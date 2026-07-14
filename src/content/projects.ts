@@ -1,0 +1,943 @@
+import type { StaticImageData } from "next/image";
+import mementoEvent from "../../assets/img-63.png";
+import mementoLanding from "../../assets/img-64.png";
+import mementoStoryboard from "../../assets/img-65.png";
+import mementoStats from "../../assets/img-66.png";
+import mementoPoster from "../../assets/img-67.png";
+import mementoFlyer from "../../assets/img-68.png";
+import mementoFaq from "../../assets/img-69.png";
+import yvesDelormeWorkshop from "../../assets/img-57.png";
+import yvesDelormeNeeds from "../../assets/img-58.png";
+import yvesDelormeStrategy from "../../assets/img-59.png";
+import yvesDelormeDesignSystem from "../../assets/img-60.png";
+import yvesDelormePrototype from "../../assets/img-61.png";
+import yvesDelormeTablet from "../../assets/img-62.png";
+import jiveDesignSystem from "../../assets/img-54.png";
+import jivePrototype from "../../assets/img-55.png";
+import jiveMiro from "../../assets/img-56.png";
+import sanofiField from "../../assets/img-48.png";
+import sanofiCenters from "../../assets/img-49.png";
+import sanofiSupport from "../../assets/img-50.png";
+import sanofiWorkshop from "../../assets/img-51.png";
+import sanofiStoryboard from "../../assets/img-52.png";
+import sanofiExperienceMap from "../../assets/img-53.png";
+import fidesioAppCalendar from "../../assets/img-42.png";
+import fidesioAppWeek from "../../assets/img-43.png";
+import fidesioWebsite from "../../assets/img-44.png";
+import fidesioDashboard from "../../assets/img-45.png";
+import fidesioBannerTeal from "../../assets/img-46.png";
+import fidesioBannerRed from "../../assets/img-47.png";
+import capgeminiOutlook from "../../assets/img-39.png";
+import capgeminiOnedrive from "../../assets/img-40.png";
+import capgeminiOfficeOnline from "../../assets/img-41.png";
+import baioEcoCourses from "../../assets/img-32.png";
+import baioCommunity from "../../assets/img-33.png";
+import baioShoppingList from "../../assets/img-34.png";
+import baioScanTicket from "../../assets/img-35.png";
+import baioOffers from "../../assets/img-36.png";
+import baioOnboarding from "../../assets/img-37.png";
+import baioFigma from "../../assets/img-38.png";
+import saegusVoeux from "../../assets/img-23.png";
+import saegusWishes from "../../assets/img-25.png";
+import saegusFigma from "../../assets/img-26.png";
+import saegusAgile from "../../assets/img-28.png";
+import saegusTeamCards from "../../assets/img-30.png";
+import saegusPolaroids from "../../assets/img-31.png";
+import grandMenagePoster from "../../assets/img-19.png";
+import grandMenageFilming from "../../assets/img-20.png";
+import grandMenageEditing from "../../assets/img-21.png";
+import grandMenageLobby from "../../assets/img-22.png";
+import archiveStickers from "../../assets/img-2.png";
+import archiveBauhaus from "../../assets/img-11.png";
+import archiveSpace from "../../assets/img-10.png";
+import archiveDreamcatcher from "../../assets/img-9.png";
+import archivePainting from "../../assets/img-8.png";
+import archiveComic from "../../assets/img-6.png";
+import archiveGecko from "../../assets/img-4.png";
+import archiveSkate from "../../assets/img-3.png";
+
+export type ProjectSection = {
+  title: string;
+  body: string;
+};
+
+export type ProjectMedia = {
+  title: string;
+  image: StaticImageData;
+  size?: "narrow" | "regular" | "wide";
+  variant?: "default" | "light";
+  layout?: "single" | "row";
+  link?: { label: string; href: string };
+};
+
+export type ProjectLink = {
+  label: string;
+  href: string;
+};
+
+export type ProjectBlock =
+  | { type: "sections"; sections: ProjectSection[] }
+  | {
+      type: "media";
+      media: ProjectMedia[];
+      layout?: "stack" | "row" | "feature-grid";
+      caption?: string;
+    }
+  | { type: "links"; links: ProjectLink[] };
+
+export type ProjectHeaderLogo =
+  | { kind: "image"; src: string; alt: string; width: number; height?: number; className?: string }
+  | { kind: "jive-orange" };
+
+export type Project = {
+  slug: string;
+  title: string;
+  eyebrow: string;
+  description: string;
+  logo: string;
+  logoKind?: "image" | "video";
+  logoAlt: string;
+  background: string;
+  foreground: string;
+  logoSize: "sm" | "md" | "lg" | "xl";
+  logoScale?: number;
+  titleColor?: string;
+  detailVariant?: "default" | "editorial" | "case-study";
+  detailSubtitle?: string;
+  headerLogo?: ProjectHeaderLogo;
+  introParagraphs?: string[];
+  sectionStyle?: "stacked" | "inline";
+  blocks?: ProjectBlock[];
+  animation: "orbit" | "float" | "sweep" | "pulse" | "tilt";
+  sections: ProjectSection[];
+  gallery: string[];
+  media?: ProjectMedia[];
+};
+
+const defaultSections: ProjectSection[] = [
+  {
+    title: "Vue d'ensemble",
+    body: "Projet issu du portfolio Figma original. Le contenu est structurellement prêt pour accueillir les textes finaux, les visuels et les livrables propres à chaque mission.",
+  },
+  {
+    title: "Enjeux",
+    body: "Clarifier le positionnement, conserver l'identité graphique du projet et restituer une expérience fluide entre la grille de sélection et la page de détail.",
+  },
+  {
+    title: "Solution",
+    body: "Une page projet lisible, centrée sur le contexte, les décisions de design et les livrables. Les zones média sont préparées pour recevoir les photos exportées depuis Figma.",
+  },
+];
+
+export const projects: Project[] = [
+  {
+    slug: "upikajob",
+    title: "UpikaJob",
+    eyebrow: "Plateforme d'accompagnement de carrière",
+    description:
+      "Mon expérience actuelle : design produit pour une plateforme de coaching professionnel.",
+    logo: "/assets/upikajob.webm",
+    logoKind: "video",
+    logoAlt: "Logo UpikaJob",
+    background: "#ffffff",
+    foreground: "#ffffff",
+    titleColor: "#1897fe",
+    logoSize: "lg",
+    logoScale: 1.05,
+    animation: "float",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "UpikaJob est une plateforme d'accompagnement de carrière. Je contribue au design produit pour structurer les parcours, clarifier les interfaces et renforcer l'identité de la marque.",
+      },
+      {
+        title: "Contexte",
+        body: "La plateforme accompagne les personnes dans leur évolution professionnelle avec des contenus, des outils et un suivi personnalisé.",
+      },
+      {
+        title: "Solution",
+        body: "Conception d'interfaces, prototypage et itérations sur les parcours clés pour rendre l'expérience plus claire, rassurante et actionnable.",
+      },
+    ],
+    gallery: [],
+  },
+  {
+    slug: "memento",
+    title: "Memento",
+    eyebrow: "Designer le service de redistribution de photo de demain",
+    description:
+      "Une SaaS de récupération et redistribution de photos individuelles pour événements.",
+    logo: "/assets/Logo-1-1.svg",
+    logoAlt: "Logo Memento",
+    background: "#1a1921",
+    foreground: "#ffffff",
+    logoSize: "xl",
+    animation: "orbit",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento, une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale.",
+      },
+      {
+        title: "Enjeux",
+        body: "L'entreprise avait besoin de structurer ses interfaces, ses maquettes, ses supports de communication et ses contenus pour accompagner sa croissance.",
+      },
+      {
+        title: "Solution",
+        body: "J'ai travaillé les interfaces et prototypes Figma, appliqué une logique de design system et produit des visuels de communication pour les réseaux sociaux, flyers et événements.",
+      },
+      {
+        title: "Résultat",
+        body: "Le résultat de mon travail a modernisé l'identité de Memento. Aujourd'hui encore, la vidéo de présentation sert de support aux associés pour présenter la solution et sa diffusion a permis de convertir plusieurs fils clients durant les mois qui ont suivi.",
+      },
+    ],
+    gallery: ["Prototype produit", "Design system", "Supports social media"],
+    media: [
+      {
+        title: "Reportage photo événementiel",
+        image: mementoEvent,
+        size: "wide",
+      },
+      {
+        title: "Landing page Memento",
+        image: mementoLanding,
+        size: "narrow",
+      },
+      {
+        title: "Storyboards de présentation",
+        image: mementoStoryboard,
+        size: "wide",
+      },
+      {
+        title: "Statistiques vidéo",
+        image: mementoStats,
+        size: "regular",
+      },
+      {
+        title: "Affiche commerciale",
+        image: mementoPoster,
+        size: "regular",
+      },
+      {
+        title: "Support événementiel QR code",
+        image: mementoFlyer,
+        size: "regular",
+      },
+      {
+        title: "Synthèse offre et FAQ",
+        image: mementoFaq,
+        size: "wide",
+      },
+    ],
+  },
+  {
+    slug: "yves-delorme",
+    title: "Yves Delorme",
+    eyebrow: "L'Odyssée — refonte de l'écosystème digital",
+    description:
+      "Refonte globale de l'expérience client pour la Maison Yves Delorme, de la recherche en boutique au prototypage haute fidélité.",
+    logo: "/assets/Logo-2-2.svg",
+    logoAlt: "Logo Yves Delorme Paris",
+    background: "#deebec",
+    foreground: "#7f7f82",
+    logoSize: "lg",
+    animation: "float",
+    detailVariant: "editorial",
+    introParagraphs: [
+      "L'Odyssée est un projet de refonte globale de l'écosystème digital de la Maison Yves Delorme. Il vise à harmoniser l'expérience client entre la boutique, le conseil et les outils numériques.",
+      "En collaboration avec les équipes marketing et commerciales, j'ai participé à la réflexion autour du parcours client, de l'architecture des interfaces et des scénarios prioritaires à prototyper.",
+      "La démarche a combiné immersion terrain, formalisation UX/UI et production de livrables concrets pour faire émerger une expérience plus cohérente, premium et orientée service.",
+    ],
+    sections: [],
+    gallery: [],
+    media: [
+      {
+        title: "Session de travail en boutique avec l'équipe de vente",
+        image: yvesDelormeWorkshop,
+        size: "wide",
+      },
+      {
+        title: "Point sur les attentes et les besoins des clients",
+        image: yvesDelormeNeeds,
+        size: "wide",
+      },
+      {
+        title: "Détermination des objectifs et de la stratégie de communication",
+        image: yvesDelormeStrategy,
+        size: "wide",
+      },
+      {
+        title: "Création de la charte graphique et de l'identité visuelle",
+        image: yvesDelormeDesignSystem,
+        size: "wide",
+      },
+      {
+        title: "Prototypage haute fidélité des différentes pages du site",
+        image: yvesDelormePrototype,
+        size: "wide",
+      },
+      {
+        title: "Mise en situation du site sur tablette",
+        image: yvesDelormeTablet,
+        size: "wide",
+        variant: "light",
+      },
+    ],
+  },
+  {
+    slug: "jive",
+    title: "Jive",
+    eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
+    description:
+      "Conception d'un add-on Jive pour Orange afin d'organiser des ateliers de design thinking directement dans l'intranet.",
+    logo: "/assets/Logo-3.svg",
+    logoAlt: "Logo Jive",
+    background: "#ffb800",
+    foreground: "#ffffff",
+    logoSize: "lg",
+    animation: "sweep",
+    detailVariant: "case-study",
+    headerLogo: { kind: "jive-orange" },
+    sectionStyle: "inline",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "Lors de mon second stage chez SÆGUS, j'ai travaillé en tant que consultant junior design au sein d'une équipe Orange. L'objectif était d'améliorer l'usage de Jive, la solution intranet utilisée au quotidien par les collaborateurs.",
+      },
+      {
+        title: "Enjeux",
+        body: "Orange avait besoin d'organiser des ateliers d'idéation au format Kanban directement dans Jive, sans multiplier les outils externes ni perdre les participants dans des interfaces complexes.",
+      },
+      {
+        title: "Solution",
+        body: "Nous avons conçu un add-on Jive fondé sur une démarche de design thinking : atelier Figma pour recueillir les besoins, puis création d'un outil final composé de modules réutilisables.",
+      },
+      {
+        title: "Résultat",
+        body: "L'équipe Orange dispose aujourd'hui d'un outil clé en main pour organiser son travail en méthode Kanban au sein même de Jive.",
+      },
+    ],
+    gallery: [],
+    media: [
+      {
+        title: "Organisation du design system",
+        image: jiveDesignSystem,
+        size: "wide",
+      },
+      {
+        title: "Organisation du prototype",
+        image: jivePrototype,
+        size: "wide",
+      },
+      {
+        title: "Organisation du Miro",
+        image: jiveMiro,
+        size: "wide",
+      },
+    ],
+  },
+  {
+    slug: "odyssey",
+    title: "Sanofi Espoir",
+    eyebrow: "Projet pour la santé des enfants au Sénégal : renforcer l'impact local",
+    description:
+      "Mission de design pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal.",
+    logo: "/assets/Logo-4-1.svg",
+    logoAlt: "Logo Sanofi Espoir",
+    background: "#f3efed",
+    foreground: "#c9a66f",
+    logoSize: "md",
+    animation: "tilt",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-4-2.svg",
+      alt: "Sanofi Espoir Foundation",
+      width: 260,
+      height: 57,
+      className: "h-auto w-52 md:w-64",
+    },
+    sectionStyle: "inline",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "Mission menée pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal. L'objectif était de mieux comprendre les parcours de soins locaux pour renforcer l'impact des actions de la fondation.",
+      },
+      {
+        title: "Enjeu",
+        body: "Les équipes devaient concilier contraintes terrain, attentes des professionnels de santé et besoins des patientes dans un environnement complexe, avec peu de visibilité sur l'expérience réelle vécue sur place.",
+      },
+      {
+        title: "Solution",
+        body: "Une démarche immersive combinant immersion terrain, entretiens, ateliers et restitution visuelle pour cartographier les parcours, structurer les insights et proposer des recommandations centrées utilisateur.",
+      },
+      {
+        title: "Résultat",
+        body: "L'équipe a pu s'appuyer sur des livrables concrets — cartographies, storyboards et experience maps — pour orienter ses décisions et renforcer la cohérence de ses actions sur le terrain.",
+      },
+    ],
+    gallery: [],
+    media: [
+      {
+        title: "Une étape de terrain avec les acteurs pour mieux comprendre les besoins",
+        image: sanofiField,
+        size: "wide",
+      },
+      {
+        title: "L'identification et le recours à des structures de santé locales",
+        image: sanofiCenters,
+        size: "wide",
+      },
+      {
+        title: "Accompagner et soutenir les équipes locales pour améliorer leurs services",
+        image: sanofiSupport,
+        size: "wide",
+      },
+      {
+        title: "Un processus d'idéation collectif et collaboratif avec les équipes de la Fondation Sanofi Espoir",
+        image: sanofiWorkshop,
+        size: "wide",
+      },
+      {
+        title: "Une cartographie visuelle de la structure et de l'organisation",
+        image: sanofiStoryboard,
+        size: "wide",
+      },
+      {
+        title: "Une analyse détaillée de l'expérience patiente et des points de douleur dans le parcours",
+        image: sanofiExperienceMap,
+        size: "wide",
+      },
+    ],
+  },
+  {
+    slug: "unicorn",
+    title: "Fidesio",
+    eyebrow: "Sanofi – esprit de solidarité",
+    detailSubtitle: "Professionnels de santé en mission",
+    description:
+      "Professionnels de santé en mission : refonte d'outils digitaux et sélection design pour Sanofi Espoir.",
+    logo: "/assets/Logo-5-1.svg",
+    logoAlt: "Logo Fidesio",
+    background: "#ff3345",
+    foreground: "#ffffff",
+    logoSize: "md",
+    animation: "pulse",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-4-2.svg",
+      alt: "Sanofi Espoir",
+      width: 260,
+      height: 57,
+      className: "h-auto w-48 md:w-56",
+    },
+    sectionStyle: "inline",
+    blocks: [
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Vue d'ensemble",
+            body: "Mission réalisée pour Sanofi Espoir autour de la gestion de créneaux professionnels et de la sélection design d'outils destinés aux professionnels de santé en mission.",
+          },
+          {
+            title: "Enjeux",
+            body: "Il fallait clarifier les usages, structurer les parcours et proposer des interfaces plus lisibles pour accompagner les équipes dans leur activité quotidienne.",
+          },
+          {
+            title: "Solution",
+            body: "J'ai participé à la conception d'interfaces applicatives, à la définition d'un site éditorial et à la production de visuels de communication cohérents avec l'identité Sanofi Espoir.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        layout: "row",
+        media: [
+          {
+            title: "Organisation de l'application de gestion",
+            image: fidesioAppCalendar,
+            size: "wide",
+          },
+          {
+            title: "Vue hebdomadaire et suivi des activités",
+            image: fidesioAppWeek,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Direction design",
+            body: "La sélection design a porté sur un univers sobre, institutionnel et rassurant, avec une hiérarchie claire entre contenus éditoriaux, données chiffrées et actions principales.",
+          },
+          {
+            title: "Site éditorial",
+            body: "Le site public met en avant la performance, les actualités et les messages institutionnels de Sanofi Espoir dans une mise en page modulaire et responsive.",
+          },
+          {
+            title: "Espace professionnel",
+            body: "L'espace dédié aux professionnels de santé propose tableaux de bord, indicateurs et visualisations pour suivre l'activité et faciliter la prise de décision.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Landing page et architecture éditoriale",
+            image: fidesioWebsite,
+            size: "wide",
+            variant: "light",
+          },
+          {
+            title: "Tableau de bord professionnel de santé",
+            image: fidesioDashboard,
+            size: "wide",
+            variant: "light",
+          },
+        ],
+      },
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Communication",
+            body: "Les déclinaisons visuelles reprennent les codes Sanofi Espoir à travers des blocs colorés, des visuels produits et des messages d'appel à l'action forts.",
+          },
+          {
+            title: "Résultat",
+            body: "L'ensemble des livrables offre une base cohérente pour déployer une expérience digitale plus claire, plus engageante et mieux alignée avec les missions de solidarité de la marque.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        layout: "row",
+        media: [
+          {
+            title: "Déclinaison visuelle esprit de solidarité",
+            image: fidesioBannerTeal,
+            size: "wide",
+          },
+          {
+            title: "Support de communication institutionnel",
+            image: fidesioBannerRed,
+            size: "wide",
+          },
+        ],
+      },
+    ],
+    sections: [],
+    gallery: [],
+  },
+  {
+    slug: "capgemini",
+    title: "Capgemini",
+    eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
+    description:
+      "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365.",
+    logo: "/assets/Logo-6-1.svg",
+    logoAlt: "Logo Capgemini",
+    background: "#e5f1f3",
+    foreground: "#0b82bd",
+    logoSize: "md",
+    animation: "float",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-6-1.svg",
+      alt: "Logo Capgemini",
+      width: 220,
+      height: 80,
+      className: "h-auto w-44 md:w-52",
+    },
+    sectionStyle: "inline",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "Lors de mon stage chez SÆGUS, j'ai travaillé pour Capgemini sur la création de vidéos animées mettant en scène des personnages et des décors à l'aide d'After Effects et du plugin Duik.",
+      },
+      {
+        title: "Enjeux",
+        body: "Il fallait produire quatre cas d'usage animés, avec de nombreuses scènes et une charge d'animation importante, dans un délai court pour un client de longue date.",
+      },
+      {
+        title: "Solution",
+        body: "J'ai gagné en autonomie sur la production, en m'appuyant sur mes compétences en design graphique et direction artistique, ainsi que sur mon intérêt pour la vidéo et l'animation.",
+      },
+      {
+        title: "Résultat",
+        body: "Le projet a été livré dans les temps et a permis à l'équipe design de SÆGUS de conserver la confiance du client sur une mission exigeante.",
+      },
+    ],
+    gallery: [],
+    media: [
+      {
+        title: "Cas d'usage 1 : comment travailler en collaboration avec Teams et SharePoint ?",
+        image: capgeminiOutlook,
+        size: "wide",
+        link: { label: "Lien vers la vidéo", href: "#" },
+      },
+      {
+        title: "Cas d'usage 2 : comment améliorer sa productivité avec OneDrive ?",
+        image: capgeminiOnedrive,
+        size: "wide",
+        link: { label: "Lien vers la vidéo", href: "#" },
+      },
+      {
+        title: "Cas d'usage 3 : comment travailler de n'importe où en utilisant Office Online ?",
+        image: capgeminiOfficeOnline,
+        size: "wide",
+        link: { label: "Lien vers la vidéo", href: "#" },
+      },
+    ],
+  },
+  {
+    slug: "lemon",
+    title: "Baio",
+    eyebrow: "Créer une application gamifiée qui encourage la consommation de produits healthy",
+    description:
+      "Conception d'une application mobile gamifiée pour encourager une alimentation plus saine.",
+    logo: "/assets/Logo-7-1.svg",
+    logoAlt: "Logo Baio",
+    background: "#58e000",
+    foreground: "#fff36d",
+    logoSize: "lg",
+    animation: "tilt",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-7-1.svg",
+      alt: "Logo Baio",
+      width: 120,
+      height: 120,
+      className: "h-auto w-24 md:w-28",
+    },
+    sectionStyle: "inline",
+    blocks: [
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Vue d'ensemble",
+            body: "Projet de conception d'une application mobile gamifiée visant à encourager les utilisateurs à consommer des produits plus sains au quotidien.",
+          },
+          {
+            title: "Enjeu",
+            body: "Proposer une expérience simple et engageante pour aider les consommateurs à mieux choisir leurs produits et à suivre leurs habitudes alimentaires.",
+          },
+          {
+            title: "Solution",
+            body: "J'ai conçu un parcours mobile complet : onboarding, recherche, listes de courses, scan de tickets et système de points avec offres partenaires.",
+          },
+          {
+            title: "Résultat",
+            body: "L'application a été structurée en écrans clés et organisée dans Figma pour faciliter les itérations et la présentation du concept.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        layout: "feature-grid",
+        caption: "Screens de l'ancienne version d'application pour Lemon",
+        media: [
+          { title: "Courses éco-responsables", image: baioEcoCourses, size: "wide" },
+          { title: "Communauté avisée", image: baioCommunity, size: "wide" },
+          { title: "Listes de courses", image: baioShoppingList, size: "wide" },
+          { title: "Scan de ticket", image: baioScanTicket, size: "wide" },
+          { title: "Offres exclusives", image: baioOffers, size: "wide" },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Parcours d'onboarding dans l'application",
+            image: baioOnboarding,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Organisation des vues et filtre dans Figma",
+            image: baioFigma,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "links",
+        links: [{ label: "Voir sur Figma", href: "#" }],
+      },
+    ],
+    sections: [],
+    gallery: [],
+  },
+  {
+    slug: "alpha",
+    title: "SÆGUS",
+    eyebrow: "10ème anniversaire Saegus x Le Trianon",
+    description:
+      "Conception de la carte de vœux digitale et des supports de communication pour les 10 ans de SÆGUS.",
+    logo: "/assets/Logo-8-1.svg",
+    logoAlt: "Logo SÆGUS",
+    background: "#111111",
+    foreground: "#ffffff",
+    logoSize: "sm",
+    animation: "orbit",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-8-1.svg",
+      alt: "Logo SÆGUS",
+      width: 120,
+      height: 120,
+      className: "h-auto w-24 md:w-28",
+    },
+    sectionStyle: "inline",
+    blocks: [
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Vue d'ensemble",
+            body: "Mission de conception pour le 10ème anniversaire de SÆGUS : carte de vœux digitale, déclinaisons desktop/mobile et supports de communication pour l'événement au Trianon.",
+          },
+          {
+            title: "Enjeux",
+            body: "Créer une expérience premium et festive qui reflète l'identité de SÆGUS tout en mettant en avant les succès de l'année et les perspectives de l'équipe.",
+          },
+          {
+            title: "Solution",
+            body: "J'ai travaillé sur une direction visuelle forte autour du violet, des chiffres clés et des témoignages, avec une architecture modulaire pensée pour le web et l'email.",
+          },
+          {
+            title: "Résultat",
+            body: "Les livrables ont permis de déployer une campagne cohérente sur plusieurs supports, de la landing page aux visuels réseaux sociaux.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          { title: "Carte de vœux digitale 2021", image: saegusVoeux, size: "wide" },
+          { title: "Version éditoriale des vœux", image: saegusWishes, size: "wide" },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Organisation des écrans dans Figma",
+            image: saegusFigma,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Accompagnement agile — filé au long cours",
+            image: saegusAgile,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "media",
+        layout: "row",
+        media: [
+          { title: "Moments clés du projet", image: saegusTeamCards, size: "wide" },
+          { title: "Remerciements aux équipes", image: saegusPolaroids, size: "wide" },
+        ],
+      },
+    ],
+    sections: [],
+    gallery: [],
+  },
+  {
+    slug: "studio",
+    title: "Film Amateur",
+    eyebrow: "Réaliser un court métrage sur une courte période pour encourager le travail d'équipe digitale",
+    description:
+      "Court métrage « Le Grand Ménage » réalisé en équipe sur deux semaines, de l'écriture au montage.",
+    logo: "/assets/Logo-9-2.svg",
+    logoAlt: "Logo Film Amateur",
+    titleColor: "#BA090B",
+    background: "#d6c6a9",
+    foreground: "#202020",
+    logoSize: "lg",
+    animation: "sweep",
+    detailVariant: "case-study",
+    headerLogo: {
+      kind: "image",
+      src: "/assets/Logo-9-1.png",
+      alt: "Le Grand Ménage",
+      width: 320,
+      height: 180,
+      className: "h-auto w-56 md:w-72",
+    },
+    sectionStyle: "inline",
+    blocks: [
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Vue d'ensemble",
+            body: "Projet de court métrage réalisé de A à Z en deux semaines avec une équipe pluridisciplinaire, dans le cadre d'une expérience de production audiovisuelle amateur.",
+          },
+          {
+            title: "Enjeux",
+            body: "Organiser une équipe, tenir un calendrier de tournage serré et converger vers un film cohérent malgré des contraintes techniques et humaines fortes.",
+          },
+          {
+            title: "Solution",
+            body: "Nous avons réparti les rôles, structuré les étapes de production — écriture, préparation, tournage, montage — et maintenu une coordination continue sur le plateau.",
+          },
+          {
+            title: "Résultat",
+            body: "Le film a été livré dans les délais et a constitué une expérience formatrice pour toute l'équipe autour du travail collectif.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Affiche du court métrage",
+            image: grandMenagePoster,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "links",
+        links: [
+          { label: "Regarder le court métrage", href: "#" },
+          { label: "Les voix les traits", href: "#" },
+          { label: "Le dossier de production", href: "#" },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Équipe et moi-même pendant le tournage d'une scène de meurtre",
+            image: grandMenageFilming,
+            size: "wide",
+          },
+          {
+            title: "Moi en train de monter le court métrage sur Mac",
+            image: grandMenageEditing,
+            size: "wide",
+          },
+          {
+            title: "Le perchman et moi en train de filmer un lobby",
+            image: grandMenageLobby,
+            size: "wide",
+          },
+        ],
+      },
+    ],
+    sections: [],
+    gallery: [],
+  },
+  {
+    slug: "archive",
+    title: "Archive",
+    eyebrow: "Dessins personnels et créations",
+    description:
+      "Sélection de créations graphiques, illustrations et expérimentations personnelles.",
+    logo: "/assets/Logo-11-1.svg",
+    logoAlt: "Logo Archive",
+    background: "#ece8df",
+    foreground: "#333333",
+    logoSize: "md",
+    logoScale: 1.12,
+    titleColor: "#BE1E2D",
+    animation: "pulse",
+    detailVariant: "case-study",
+    sectionStyle: "inline",
+    sections: [],
+    gallery: [],
+    media: [
+      {
+        title: "Illustrations réalisées pour des stickers",
+        image: archiveStickers,
+        size: "wide",
+      },
+      {
+        title: "Projet de recherche graphique autour d'une exposition sur le Bauhaus",
+        image: archiveBauhaus,
+        size: "wide",
+      },
+      {
+        title: "Recherche graphique pour un projet de jeu vidéo dans l'espace",
+        image: archiveSpace,
+        size: "wide",
+      },
+      {
+        title: "Illustration d'un attrapeur de rêves",
+        image: archiveDreamcatcher,
+        size: "wide",
+      },
+      {
+        title: "Peinture digitale de paysage au crépuscule",
+        image: archivePainting,
+        size: "wide",
+      },
+      {
+        title: "Expérimentation graphique sous forme de petit comic strip",
+        image: archiveComic,
+        size: "wide",
+      },
+      {
+        title: "Proposition de charte graphique pour un studio de production audiovisuel",
+        image: archiveGecko,
+        size: "wide",
+        link: { label: "Voir le site", href: "#" },
+      },
+      {
+        title: "Réalisation et montage d'une vidéo de skate",
+        image: archiveSkate,
+        size: "wide",
+        link: { label: "Voir la vidéo", href: "#" },
+      },
+    ],
+  },
+];
+
+export const methodSteps = [
+  {
+    title: "Comprendre le contexte et les besoins du client",
+    body: "La première étape consiste à comprendre les objectifs, les besoins, le public cible et l'environnement concurrentiel du projet.",
+  },
+  {
+    title: "Rechercher et collecter des informations",
+    body: "Je mène une recherche approfondie sur le marché, les tendances, les utilisateurs, les besoins réels et la concurrence.",
+  },
+  {
+    title: "Synthétiser et analyser les données",
+    body: "Les informations sont triées et analysées pour produire des conclusions utiles, des insights et une direction claire.",
+  },
+  {
+    title: "Concevoir, prototyper et tester",
+    body: "Je transforme les hypothèses en interfaces, prototypes et supports testables pour valider rapidement les décisions.",
+  },
+  {
+    title: "Livrer et accompagner",
+    body: "Les livrables sont préparés proprement, documentés et pensés pour être repris ou déployés par les équipes.",
+  },
+];
+
+export function getProject(slug: string) {
+  return projects.find((project) => project.slug === slug);
+}

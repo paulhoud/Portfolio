@@ -1,0 +1,436 @@
+"use client";
+
+import Image from "next/image";
+import { BackLink } from "@/components/layout/BackLink";
+import {
+  ScrollReveal,
+  ScrollRevealGroup,
+  ScrollRevealItem,
+} from "@/components/motion/ScrollReveal";
+import type {
+  Project,
+  ProjectBlock,
+  ProjectHeaderLogo,
+  ProjectLink,
+  ProjectMedia,
+  ProjectSection,
+} from "@/content/projects";
+import { AnimatedLogo } from "./AnimatedLogo";
+
+type ProjectDetailProps = {
+  project: Project;
+};
+
+export function ProjectDetail({ project }: ProjectDetailProps) {
+  if (project.detailVariant === "editorial") {
+    return <EditorialProjectDetail project={project} />;
+  }
+
+  if (project.detailVariant === "case-study") {
+    return <CaseStudyProjectDetail project={project} />;
+  }
+
+  return <DefaultProjectDetail project={project} />;
+}
+
+function DefaultProjectDetail({ project }: ProjectDetailProps) {
+  const hasTextSections = project.sections.length > 0;
+
+  return (
+    <article className="min-h-screen bg-[#1a1921] px-6 py-8 md:px-20 md:py-12">
+      <div className="mx-auto max-w-5xl">
+        <BackLink />
+
+        <ScrollReveal>
+          <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
+            <p className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
+              {project.eyebrow}
+            </p>
+            <div
+              className="flex h-44 w-full items-center justify-center rounded-[2rem]"
+              style={{ color: project.foreground }}
+            >
+              <AnimatedLogo
+                animation={project.animation}
+                foreground={project.foreground}
+                logo={project.logo}
+                logoAlt={project.logoAlt}
+                logoKind={project.logoKind}
+                logoSize={project.logoSize}
+                logoScale={project.logoScale}
+                priority
+              />
+            </div>
+          </header>
+        </ScrollReveal>
+
+        {hasTextSections ? (
+          <ScrollRevealGroup className="mx-auto grid max-w-4xl gap-8 pb-20 md:gap-10">
+            {project.sections.map((section) => (
+              <ScrollRevealItem key={section.title} className="copy">
+                <h2 className="mb-2 text-sm font-bold uppercase tracking-[0.04em] text-white">
+                  {section.title}
+                </h2>
+                <p>{section.body}</p>
+              </ScrollRevealItem>
+            ))}
+          </ScrollRevealGroup>
+        ) : null}
+
+        <ProjectMediaGallery project={project} />
+      </div>
+    </article>
+  );
+}
+
+function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
+  const inlineSections = project.sectionStyle === "inline";
+  const hasBlocks = Boolean(project.blocks?.length);
+
+  return (
+    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+      <div className="mx-auto max-w-5xl">
+        <BackLink />
+
+        <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-12 pt-6 text-center md:pb-16 md:pt-10">
+          <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
+            <p className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+              {project.eyebrow}
+            </p>
+            {project.detailSubtitle ? (
+              <p className="mt-3 text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/45 md:text-sm">
+                {project.detailSubtitle}
+              </p>
+            ) : null}
+          </ScrollRevealItem>
+
+          {project.headerLogo ? (
+            <ScrollRevealItem className="mb-12 md:mb-16">
+              <CaseStudyHeaderLogo headerLogo={project.headerLogo} />
+            </ScrollRevealItem>
+          ) : null}
+        </ScrollRevealGroup>
+
+        {hasBlocks ? (
+          <div className="mx-auto max-w-3xl space-y-12 pb-24 md:space-y-16">
+            {project.blocks?.map((block, index) => (
+              <CaseStudyBlock
+                key={`${block.type}-${index}`}
+                block={block}
+                inlineSections={inlineSections}
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            {project.sections.length ? (
+              <ScrollRevealGroup className="mx-auto mb-16 max-w-3xl space-y-6 md:mb-20 md:space-y-8">
+                {project.sections.map((section) => (
+                  <ScrollRevealItem key={section.title}>
+                    <CaseStudySection section={section} inline={inlineSections} />
+                  </ScrollRevealItem>
+                ))}
+              </ScrollRevealGroup>
+            ) : null}
+
+            <ProjectMediaGallery project={project} editorial />
+          </>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function CaseStudyBlock({
+  block,
+  inlineSections,
+}: {
+  block: ProjectBlock;
+  inlineSections: boolean;
+}) {
+  if (block.type === "sections") {
+    return (
+      <ScrollRevealGroup className="space-y-6 md:space-y-8">
+        {block.sections.map((section) => (
+          <ScrollRevealItem key={section.title}>
+            <CaseStudySection section={section} inline={inlineSections} />
+          </ScrollRevealItem>
+        ))}
+      </ScrollRevealGroup>
+    );
+  }
+
+  if (block.type === "links") {
+    return (
+      <ScrollReveal>
+        <ProjectLinks links={block.links} />
+      </ScrollReveal>
+    );
+  }
+
+  if (block.layout === "feature-grid") {
+    return (
+      <ScrollRevealGroup className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {block.media.map((media) => (
+            <ScrollRevealItem key={media.title}>
+              <Image
+                src={media.image}
+                alt={media.title}
+                sizes="(max-width: 768px) 45vw, 180px"
+                className="h-auto w-full rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+              />
+            </ScrollRevealItem>
+          ))}
+        </div>
+        {block.caption ? (
+          <ScrollRevealItem>
+            <p className="text-center text-xs uppercase tracking-[0.18em] text-white/55">
+              {block.caption}
+            </p>
+          </ScrollRevealItem>
+        ) : null}
+      </ScrollRevealGroup>
+    );
+  }
+
+  if (block.layout === "row") {
+    return (
+      <ScrollRevealGroup className="grid gap-8 md:grid-cols-2 md:gap-6">
+        {block.media.map((media) => (
+          <ScrollRevealItem key={media.title}>
+            <ProjectMediaBlock media={media} priority={false} editorial />
+          </ScrollRevealItem>
+        ))}
+      </ScrollRevealGroup>
+    );
+  }
+
+  return (
+    <div className="space-y-16 md:space-y-20">
+      {block.media.map((media, index) => (
+        <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
+          <ProjectMediaBlock media={media} priority={index < 2} editorial />
+        </ScrollReveal>
+      ))}
+    </div>
+  );
+}
+
+function CaseStudySection({
+  section,
+  inline,
+}: {
+  section: ProjectSection;
+  inline: boolean;
+}) {
+  if (inline) {
+    return (
+      <p className="copy text-left text-white/80">
+        <span className="font-bold uppercase tracking-[0.04em] text-white">
+          {section.title}
+        </span>
+        <span className="text-white/45"> — </span>
+        {section.body}
+      </p>
+    );
+  }
+
+  return (
+    <div className="copy text-left text-white/80">
+      <h2 className="mb-2 text-sm font-bold uppercase tracking-[0.04em] text-white">
+        {section.title}
+      </h2>
+      <p>{section.body}</p>
+    </div>
+  );
+}
+
+function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) {
+  if (headerLogo.kind === "jive-orange") {
+    return (
+      <div className="flex items-center justify-center gap-4 md:gap-5">
+        <Image
+          src="/assets/Logo-3.svg"
+          alt="Jive"
+          width={120}
+          height={48}
+          priority
+          className="h-10 w-auto md:h-12"
+        />
+        <span aria-hidden="true" className="text-lg text-white/45 md:text-xl">
+          ×
+        </span>
+        <span className="inline-flex h-10 items-end overflow-hidden rounded-sm bg-[#FF7900] px-2.5 pb-1.5 md:h-12 md:px-3 md:pb-2">
+          <span className="text-sm font-bold lowercase tracking-tight text-white md:text-base">
+            orange
+          </span>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <span
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl md:h-52 md:w-52"
+      />
+      <Image
+        src={headerLogo.src}
+        alt={headerLogo.alt}
+        width={headerLogo.width}
+        height={headerLogo.height ?? 80}
+        priority
+        className={`relative ${headerLogo.className ?? "h-auto w-48"}`}
+      />
+    </div>
+  );
+}
+
+function ProjectLinks({ links }: { links: ProjectLink[] }) {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      {links.map((link) => (
+        <a
+          key={link.label}
+          href={link.href}
+          className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function EditorialProjectDetail({ project }: ProjectDetailProps) {
+  return (
+    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+      <div className="mx-auto max-w-5xl">
+        <BackLink />
+
+        <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-8 text-center md:pb-24 md:pt-12">
+          <ScrollRevealItem className="relative mb-10 flex flex-col items-center md:mb-14">
+            <span
+              aria-hidden="true"
+              className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl md:h-52 md:w-52"
+            />
+            <Image
+              src={project.logo}
+              alt={project.logoAlt}
+              width={220}
+              height={120}
+              priority
+              className="relative h-auto w-44 md:w-52"
+            />
+          </ScrollRevealItem>
+
+          {project.introParagraphs?.map((paragraph) => (
+            <ScrollRevealItem key={paragraph} className="copy mb-6 max-w-2xl text-white/80">
+              <p>{paragraph}</p>
+            </ScrollRevealItem>
+          ))}
+        </ScrollRevealGroup>
+
+        <ProjectMediaGallery project={project} editorial />
+      </div>
+    </article>
+  );
+}
+
+function ProjectMediaGallery({
+  project,
+  editorial = false,
+}: {
+  project: Project;
+  editorial?: boolean;
+}) {
+  return (
+    <section
+      aria-label="Visuels du projet"
+      className={editorial ? "space-y-16 pb-24 md:space-y-24" : "space-y-8 pb-20"}
+    >
+      {project.media?.length ? (
+        project.media.map((media, index) => (
+          <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
+            <ProjectMediaBlock media={media} priority={index < 2} editorial={editorial} />
+          </ScrollReveal>
+        ))
+      ) : (
+        <ScrollRevealGroup className="grid gap-4 md:grid-cols-3">
+          {project.gallery.map((item, index) => (
+            <ScrollRevealItem
+              key={item}
+              className="flex aspect-[4/3] items-end overflow-hidden rounded-[1.5rem] border border-white/8 bg-white/[0.04] p-5"
+            >
+              <div>
+                <span className="text-xs uppercase tracking-[0.18em] text-white/35">
+                  0{index + 1}
+                </span>
+                <p className="mt-2 text-lg font-semibold text-white">{item}</p>
+              </div>
+            </ScrollRevealItem>
+          ))}
+        </ScrollRevealGroup>
+      )}
+    </section>
+  );
+}
+
+function ProjectMediaBlock({
+  media,
+  priority,
+  editorial = false,
+}: {
+  media: ProjectMedia;
+  priority: boolean;
+  editorial?: boolean;
+}) {
+  const widthClass = {
+    narrow: "max-w-[480px]",
+    regular: "max-w-[720px]",
+    wide: "max-w-5xl",
+  }[media.size ?? "regular"];
+
+  const isLightVariant = media.variant === "light";
+
+  return (
+    <figure className={`mx-auto ${widthClass}`}>
+      <div
+        className={
+          isLightVariant
+            ? "overflow-hidden rounded-[0.35rem] bg-white px-4 py-6 md:px-8 md:py-8"
+            : undefined
+        }
+      >
+        <Image
+          src={media.image}
+          alt={media.title}
+          priority={priority}
+          sizes="(max-width: 768px) 92vw, 900px"
+          className={`h-auto w-full ${
+            isLightVariant ? "" : "rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+          }`}
+        />
+      </div>
+      <figcaption
+        className={`mt-4 text-center text-xs uppercase tracking-[0.18em] ${
+          editorial ? "text-white/55" : "text-white/35"
+        }`}
+      >
+        {media.title}
+      </figcaption>
+      {media.link ? (
+        <p className="mt-3 text-center">
+          <a
+            href={media.link.href}
+            className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
+          >
+            {media.link.label}
+          </a>
+        </p>
+      ) : null}
+    </figure>
+  );
+}
