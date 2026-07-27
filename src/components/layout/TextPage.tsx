@@ -1,6 +1,5 @@
 "use client";
 
-import { BackLink } from "./BackLink";
 import {
   ScrollReveal,
   ScrollRevealGroup,
@@ -17,8 +16,6 @@ export function TextPage({ title, eyebrow, children }: TextPageProps) {
   return (
     <section className="min-h-screen bg-[linear-gradient(120deg,#172237_0%,#191820_46%,#17161d_100%)] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-4xl">
-        <BackLink />
-
         <ScrollReveal>
           <header className="mb-16 pt-2 text-center md:mb-20">
             {eyebrow ? (

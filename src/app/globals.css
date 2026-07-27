@@ -16,7 +16,6 @@
 html {
   background: var(--background);
   color: var(--foreground);
-  scroll-behavior: smooth;
 }
 
 body {
@@ -49,6 +48,22 @@ button {
 .portfolio-main {
   min-height: 100vh;
   padding-left: var(--sidebar-width);
+}
+
+/* Transition damier ↔ page : les calques occupent la MÊME cellule de grille.
+   La superposition se fait donc sans positionnement absolu ni reflow (aucun
+   décalage vertical parasite : seul le translateX anime), et le contenu dicte
+   la hauteur, ce qui préserve le scroll de la fenêtre. */
+.page-transition-viewport {
+  display: grid;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.page-transition-layer {
+  grid-area: 1 / 1;
+  min-height: 100vh;
+  background: var(--background);
 }
 
 .copy {
