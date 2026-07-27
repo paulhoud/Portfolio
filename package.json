@@ -4,7 +4,10 @@
   "description": "Portfolio de Paul Houdebine, reproduit depuis le prototype Figma.",
   "private": true,
   "scripts": {
+    "media:manifest": "node scripts/generate-media-manifest.mjs",
+    "predev": "node scripts/generate-media-manifest.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-media-manifest.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
