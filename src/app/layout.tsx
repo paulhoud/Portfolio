@@ -1,3 +1,4 @@
+import { AppFrame } from "@/components/layout/AppFrame";
 import { LanguageProvider } from "@/i18n/context";
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
@@ -60,9 +61,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={lato.variable} data-scroll-behavior="smooth">
+    <html lang="fr" className={lato.variable}>
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          <AppFrame>{children}</AppFrame>
+        </LanguageProvider>
       </body>
     </html>
   );

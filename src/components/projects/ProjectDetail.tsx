@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { BackLink } from "@/components/layout/BackLink";
+import { collectProjectMedia } from "@/components/media/collectProjectMedia";
+import { MediaButton } from "@/components/media/MediaButton";
+import { MediaViewerProvider } from "@/components/media/MediaViewerProvider";
 import {
   ScrollReveal,
   ScrollRevealGroup,
@@ -22,15 +24,18 @@ type ProjectDetailProps = {
 };
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
+  const viewerMedia = collectProjectMedia(project);
+
+  let content;
   if (project.detailVariant === "editorial") {
-    return <EditorialProjectDetail project={project} />;
+    content = <EditorialProjectDetail project={project} />;
+  } else if (project.detailVariant === "case-study") {
+    content = <CaseStudyProjectDetail project={project} />;
+  } else {
+    content = <DefaultProjectDetail project={project} />;
   }
 
-  if (project.detailVariant === "case-study") {
-    return <CaseStudyProjectDetail project={project} />;
-  }
-
-  return <DefaultProjectDetail project={project} />;
+  return <MediaViewerProvider media={viewerMedia}>{content}</MediaViewerProvider>;
 }
 
 function DefaultProjectDetail({ project }: ProjectDetailProps) {
@@ -39,8 +44,6 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
   return (
     <article className="min-h-screen bg-[#1a1921] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-5xl">
-        <BackLink />
-
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
             <p className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
@@ -90,8 +93,6 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
   return (
     <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-5xl">
-        <BackLink />
-
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-12 pt-6 text-center md:pb-16 md:pt-10">
           <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
             <p className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
@@ -174,12 +175,14 @@ function CaseStudyBlock({
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {block.media.map((media) => (
             <ScrollRevealItem key={media.title}>
-              <Image
-                src={media.image}
-                alt={media.title}
-                sizes="(max-width: 768px) 45vw, 180px"
-                className="h-auto w-full rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-              />
+              <MediaButton media={media} className="rounded-[0.35rem]">
+                <Image
+                  src={media.image}
+                  alt={media.title}
+                  sizes="(max-width: 768px) 45vw, 180px"
+                  className="h-auto w-full rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+                />
+              </MediaButton>
             </ScrollRevealItem>
           ))}
         </div>
@@ -308,8 +311,6 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
   return (
     <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-5xl">
-        <BackLink />
-
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-8 text-center md:pb-24 md:pt-12">
           <ScrollRevealItem className="relative mb-10 flex flex-col items-center md:mb-14">
             <span
@@ -397,23 +398,25 @@ function ProjectMediaBlock({
 
   return (
     <figure className={`mx-auto ${widthClass}`}>
-      <div
-        className={
-          isLightVariant
-            ? "overflow-hidden rounded-[0.35rem] bg-white px-4 py-6 md:px-8 md:py-8"
-            : undefined
-        }
-      >
-        <Image
-          src={media.image}
-          alt={media.title}
-          priority={priority}
-          sizes="(max-width: 768px) 92vw, 900px"
-          className={`h-auto w-full ${
-            isLightVariant ? "" : "rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-          }`}
-        />
-      </div>
+      <MediaButton media={media}>
+        <div
+          className={
+            isLightVariant
+              ? "overflow-hidden rounded-[0.35rem] bg-white px-4 py-6 md:px-8 md:py-8"
+              : undefined
+          }
+        >
+          <Image
+            src={media.image}
+            alt={media.title}
+            priority={priority}
+            sizes="(max-width: 768px) 92vw, 900px"
+            className={`h-auto w-full ${
+              isLightVariant ? "" : "rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+            }`}
+          />
+        </div>
+      </MediaButton>
       <figcaption
         className={`mt-4 text-center text-xs uppercase tracking-[0.18em] ${
           editorial ? "text-white/55" : "text-white/35"

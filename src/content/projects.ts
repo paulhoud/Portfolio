@@ -65,6 +65,8 @@ export type ProjectSection = {
 export type ProjectMedia = {
   title: string;
   image: StaticImageData;
+  /** Source vidéo optionnelle : si présente, le média s'ouvre en vidéo dans la visionneuse (l'image sert de poster). */
+  video?: string;
   size?: "narrow" | "regular" | "wide";
   variant?: "default" | "light";
   layout?: "single" | "row";
