@@ -1,4 +1,5 @@
 import type { StaticImageData } from "next/image";
+import type { MediaKey } from "./generated/media-manifest";
 import mementoEvent from "../../assets/img-63.png";
 import mementoLanding from "../../assets/img-64.png";
 import mementoStoryboard from "../../assets/img-65.png";
@@ -109,6 +110,8 @@ export type Project = {
   sectionStyle?: "stacked" | "inline";
   blocks?: ProjectBlock[];
   animation: "orbit" | "float" | "sweep" | "pulse" | "tilt";
+  /** Clé du média de la carte : image placeholder + animation .webm (cf. media-manifest). */
+  mediaKey?: MediaKey;
   sections: ProjectSection[];
   gallery: string[];
   media?: ProjectMedia[];
@@ -132,6 +135,7 @@ const defaultSections: ProjectSection[] = [
 export const projects: Project[] = [
   {
     slug: "upikajob",
+    mediaKey: "UPIKAJOB",
     title: "UpikaJob",
     eyebrow: "Plateforme d'accompagnement de carrière",
     description:
@@ -163,6 +167,7 @@ export const projects: Project[] = [
   },
   {
     slug: "memento",
+    mediaKey: "MEMENTO",
     title: "Memento",
     eyebrow: "Designer le service de redistribution de photo de demain",
     description:
@@ -232,6 +237,7 @@ export const projects: Project[] = [
   },
   {
     slug: "yves-delorme",
+    mediaKey: "YDL",
     title: "Yves Delorme",
     eyebrow: "L'Odyssée — refonte de l'écosystème digital",
     description:
@@ -286,6 +292,7 @@ export const projects: Project[] = [
   },
   {
     slug: "jive",
+    mediaKey: "JIVE",
     title: "Jive",
     eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
     description:
@@ -338,6 +345,7 @@ export const projects: Project[] = [
   },
   {
     slug: "odyssey",
+    mediaKey: "SANOFI",
     title: "Sanofi Espoir",
     eyebrow: "Projet pour la santé des enfants au Sénégal : renforcer l'impact local",
     description:
@@ -412,6 +420,7 @@ export const projects: Project[] = [
   },
   {
     slug: "unicorn",
+    mediaKey: "FIDESIO",
     title: "Fidesio",
     eyebrow: "Sanofi – esprit de solidarité",
     detailSubtitle: "Professionnels de santé en mission",
@@ -536,6 +545,7 @@ export const projects: Project[] = [
   },
   {
     slug: "capgemini",
+    mediaKey: "CAPGEMINI",
     title: "Capgemini",
     eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
     description:
@@ -598,6 +608,7 @@ export const projects: Project[] = [
   },
   {
     slug: "lemon",
+    mediaKey: "BAIO",
     title: "Baio",
     eyebrow: "Créer une application gamifiée qui encourage la consommation de produits healthy",
     description:
@@ -682,6 +693,7 @@ export const projects: Project[] = [
   },
   {
     slug: "alpha",
+    mediaKey: "SAEGUS",
     title: "SÆGUS",
     eyebrow: "10ème anniversaire Saegus x Le Trianon",
     description:
@@ -765,6 +777,7 @@ export const projects: Project[] = [
   },
   {
     slug: "studio",
+    mediaKey: "LGM",
     title: "Film Amateur",
     eyebrow: "Réaliser un court métrage sur une courte période pour encourager le travail d'équipe digitale",
     description:
@@ -852,6 +865,7 @@ export const projects: Project[] = [
   },
   {
     slug: "archive",
+    mediaKey: "PERSO",
     title: "Archive",
     eyebrow: "Dessins personnels et créations",
     description:

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Project } from "@/content/projects";
-import { AnimatedLogo } from "./AnimatedLogo";
+import { ProjectThumbnail } from "./ProjectThumbnail";
 
 type ProjectTileProps = {
   project: Project;
@@ -32,30 +32,24 @@ export function ProjectTile({ project, index }: ProjectTileProps) {
     >
       <Link
         href={`/projects/${project.slug}`}
-        className="group relative flex h-full w-full overflow-hidden"
+        className="group relative block h-full w-full overflow-hidden"
         style={{ backgroundColor: project.background, color: project.foreground }}
         aria-label={`Voir le projet ${project.title}`}
       >
-        <span className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.22),transparent_42%)] opacity-0 transition duration-500 group-hover:opacity-100" />
-        <span className="absolute inset-x-8 bottom-7 z-10 translate-y-5 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+        <ProjectThumbnail
+          id={project.slug}
+          mediaKey={project.mediaKey}
+          alt={project.logoAlt}
+          background={project.background}
+          priority={index < 3}
+        />
+        <span className="pointer-events-none absolute inset-x-8 bottom-7 z-10 translate-y-5 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
           <span
-            className="block text-sm font-bold uppercase tracking-[0.18em]"
+            className="block text-sm font-bold uppercase tracking-[0.18em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
             style={project.titleColor ? { color: project.titleColor } : undefined}
           >
             {project.title}
           </span>
-        </span>
-        <span className="relative z-0 flex h-full w-full items-center justify-center p-10 transition duration-500 group-hover:-translate-y-4">
-          <AnimatedLogo
-            animation={project.animation}
-            foreground={project.foreground}
-            logo={project.logo}
-            logoAlt={project.logoAlt}
-            logoKind={project.logoKind}
-            logoSize={project.logoSize}
-            logoScale={project.logoScale}
-            priority={index < 3}
-          />
         </span>
       </Link>
     </motion.article>
