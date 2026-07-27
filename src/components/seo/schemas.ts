@@ -33,7 +33,9 @@ export function personSchema() {
     "@id": PERSON_ID,
     name: profile.name,
     url: siteUrl,
-    jobTitle: profile.jobTitle,
+    // Plusieurs intitulés exercés : déclarés ensemble pour couvrir les deux
+    // métiers sans imposer de choix dans l'interface.
+    jobTitle: [profile.jobTitle, ...profile.alternateJobTitles],
     description: profile.description,
     email: profile.email ? `mailto:${profile.email}` : "",
     image: profile.photo ? absoluteUrl(profile.photo) : "",

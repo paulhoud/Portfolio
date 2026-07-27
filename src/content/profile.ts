@@ -34,7 +34,7 @@ export const socialLinks: SocialLink[] = [
   { id: "behance", label: "Behance", url: "https://www.behance.net/paulhoud" },
   { id: "figma", label: "Figma", url: "https://www.figma.com/@paulhoudebine" },
   { id: "github", label: "GitHub", url: "https://github.com/paulhoud" },
-  { id: "youtube", label: "YouTube", url: "" }, // À COMPLÉTER si une chaîne existe
+  { id: "youtube", label: "YouTube", url: "https://www.youtube.com/@paulhdbn" },
 ];
 
 /** Profils réellement renseignés (les autres sont ignorés partout). */
@@ -42,8 +42,15 @@ export const activeSocialLinks = socialLinks.filter((link) => link.url.trim() !=
 
 export const profile = {
   name: "Paul Houdebine",
-  /** Intitulé de métier principal, utilisé dans les titres et le JSON-LD. */
+  /** Intitulé principal, affiché dans les titres, l'image de partage et le JSON-LD. */
   jobTitle: "Product Designer",
+
+  /**
+   * Autres intitulés exercés. Ils ne sont pas affichés (l'interface reste
+   * lisible avec un seul titre) mais sont déclarés dans le schéma Person, afin
+   * que les recherches portant sur ces métiers puissent aussi remonter le site.
+   */
+  alternateJobTitles: ["UI Designer"],
   email: "contact@paulhoudebine.com",
 
   /**
