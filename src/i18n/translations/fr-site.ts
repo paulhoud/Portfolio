@@ -64,11 +64,15 @@ export const frSite: SiteCopy = {
   about: {
     title: "À propos",
     intro: [
-      "Designer produit et identité digitale, j'accompagne des équipes sur la conception d'expériences utiles, cohérentes et durables.",
+      "Je m'appelle Paul Houdebine et je suis Product Designer. Basé entre Paris et Bordeaux, j'accompagne des équipes sur la conception d'expériences utiles, cohérentes et durables.",
       "Mon travail relie la stratégie, l'usage réel et l'exécution graphique pour produire des interfaces lisibles, des systèmes visuels solides et des parcours utilisateurs fluides.",
-      "J'interviens aussi bien sur des produits digitaux que sur des dispositifs de communication, en alternance, en freelance ou en collaboration avec des studios et des startups.",
+      "J'interviens aussi bien sur des produits digitaux que sur des dispositifs de communication, en collaboration avec des studios, des startups et des grands comptes.",
     ],
     sections: [
+      {
+        title: "Parcours",
+        body: "Diplômé de HETIC, j'ai débuté par une alternance d'un an chez Memento, start-up de redistribution de photos, avant de rejoindre SÆGUS comme consultant design junior sur des missions pour Capgemini et Orange. J'ai également accompagné la Fondation Sanofi Espoir et la Maison Yves Delorme. Je suis aujourd'hui Product Designer chez UpikaJob.",
+      },
       {
         title: "Ce que je fais",
         body: "Conception d'interfaces, prototypage, design system, direction artistique, supports print et digital, storytelling produit, facilitation d'ateliers et restitution de parcours utilisateurs.",
@@ -94,7 +98,7 @@ export const frSite: SiteCopy = {
       },
       {
         label: "LinkedIn",
-        href: "https://www.linkedin.com/in/paulhoudebine",
+        href: "https://www.linkedin.com/in/paul-houdebine",
         external: true,
       },
     ],

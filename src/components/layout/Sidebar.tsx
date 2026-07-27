@@ -3,6 +3,7 @@
 import { LanguageFlags } from "./LanguageFlags";
 import { LogoMark } from "./LogoMark";
 import { SidebarNavLink } from "./SidebarNavLink";
+import { SocialLinks } from "./SocialLinks";
 import { useTranslation } from "@/i18n/context";
 
 export function Sidebar() {
@@ -26,6 +27,7 @@ export function Sidebar() {
       </div>
 
       <div className="space-y-5">
+        <SocialLinks />
         <LanguageFlags />
         <p className="text-[0.58rem] uppercase leading-relaxed tracking-[0.02em] text-white/35">
           {t.site.footer.copyright}

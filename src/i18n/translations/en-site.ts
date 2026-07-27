@@ -64,11 +64,15 @@ export const enSite: SiteCopy = {
   about: {
     title: "About",
     intro: [
-      "Product designer and digital identity specialist, I help teams build useful, coherent, and lasting experiences.",
+      "My name is Paul Houdebine and I am a Product Designer. Based between Paris and Bordeaux, I help teams build useful, coherent, and lasting experiences.",
       "My work connects strategy, real-world usage, and graphic execution to produce readable interfaces, strong visual systems, and smooth user journeys.",
-      "I work on digital products and communication materials alike, through apprenticeships, freelance missions, or collaborations with studios and startups.",
+      "I work on digital products and communication materials alike, collaborating with studios, startups, and large organisations.",
     ],
     sections: [
+      {
+        title: "Background",
+        body: "A HETIC graduate, I started with a one-year apprenticeship at Memento, a photo redistribution startup, before joining SÆGUS as a junior design consultant on assignments for Capgemini and Orange. I also worked with the Sanofi Espoir Foundation and Maison Yves Delorme. Today I am a Product Designer at UpikaJob.",
+      },
       {
         title: "What I do",
         body: "Interface design, prototyping, design systems, art direction, print and digital assets, product storytelling, workshop facilitation, and user journey documentation.",
@@ -94,7 +98,7 @@ export const enSite: SiteCopy = {
       },
       {
         label: "LinkedIn",
-        href: "https://www.linkedin.com/in/paulhoudebine",
+        href: "https://www.linkedin.com/in/paul-houdebine",
         external: true,
       },
     ],

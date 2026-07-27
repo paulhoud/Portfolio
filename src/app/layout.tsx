@@ -1,4 +1,7 @@
 import { AppFrame } from "@/components/layout/AppFrame";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { personSchema, webSiteSchema } from "@/components/seo/schemas";
+import { profile, siteUrl } from "@/content/profile";
 import { LanguageProvider } from "@/i18n/context";
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
@@ -10,10 +13,46 @@ const lato = Lato({
   variable: "--font-lato",
 });
 
+const siteTitle = `${profile.name} — ${profile.jobTitle}`;
+
 export const metadata: Metadata = {
-  title: "Paul Houdebine - Portfolio",
-  description:
-    "Portfolio de Paul Houdebine, designer produit et identité digitale.",
+  // Indispensable pour que les URLs Open Graph / canonical soient absolues.
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteTitle,
+    // Les pages ne déclarent que leur propre titre : le nom est ajouté ici.
+    template: `%s — ${profile.name}`,
+  },
+  description: profile.description,
+  applicationName: siteTitle,
+  authors: [{ name: profile.name, url: siteUrl }],
+  creator: profile.name,
+  publisher: profile.name,
+  alternates: { canonical: "/" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: siteUrl,
+    siteName: siteTitle,
+    title: siteTitle,
+    description: profile.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: profile.description,
+  },
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -63,6 +102,8 @@ export default function RootLayout({
   return (
     <html lang="fr" className={lato.variable}>
       <body>
+        <JsonLd schema={personSchema()} />
+        <JsonLd schema={webSiteSchema()} />
         <LanguageProvider>
           <AppFrame>{children}</AppFrame>
         </LanguageProvider>
