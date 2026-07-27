@@ -46,9 +46,12 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
       <div className="mx-auto max-w-5xl">
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
-            <p className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
+            {/* Le nom du projet est porté par le h1 (lu par les moteurs et les
+                lecteurs d'écran) sans modifier le rendu visuel existant. */}
+            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
+              <span className="sr-only">{project.title} — </span>
               {project.eyebrow}
-            </p>
+            </h1>
             <div
               className="flex h-44 w-full items-center justify-center rounded-[2rem]"
               style={{ color: project.foreground }}
@@ -95,9 +98,11 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-12 pt-6 text-center md:pb-16 md:pt-10">
           <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
-            <p className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+            {/* Idem : h1 sémantique, rendu visuel inchangé. */}
+            <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+              <span className="sr-only">{project.title} — </span>
               {project.eyebrow}
-            </p>
+            </h1>
             {project.detailSubtitle ? (
               <p className="mt-3 text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/45 md:text-sm">
                 {project.detailSubtitle}
@@ -312,6 +317,11 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
     <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-8 text-center md:pb-24 md:pt-12">
+          {/* Cette variante n'affiche pas de titre : le h1 reste accessible
+              aux moteurs sans altérer la mise en page éditoriale. */}
+          <h1 className="sr-only">
+            {project.title} — {project.eyebrow}
+          </h1>
           <ScrollRevealItem className="relative mb-10 flex flex-col items-center md:mb-14">
             <span
               aria-hidden="true"

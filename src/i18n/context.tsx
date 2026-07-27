@@ -35,8 +35,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Seule la langue du document est synchronisée : le <title> est géré par
+    // les metadata Next, page par page. L'écraser ici replaçait le titre
+    // générique du site sur toutes les pages après hydratation.
     document.documentElement.lang = locale;
-    document.title = translations[locale].site.meta.title;
   }, [locale]);
 
   const setLocale = useCallback((nextLocale: Locale) => {

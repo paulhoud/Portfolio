@@ -8,6 +8,7 @@ import { useTranslation } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 import { LanguageFlags } from "./LanguageFlags";
 import { LogoMark } from "./LogoMark";
+import { SocialLinks } from "./SocialLinks";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -66,7 +67,8 @@ export function MobileNav() {
                 );
               })}
             </nav>
-            <div className="mt-8 border-t border-white/10 pt-6">
+            <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
+              <SocialLinks />
               <LanguageFlags />
             </div>
           </motion.div>

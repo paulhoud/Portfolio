@@ -183,19 +183,19 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento, une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale.",
+        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento. Memento est une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale. Le service s'adresse aux créateurs d'événements pour redistribuer toutes les photos prises sur leur événement à chacun des invités.",
       },
       {
         title: "Enjeux",
-        body: "L'entreprise avait besoin de structurer ses interfaces, ses maquettes, ses supports de communication et ses contenus pour accompagner sa croissance.",
+        body: "J'ai été recruté par l'entreprise car ils n'avaient pas encore de designer et leur désir de grandir impliquait de créer beaucoup de contenus différents. J'étais en charge de la création de nouvelles maquettes d'interface pour améliorer leur application, des visuels pour les publications sur les réseaux sociaux, des vidéos pour expliquer le fonctionnement de leur service, mais aussi des flyers ou kakémonos pour des événements.",
       },
       {
         title: "Solution",
-        body: "J'ai travaillé les interfaces et prototypes Figma, appliqué une logique de design system et produit des visuels de communication pour les réseaux sociaux, flyers et événements.",
+        body: "Grâce à mon expertise de Figma, j'ai pu réaliser beaucoup d'interfaces et de prototypes pour les besoins de l'entreprise. J'ai appliqué le design atomique et j'ai pu créer et maintenir un design system pour améliorer le scaling de notre application. Mes compétences sur la suite Adobe m'ont également permis de réaliser des vidéos animées avec du Motion Design dans After Effect ou de créer des Kakemono, des affiches et des flyers sur InDesign.",
       },
       {
         title: "Résultat",
-        body: "Le résultat de mon travail a modernisé l'identité de Memento. Aujourd'hui encore, la vidéo de présentation sert de support aux associés pour présenter la solution et sa diffusion a permis de convertir plusieurs fils clients durant les mois qui ont suivi.",
+        body: "Le résultat de mon travail a modernisé l'identité de Memento. Aujourd'hui encore, la vidéo de présentation sert de support aux associés pour présenter la solution et sa diffusion a permis de convertir 3 fois plus de clients durant les 3 mois qui ont suivi.",
       },
     ],
     gallery: ["Prototype produit", "Design system", "Supports social media"],
@@ -872,7 +872,7 @@ export const projects: Project[] = [
     eyebrow: "Dessins personnels et créations",
     description:
       "Sélection de créations graphiques, illustrations et expérimentations personnelles.",
-    logo: "/assets/Logo-11-1.svg",
+    logo: "/assets/Logo-archive.png",
     logoAlt: "Logo Archive",
     background: "#ece8df",
     foreground: "#333333",
