@@ -50,7 +50,6 @@ export function TechStack() {
 
 function TechLink({ tech }: { tech: Tech }) {
   const { icon } = tech;
-  const isMono = icon.kind === "mono";
 
   return (
     <a
@@ -59,9 +58,11 @@ function TechLink({ tech }: { tech: Tech }) {
       rel="noopener noreferrer"
       title={tech.label}
       className="group/tech relative flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 transition duration-300 hover:-translate-y-0.5 hover:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
-      style={{ backgroundColor: isMono ? icon.background : "rgba(255,255,255,0.04)" }}
+      style={{
+        backgroundColor: icon.kind === "mono" ? icon.background : "rgba(255,255,255,0.04)",
+      }}
     >
-      {isMono ? (
+      {icon.kind === "mono" ? (
         <span
           aria-hidden="true"
           className="text-[0.92rem] font-bold leading-none tracking-tight"
@@ -69,6 +70,18 @@ function TechLink({ tech }: { tech: Tech }) {
         >
           {icon.text}
         </span>
+      ) : icon.kind === "multi" ? (
+        // Logo multicolore : la hauteur est contrainte et la largeur suit le
+        // ratio d'origine, pour ne pas déformer les marques non carrées.
+        <svg
+          aria-hidden="true"
+          viewBox={icon.viewBox}
+          className="h-[1.45rem] w-auto opacity-90 transition-opacity duration-300 group-hover/tech:opacity-100"
+        >
+          {icon.paths.map((shape) => (
+            <path key={shape.d} d={shape.d} fill={shape.fill} />
+          ))}
+        </svg>
       ) : (
         <svg
           aria-hidden="true"
