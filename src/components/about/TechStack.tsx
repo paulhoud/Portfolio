@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/motion/ScrollReveal";
 import { techCategories, type Tech } from "@/content/techStack";
 import { useTranslation } from "@/i18n/context";
@@ -70,6 +71,16 @@ function TechLink({ tech }: { tech: Tech }) {
         >
           {icon.text}
         </span>
+      ) : icon.kind === "image" ? (
+        // Logo bitmap : la marque repose sur un dégradé qu'un tracé vectoriel
+        // ne saurait restituer.
+        <Image
+          src={icon.src}
+          alt=""
+          width={64}
+          height={64}
+          className="h-[1.35rem] w-[1.35rem] object-contain opacity-90 transition-opacity duration-300 group-hover/tech:opacity-100"
+        />
       ) : icon.kind === "multi" ? (
         // Logo multicolore : la hauteur est contrainte et la largeur suit le
         // ratio d'origine, pour ne pas déformer les marques non carrées.

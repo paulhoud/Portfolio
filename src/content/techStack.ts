@@ -6,6 +6,8 @@
  *   officiel repris ici pour les marques qui en ont été retirées) ;
  * - `multi` : logo officiel multicolore, quand la marque perd son identité en
  *   une seule couleur (cas de Figma et de ses cinq formes) ;
+ * - `image` : logo bitmap officiel, pour les marques dont la marque repose sur
+ *   un dégradé qu'un tracé vectoriel ne saurait restituer (cas de Spline) ;
  * - `mono` : pastille monogramme, faute de tracé disponible. C'est notamment
  *   le parti pris des applications Adobe, dont l'icône réelle est elle-même un
  *   monogramme sur fond sombre.
@@ -23,6 +25,7 @@
 export type TechIcon =
   | { kind: "path"; d: string; color: string }
   | { kind: "multi"; viewBox: string; paths: { d: string; fill: string }[] }
+  | { kind: "image"; src: string }
   | { kind: "mono"; text: string; color: string; background: string };
 
 export type TechCategoryId = "design" | "dev" | "ai" | "os" | "browsers";
@@ -69,10 +72,8 @@ export const techCategories: TechCategory[] = [
         "label": "Spline",
         "url": "https://spline.design",
         "icon": {
-          "kind": "mono",
-          "text": "Sp",
-          "color": "#C4B5FD",
-          "background": "#241B3A"
+          "kind": "image",
+          "src": "/assets/logo-spline.png"
         }
       },
       {
