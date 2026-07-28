@@ -5,17 +5,33 @@ import {
   ScrollRevealGroup,
   ScrollRevealItem,
 } from "@/components/motion/ScrollReveal";
+import { cn } from "@/lib/utils";
 
 type TextPageProps = {
   title: string;
   eyebrow?: string;
+  /** Élargit la colonne de contenu (mises en page riches, grilles). */
+  wide?: boolean;
+  /**
+   * Enveloppe le contenu dans une animation d'apparition groupée. À désactiver
+   * quand les enfants gèrent eux-mêmes leurs propres révélations au scroll.
+   */
+  revealChildren?: boolean;
   children: React.ReactNode;
 };
 
-export function TextPage({ title, eyebrow, children }: TextPageProps) {
+export function TextPage({
+  title,
+  eyebrow,
+  wide = false,
+  revealChildren = true,
+  children,
+}: TextPageProps) {
+  const contentClass = cn("mx-auto", wide ? "max-w-5xl" : "copy max-w-3xl");
+
   return (
     <section className="min-h-screen bg-[linear-gradient(120deg,#172237_0%,#191820_46%,#17161d_100%)] px-6 py-8 md:px-20 md:py-12">
-      <div className="mx-auto max-w-4xl">
+      <div className={cn("mx-auto", wide ? "max-w-6xl" : "max-w-4xl")}>
         <ScrollReveal>
           <header className="mb-16 pt-2 text-center md:mb-20">
             {eyebrow ? (
@@ -29,7 +45,11 @@ export function TextPage({ title, eyebrow, children }: TextPageProps) {
           </header>
         </ScrollReveal>
 
-        <ScrollRevealGroup className="copy mx-auto max-w-3xl">{children}</ScrollRevealGroup>
+        {revealChildren ? (
+          <ScrollRevealGroup className={contentClass}>{children}</ScrollRevealGroup>
+        ) : (
+          <div className={contentClass}>{children}</div>
+        )}
       </div>
     </section>
   );

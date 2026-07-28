@@ -18,12 +18,6 @@ export type AboutSection = {
   body: string;
 };
 
-export type ContactChannel = {
-  label: string;
-  href: string;
-  external?: boolean;
-};
-
 export type SiteCopy = {
   meta: {
     title: string;
@@ -65,11 +59,27 @@ export type SiteCopy = {
     title: string;
     intro: string[];
     sections: AboutSection[];
+    /** Texte alternatif du portrait. */
+    photoAlt: string;
+    /** Intitulés des catégories d'outils (les données vivent dans techStack.ts). */
+    stack: {
+      heading: string;
+      design: string;
+      dev: string;
+      ai: string;
+      os: string;
+      browsers: string;
+    };
   };
   contact: {
     title: string;
     intro: string;
-    channels: ContactChannel[];
+    /** Intitulé du bloc principal menant à l'adresse e-mail. */
+    emailLabel: string;
+    /** Intitulé de la liste des profils externes. */
+    socialLabel: string;
+    /** Intitulé précédant les villes d'exercice. */
+    locationLabel: string;
   };
 };
 

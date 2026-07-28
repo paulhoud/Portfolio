@@ -86,21 +86,22 @@ export const frSite: SiteCopy = {
         body: "Figma, Adobe Creative Suite, Miro, Notion, Framer, HTML/CSS, et une bonne dose de curiosité pour comprendre les enjeux métier avant de dessiner la solution.",
       },
     ],
+    photoAlt: "Portrait de Paul Houdebine, Product Designer",
+    stack: {
+      heading: "Outils & technologies",
+      design: "Outils de conception",
+      dev: "Développement",
+      ai: "Modèles d'IA",
+      os: "Systèmes d'exploitation",
+      browsers: "Navigateurs web",
+    },
   },
   contact: {
     title: "Contact",
     intro:
       "Un projet, une mission ou une collaboration ? Échangeons autour de vos besoins, de votre calendrier et de la meilleure façon de travailler ensemble.",
-    channels: [
-      {
-        label: "Email",
-        href: "mailto:contact@paulhoudebine.com",
-      },
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/in/paul-houdebine",
-        external: true,
-      },
-    ],
+    emailLabel: "Écrire un e-mail",
+    socialLabel: "Me retrouver ailleurs",
+    locationLabel: "Basé entre",
   },
 };
