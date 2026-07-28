@@ -19,7 +19,12 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
         aria-label="Retour à l'accueil"
         className={cn("inline-flex w-fit items-center", className)}
       >
-        <Image src="/assets/Logo-0-2.svg" alt="PH" width={61} height={70} priority />
+        {/* Pas de `priority` : il générerait un préchargement pour chacune des
+            deux instances du logo (barre latérale et en-tête mobile), alors
+            qu'une seule est affichée selon la largeur d'écran. Le préchargement
+            inutilisé provoquait un avertissement du navigateur. `eager` suffit :
+            le logo est au-dessus de la ligne de flottaison. */}
+        <Image src="/assets/Logo-0-2.svg" alt="PH" width={61} height={70} loading="eager" />
       </Link>
     );
   }
@@ -35,7 +40,7 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
         alt="PH"
         width={61}
         height={70}
-        priority
+        loading="eager"
         className="transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-0"
         style={{ transitionTimingFunction: logoFillEase }}
       />
