@@ -12,6 +12,20 @@ import type { Project } from "@/content/projects";
 
 const PERSON_ID = `${siteUrl}/#person`;
 const WEBSITE_ID = `${siteUrl}/#website`;
+const BRAND_IMAGE_ID = `${siteUrl}/#brand-image`;
+
+/** Visuel de marque, déclaré une fois et référencé par les autres schémas. */
+function brandImageSchema() {
+  return {
+    "@type": "ImageObject",
+    "@id": BRAND_IMAGE_ID,
+    url: absoluteUrl(profile.brandImage),
+    contentUrl: absoluteUrl(profile.brandImage),
+    width: 1200,
+    height: 1200,
+    caption: `${profile.name} — ${profile.jobTitle}`,
+  };
+}
 
 /** Retire les clés vides (chaîne vide, tableau vide, undefined). */
 function compact<T extends Record<string, unknown>>(input: T): T {
@@ -78,8 +92,32 @@ export function webSiteSchema() {
     name: `${profile.name} — ${profile.jobTitle}`,
     description: profile.description,
     inLanguage: "fr-FR",
+    image: brandImageSchema(),
     author: { "@id": PERSON_ID },
     publisher: { "@id": PERSON_ID },
+  };
+}
+
+/**
+ * Page d'accueil, avec son image principale explicitement désignée.
+ *
+ * `primaryImageOfPage` est le signal le plus direct dont dispose un moteur pour
+ * choisir la vignette d'un résultat. Sans lui, il puise dans les images de la
+ * page — ici, les miniatures de projets.
+ */
+export function homePageSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${siteUrl}/#webpage`,
+    url: siteUrl,
+    name: `${profile.name} — ${profile.jobTitle}`,
+    description: profile.description,
+    inLanguage: "fr-FR",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": PERSON_ID },
+    primaryImageOfPage: brandImageSchema(),
+    image: brandImageSchema(),
   };
 }
 
