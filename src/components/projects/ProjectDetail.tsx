@@ -18,6 +18,7 @@ import type {
   ProjectSection,
 } from "@/content/projects";
 import { AnimatedLogo } from "./AnimatedLogo";
+import { ProjectStorySection } from "./ProjectStorySection";
 
 type ProjectDetailProps = {
   project: Project;
@@ -27,7 +28,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const viewerMedia = collectProjectMedia(project);
 
   let content;
-  if (project.detailVariant === "editorial") {
+  if (project.detailVariant === "story") {
+    content = <StoryProjectDetail project={project} />;
+  } else if (project.detailVariant === "editorial") {
     content = <EditorialProjectDetail project={project} />;
   } else if (project.detailVariant === "case-study") {
     content = <CaseStudyProjectDetail project={project} />;
@@ -321,6 +324,68 @@ function ProjectLinks({ links }: { links: ProjectLink[] }) {
         </a>
       ))}
     </div>
+  );
+}
+
+/**
+ * Variante « récit » : la page se lit comme une progression, portée par le
+ * défilement plutôt que par le volume de texte. Voir {@link ProjectStorySection}
+ * pour la mise en scène.
+ */
+function StoryProjectDetail({ project }: ProjectDetailProps) {
+  const story = project.story;
+  if (!story) return <DefaultProjectDetail project={project} />;
+
+  return (
+    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+      <div className="mx-auto max-w-6xl">
+        <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-6 text-center md:pb-24 md:pt-12">
+          <ScrollRevealItem>
+            <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+              <span className="sr-only">{project.title} — </span>
+              {project.eyebrow}
+            </h1>
+          </ScrollRevealItem>
+          <ScrollRevealItem>
+            {/* Phrase d'ouverture : elle pose l'arc du récit à elle seule. */}
+            <p className="mt-8 text-balance text-xl font-medium leading-snug text-white md:mt-10 md:text-3xl">
+              {story.lead}
+            </p>
+          </ScrollRevealItem>
+        </ScrollRevealGroup>
+
+        <ProjectStorySection chapters={story.chapters} />
+
+        <section className="mt-24 border-t border-white/10 pt-16 md:mt-32 md:pt-20">
+          <ScrollReveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+                {story.closing.title}
+              </h2>
+              <p className="copy mt-5">{story.closing.body}</p>
+            </div>
+          </ScrollReveal>
+
+          {project.media?.length ? (
+            <ScrollRevealGroup className="mx-auto mt-12 grid max-w-4xl gap-8 md:mt-16 md:grid-cols-2">
+              {project.media.map((media) => (
+                <ScrollRevealItem key={media.title}>
+                  <ProjectMediaBlock media={media} priority={false} editorial />
+                </ScrollRevealItem>
+              ))}
+            </ScrollRevealGroup>
+          ) : null}
+
+          {story.closing.link ? (
+            <ScrollReveal delay={0.06}>
+              <div className="mt-14">
+                <ProjectLinks links={[story.closing.link]} />
+              </div>
+            </ScrollReveal>
+          ) : null}
+        </section>
+      </div>
+    </article>
   );
 }
 

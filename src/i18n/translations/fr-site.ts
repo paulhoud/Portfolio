@@ -7,7 +7,7 @@ export const frSite: SiteCopy = {
       "Portfolio de Paul Houdebine, designer produit et identité digitale.",
   },
   nav: {
-    method: "Ma méthode",
+    method: "Méthodologie",
     about: "À propos",
     contact: "Contact",
     home: "Accueil",
