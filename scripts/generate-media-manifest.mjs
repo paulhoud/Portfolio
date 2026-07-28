@@ -20,7 +20,15 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const SOURCES = [
-  { srcDir: "assets/default", pubDir: "public/media/default", slot: "placeholder", exts: [".png"] },
+  {
+    srcDir: "assets/default",
+    pubDir: "public/media/default",
+    slot: "placeholder",
+    // PNG pour les aplats graphiques, JPEG pour les visuels photographiques :
+    // le format le plus léger est retenu image par image. Dans les deux cas
+    // `next/image` livre finalement de l'AVIF/WebP.
+    exts: [".png", ".jpg", ".jpeg"],
+  },
   { srcDir: "assets/webm", pubDir: "public/media/webm", slot: "video", exts: [".webm"] },
 ];
 
@@ -53,6 +61,16 @@ for (const { srcDir, pubDir, slot, exts } of SOURCES) {
     .filter((f) => exts.includes(path.extname(f).toLowerCase()))
     .sort();
 
+  // Purge des fichiers obsolètes : sans cela, changer l'extension d'un média
+  // (PNG -> JPEG) laisserait l'ancienne copie servie dans public/.
+  const expected = new Set(files);
+  for (const stale of fs.readdirSync(absPub)) {
+    if (!expected.has(stale)) {
+      fs.unlinkSync(path.join(absPub, stale));
+      console.log(`[media-manifest] fichier obsolète supprimé : ${pubDir}/${stale}`);
+    }
+  }
+
   for (const file of files) {
     // Copie idempotente vers public/ (n'écrit que si le contenu a changé).
     const from = path.join(absSrc, file);
@@ -63,6 +81,15 @@ for (const { srcDir, pubDir, slot, exts } of SOURCES) {
 
     const key = normalizeKey(file);
     const entry = entries.get(key) ?? {};
+    if (entry[slot]) {
+      // Deux fichiers de même nom mais d'extensions différentes (ex. un PNG
+      // laissé à côté du JPEG qui l'a remplacé) : signalé plutôt qu'écrasé en
+      // silence, car le média retenu dépendrait alors de l'ordre de lecture.
+      console.warn(
+        `[media-manifest] ⚠ doublon pour "${key}" : ${entry[slot]} puis ${file}. ` +
+          `Supprime le fichier en trop dans ${srcDir}.`,
+      );
+    }
     entry[slot] = `/${pubDir.replace(/^public\//, "")}/${file}`;
     entries.set(key, entry);
   }
