@@ -1,5 +1,14 @@
 import type { StaticImageData } from "next/image";
 import type { MediaKey } from "./generated/media-manifest";
+// Vignettes des vidéos YouTube, servies localement plutôt que depuis les
+// serveurs de YouTube : rien n'est chargé tant que la lecture n'a pas démarré.
+import videoUpikajob from "../../assets/video-upikajob.jpg";
+import videoMemento from "../../assets/video-memento.jpg";
+import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
+import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
+import videoSanofiProject from "../../assets/video-sanofi-project.jpg";
+import videoBaio from "../../assets/video-baio.jpg";
+import videoOrangeAgile from "../../assets/video-orange-agile.jpg";
 import mementoEvent from "../../assets/img-63.png";
 import mementoLanding from "../../assets/img-64.png";
 import mementoStoryboard from "../../assets/img-65.png";
@@ -172,6 +181,14 @@ export const projects: Project[] = [
       },
     ],
     gallery: [],
+    media: [
+      {
+        title: "Trailer de présentation de la plateforme",
+        image: videoUpikajob,
+        size: "wide",
+        youtubeId: "w5McH1Ib1jI",
+      },
+    ],
   },
   {
     slug: "memento",
@@ -241,6 +258,12 @@ export const projects: Project[] = [
         image: mementoFaq,
         size: "wide",
       },
+      {
+        title: "Vidéo de présentation B2B",
+        image: videoMemento,
+        size: "wide",
+        youtubeId: "DkHwGQkWkfs",
+      },
     ],
   },
   {
@@ -296,6 +319,12 @@ export const projects: Project[] = [
         size: "wide",
         variant: "light",
       },
+      {
+        title: "Configurateur produit en vidéo",
+        image: videoYvesDelorme,
+        size: "wide",
+        youtubeId: "Y6ov9iYdWIk",
+      },
     ],
   },
   {
@@ -343,6 +372,12 @@ export const projects: Project[] = [
         title: "Organisation du prototype",
         image: jivePrototype,
         size: "wide",
+      },
+      {
+        title: "Retour d'expérience sur la formation Agile",
+        image: videoOrangeAgile,
+        size: "wide",
+        youtubeId: "9jyKLH6kMH4",
       },
       {
         title: "Organisation du Miro",
@@ -418,6 +453,18 @@ export const projects: Project[] = [
         title: "Une cartographie visuelle de la structure et de l'organisation",
         image: sanofiStoryboard,
         size: "wide",
+      },
+      {
+        title: "Accelerating Local Impact — film de restitution",
+        image: videoSanofiImpact,
+        size: "wide",
+        youtubeId: "M0JuT4dlrGg",
+      },
+      {
+        title: "Présentation du projet en vidéo",
+        image: videoSanofiProject,
+        size: "wide",
+        youtubeId: "tsqkmX-ZNsE",
       },
       {
         title: "Une analyse détaillée de l'expérience patiente et des points de douleur dans le parcours",
@@ -678,6 +725,17 @@ export const projects: Project[] = [
             title: "Parcours d'onboarding dans l'application",
             image: baioOnboarding,
             size: "wide",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          {
+            title: "Présentation animée de l'application",
+            image: videoBaio,
+            size: "wide",
+            youtubeId: "xYF8CUZPjHw",
           },
         ],
       },
