@@ -1,19 +1,8 @@
-export type ProjectCopy = {
-  title: string;
-  eyebrow: string;
-  description: string;
-  detailSubtitle?: string;
-  introParagraphs?: string[];
-  sections?: { title: string; body: string }[];
-  media?: { title: string }[];
-  blocks?: (
-    | { type: "sections"; sections: { title: string; body: string }[] }
-    | { type: "media"; caption?: string; media: { title: string }[] }
-    | { type: "links"; links: { label: string }[] }
-  )[];
-};
+// Le type vit dans `../types` : il était auparavant redéclaré ici, si bien que
+// toute évolution du modèle devait être reportée à deux endroits.
+import type { ProjectTranslations } from "../types";
 
-export const enProjectTranslations: Record<string, ProjectCopy> = {
+export const enProjectTranslations: ProjectTranslations = {
   memento: {
     title: "Memento",
     eyebrow: "Designing tomorrow's photo redistribution service",
@@ -415,20 +404,51 @@ export const enProjectTranslations: Record<string, ProjectCopy> = {
     title: "UpikaJob",
     eyebrow: "Career coaching & professional support platform",
     description: "My current role: product design for a career coaching platform.",
-    sections: [
-      {
-        title: "Overview",
-        body: "UpikaJob is a career coaching and professional support platform that helps individuals navigate career transitions, build confidence, and achieve their professional goals.",
+    sections: [],
+    story: {
+      lead: "I joined to draw screens. I stayed to shape the product — and to ship part of it myself.",
+      chapters: [
+        {
+          period: "At first",
+          role: "UI/UX Designer",
+          title: "Screens, to begin with",
+          body: "I took over a platform that was already live. I made existing journeys more reliable, brought components into line, and laid the groundwork for a coherent visual system.",
+          shots: [
+            { caption: "The platform when I arrived" },
+            { caption: "Sign-up journey, first version" },
+          ],
+        },
+        {
+          period: "Then",
+          role: "Designer embedded with the engineering team",
+          title: "Close to the code",
+          body: "Working with developers day in, day out, I began designing with an eye on what gets built behind the screen. Mockups turned into intentions we discussed together, rather than deliverables thrown over the wall.",
+          shots: [{ caption: "Design system and component states" }],
+        },
+        {
+          period: "Next",
+          role: "Product Designer",
+          title: "From screen to feature",
+          body: "I took ownership of entire features: framing the need, making the trade-offs, designing, then following through to release. The scope widened from the visual to the product.",
+          shots: [{ caption: "A feature designed end to end" }],
+        },
+        {
+          period: "Today",
+          role: "Product Designer — design & implementation",
+          title: "Designing and shipping",
+          body: "Vibe Coding lets me build part of what I design myself. An idea now travels from intent to shipped interface without changing hands.",
+          shots: [
+            { caption: "The platform today" },
+            { caption: "A feature I built myself" },
+          ],
+        },
+      ],
+      closing: {
+        title: "What it adds up to",
+        body: "The platform as it stands online today, and the marketing site I designed then built on my own.",
+        link: { label: "Visit the site" },
       },
-      {
-        title: "Context",
-        body: "As product designer on UpikaJob, I work on shaping digital experiences that connect job seekers and professionals with tailored coaching, resources, and guidance throughout their career journey.",
-      },
-      {
-        title: "Solution",
-        body: "The platform brings together coaching tools, personalized pathways, and support features designed to make career development more accessible, structured, and actionable for every user.",
-      },
-    ],
+    },
   },
 };
 

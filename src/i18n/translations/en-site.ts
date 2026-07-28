@@ -7,7 +7,7 @@ export const enSite: SiteCopy = {
       "Portfolio of Paul Houdebine, product designer and digital identity specialist.",
   },
   nav: {
-    method: "My method",
+    method: "Methodology",
     about: "About",
     contact: "Contact",
     home: "Home",

@@ -88,6 +88,50 @@ function mergeBlocks(
   });
 }
 
+/**
+ * Applique les textes traduits au récit, chapitre par chapitre, en conservant
+ * les captures du catalogue (elles ne dépendent pas de la langue). Un chapitre
+ * ou une légende non traduits gardent leur version d'origine.
+ */
+function mergeStory(
+  base: Project["story"],
+  translated: ProjectCopy["story"],
+): Project["story"] {
+  if (!base || !translated) return base;
+
+  return {
+    lead: translated.lead ?? base.lead,
+    closing: {
+      ...base.closing,
+      title: translated.closing?.title ?? base.closing.title,
+      body: translated.closing?.body ?? base.closing.body,
+      // Seul le libellé est traduit : l'adresse reste celle du catalogue.
+      link: base.closing.link
+        ? {
+            ...base.closing.link,
+            label: translated.closing?.link?.label ?? base.closing.link.label,
+          }
+        : undefined,
+    },
+    chapters: base.chapters.map((chapter, index) => {
+      const copy = translated.chapters?.[index];
+      if (!copy) return chapter;
+
+      return {
+        ...chapter,
+        period: copy.period ?? chapter.period,
+        role: copy.role ?? chapter.role,
+        title: copy.title ?? chapter.title,
+        body: copy.body ?? chapter.body,
+        shots: chapter.shots.map((shot, shotIndex) => ({
+          ...shot,
+          caption: copy.shots?.[shotIndex]?.caption ?? shot.caption,
+        })),
+      };
+    }),
+  };
+}
+
 export function localizeProject(
   project: Project,
   locale: Locale,
@@ -110,6 +154,7 @@ export function localizeProject(
     detailSubtitle: copy.detailSubtitle ?? project.detailSubtitle,
     introParagraphs: copy.introParagraphs ?? project.introParagraphs,
     sections: mergeSections(project.sections, copy.sections),
+    story: mergeStory(project.story, copy.story),
     media: mergeMedia(project.media, copy.media),
     blocks: mergeBlocks(project.blocks, copy.blocks),
     gallery: copy.media?.map((item) => item.title) ?? project.gallery,

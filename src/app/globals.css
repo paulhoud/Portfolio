@@ -16,6 +16,12 @@
 html {
   background: var(--background);
   color: var(--foreground);
+  /* Le calque entrant démarre hors écran, à droite : le rognage évite une barre
+     de défilement horizontale pendant la transition.
+     Il est posé ici, et non sur le conteneur de transition : un ancêtre au
+     débordement non visible devient le référent des éléments `sticky`, ce qui
+     les empêcherait de se fixer au viewport (colonne épinglée des pages récit). */
+  overflow-x: clip;
 }
 
 body {
@@ -57,7 +63,6 @@ button {
 .page-transition-viewport {
   display: grid;
   min-height: 100vh;
-  overflow-x: clip;
 }
 
 .page-transition-layer {

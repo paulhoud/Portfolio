@@ -3,6 +3,7 @@ import type { MediaKey } from "./generated/media-manifest";
 // Vignettes des vidéos YouTube, servies localement plutôt que depuis les
 // serveurs de YouTube : rien n'est chargé tant que la lecture n'a pas démarré.
 import videoUpikajob from "../../assets/video-upikajob.jpg";
+import videoUpikajobPitch from "../../assets/video-upikajob-pitch.jpg";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -103,6 +104,37 @@ export type ProjectBlock =
     }
   | { type: "links"; links: ProjectLink[] };
 
+/**
+ * Emplacement de capture dans une page récit. Tant qu'aucune image n'est
+ * fournie, un cadre vide est rendu à sa place : la mise en page est donc déjà
+ * définitive, seules les captures manquent.
+ */
+export type ProjectStoryShot = {
+  caption: string;
+  image?: StaticImageData;
+};
+
+/** Un chapitre du récit : une période, un rôle, et l'état du produit associé. */
+export type ProjectStoryChapter = {
+  /** Repère temporel court (« Au départ », « Aujourd'hui »…). */
+  period: string;
+  /** Intitulé du poste à ce moment : c'est lui qui matérialise la progression. */
+  role: string;
+  title: string;
+  body: string;
+  shots: ProjectStoryShot[];
+};
+
+/**
+ * Récit d'un projet raconté au fil du défilement : le produit évolue dans la
+ * colonne épinglée pendant que les chapitres déroulent l'évolution du rôle.
+ */
+export type ProjectStory = {
+  lead: string;
+  chapters: ProjectStoryChapter[];
+  closing: { title: string; body: string; link?: ProjectLink };
+};
+
 export type ProjectHeaderLogo =
   | { kind: "image"; src: string; alt: string; width: number; height?: number; className?: string }
   | { kind: "jive-orange" };
@@ -120,7 +152,9 @@ export type Project = {
   logoSize: "sm" | "md" | "lg" | "xl";
   logoScale?: number;
   titleColor?: string;
-  detailVariant?: "default" | "editorial" | "case-study";
+  detailVariant?: "default" | "editorial" | "case-study" | "story";
+  /** Récit scrollé, utilisé par la variante « story ». */
+  story?: ProjectStory;
   detailSubtitle?: string;
   headerLogo?: ProjectHeaderLogo;
   introParagraphs?: string[];
@@ -166,22 +200,60 @@ export const projects: Project[] = [
     logoSize: "lg",
     logoScale: 1.05,
     animation: "float",
-    sections: [
-      {
-        title: "Vue d'ensemble",
-        body: "UpikaJob est une plateforme d'accompagnement de carrière. Je contribue au design produit pour structurer les parcours, clarifier les interfaces et renforcer l'identité de la marque.",
+    detailVariant: "story",
+    story: {
+      lead: "Arrivé pour dessiner des écrans, resté pour concevoir le produit — et en livrer une partie.",
+      chapters: [
+        {
+          period: "Au départ",
+          role: "UI/UX Designer",
+          title: "Les écrans, d'abord",
+          body: "Je prends en main une plateforme déjà lancée. Je fiabilise les parcours existants, j'harmonise les composants et je pose les bases d'un système visuel cohérent.",
+          shots: [
+            { caption: "La plateforme à mon arrivée" },
+            { caption: "Parcours d'inscription, première version" },
+          ],
+        },
+        {
+          period: "Puis",
+          role: "Designer intégré à l'équipe technique",
+          title: "Au contact du code",
+          body: "À force de travailler au quotidien avec les développeurs, je conçois en tenant compte de ce qui se construit derrière l'écran. Les maquettes deviennent des intentions discutées, plus des livrables passés par-dessus le mur.",
+          shots: [{ caption: "Design system et états de composants" }],
+        },
+        {
+          period: "Ensuite",
+          role: "Product Designer",
+          title: "De l'écran à la fonctionnalité",
+          body: "Je prends la responsabilité de fonctionnalités entières : cadrage du besoin, arbitrages, conception, puis suivi jusqu'à la mise en production. Le périmètre s'élargit du visuel au produit.",
+          shots: [{ caption: "Une fonctionnalité conçue de bout en bout" }],
+        },
+        {
+          period: "Aujourd'hui",
+          role: "Product Designer — conception & implémentation",
+          title: "Concevoir et livrer",
+          body: "Le Vibe Coding me permet de développer moi-même une partie de ce que je dessine. Une idée passe désormais de l'intention à l'interface en production sans changer de main.",
+          shots: [
+            { caption: "La plateforme aujourd'hui" },
+            { caption: "Une fonctionnalité développée par mes soins" },
+          ],
+        },
+      ],
+      closing: {
+        title: "Ce que ça donne",
+        body: "La plateforme telle qu'elle est en ligne aujourd'hui, et le site vitrine que j'ai conçu puis développé seul.",
+        link: { label: "Voir le site", href: "https://www.upikajob.com/" },
       },
-      {
-        title: "Contexte",
-        body: "La plateforme accompagne les personnes dans leur évolution professionnelle avec des contenus, des outils et un suivi personnalisé.",
-      },
-      {
-        title: "Solution",
-        body: "Conception d'interfaces, prototypage et itérations sur les parcours clés pour rendre l'expérience plus claire, rassurante et actionnable.",
-      },
-    ],
+    },
+    sections: [],
     gallery: [],
     media: [
+      {
+        title: "La plateforme en une minute trente",
+        image: videoUpikajobPitch,
+        size: "wide",
+        youtubeId: "-P4zZUIqNAk",
+      },
       {
         title: "Trailer de présentation de la plateforme",
         image: videoUpikajob,

@@ -93,6 +93,21 @@ export type ProjectCopy = {
   introParagraphs?: string[];
   sections?: { title: string; body: string }[];
   media?: { title: string }[];
+  /**
+   * Récit scrollé. Seuls les textes sont traduits : les captures viennent du
+   * catalogue et restent communes aux deux langues.
+   */
+  story?: {
+    lead: string;
+    chapters: {
+      period: string;
+      role: string;
+      title: string;
+      body: string;
+      shots: { caption: string }[];
+    }[];
+    closing: { title: string; body: string; link?: { label: string } };
+  };
   blocks?: (
     | { type: "sections"; sections: { title: string; body: string }[] }
     | { type: "media"; caption?: string; media: { title: string }[] }
