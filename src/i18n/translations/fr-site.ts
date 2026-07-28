@@ -13,6 +13,8 @@ export const frSite: SiteCopy = {
     home: "Accueil",
     main: "Navigation principale",
     mobile: "Navigation mobile",
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
   },
   footer: {
     copyright: "© 2026 Paul Houdebine.",

@@ -30,6 +30,8 @@ export type SiteCopy = {
     home: string;
     main: string;
     mobile: string;
+    openMenu: string;
+    closeMenu: string;
   };
   footer: {
     copyright: string;

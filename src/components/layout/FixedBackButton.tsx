@@ -23,6 +23,9 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
     >
       <Link
         href={href}
+        // Next repositionne en haut à chaque navigation : on le laisse à
+        // `useScrollMemory`, qui restaure la position précédente du damier.
+        scroll={false}
         aria-label={t.site.common.back}
         className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 backdrop-blur-md transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
       >
