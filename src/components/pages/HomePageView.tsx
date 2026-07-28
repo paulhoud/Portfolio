@@ -4,10 +4,15 @@ import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { profile } from "@/content/profile";
 import { getLocalizedProjects } from "@/i18n/catalog";
 import { useTranslation } from "@/i18n/context";
+import { useScrollMemory } from "@/lib/useScrollMemory";
 
 export function HomePageView() {
   const { locale } = useTranslation();
   const projects = getLocalizedProjects(locale);
+
+  // Revenir au damier depuis une fiche projet reprend le défilement là où il
+  // avait été laissé, plutôt que de tout remonter en haut.
+  useScrollMemory("/");
 
   return (
     <>
