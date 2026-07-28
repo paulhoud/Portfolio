@@ -99,13 +99,18 @@ export type ProjectCopy = {
    */
   story?: {
     lead: string;
-    chapters: {
-      period: string;
-      role: string;
-      title: string;
-      body: string;
-      shots: { caption: string }[];
-    }[];
+    trackLabels: { product: string; role: string };
+    /** Même ordre que le catalogue : chaque entrée traduit le temps fort correspondant. */
+    beats: (
+      | {
+          type: "stage";
+          period: string;
+          product: { title: string; body: string };
+          role: { title: string; body: string };
+          shots: { caption: string }[];
+        }
+      | { type: "pivot"; label: string; statement: string }
+    )[];
     closing: { title: string; body: string; link?: { label: string } };
   };
   blocks?: (

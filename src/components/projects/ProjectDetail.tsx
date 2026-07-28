@@ -339,22 +339,53 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
   return (
     <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
       <div className="mx-auto max-w-6xl">
-        <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-6 text-center md:pb-24 md:pt-12">
-          <ScrollRevealItem>
-            <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+        {/* En-tête commun aux pages projet : accroche puis logo flottant.
+            C'est le repère qui rattache visuellement cette page aux autres. */}
+        <ScrollReveal>
+          <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
+            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
               <span className="sr-only">{project.title} — </span>
               {project.eyebrow}
             </h1>
-          </ScrollRevealItem>
-          <ScrollRevealItem>
-            {/* Phrase d'ouverture : elle pose l'arc du récit à elle seule. */}
-            <p className="mt-8 text-balance text-xl font-medium leading-snug text-white md:mt-10 md:text-3xl">
-              {story.lead}
-            </p>
-          </ScrollRevealItem>
-        </ScrollRevealGroup>
+            <div
+              className="flex h-44 w-full items-center justify-center rounded-[2rem]"
+              style={{ color: project.foreground }}
+            >
+              <AnimatedLogo
+                animation={project.animation}
+                foreground={project.foreground}
+                logo={project.logo}
+                logoAlt={project.logoAlt}
+                logoKind={project.logoKind}
+                logoSize={project.logoSize}
+                logoScale={project.logoScale}
+                priority
+              />
+            </div>
+          </header>
+        </ScrollReveal>
 
-        <ProjectStorySection chapters={story.chapters} />
+        {/* Vue d'ensemble, enjeu, solution, résultat : même grille de lecture
+            que les autres études de cas. */}
+        {project.sections.length ? (
+          <ScrollRevealGroup className="mx-auto max-w-3xl space-y-6 pb-20 md:space-y-8 md:pb-28">
+            {project.sections.map((section) => (
+              <ScrollRevealItem key={section.title}>
+                <CaseStudySection section={section} inline={project.sectionStyle === "inline"} />
+              </ScrollRevealItem>
+            ))}
+          </ScrollRevealGroup>
+        ) : null}
+
+        {/* À partir d'ici, la page quitte le format d'étude de cas pour dérouler
+            l'histoire du produit et celle du rôle, en parallèle. */}
+        <ScrollReveal>
+          <p className="mx-auto max-w-3xl text-balance pb-16 text-center text-xl font-medium leading-snug text-white md:pb-24 md:text-3xl">
+            {story.lead}
+          </p>
+        </ScrollReveal>
+
+        <ProjectStorySection beats={story.beats} trackLabels={story.trackLabels} />
 
         <section className="mt-24 border-t border-white/10 pt-16 md:mt-32 md:pt-20">
           <ScrollReveal>

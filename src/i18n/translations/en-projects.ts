@@ -404,39 +404,100 @@ export const enProjectTranslations: ProjectTranslations = {
     title: "UpikaJob",
     eyebrow: "Career coaching & professional support platform",
     description: "My current role: product design for a career coaching platform.",
-    sections: [],
+    sections: [
+      {
+        title: "Overview",
+        body: "UpikaJob is an HR platform born out of supporting young talent. I have been its Product Designer, from the first redesigns through to the product as it stands today.",
+      },
+      {
+        title: "Challenge",
+        body: "Turning a tool built for training organisations into an HRIS able to serve HR teams and managers — without losing the expertise that made it strong in the first place.",
+      },
+      {
+        title: "Solution",
+        body: "Successive redesigns, a reworked visual identity, a shared design system, and features designed end to end alongside the engineering team.",
+      },
+      {
+        title: "Outcome",
+        body: "A complete HR platform — and a role that grew from designing interfaces to shaping the product, all the way to implementation.",
+      },
+    ],
     story: {
-      lead: "I joined to draw screens. I stayed to shape the product — and to ship part of it myself.",
-      chapters: [
+      lead: "A platform born to support young talent, now an HRIS. I grew alongside it.",
+      trackLabels: { product: "The product", role: "My role" },
+      beats: [
         {
+          type: "stage",
           period: "At first",
-          role: "UI/UX Designer",
-          title: "Screens, to begin with",
-          body: "I took over a platform that was already live. I made existing journeys more reliable, brought components into line, and laid the groundwork for a coherent visual system.",
+          product: {
+            title: "A tool for training organisations",
+            body: "UpikaJob supported young talent entering the workforce: tracking apprentices, interns and junior employees, with day-to-day guidance built in.",
+          },
+          role: {
+            title: "UI/UX Designer",
+            body: "I took over the existing journeys, made the screens more reliable and brought components into line.",
+          },
           shots: [
-            { caption: "The platform when I arrived" },
-            { caption: "Sign-up journey, first version" },
+            { caption: "The earliest interfaces" },
+            { caption: "Apprentice tracking, first version" },
           ],
         },
         {
+          type: "pivot",
+          label: "First turn",
+          statement:
+            "The expertise built around young talent turns out to matter far beyond training organisations.",
+        },
+        {
+          type: "stage",
           period: "Then",
-          role: "Designer embedded with the engineering team",
-          title: "Close to the code",
-          body: "Working with developers day in, day out, I began designing with an eye on what gets built behind the screen. Mockups turned into intentions we discussed together, rather than deliverables thrown over the wall.",
-          shots: [{ caption: "Design system and component states" }],
+          product: {
+            title: "The scope widens",
+            body: "HR teams and managers become users in their own right. The product moves beyond training and into talent management.",
+          },
+          role: {
+            title: "Designer of the redesigns",
+            body: "I carried the successive redesigns, evolved the visual identity, and helped create the design system.",
+          },
+          shots: [
+            { caption: "Logo evolution" },
+            { caption: "First brand guidelines" },
+            { caption: "Current brand guidelines" },
+          ],
         },
         {
+          type: "pivot",
+          label: "Change of course",
+          statement:
+            "UpikaJob becomes an HRIS — a complete HR platform, without giving up what it does best.",
+        },
+        {
+          type: "stage",
           period: "Next",
-          role: "Product Designer",
-          title: "From screen to feature",
-          body: "I took ownership of entire features: framing the need, making the trade-offs, designing, then following through to release. The scope widened from the visual to the product.",
-          shots: [{ caption: "A feature designed end to end" }],
+          product: {
+            title: "An HR platform",
+            body: "Talent management, team tracking, tools for managers: the product gains functional depth and a higher bar for quality.",
+          },
+          role: {
+            title: "Product Designer",
+            body: "I design increasingly complex features, from framing the need to release, working with developers every day.",
+          },
+          shots: [
+            { caption: "A complex feature, end to end" },
+            { caption: "The design system at scale" },
+          ],
         },
         {
+          type: "stage",
           period: "Today",
-          role: "Product Designer — design & implementation",
-          title: "Designing and shipping",
-          body: "Vibe Coding lets me build part of what I design myself. An idea now travels from intent to shipped interface without changing hands.",
+          product: {
+            title: "A complete HRIS",
+            body: "The platform now serves HR teams and managers, while keeping the young-talent support that made its reputation.",
+          },
+          role: {
+            title: "Product Designer — design & implementation",
+            body: "Vibe Coding lets me build part of what I design: an idea travels from intent to shipped interface without changing hands.",
+          },
           shots: [
             { caption: "The platform today" },
             { caption: "A feature I built myself" },

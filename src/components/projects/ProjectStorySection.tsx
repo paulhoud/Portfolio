@@ -1,209 +1,220 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
-import type { ProjectStoryChapter, ProjectStoryShot } from "@/content/projects";
+import type {
+  ProjectStoryBeat,
+  ProjectStoryPivot,
+  ProjectStoryShot,
+  ProjectStoryStage,
+} from "@/content/projects";
 import { cn } from "@/lib/utils";
 
 /**
- * Récit d'un projet raconté au fil du défilement.
+ * Récit d'un projet déroulé au fil du défilement.
  *
- * Mise en scène : sur grand écran, une colonne reste épinglée pendant que les
- * chapitres défilent à côté. Le produit y change d'état en même temps que
- * l'intitulé de poste — les deux évolutions se répondent à l'écran, sans qu'il
- * soit nécessaire de les commenter.
+ * Deux trajectoires avancent en parallèle : celle du produit et celle du rôle.
+ * Chaque étape les montre côte à côte, si bien que leur progression conjointe se
+ * lit d'elle-même. Entre deux étapes, une bascule stratégique occupe toute la
+ * largeur et sort de l'axe : la rupture de rythme signale un changement de cap
+ * plutôt qu'une étape de plus.
  *
- * Sur mobile, la colonne épinglée n'aurait pas de sens : chaque chapitre porte
- * alors ses propres captures, juste sous son texte.
+ * La liste des temps forts est ouverte : ajouter une étape ou une bascule
+ * revient à ajouter une entrée au catalogue, sans toucher à ce composant.
  */
-export function ProjectStorySection({ chapters }: { chapters: ProjectStoryChapter[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const chapterRefs = useRef<(HTMLLIElement | null)[]>([]);
-
-  // Le chapitre actif est celui dont le centre est le plus proche du milieu de
-  // l'écran. Ce critère de proximité ne laisse aucune zone morte — contrairement
-  // à un seuil de franchissement, il désigne toujours exactement un chapitre,
-  // y compris au chargement et après un redimensionnement.
-  useEffect(() => {
-    const update = () => {
-      // Les nœuds sont relus à chaque mesure plutôt que capturés une fois :
-      // une liste figée deviendrait obsolète au moindre remontage, et des
-      // éléments détachés mesurent zéro — l'index resterait bloqué au premier.
-      const nodes = chapterRefs.current.filter(Boolean) as HTMLLIElement[];
-      if (nodes.length === 0) return;
-
-      const viewportCenter = window.innerHeight / 2;
-      let closest = 0;
-      let smallestDistance = Number.POSITIVE_INFINITY;
-
-      nodes.forEach((node, index) => {
-        const rect = node.getBoundingClientRect();
-        const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
-        if (distance < smallestDistance) {
-          smallestDistance = distance;
-          closest = index;
-        }
-      });
-
-      // React ignore une mise à jour de valeur identique : inutile de comparer.
-      setActiveIndex(closest);
-    };
-
-    update();
-    // Les navigateurs limitent déjà l'événement `scroll` à une fois par frame,
-    // et quatre mesures par frame sont négligeables : pas d'étranglement requis.
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [chapters.length]);
-
-  const active = chapters[activeIndex] ?? chapters[0];
-
+export function ProjectStorySection({
+  beats,
+  trackLabels,
+}: {
+  beats: ProjectStoryBeat[];
+  trackLabels: { product: string; role: string };
+}) {
+  // Position de l'axe, partagée par le fil et les points. Tous deux sont centrés
+  // dessus par la même translation : l'alignement tient donc à toutes les
+  // largeurs d'écran, sans ajustement au cas par cas.
   return (
-    <section aria-label="Déroulé du projet" className="mt-4 md:mt-10">
-      {/* Pas d'`items-start` ici : la colonne de droite doit s'étirer sur toute
-          la hauteur des chapitres, faute de quoi l'élément épinglé n'aurait
-          aucune course pour coulisser. */}
-      <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:gap-16">
-        {/* Colonne des chapitres : c'est elle qui donne le rythme. */}
-        <ol className="relative">
-          <span
-            aria-hidden="true"
-            className="absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"
-          />
+    <section
+      aria-label="Déroulé du projet"
+      className="relative mt-4 [--axis:0.4rem] md:mt-10 md:[--axis:0.5rem]"
+    >
+      <span
+        aria-hidden="true"
+        className="absolute left-[var(--axis)] top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/12 to-transparent"
+      />
 
-          {chapters.map((chapter, index) => (
-            <li
-              key={chapter.title}
-              ref={(node) => {
-                chapterRefs.current[index] = node;
-              }}
-              // Chaque chapitre occupe une large part de l'écran : c'est ce qui
-              // donne au récit son rythme, et ce qui laisse à la colonne
-              // épinglée la course nécessaire pour accompagner la lecture.
-              className="relative flex flex-col justify-center pl-7 pb-20 last:pb-0 md:min-h-[76vh] md:pl-9 md:pb-0"
-            >
-              <ScrollReveal>
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute left-0 top-2.5 h-2 w-2 -translate-x-1/2 rounded-full transition-colors duration-500",
-                    index <= activeIndex ? "bg-white/70" : "bg-white/20",
-                  )}
-                />
-
-                <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/30">
-                  {String(index + 1).padStart(2, "0")} — {chapter.period}
-                </span>
-
-                {/* Le rôle apparaît ici sur mobile, où la colonne épinglée
-                    n'existe pas ; sur desktop il vit dans le cadre produit. */}
-                <span className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-white/70 md:hidden">
-                  {chapter.role}
-                </span>
-
-                <h2 className="mt-3 text-xl font-medium text-white md:text-2xl">{chapter.title}</h2>
-                <p className="copy mt-3 max-w-xl">{chapter.body}</p>
-
-                {/* Captures en ligne, mobile uniquement. */}
-                <div className="mt-6 space-y-4 md:hidden">
-                  {chapter.shots.map((shot) => (
-                    <StoryShotFrame key={shot.caption} shot={shot} />
-                  ))}
-                </div>
-              </ScrollReveal>
-            </li>
-          ))}
-        </ol>
-
-        {/* Colonne épinglée : l'état du produit et le rôle du moment. */}
-        <div className="hidden md:block">
-          <div className="sticky top-24">
-            <StoryStage chapter={active} index={activeIndex} total={chapters.length} />
-          </div>
-        </div>
-      </div>
+      <ol>
+        {beats.map((beat, index) =>
+          beat.type === "pivot" ? (
+            <PivotBeat key={`pivot-${index}`} beat={beat} />
+          ) : (
+            <StageBeat key={beat.period} beat={beat} trackLabels={trackLabels} />
+          ),
+        )}
+      </ol>
     </section>
   );
 }
 
-function StoryStage({
-  chapter,
-  index,
-  total,
+function StageBeat({
+  beat,
+  trackLabels,
 }: {
-  chapter: ProjectStoryChapter;
-  index: number;
-  total: number;
+  beat: { type: "stage" } & ProjectStoryStage;
+  trackLabels: { product: string; role: string };
 }) {
-  const reduceMotion = useReducedMotion();
-  const transition = { duration: reduceMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] as const };
-
   return (
-    <div>
-      {/* Intitulé de poste : il se substitue au précédent à chaque chapitre.
-          C'est le marqueur visible de la progression du rôle.
-          Le changement de `key` remonte le bloc, qui rejoue son animation
-          d'entrée. Pas d'animation de sortie ici : en défilement rapide, elle
-          retarderait l'affichage du chapitre suivant. */}
-      <div className="mb-5 min-h-[3.25rem]">
-        <motion.div
-          key={chapter.role}
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={transition}
-        >
-          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/30">
-            {chapter.period}
-          </span>
-          <span className="mt-2 block text-balance text-sm font-bold uppercase tracking-[0.1em] text-white">
-            {chapter.role}
-          </span>
-        </motion.div>
-      </div>
-
-      {/* Jauge de progression du récit. */}
-      <div aria-hidden="true" className="mb-7 h-px w-full bg-white/10">
-        <motion.div
-          className="h-px bg-white/45"
-          initial={false}
-          animate={{ width: `${((index + 1) / total) * 100}%` }}
-          transition={transition}
+    <li className="relative pb-16 pl-8 last:pb-0 md:pb-24 md:pl-14">
+      <ScrollReveal>
+        <span
+          aria-hidden="true"
+          className="absolute left-[var(--axis)] top-2 h-2 w-2 -translate-x-1/2 rounded-full bg-white/70 ring-4 ring-[#121212]"
         />
-      </div>
 
-      <motion.div
-        key={chapter.title}
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={transition}
-        className={cn("relative", chapter.shots.length > 1 && "pb-10 pr-8")}
-      >
-        <StoryShotFrame shot={chapter.shots[0]} />
+        <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/30">
+          {beat.period}
+        </span>
 
-        {/* Seconde capture en incrustation : donne de la profondeur sans
-            transformer la colonne en galerie. */}
-        {chapter.shots[1] ? (
-          <div className="absolute -bottom-2 -right-2 w-[46%]">
-            <StoryShotFrame shot={chapter.shots[1]} compact />
+        {/* Les deux trajectoires, côte à côte : c'est leur mise en regard qui
+            raconte que produit et rôle ont avancé ensemble. */}
+        <div className="mt-5 grid gap-7 md:grid-cols-2 md:gap-10">
+          <Track label={trackLabels.product} title={beat.product.title} body={beat.product.body} />
+          <Track label={trackLabels.role} title={beat.role.title} body={beat.role.body} accent />
+        </div>
+
+        {beat.shots.length > 0 ? (
+          <div className="mt-9">
+            <StoryShots shots={beat.shots} layout={beat.shotLayout ?? "stage"} />
           </div>
         ) : null}
-      </motion.div>
+      </ScrollReveal>
+    </li>
+  );
+}
+
+function Track({
+  label,
+  title,
+  body,
+  accent = false,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className={cn("border-t pt-4", accent ? "border-white/25" : "border-white/10")}>
+      <span
+        className={cn(
+          "block text-[0.55rem] font-semibold uppercase tracking-[0.24em]",
+          accent ? "text-white/55" : "text-white/30",
+        )}
+      >
+        {label}
+      </span>
+      <h3 className="mt-2 text-base font-bold text-white md:text-lg">{title}</h3>
+      <p className="copy mt-2">{body}</p>
+    </div>
+  );
+}
+
+/** Bascule stratégique : pleine largeur, hors de l'axe, pour rompre le rythme. */
+function PivotBeat({ beat }: { beat: { type: "pivot" } & ProjectStoryPivot }) {
+  return (
+    <li className="relative pb-16 md:pb-24">
+      <ScrollReveal>
+        <div className="relative overflow-hidden rounded-[0.75rem] border border-white/10 bg-white/[0.03] px-6 py-10 text-center md:px-12 md:py-14">
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+          />
+          <span className="block text-[0.55rem] font-semibold uppercase tracking-[0.28em] text-white/40">
+            {beat.label}
+          </span>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-lg font-medium leading-snug text-white md:text-2xl">
+            {beat.statement}
+          </p>
+        </div>
+      </ScrollReveal>
+    </li>
+  );
+}
+
+/**
+ * Présentation des captures. Le mode varie d'une étape à l'autre pour éviter
+ * qu'une longue suite d'étapes ne devienne monotone.
+ */
+function StoryShots({
+  shots,
+  layout,
+}: {
+  shots: ProjectStoryShot[];
+  layout: NonNullable<ProjectStoryStage["shotLayout"]>;
+}) {
+  if (layout === "identity") {
+    return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5">
+        {shots.map((shot) => (
+          <StoryShotFrame key={shot.caption} shot={shot} ratio="square" />
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === "row") {
+    return (
+      <div className="grid gap-5 md:grid-cols-2">
+        {shots.map((shot) => (
+          <StoryShotFrame key={shot.caption} shot={shot} />
+        ))}
+      </div>
+    );
+  }
+
+  // « stage » : une capture dominante, la seconde en incrustation.
+  return (
+    <div className={cn("relative", shots.length > 1 && "pb-10 pr-6 md:pb-12 md:pr-10")}>
+      <StoryShotFrame shot={shots[0]} />
+      {shots[1] ? (
+        <div className="absolute -bottom-1 -right-1 w-[42%] md:w-[38%]">
+          <StoryShotFrame shot={shots[1]} compact />
+        </div>
+      ) : null}
+      {shots.slice(2).length > 0 ? (
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          {shots.slice(2).map((shot) => (
+            <StoryShotFrame key={shot.caption} shot={shot} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 /**
  * Cadre d'une capture. Tant que l'image n'est pas fournie, un emplacement
- * réservé est rendu : la mise en page est déjà définitive, il ne manque que le
- * visuel.
+ * réservé tient sa place : la mise en page est déjà définitive.
  */
-function StoryShotFrame({ shot, compact = false }: { shot: ProjectStoryShot; compact?: boolean }) {
+function StoryShotFrame({
+  shot,
+  compact = false,
+  ratio = "wide",
+}: {
+  shot: ProjectStoryShot;
+  compact?: boolean;
+  ratio?: "wide" | "square";
+}) {
+  const caption = (
+    <figcaption
+      className={cn(
+        "mt-3 text-center uppercase tracking-[0.18em] text-white/35",
+        compact ? "text-[0.55rem]" : "text-[0.62rem]",
+      )}
+    >
+      {shot.caption}
+    </figcaption>
+  );
+
   if (shot.image) {
     return (
       <figure>
@@ -211,18 +222,11 @@ function StoryShotFrame({ shot, compact = false }: { shot: ProjectStoryShot; com
           <Image
             src={shot.image}
             alt={shot.caption}
-            sizes="(max-width: 768px) 92vw, 620px"
+            sizes="(max-width: 768px) 92vw, 720px"
             className="h-auto w-full"
           />
         </div>
-        <figcaption
-          className={cn(
-            "mt-3 text-center uppercase tracking-[0.18em] text-white/35",
-            compact ? "text-[0.55rem]" : "text-[0.62rem]",
-          )}
-        >
-          {shot.caption}
-        </figcaption>
+        {caption}
       </figure>
     );
   }
@@ -232,34 +236,25 @@ function StoryShotFrame({ shot, compact = false }: { shot: ProjectStoryShot; com
       <div
         className={cn(
           "flex items-center justify-center rounded-[0.6rem] border border-dashed border-white/15 bg-white/[0.02]",
-          compact ? "aspect-[4/3] p-4" : "aspect-[16/10] p-6",
+          ratio === "square" ? "aspect-square p-4" : compact ? "aspect-[4/3] p-4" : "aspect-[16/10] p-6",
         )}
       >
-        <div className="flex flex-col items-center gap-3 text-center">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className={cn("text-white/20", compact ? "h-5 w-5" : "h-7 w-7")}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
-            <circle cx="8.5" cy="10" r="1.6" />
-            <path d="M3.5 17l4.8-4.4a2 2 0 0 1 2.7 0l6.4 5.9M14 13.2l1.6-1.5a2 2 0 0 1 2.7 0l2.2 2" />
-          </svg>
-          <span
-            className={cn(
-              "uppercase tracking-[0.18em] text-white/35",
-              compact ? "text-[0.55rem]" : "text-[0.62rem]",
-            )}
-          >
-            {shot.caption}
-          </span>
-        </div>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className={cn("text-white/20", compact ? "h-5 w-5" : "h-7 w-7")}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
+          <circle cx="8.5" cy="10" r="1.6" />
+          <path d="M3.5 17l4.8-4.4a2 2 0 0 1 2.7 0l6.4 5.9M14 13.2l1.6-1.5a2 2 0 0 1 2.7 0l2.2 2" />
+        </svg>
       </div>
+      {caption}
     </figure>
   );
 }
