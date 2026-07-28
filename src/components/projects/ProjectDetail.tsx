@@ -296,6 +296,17 @@ function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) 
   );
 }
 
+/**
+ * Attributs d'ouverture d'un lien de projet. Les liens sortants (vidéos
+ * YouTube, sites clients) s'ouvrent dans un nouvel onglet pour ne pas faire
+ * quitter le portfolio ; les ancres internes gardent le comportement par défaut.
+ */
+function externalLinkProps(href: string) {
+  return href.startsWith("http")
+    ? { target: "_blank" as const, rel: "noopener noreferrer" }
+    : {};
+}
+
 function ProjectLinks({ links }: { links: ProjectLink[] }) {
   return (
     <div className="flex flex-col items-center gap-3">
@@ -303,6 +314,7 @@ function ProjectLinks({ links }: { links: ProjectLink[] }) {
         <a
           key={link.label}
           href={link.href}
+          {...externalLinkProps(link.href)}
           className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
         >
           {link.label}
@@ -438,6 +450,7 @@ function ProjectMediaBlock({
         <p className="mt-3 text-center">
           <a
             href={media.link.href}
+            {...externalLinkProps(media.link.href)}
             className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
           >
             {media.link.label}
