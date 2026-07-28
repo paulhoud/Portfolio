@@ -86,21 +86,22 @@ export const enSite: SiteCopy = {
         body: "Figma, Adobe Creative Suite, Miro, Notion, Framer, HTML/CSS, and enough curiosity to understand business challenges before drawing the solution.",
       },
     ],
+    photoAlt: "Portrait of Paul Houdebine, Product Designer",
+    stack: {
+      heading: "Tools & technologies",
+      design: "Design tools",
+      dev: "Development",
+      ai: "AI models",
+      os: "Operating systems",
+      browsers: "Web browsers",
+    },
   },
   contact: {
     title: "Contact",
     intro:
       "Have a project, mission, or collaboration in mind? Let's talk about your needs, timeline, and the best way to work together.",
-    channels: [
-      {
-        label: "Email",
-        href: "mailto:contact@paulhoudebine.com",
-      },
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/in/paul-houdebine",
-        external: true,
-      },
-    ],
+    emailLabel: "Send an email",
+    socialLabel: "Find me elsewhere",
+    locationLabel: "Based between",
   },
 };

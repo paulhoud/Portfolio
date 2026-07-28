@@ -20,12 +20,21 @@ import { brandIconPaths, type BrandIconId } from "./icons/brandIconPaths";
  *
  * Si aucun profil n'est renseigné dans `profile.ts`, le composant ne rend rien.
  */
-export function SocialLinks({ className }: { className?: string }) {
+export function SocialLinks({
+  className,
+  variant = "compact",
+}: {
+  className?: string;
+  /** `compact` : icônes seules (barre latérale). `labelled` : icône + libellé visible. */
+  variant?: "compact" | "labelled";
+}) {
   if (activeSocialLinks.length === 0) return null;
+
+  const labelled = variant === "labelled";
 
   return (
     <nav aria-label={`Profils professionnels de ${profile.name}`} className={className}>
-      <ul className="flex flex-wrap items-center gap-4">
+      <ul className={cn("flex flex-wrap", labelled ? "gap-2.5" : "items-center gap-4")}>
         {activeSocialLinks.map((link) => {
           const path = brandIconPaths[link.id as BrandIconId];
 
@@ -37,23 +46,29 @@ export function SocialLinks({ className }: { className?: string }) {
                 rel="me noopener noreferrer"
                 title={`${profile.name} sur ${link.label}`}
                 className={cn(
-                  "flex text-white/40 transition-colors duration-200",
-                  "hover:text-white focus-visible:text-white",
+                  "flex items-center transition duration-200",
                   "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+                  labelled
+                    ? "gap-2.5 rounded-full border border-white/12 px-4 py-2.5 text-white/70 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/5 hover:text-white"
+                    : "text-white/40 hover:text-white focus-visible:text-white",
                 )}
               >
                 {path ? (
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 24 24"
-                    className="h-[1.05rem] w-[1.05rem]"
+                    className={labelled ? "h-4 w-4 shrink-0" : "h-[1.05rem] w-[1.05rem]"}
                     fill="currentColor"
                   >
                     <path d={path} />
                   </svg>
                 ) : null}
-                {/* Ancre textuelle conservée pour le SEO et l'accessibilité. */}
-                <span className="sr-only">{link.label}</span>
+                {labelled ? (
+                  <span className="text-xs uppercase tracking-[0.12em]">{link.label}</span>
+                ) : (
+                  // Ancre textuelle conservée pour le SEO et l'accessibilité.
+                  <span className="sr-only">{link.label}</span>
+                )}
               </a>
             </li>
           );
