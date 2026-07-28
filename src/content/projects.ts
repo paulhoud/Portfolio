@@ -67,6 +67,12 @@ export type ProjectMedia = {
   image: StaticImageData;
   /** Source vidéo optionnelle : si présente, le média s'ouvre en vidéo dans la visionneuse (l'image sert de poster). */
   video?: string;
+  /**
+   * Identifiant d'une vidéo YouTube. Le média s'ouvre alors dans la visionneuse
+   * sous forme de lecteur intégré, sans quitter le portfolio (l'image sert de
+   * vignette).
+   */
+  youtubeId?: string;
   size?: "narrow" | "regular" | "wide";
   variant?: "default" | "light";
   layout?: "single" | "row";
@@ -592,19 +598,19 @@ export const projects: Project[] = [
         title: "Cas d'usage 1 : comment travailler en collaboration avec Teams et SharePoint ?",
         image: capgeminiOutlook,
         size: "wide",
-        link: { label: "Lien vers la vidéo", href: "https://www.youtube.com/watch?v=r91TdLUeQPE" },
+        youtubeId: "r91TdLUeQPE",
       },
       {
         title: "Cas d'usage 2 : comment améliorer sa productivité avec OneDrive ?",
         image: capgeminiOnedrive,
         size: "wide",
-        link: { label: "Lien vers la vidéo", href: "https://www.youtube.com/watch?v=G7whaTB6e_0" },
+        youtubeId: "G7whaTB6e_0",
       },
       {
         title: "Cas d'usage 3 : comment travailler de n'importe où en utilisant Office Online ?",
         image: capgeminiOfficeOnline,
         size: "wide",
-        link: { label: "Lien vers la vidéo", href: "https://www.youtube.com/watch?v=iqyDW3P5uK4" },
+        youtubeId: "iqyDW3P5uK4",
       },
     ],
   },
@@ -830,16 +836,13 @@ export const projects: Project[] = [
             title: "Affiche du court métrage",
             image: grandMenagePoster,
             size: "wide",
+            youtubeId: "CDM8p7Ixegg",
           },
         ],
       },
       {
         type: "links",
         links: [
-          {
-            label: "Regarder le court métrage",
-            href: "https://www.youtube.com/watch?v=CDM8p7Ixegg",
-          },
           { label: "Les voix les traits", href: "#" },
           { label: "Le dossier de production", href: "#" },
         ],
@@ -928,7 +931,7 @@ export const projects: Project[] = [
         title: "Réalisation et montage d'une vidéo de skate",
         image: archiveSkate,
         size: "wide",
-        link: { label: "Voir la vidéo", href: "https://www.youtube.com/watch?v=jqaKMLXqmb4" },
+        youtubeId: "jqaKMLXqmb4",
       },
     ],
   },

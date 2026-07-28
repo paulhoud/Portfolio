@@ -33,7 +33,11 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   const en = locale === "en";
 
   const current = media[index];
-  const isVideo = Boolean(current.video);
+  const isFileVideo = Boolean(current.video);
+  const isEmbeddedVideo = Boolean(current.youtubeId);
+  // Fichier vidéo ou lecteur embarqué : dans les deux cas, ni zoom ni
+  // déplacement — les commandes du lecteur doivent rester accessibles.
+  const isVideo = isFileVideo || isEmbeddedVideo;
   const count = media.length;
 
   const stageRef = useRef<HTMLDivElement>(null);
@@ -247,7 +251,28 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
         ref={stageRef}
         className="absolute inset-0 flex touch-none items-center justify-center overflow-hidden px-4 py-16 md:px-24"
       >
-        {isVideo ? (
+        {isEmbeddedVideo ? (
+          // Lecteur YouTube intégré : la vidéo se regarde sans quitter le site.
+          // Le domaine « nocookie » évite tout dépôt de traceur tant que la
+          // lecture n'a pas démarré.
+          //
+          // La largeur est bornée à la fois par le viewport et par la hauteur
+          // disponible (78vh × 16/9), afin que le cadre 16:9 tienne toujours à
+          // l'écran sans déborder sous la légende.
+          <div
+            onClick={handleMediaClick}
+            className="aspect-video w-[min(92vw,138vh)] overflow-hidden rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
+          >
+            <iframe
+              key={current.youtubeId}
+              src={`https://www.youtube-nocookie.com/embed/${current.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+              title={current.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
+          </div>
+        ) : isFileVideo ? (
           <video
             key={current.video}
             src={current.video}
