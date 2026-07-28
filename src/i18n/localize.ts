@@ -113,21 +113,31 @@ function mergeStory(
           }
         : undefined,
     },
-    chapters: base.chapters.map((chapter, index) => {
-      const copy = translated.chapters?.[index];
-      if (!copy) return chapter;
+    trackLabels: translated.trackLabels ?? base.trackLabels,
+    beats: base.beats.map((beat, index) => {
+      const copy = translated.beats?.[index];
+      // Un temps fort dont la traduction est absente — ou d'un autre type —
+      // garde sa version d'origine plutôt que de produire un contenu incohérent.
+      if (!copy || copy.type !== beat.type) return beat;
 
-      return {
-        ...chapter,
-        period: copy.period ?? chapter.period,
-        role: copy.role ?? chapter.role,
-        title: copy.title ?? chapter.title,
-        body: copy.body ?? chapter.body,
-        shots: chapter.shots.map((shot, shotIndex) => ({
-          ...shot,
-          caption: copy.shots?.[shotIndex]?.caption ?? shot.caption,
-        })),
-      };
+      if (beat.type === "pivot" && copy.type === "pivot") {
+        return { ...beat, label: copy.label ?? beat.label, statement: copy.statement ?? beat.statement };
+      }
+
+      if (beat.type === "stage" && copy.type === "stage") {
+        return {
+          ...beat,
+          period: copy.period ?? beat.period,
+          product: { ...beat.product, ...copy.product },
+          role: { ...beat.role, ...copy.role },
+          shots: beat.shots.map((shot, shotIndex) => ({
+            ...shot,
+            caption: copy.shots?.[shotIndex]?.caption ?? shot.caption,
+          })),
+        };
+      }
+
+      return beat;
     }),
   };
 }

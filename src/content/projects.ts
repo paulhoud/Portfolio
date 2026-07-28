@@ -114,24 +114,51 @@ export type ProjectStoryShot = {
   image?: StaticImageData;
 };
 
-/** Un chapitre du récit : une période, un rôle, et l'état du produit associé. */
-export type ProjectStoryChapter = {
+/**
+ * Une étape du récit : ce que devient le produit et ce que devient le rôle, au
+ * même moment. Les deux sont montrés côte à côte, si bien que leur progression
+ * conjointe se lit sans avoir à être commentée.
+ */
+export type ProjectStoryStage = {
   /** Repère temporel court (« Au départ », « Aujourd'hui »…). */
   period: string;
-  /** Intitulé du poste à ce moment : c'est lui qui matérialise la progression. */
-  role: string;
-  title: string;
-  body: string;
+  product: { title: string; body: string };
+  role: { title: string; body: string };
   shots: ProjectStoryShot[];
+  /**
+   * Présentation des captures. Faire varier ce mode d'une étape à l'autre évite
+   * qu'une longue suite d'étapes ne devienne monotone.
+   * - `stage` : une capture dominante, la seconde en incrustation ;
+   * - `row` : captures de même poids, côte à côte ;
+   * - `identity` : bandeau de petites vignettes (logos, chartes successives).
+   */
+  shotLayout?: "stage" | "row" | "identity";
 };
 
 /**
- * Récit d'un projet raconté au fil du défilement : le produit évolue dans la
- * colonne épinglée pendant que les chapitres déroulent l'évolution du rôle.
+ * Une bascule stratégique. Rendue pleine largeur, hors de l'axe du récit, elle
+ * interrompt volontairement le rythme : c'est ce qui distingue un changement de
+ * cap d'une simple étape de plus.
+ */
+export type ProjectStoryPivot = {
+  label: string;
+  statement: string;
+};
+
+/** Temps fort du récit : une étape, ou une bascule entre deux étapes. */
+export type ProjectStoryBeat =
+  | ({ type: "stage" } & ProjectStoryStage)
+  | ({ type: "pivot" } & ProjectStoryPivot);
+
+/**
+ * Récit d'un projet déroulé au fil du défilement. La liste des temps forts est
+ * ouverte : ajouter une étape ou une bascule revient à ajouter une entrée.
  */
 export type ProjectStory = {
   lead: string;
-  chapters: ProjectStoryChapter[];
+  /** Intitulés des deux trajectoires suivies en parallèle. */
+  trackLabels: { product: string; role: string };
+  beats: ProjectStoryBeat[];
   closing: { title: string; body: string; link?: ProjectLink };
 };
 
@@ -202,41 +229,89 @@ export const projects: Project[] = [
     animation: "float",
     detailVariant: "story",
     story: {
-      lead: "Arrivé pour dessiner des écrans, resté pour concevoir le produit — et en livrer une partie.",
-      chapters: [
+      lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH. J'ai grandi avec elle.",
+      trackLabels: { product: "Le produit", role: "Mon rôle" },
+      beats: [
         {
+          type: "stage",
           period: "Au départ",
-          role: "UI/UX Designer",
-          title: "Les écrans, d'abord",
-          body: "Je prends en main une plateforme déjà lancée. Je fiabilise les parcours existants, j'harmonise les composants et je pose les bases d'un système visuel cohérent.",
+          product: {
+            title: "Un outil pour les organismes de formation",
+            body: "UpikaJob accompagne l'insertion professionnelle des jeunes talents : suivi des alternants, des stagiaires et des jeunes collaborateurs, dans une logique d'assistance au quotidien.",
+          },
+          role: {
+            title: "UI/UX Designer",
+            body: "Je reprends les parcours existants, je fiabilise les écrans et j'harmonise les composants.",
+          },
           shots: [
-            { caption: "La plateforme à mon arrivée" },
-            { caption: "Parcours d'inscription, première version" },
+            { caption: "Les premières interfaces" },
+            { caption: "Suivi d'un alternant, première version" },
           ],
+          shotLayout: "stage",
         },
         {
+          type: "pivot",
+          label: "Premier virage",
+          statement:
+            "L'expertise acquise auprès des jeunes talents intéresse bien au-delà des organismes de formation.",
+        },
+        {
+          type: "stage",
           period: "Puis",
-          role: "Designer intégré à l'équipe technique",
-          title: "Au contact du code",
-          body: "À force de travailler au quotidien avec les développeurs, je conçois en tenant compte de ce qui se construit derrière l'écran. Les maquettes deviennent des intentions discutées, plus des livrables passés par-dessus le mur.",
-          shots: [{ caption: "Design system et états de composants" }],
+          product: {
+            title: "Le périmètre s'élargit",
+            body: "Équipes RH et managers deviennent des utilisateurs à part entière. Le produit sort du cadre de la formation pour entrer dans la gestion des talents.",
+          },
+          role: {
+            title: "Designer des refontes",
+            body: "J'accompagne les refontes successives, je fais évoluer l'identité graphique et je participe à la création du design system.",
+          },
+          shots: [
+            { caption: "Évolutions du logo" },
+            { caption: "Première charte graphique" },
+            { caption: "Charte actuelle" },
+          ],
+          shotLayout: "identity",
         },
         {
+          type: "pivot",
+          label: "Changement de cap",
+          statement:
+            "UpikaJob devient un SIRH — une plateforme RH complète, sans renoncer à ce qu'elle sait faire de mieux.",
+        },
+        {
+          type: "stage",
           period: "Ensuite",
-          role: "Product Designer",
-          title: "De l'écran à la fonctionnalité",
-          body: "Je prends la responsabilité de fonctionnalités entières : cadrage du besoin, arbitrages, conception, puis suivi jusqu'à la mise en production. Le périmètre s'élargit du visuel au produit.",
-          shots: [{ caption: "Une fonctionnalité conçue de bout en bout" }],
+          product: {
+            title: "Une plateforme RH",
+            body: "Gestion des talents, suivi des équipes, outils pour les managers : le produit gagne en profondeur fonctionnelle et en exigence.",
+          },
+          role: {
+            title: "Product Designer",
+            body: "Je conçois des fonctionnalités de plus en plus complexes, du cadrage à la mise en production, en travaillant chaque jour avec les développeurs.",
+          },
+          shots: [
+            { caption: "Une fonctionnalité complexe, de bout en bout" },
+            { caption: "Le design system à l'échelle" },
+          ],
+          shotLayout: "row",
         },
         {
+          type: "stage",
           period: "Aujourd'hui",
-          role: "Product Designer — conception & implémentation",
-          title: "Concevoir et livrer",
-          body: "Le Vibe Coding me permet de développer moi-même une partie de ce que je dessine. Une idée passe désormais de l'intention à l'interface en production sans changer de main.",
+          product: {
+            title: "Un SIRH complet",
+            body: "La plateforme sert désormais les équipes RH et les managers, tout en conservant l'accompagnement des jeunes talents qui a fait sa force.",
+          },
+          role: {
+            title: "Product Designer — conception & implémentation",
+            body: "Le Vibe Coding me permet de développer moi-même une partie de ce que je dessine : une idée passe de l'intention à l'interface en production sans changer de main.",
+          },
           shots: [
             { caption: "La plateforme aujourd'hui" },
             { caption: "Une fonctionnalité développée par mes soins" },
           ],
+          shotLayout: "stage",
         },
       ],
       closing: {
@@ -245,7 +320,25 @@ export const projects: Project[] = [
         link: { label: "Voir le site", href: "https://www.upikajob.com/" },
       },
     },
-    sections: [],
+    sectionStyle: "inline",
+    sections: [
+      {
+        title: "Vue d'ensemble",
+        body: "UpikaJob est une plateforme RH née de l'accompagnement des jeunes talents. J'y suis Product Designer, depuis les premières refontes jusqu'au produit actuel.",
+      },
+      {
+        title: "Enjeu",
+        body: "Faire évoluer un outil pensé pour les organismes de formation vers un SIRH capable de servir les équipes RH et les managers, sans perdre l'expertise qui faisait sa force.",
+      },
+      {
+        title: "Solution",
+        body: "Des refontes successives, une identité graphique retravaillée, un design system partagé, et des fonctionnalités conçues de bout en bout avec les équipes techniques.",
+      },
+      {
+        title: "Résultat",
+        body: "Une plateforme RH complète — et un rôle passé de la conception d'interfaces à la conception produit, jusqu'à l'implémentation.",
+      },
+    ],
     gallery: [],
     media: [
       {
