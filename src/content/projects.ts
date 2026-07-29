@@ -4,6 +4,26 @@ import type { MediaKey } from "./generated/media-manifest";
 // serveurs de YouTube : rien n'est chargé tant que la lecture n'a pas démarré.
 import videoUpikajob from "../../assets/video-upikajob.jpg";
 import videoUpikajobPitch from "../../assets/video-upikajob-pitch.jpg";
+// Récit UpikaJob : l'ancienne application, l'identité et le système, la
+// plateforme actuelle, puis le site vitrine.
+import upikaOldDashboard from "../../assets/upika-old-dashboard.jpg";
+import upikaOldTalents from "../../assets/upika-old-talents.jpg";
+import upikaOldSuivi from "../../assets/upika-old-suivi.jpg";
+import upikaOldCompetences from "../../assets/upika-old-competences.jpg";
+import upikaLogotype from "../../assets/upika-logotype.jpg";
+import upikaTypescale from "../../assets/upika-typescale.jpg";
+import upikaFigmaComponents from "../../assets/upika-figma-components.jpg";
+import upikaFigmaTokens from "../../assets/upika-figma-tokens.jpg";
+import upikaNewDashboard from "../../assets/upika-new-dashboard.jpg";
+import upikaNewLogin from "../../assets/upika-new-login.jpg";
+import upikaNewPilotage from "../../assets/upika-new-pilotage.jpg";
+import upikaNewEntretiens from "../../assets/upika-new-entretiens.jpg";
+import upikaNewCompetences from "../../assets/upika-new-competences.jpg";
+import upikaNewIndicateurs from "../../assets/upika-new-indicateurs.jpg";
+import upikaNewProfil from "../../assets/upika-new-profil.jpg";
+import upikaSiteHome from "../../assets/upika-site-home.jpg";
+import upikaSiteSolution from "../../assets/upika-site-solution.jpg";
+import upikaSiteTarifs from "../../assets/upika-site-tarifs.jpg";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -129,10 +149,11 @@ export type ProjectStoryStage = {
    * Présentation des captures. Faire varier ce mode d'une étape à l'autre évite
    * qu'une longue suite d'étapes ne devienne monotone.
    * - `stage` : une capture dominante, la seconde en incrustation ;
-   * - `row` : captures de même poids, côte à côte ;
-   * - `identity` : bandeau de petites vignettes (logos, chartes successives).
+   * - `row` : deux captures de même poids, côte à côte ;
+   * - `grid` : mosaïque régulière, pour une série homogène (planches d'identité,
+   *   suite de fonctionnalités).
    */
-  shotLayout?: "stage" | "row" | "identity";
+  shotLayout?: "stage" | "row" | "grid";
 };
 
 /**
@@ -244,8 +265,10 @@ export const projects: Project[] = [
             body: "Je reprends les parcours existants, je fiabilise les écrans et j'harmonise les composants.",
           },
           shots: [
-            { caption: "Les premières interfaces" },
-            { caption: "Suivi d'un alternant, première version" },
+            { caption: "Le tableau de bord à mon arrivée", image: upikaOldDashboard },
+            { caption: "Les jeunes talents en chiffres", image: upikaOldTalents },
+            { caption: "Fiche de suivi d'un alternant", image: upikaOldSuivi },
+            { caption: "Validation des compétences", image: upikaOldCompetences },
           ],
           shotLayout: "stage",
         },
@@ -264,14 +287,15 @@ export const projects: Project[] = [
           },
           role: {
             title: "Designer des refontes",
-            body: "J'accompagne les refontes successives, je fais évoluer l'identité graphique et je participe à la création du design system.",
+            body: "J'accompagne les refontes successives, je fais évoluer l'identité graphique et je pose avec l'équipe les fondations du design system.",
           },
           shots: [
-            { caption: "Évolutions du logo" },
-            { caption: "Première charte graphique" },
-            { caption: "Charte actuelle" },
+            { caption: "Déclinaisons du logotype", image: upikaLogotype },
+            { caption: "Échelle typographique et tokens", image: upikaTypescale },
+            { caption: "Bibliothèque de composants", image: upikaFigmaComponents },
+            { caption: "Organisation du fichier et styles partagés", image: upikaFigmaTokens },
           ],
-          shotLayout: "identity",
+          shotLayout: "grid",
         },
         {
           type: "pivot",
@@ -288,28 +312,49 @@ export const projects: Project[] = [
           },
           role: {
             title: "Product Designer",
-            body: "Je conçois des fonctionnalités de plus en plus complexes, du cadrage à la mise en production, en travaillant chaque jour avec les développeurs.",
+            body: "Je conçois l'interface du nouveau produit et j'installe, écran après écran, les repères d'une plateforme destinée à des professionnels des RH.",
           },
           shots: [
-            { caption: "Une fonctionnalité complexe, de bout en bout" },
-            { caption: "Le design system à l'échelle" },
+            { caption: "Le tableau de bord de la nouvelle plateforme", image: upikaNewDashboard },
+            { caption: "Nouvelle identité, nouvelle interface", image: upikaNewLogin },
+            { caption: "Pilotage RH et managérial", image: upikaNewPilotage },
           ],
-          shotLayout: "row",
+          shotLayout: "stage",
+        },
+        {
+          type: "stage",
+          period: "En profondeur",
+          product: {
+            title: "Des fonctionnalités à part entière",
+            body: "Entretiens annuels, cartographie des compétences, indicateurs de pilotage, profils collaborateurs : chaque brique demande son propre cadrage.",
+          },
+          role: {
+            title: "Conception de bout en bout",
+            body: "Du cadrage du besoin jusqu'à la mise en production, en travaillant chaque jour avec les développeurs.",
+          },
+          shots: [
+            { caption: "Campagnes d'entretiens annuels", image: upikaNewEntretiens },
+            { caption: "Cartographie des compétences", image: upikaNewCompetences },
+            { caption: "Indicateurs et filtres globaux", image: upikaNewIndicateurs },
+            { caption: "Profil collaborateur", image: upikaNewProfil },
+          ],
+          shotLayout: "grid",
         },
         {
           type: "stage",
           period: "Aujourd'hui",
           product: {
-            title: "Un SIRH complet",
-            body: "La plateforme sert désormais les équipes RH et les managers, tout en conservant l'accompagnement des jeunes talents qui a fait sa force.",
+            title: "Un SIRH assumé",
+            body: "La plateforme sert les équipes RH et les managers — et s'adresse à elles jusque dans sa vitrine : offre, tarifs, documentation.",
           },
           role: {
             title: "Product Designer — conception & implémentation",
-            body: "Le Vibe Coding me permet de développer moi-même une partie de ce que je dessine : une idée passe de l'intention à l'interface en production sans changer de main.",
+            body: "Le site vitrine, je l'ai conçu puis développé seul. Le Vibe Coding me permet désormais de livrer moi-même une partie de ce que je dessine.",
           },
           shots: [
-            { caption: "La plateforme aujourd'hui" },
-            { caption: "Une fonctionnalité développée par mes soins" },
+            { caption: "Page d'accueil du site", image: upikaSiteHome },
+            { caption: "Présentation de la solution", image: upikaSiteSolution },
+            { caption: "Grille tarifaire", image: upikaSiteTarifs },
           ],
           shotLayout: "stage",
         },

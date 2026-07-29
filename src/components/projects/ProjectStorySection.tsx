@@ -151,9 +151,9 @@ function StoryShots({
   shots: ProjectStoryShot[];
   layout: NonNullable<ProjectStoryStage["shotLayout"]>;
 }) {
-  if (layout === "identity") {
+  if (layout === "grid") {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5">
+      <div className="grid gap-4 sm:grid-cols-2 md:gap-5">
         {shots.map((shot) => (
           <StoryShotFrame key={shot.caption} shot={shot} ratio="square" />
         ))}
