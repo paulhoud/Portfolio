@@ -152,11 +152,15 @@ function StoryShots({
   shots: ProjectStoryShot[];
   layout: NonNullable<ProjectStoryStage["shotLayout"]>;
 }) {
+  // Deux colonnes sur grand écran : chaque cadre occupe environ la moitié de
+  // la colonne de contenu.
+  const HALF = "(max-width: 768px) 92vw, 560px";
+
   if (layout === "grid") {
     return (
       <div className="grid gap-4 sm:grid-cols-2 md:gap-5">
         {shots.map((shot) => (
-          <StoryShotFrame key={shot.caption} shot={shot} ratio="square" />
+          <StoryShotFrame key={shot.caption} shot={shot} ratio="square" sizes={HALF} />
         ))}
       </div>
     );
@@ -166,7 +170,7 @@ function StoryShots({
     return (
       <div className="grid gap-5 md:grid-cols-2">
         {shots.map((shot) => (
-          <StoryShotFrame key={shot.caption} shot={shot} />
+          <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF} />
         ))}
       </div>
     );
@@ -178,13 +182,13 @@ function StoryShots({
       <StoryShotFrame shot={shots[0]} />
       {shots[1] ? (
         <div className="absolute -bottom-1 -right-1 w-[42%] md:w-[38%]">
-          <StoryShotFrame shot={shots[1]} compact />
+          <StoryShotFrame shot={shots[1]} compact sizes="(max-width: 768px) 40vw, 420px" />
         </div>
       ) : null}
       {shots.slice(2).length > 0 ? (
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {shots.slice(2).map((shot) => (
-            <StoryShotFrame key={shot.caption} shot={shot} />
+            <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF} />
           ))}
         </div>
       ) : null}
@@ -200,10 +204,17 @@ function StoryShotFrame({
   shot,
   compact = false,
   ratio = "wide",
+  sizes = "(max-width: 768px) 92vw, 1000px",
 }: {
   shot: ProjectStoryShot;
   compact?: boolean;
   ratio?: "wide" | "square";
+  /**
+   * Doit couvrir la largeur réelle d'affichage. Une valeur sous-estimée fait
+   * choisir au navigateur une variante plus petite que le cadre, qu'il étire
+   * ensuite — l'image paraît alors floue sur les écrans non retina.
+   */
+  sizes?: string;
 }) {
   const caption = (
     <figcaption
@@ -229,7 +240,7 @@ function StoryShotFrame({
             <Image
               src={shot.image}
               alt={shot.caption}
-              sizes="(max-width: 768px) 92vw, 780px"
+              sizes={sizes}
               // Les captures d'interface marquent vite la compression : on
               // s'écarte ici de la qualité par défaut (75).
               quality={92}

@@ -70,6 +70,9 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
                 priority
               />
             </div>
+            <div className="mt-6">
+              <CompanySiteLink site={project.companySite} />
+            </div>
           </header>
         </ScrollReveal>
 
@@ -116,6 +119,12 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
           {project.headerLogo ? (
             <ScrollRevealItem className="mb-12 md:mb-16">
               <CaseStudyHeaderLogo headerLogo={project.headerLogo} />
+            </ScrollRevealItem>
+          ) : null}
+
+          {project.companySite ? (
+            <ScrollRevealItem className="mb-12 md:mb-16">
+              <CompanySiteLink site={project.companySite} />
             </ScrollRevealItem>
           ) : null}
         </ScrollRevealGroup>
@@ -310,6 +319,37 @@ function externalLinkProps(href: string) {
     : {};
 }
 
+/**
+ * Lien vers le site officiel de l'entreprise concernée, placé sous le logo.
+ * Discret par défaut : il situe le projet sans détourner de la lecture.
+ */
+function CompanySiteLink({ site }: { site?: ProjectLink }) {
+  if (!site) return null;
+
+  return (
+    <a
+      href={site.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.18em] text-white/40 transition-colors hover:text-white/80 focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50"
+    >
+      {site.label}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M7 17L17 7M9 7h8v8" />
+      </svg>
+    </a>
+  );
+}
+
 function ProjectLinks({ links }: { links: ProjectLink[] }) {
   return (
     <div className="flex flex-col items-center gap-3">
@@ -361,6 +401,9 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
                 logoScale={project.logoScale}
                 priority
               />
+            </div>
+            <div className="mt-6">
+              <CompanySiteLink site={project.companySite} />
             </div>
           </header>
         </ScrollReveal>
@@ -445,6 +488,12 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
             />
           </ScrollRevealItem>
 
+          {project.companySite ? (
+            <ScrollRevealItem className="mb-10 md:mb-14">
+              <CompanySiteLink site={project.companySite} />
+            </ScrollRevealItem>
+          ) : null}
+
           {project.introParagraphs?.map((paragraph) => (
             <ScrollRevealItem key={paragraph} className="copy mb-6 max-w-2xl text-white/80">
               <p>{paragraph}</p>
@@ -528,7 +577,10 @@ function ProjectMediaBlock({
             src={media.image}
             alt={media.title}
             priority={priority}
-            sizes="(max-width: 768px) 92vw, 900px"
+            sizes="(max-width: 768px) 92vw, 1000px"
+            // Visuels de projet : la qualité par défaut (75) marque trop les
+            // captures d'interface et les aplats.
+            quality={92}
             className={`h-auto w-full ${
               isLightVariant ? "" : "rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
             }`}
