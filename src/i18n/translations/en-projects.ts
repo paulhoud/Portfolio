@@ -438,8 +438,10 @@ export const enProjectTranslations: ProjectTranslations = {
             body: "I took over the existing journeys, made the screens more reliable and brought components into line.",
           },
           shots: [
-            { caption: "The earliest interfaces" },
-            { caption: "Apprentice tracking, first version" },
+            { caption: "The dashboard when I arrived" },
+            { caption: "Young talent, by the numbers" },
+            { caption: "An apprentice's tracking record" },
+            { caption: "Skills validation" },
           ],
         },
         {
@@ -457,12 +459,13 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           role: {
             title: "Designer of the redesigns",
-            body: "I carried the successive redesigns, evolved the visual identity, and helped create the design system.",
+            body: "I carried the successive redesigns, evolved the visual identity, and laid the foundations of the design system with the team.",
           },
           shots: [
-            { caption: "Logo evolution" },
-            { caption: "First brand guidelines" },
-            { caption: "Current brand guidelines" },
+            { caption: "Logotype variations" },
+            { caption: "Type scale and tokens" },
+            { caption: "Component library" },
+            { caption: "File structure and shared styles" },
           ],
         },
         {
@@ -480,27 +483,47 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           role: {
             title: "Product Designer",
-            body: "I design increasingly complex features, from framing the need to release, working with developers every day.",
+            body: "I design the interface of the new product, screen after screen, setting the bearings of a platform built for HR professionals.",
           },
           shots: [
-            { caption: "A complex feature, end to end" },
-            { caption: "The design system at scale" },
+            { caption: "The new platform's dashboard" },
+            { caption: "New identity, new interface" },
+            { caption: "HR and managerial steering" },
+          ],
+        },
+        {
+          type: "stage",
+          period: "In depth",
+          product: {
+            title: "Features in their own right",
+            body: "Annual reviews, skills mapping, steering indicators, employee profiles: each building block calls for its own framing.",
+          },
+          role: {
+            title: "Designing end to end",
+            body: "From framing the need through to release, working with developers every single day.",
+          },
+          shots: [
+            { caption: "Annual review campaigns" },
+            { caption: "Skills mapping" },
+            { caption: "Indicators and global filters" },
+            { caption: "Employee profile" },
           ],
         },
         {
           type: "stage",
           period: "Today",
           product: {
-            title: "A complete HRIS",
-            body: "The platform now serves HR teams and managers, while keeping the young-talent support that made its reputation.",
+            title: "An HRIS in its own right",
+            body: "The platform serves HR teams and managers — and speaks to them right down to its public site: offering, pricing, documentation.",
           },
           role: {
             title: "Product Designer — design & implementation",
-            body: "Vibe Coding lets me build part of what I design: an idea travels from intent to shipped interface without changing hands.",
+            body: "I designed the marketing site, then built it on my own. Vibe Coding now lets me ship part of what I design myself.",
           },
           shots: [
-            { caption: "The platform today" },
-            { caption: "A feature I built myself" },
+            { caption: "Site home page" },
+            { caption: "Solution overview" },
+            { caption: "Pricing" },
           ],
         },
       ],

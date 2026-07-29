@@ -23,3 +23,9 @@ pnpm-debug.log*
 # La source de vérité est assets/default et assets/webm.
 /public/media/
 /src/content/generated/
+
+# Dépôts de fichiers bruts (exports Figma, captures pleine résolution, PDF).
+# Seules les versions optimisées, dérivées de ces sources et référencées par le
+# site, sont versionnées — les originaux pèsent plusieurs dizaines de Mo et ne
+# sont jamais servis.
+/assets/upika/
