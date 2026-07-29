@@ -101,6 +101,9 @@ export const profile = {
    * paysage de l'image Open Graph s'y recadrant mal.
    */
   brandImage: "/assets/brand-square.png",
+
+  /** CV téléchargeable depuis la page contact. Vide = le bloc n'est pas rendu. */
+  cv: "/paul-houdebine-cv.pdf",
 } as const;
 
 /** URL absolue à partir d'un chemin relatif. */

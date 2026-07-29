@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
     // AVIF d'abord (env. 30 % plus léger que WebP à qualité perçue égale),
     // WebP en repli pour les navigateurs qui ne le gèrent pas.
     formats: ["image/avif", "image/webp"],
+    // Next ne sert que les qualités déclarées ici, et n'en autorise qu'une seule
+    // (75) par défaut. C'est insuffisant pour des captures d'interface, où le
+    // texte et les aplats marquent vite la compression : 92 est réservé aux
+    // visuels de projet, 75 reste le réglage courant.
+    qualities: [75, 92],
   },
 
   async redirects() {

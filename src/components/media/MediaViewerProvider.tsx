@@ -65,8 +65,12 @@ export function MediaViewerProvider({
 
   const openMedia = useCallback(
     (item: ProjectMedia) => {
+      // Repli sur le titre : les captures du récit sont converties en médias au
+      // moment de la collecte, l'objet transmis n'est donc pas celui de la
+      // liste. Les titres, eux, sont uniques au sein d'un projet.
       const found = media.indexOf(item);
-      if (found >= 0) setIndex(found);
+      const index = found >= 0 ? found : media.findIndex((m) => m.title === item.title);
+      if (index >= 0) setIndex(index);
     },
     [media],
   );

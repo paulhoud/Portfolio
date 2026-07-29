@@ -29,3 +29,7 @@ pnpm-debug.log*
 # site, sont versionnées — les originaux pèsent plusieurs dizaines de Mo et ne
 # sont jamais servis.
 /assets/upika/
+
+# Le CV servi est public/paul-houdebine-cv.pdf ; la source ici en serait un
+# doublon octet pour octet.
+/assets/CV_*.pdf

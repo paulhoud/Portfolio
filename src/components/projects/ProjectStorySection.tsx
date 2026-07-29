@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { MediaButton } from "@/components/media/MediaButton";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import type {
   ProjectStoryBeat,
@@ -216,16 +217,35 @@ function StoryShotFrame({
   );
 
   if (shot.image) {
+    // Page entière : trop haute pour être montrée en entier dans le fil. Elle
+    // est plafonnée et fondue en bas — un repère visuel que la suite se
+    // découvre dans la visionneuse, où elle se parcourt au défilement.
+    const isTallPage = shot.image.height / shot.image.width > 1.6;
+
     return (
       <figure>
-        <div className="overflow-hidden rounded-[0.6rem] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
-          <Image
-            src={shot.image}
-            alt={shot.caption}
-            sizes="(max-width: 768px) 92vw, 720px"
-            className="h-auto w-full"
-          />
-        </div>
+        <MediaButton media={{ title: shot.caption, image: shot.image }} className="rounded-[0.6rem]">
+          <div className="relative overflow-hidden rounded-[0.6rem] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
+            <Image
+              src={shot.image}
+              alt={shot.caption}
+              sizes="(max-width: 768px) 92vw, 780px"
+              // Les captures d'interface marquent vite la compression : on
+              // s'écarte ici de la qualité par défaut (75).
+              quality={92}
+              className={cn(
+                "w-full",
+                isTallPage ? "h-[420px] object-cover object-top md:h-[520px]" : "h-auto",
+              )}
+            />
+            {isTallPage ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#121212] to-transparent"
+              />
+            ) : null}
+          </div>
+        </MediaButton>
         {caption}
       </figure>
     );

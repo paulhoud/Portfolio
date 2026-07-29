@@ -105,5 +105,6 @@ export const frSite: SiteCopy = {
     emailLabel: "Écrire un e-mail",
     socialLabel: "Me retrouver ailleurs",
     locationLabel: "Basé entre",
+    cvLabel: "Télécharger mon CV",
   },
 };

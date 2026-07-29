@@ -82,6 +82,8 @@ export type SiteCopy = {
     socialLabel: string;
     /** Intitulé précédant les villes d'exercice. */
     locationLabel: string;
+    /** Libellé du lien de téléchargement du CV. */
+    cvLabel: string;
   };
 };
 

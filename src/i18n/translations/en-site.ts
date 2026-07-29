@@ -105,5 +105,6 @@ export const enSite: SiteCopy = {
     emailLabel: "Send an email",
     socialLabel: "Find me elsewhere",
     locationLabel: "Based between",
+    cvLabel: "Download my resume",
   },
 };

@@ -4,6 +4,7 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ProjectMedia } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
+import { cn } from "@/lib/utils";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -38,6 +39,15 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   // Fichier vidéo ou lecteur embarqué : dans les deux cas, ni zoom ni
   // déplacement — les commandes du lecteur doivent rester accessibles.
   const isVideo = isFileVideo || isEmbeddedVideo;
+
+  /**
+   * Page entière : capture bien plus haute que large. L'ajuster à la hauteur de
+   * l'écran la réduirait à une bande illisible ; elle est donc affichée en
+   * pleine largeur et se parcourt au défilement.
+   */
+  const isTallPage = !isVideo && current.image.height / current.image.width > 1.6;
+  // Le zoom n'a pas de sens sur une page qu'on parcourt.
+  const allowZoom = !isVideo && !isTallPage;
   const count = media.length;
 
   const stageRef = useRef<HTMLDivElement>(null);
@@ -126,7 +136,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   // Zoom molette (listener natif pour pouvoir préempter le scroll).
   useEffect(() => {
     const element = stageRef.current;
-    if (!element || isVideo) return;
+    if (!element || !allowZoom) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
@@ -134,10 +144,10 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
     };
     element.addEventListener("wheel", onWheel, { passive: false });
     return () => element.removeEventListener("wheel", onWheel);
-  }, [isVideo, applyZoom, scale]);
+  }, [allowZoom, applyZoom, scale]);
 
   const handlePointerDown = (event: React.PointerEvent) => {
-    if (isVideo || scale.get() <= 1) return;
+    if (!allowZoom || scale.get() <= 1) return;
     pointerState.current = {
       dragging: true,
       startX: event.clientX,
@@ -168,7 +178,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   };
 
   const handleDoubleClick = (event: React.MouseEvent) => {
-    if (isVideo) return;
+    if (!allowZoom) return;
     if (scale.get() > 1) applyZoom(1, undefined, undefined, true);
     else applyZoom(2.5, event.clientX, event.clientY, true);
   };
@@ -249,7 +259,11 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
       {/* Scène média */}
       <div
         ref={stageRef}
-        className="absolute inset-0 flex touch-none items-center justify-center overflow-hidden px-4 py-16 md:px-24"
+        className={cn(
+          "absolute inset-0 flex items-center justify-center overflow-hidden px-4 py-16 md:px-24",
+          // `touch-none` empêcherait le défilement tactile d'une page entière.
+          allowZoom && "touch-none",
+        )}
       >
         {isEmbeddedVideo ? (
           // Lecteur YouTube intégré : la vidéo se regarde sans quitter le site.
@@ -283,6 +297,17 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
             onClick={handleMediaClick}
             className="max-h-full max-w-full rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
           />
+        ) : isTallPage ? (
+          // Page entière : affichée sur toute sa largeur et parcourue au
+          // défilement. L'ajuster à la hauteur de l'écran la réduirait à une
+          // bande de quelques dizaines de pixels.
+          <div
+            onClick={handleMediaClick}
+            className="max-h-full w-[min(92vw,1100px)] overflow-y-auto overscroll-contain rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={current.image.src} alt={current.title} className="block w-full" />
+          </div>
         ) : (
           <motion.div
             style={{ scale, x, y, cursor: zoomed ? "grab" : "zoom-in" }}
@@ -316,7 +341,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
       </figcaption>
 
       {/* Contrôles de zoom (images) */}
-      {!isVideo ? (
+      {allowZoom ? (
         <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2 md:bottom-6 md:right-8">
           <button
             type="button"
