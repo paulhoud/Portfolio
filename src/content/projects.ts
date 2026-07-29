@@ -6,23 +6,23 @@ import videoUpikajob from "../../assets/video-upikajob.jpg";
 import videoUpikajobPitch from "../../assets/video-upikajob-pitch.jpg";
 // Récit UpikaJob : l'ancienne application, l'identité et le système, la
 // plateforme actuelle, puis le site vitrine.
-import upikaOldDashboard from "../../assets/upika-old-dashboard.jpg";
-import upikaOldTalents from "../../assets/upika-old-talents.jpg";
-import upikaOldSuivi from "../../assets/upika-old-suivi.jpg";
-import upikaOldCompetences from "../../assets/upika-old-competences.jpg";
-import upikaLogotype from "../../assets/upika-logotype.jpg";
-import upikaTypescale from "../../assets/upika-typescale.jpg";
-import upikaFigmaComponents from "../../assets/upika-figma-components.jpg";
-import upikaFigmaTokens from "../../assets/upika-figma-tokens.jpg";
-import upikaNewDashboard from "../../assets/upika-new-dashboard.jpg";
+import upikaOldDashboard from "../../assets/upika-old-dashboard.png";
+import upikaOldTalents from "../../assets/upika-old-talents.png";
+import upikaOldSuivi from "../../assets/upika-old-suivi.png";
+import upikaOldCompetences from "../../assets/upika-old-competences.png";
+import upikaLogotype from "../../assets/upika-logotype.png";
+import upikaTypescale from "../../assets/upika-typescale.png";
+import upikaFigmaComponents from "../../assets/upika-figma-components.png";
+import upikaFigmaTokens from "../../assets/upika-figma-tokens.png";
+import upikaNewDashboard from "../../assets/upika-new-dashboard.png";
 import upikaNewLogin from "../../assets/upika-new-login.jpg";
-import upikaNewPilotage from "../../assets/upika-new-pilotage.jpg";
-import upikaNewEntretiens from "../../assets/upika-new-entretiens.jpg";
-import upikaNewCompetences from "../../assets/upika-new-competences.jpg";
-import upikaNewIndicateurs from "../../assets/upika-new-indicateurs.jpg";
-import upikaNewProfil from "../../assets/upika-new-profil.jpg";
-import upikaSiteHome from "../../assets/upika-site-home.jpg";
-import upikaSiteSolution from "../../assets/upika-site-solution.jpg";
+import upikaNewPilotage from "../../assets/upika-new-pilotage.png";
+import upikaNewEntretiens from "../../assets/upika-new-entretiens.png";
+import upikaNewCompetences from "../../assets/upika-new-competences.png";
+import upikaNewIndicateurs from "../../assets/upika-new-indicateurs.png";
+import upikaNewProfil from "../../assets/upika-new-profil.png";
+import upikaSiteHome from "../../assets/upika-site-home.png";
+import upikaSiteSolution from "../../assets/upika-site-solution.png";
 import upikaSiteTarifs from "../../assets/upika-site-tarifs.jpg";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
@@ -78,12 +78,12 @@ import grandMenagePoster from "../../assets/img-19.png";
 import grandMenageFilming from "../../assets/img-20.png";
 import grandMenageEditing from "../../assets/img-21.png";
 import grandMenageLobby from "../../assets/img-22.png";
-import archiveStickers from "../../assets/img-2.png";
+import archiveFruits from "../../assets/archive-fruits.png";
 import archiveBauhaus from "../../assets/img-11.png";
 import archiveSpace from "../../assets/img-10.png";
 import archiveDreamcatcher from "../../assets/img-9.png";
 import archivePainting from "../../assets/img-8.png";
-import archiveComic from "../../assets/img-6.png";
+import archiveCitron from "../../assets/archive-citron-triptyque.png";
 import archiveGecko from "../../assets/img-4.png";
 import archiveSkate from "../../assets/img-3.png";
 
@@ -1161,7 +1161,7 @@ export const projects: Project[] = [
     media: [
       {
         title: "Illustrations réalisées pour des stickers",
-        image: archiveStickers,
+        image: archiveFruits,
         size: "wide",
       },
       {
@@ -1186,7 +1186,7 @@ export const projects: Project[] = [
       },
       {
         title: "Expérimentation graphique sous forme de petit comic strip",
-        image: archiveComic,
+        image: archiveCitron,
         size: "wide",
       },
       {

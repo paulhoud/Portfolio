@@ -50,6 +50,34 @@ export function ContactPageView() {
         </a>
       </ScrollReveal>
 
+      {profile.cv ? (
+        <ScrollReveal delay={0.09}>
+          <div className="mt-8 flex justify-center">
+            <a
+              href={profile.cv}
+              // `download` force l'enregistrement plutôt que l'ouverture dans
+              // le navigateur ; le nom du fichier servi est déjà explicite.
+              download
+              className="group inline-flex items-center gap-3 rounded-full border border-white/15 px-6 py-3 text-xs uppercase tracking-[0.14em] text-white/75 transition duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-y-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" />
+              </svg>
+              {contact.cvLabel}
+            </a>
+          </div>
+        </ScrollReveal>
+      ) : null}
+
       <ScrollReveal delay={0.12}>
         <div className="mt-14 flex flex-col items-center gap-4">
           <h2 className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/40">
