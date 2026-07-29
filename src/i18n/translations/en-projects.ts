@@ -407,19 +407,19 @@ export const enProjectTranslations: ProjectTranslations = {
     sections: [
       {
         title: "Overview",
-        body: "UpikaJob is an HR platform born out of supporting young talent. I have been its Product Designer, from the first redesigns through to the product as it stands today.",
+        body: "UpikaJob is now an HRIS: a platform that equips HR teams and managers to follow their people — reviews, skills, objectives, steering indicators. It began as something quite different, a tool for training organisations supporting young talent into work. I am its Product Designer, and I lived that transformation from the inside, from the first redesigns through to the product as it stands today.",
       },
       {
         title: "Challenge",
-        body: "Turning a tool built for training organisations into an HRIS able to serve HR teams and managers — without losing the expertise that made it strong in the first place.",
+        body: "The company realised its craft — structuring guidance, making progress measurable, equipping a mentor — reached far beyond apprenticeships. That meant speaking to a far more demanding audience, HR professionals, without disowning the expertise that made the product strong. A change of scale as much as of audience: more data, more roles, more business rules, and the usability expectations of a tool people live in all day.",
       },
       {
         title: "Solution",
-        body: "Successive redesigns, a reworked visual identity, a shared design system, and features designed end to end alongside the engineering team.",
+        body: "Several successive redesigns, each carrying a shift in vision rather than a simple refresh. A visual identity reworked in depth, then a design system shared with the developers — primitives, tokens, documented components — so that coherence would hold as the product grew. And features taken end to end: framing the need, making the trade-offs, designing, then following through to release.",
       },
       {
         title: "Outcome",
-        body: "A complete HR platform — and a role that grew from designing interfaces to shaping the product, all the way to implementation.",
+        body: "A complete HR platform whose features I now design, and whose marketing site I drew then built on my own. My role followed the same trajectory as the product: screens first, then the product, all the way to implementation — Vibe Coding now letting me ship part of what I design myself.",
       },
     ],
     story: {

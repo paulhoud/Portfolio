@@ -200,6 +200,11 @@ export type Project = {
   logoSize: "sm" | "md" | "lg" | "xl";
   logoScale?: number;
   titleColor?: string;
+  /**
+   * Site officiel de l'entreprise ou de la marque concernée. Absent lorsqu'il
+   * n'y en a pas (projet personnel, structure disparue).
+   */
+  companySite?: ProjectLink;
   detailVariant?: "default" | "editorial" | "case-study" | "story";
   /** Récit scrollé, utilisé par la variante « story ». */
   story?: ProjectStory;
@@ -234,6 +239,7 @@ const defaultSections: ProjectSection[] = [
 export const projects: Project[] = [
   {
     slug: "upikajob",
+    companySite: { label: "UpikaJob", href: "https://www.upikajob.com/" },
     mediaKey: "UPIKAJOB",
     title: "UpikaJob",
     eyebrow: "Plateforme d'accompagnement de carrière",
@@ -369,19 +375,19 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "UpikaJob est une plateforme RH née de l'accompagnement des jeunes talents. J'y suis Product Designer, depuis les premières refontes jusqu'au produit actuel.",
+        body: "UpikaJob est aujourd'hui un SIRH : une plateforme qui outille les équipes RH et les managers dans le suivi de leurs collaborateurs — entretiens, compétences, objectifs, indicateurs de pilotage. Elle est née tout autrement, comme un outil destiné aux organismes de formation pour accompagner l'insertion des jeunes talents. J'y suis Product Designer et j'ai vécu cette transformation de l'intérieur, des premières refontes jusqu'au produit actuel.",
       },
       {
         title: "Enjeu",
-        body: "Faire évoluer un outil pensé pour les organismes de formation vers un SIRH capable de servir les équipes RH et les managers, sans perdre l'expertise qui faisait sa force.",
+        body: "L'entreprise a compris que son savoir-faire — structurer un accompagnement, objectiver une progression, outiller un référent — dépassait largement le cadre de l'alternance. Il fallait donc s'adresser à une population bien plus exigeante, celle des professionnels RH, sans renier l'expertise qui faisait la force du produit. Un changement d'échelle autant que de public : plus de données, plus de rôles, plus de règles métier, et des attentes d'ergonomie propres à un outil utilisé toute la journée.",
       },
       {
         title: "Solution",
-        body: "Des refontes successives, une identité graphique retravaillée, un design system partagé, et des fonctionnalités conçues de bout en bout avec les équipes techniques.",
+        body: "Plusieurs refontes successives, chacune accompagnant un changement de vision plutôt qu'un simple rafraîchissement. Une identité graphique reprise en profondeur, puis un design system partagé avec les développeurs — primitives, tokens, composants documentés — pour que la cohérence tienne à mesure que le produit grossit. Et des fonctionnalités menées de bout en bout : cadrage du besoin, arbitrages, conception, suivi jusqu'à la mise en production.",
       },
       {
         title: "Résultat",
-        body: "Une plateforme RH complète — et un rôle passé de la conception d'interfaces à la conception produit, jusqu'à l'implémentation.",
+        body: "Une plateforme RH complète, dont je conçois aujourd'hui les fonctionnalités et dont j'ai dessiné puis développé seul le site vitrine. Mon rôle a suivi la même trajectoire que le produit : d'abord les écrans, puis le produit, jusqu'à l'implémentation — le Vibe Coding me permettant désormais de livrer moi-même une partie de ce que je conçois.",
       },
     ],
     gallery: [],
@@ -478,6 +484,7 @@ export const projects: Project[] = [
   },
   {
     slug: "yves-delorme",
+    companySite: { label: "Yves Delorme", href: "https://france.yvesdelorme.com/" },
     mediaKey: "YDL",
     title: "Yves Delorme",
     eyebrow: "L'Odyssée — refonte de l'écosystème digital",
@@ -539,6 +546,7 @@ export const projects: Project[] = [
   },
   {
     slug: "jive",
+    companySite: { label: "Orange", href: "https://www.orange.com/" },
     mediaKey: "JIVE",
     title: "Jive",
     eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
@@ -598,6 +606,7 @@ export const projects: Project[] = [
   },
   {
     slug: "odyssey",
+    companySite: { label: "Sanofi", href: "https://www.sanofi.com/" },
     mediaKey: "SANOFI",
     title: "Sanofi Espoir",
     eyebrow: "Projet pour la santé des enfants au Sénégal : renforcer l'impact local",
@@ -685,6 +694,7 @@ export const projects: Project[] = [
   },
   {
     slug: "unicorn",
+    companySite: { label: "Fidesio", href: "https://www.fidesio.com/" },
     mediaKey: "FIDESIO",
     title: "Fidesio",
     eyebrow: "Sanofi – esprit de solidarité",
@@ -810,6 +820,7 @@ export const projects: Project[] = [
   },
   {
     slug: "capgemini",
+    companySite: { label: "Capgemini", href: "https://www.capgemini.com/" },
     mediaKey: "CAPGEMINI",
     title: "Capgemini",
     eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
@@ -969,6 +980,7 @@ export const projects: Project[] = [
   },
   {
     slug: "alpha",
+    companySite: { label: "SÆGUS", href: "https://www.saegus.com/" },
     mediaKey: "SAEGUS",
     title: "SÆGUS",
     eyebrow: "10ème anniversaire Saegus x Le Trianon",
