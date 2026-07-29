@@ -408,6 +408,7 @@ export const projects: Project[] = [
   },
   {
     slug: "memento",
+    companySite: { label: "Memento", href: "https://event.memento.photo/" },
     mediaKey: "MEMENTO",
     title: "Memento",
     eyebrow: "Designer le service de redistribution de photo de demain",
@@ -422,7 +423,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento. Memento est une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale. Le service s'adresse aux créateurs d'événements pour redistribuer toutes les photos prises sur leur événement à chacun des invités.",
+        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento. Memento est une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale. Le service s'adresse aux créateurs d'événements pour redistribuer toutes les photos prises sur leur événement à chacun des invités. La start-up a depuis poussé cette intuition plus loin : la reconnaissance a laissé place à un agent photo propulsé par l'IA, qui remet automatiquement à chaque participant les clichés sur lesquels il apparaît.",
       },
       {
         title: "Enjeux",

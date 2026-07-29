@@ -11,7 +11,7 @@ export const enProjectTranslations: ProjectTranslations = {
     sections: [
       {
         title: "Overview",
-        body: "I had the opportunity to spend a year in an apprenticeship with Memento, a startup offering a personalized photo retrieval service powered by the cloud and facial recognition.",
+        body: "I had the opportunity to spend a year in an apprenticeship with Memento, a startup offering a personalized photo retrieval service powered by the cloud and facial recognition. The service was aimed at event organisers, handing every guest the pictures taken of them. The startup has since taken that idea further: recognition has given way to an AI-driven photo agent that delivers each attendee their own shots automatically.",
       },
       {
         title: "Challenges",
