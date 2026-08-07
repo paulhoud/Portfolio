@@ -257,14 +257,36 @@ function StoryShots({
  */
 function ScreenChrome({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[0.7rem] bg-gradient-to-b from-[#34343e] to-[#1b1b21] p-[3px] shadow-[0_30px_90px_rgba(0,0,0,0.55)]">
-      <div className="overflow-hidden rounded-[0.55rem] border border-white/[0.06] bg-[#0e0e12]">
-        <div className="flex h-6 items-center gap-1.5 border-b border-white/[0.06] bg-gradient-to-b from-[#2c2c34] to-[#22222a] px-3 md:h-7">
-          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#ff5f57]/75" />
-          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#febc2e]/75" />
-          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#28c840]/75" />
+    <div className="relative">
+      {/* Halo diffus derrière l'écran : il détache la dalle du fond et suggère
+          une source lumineuse, plutôt qu'un cadre posé à plat. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-8 -top-6 bottom-0 rounded-[2.5rem] bg-[radial-gradient(55%_50%_at_50%_45%,rgba(122,150,255,0.14),rgba(122,150,255,0.05)_45%,transparent_72%)] blur-2xl"
+      />
+      {/* Ombre de contact, resserrée sous l'écran : c'est elle qui donne
+          l'impression que la dalle flotte au-dessus du fond. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-10 -bottom-4 h-10 rounded-[50%] bg-black/55 blur-2xl"
+      />
+
+      {/* Ombres empilées plutôt qu'une seule : une ombre courte et dense pour
+          l'épaisseur du châssis, une longue et douce pour la profondeur. */}
+      <div className="relative rounded-[0.7rem] bg-gradient-to-b from-[#34343e] to-[#1b1b21] p-[3px] shadow-[0_2px_6px_rgba(0,0,0,0.3),0_14px_32px_rgba(0,0,0,0.34),0_52px_100px_-28px_rgba(0,0,0,0.7)]">
+        <div className="overflow-hidden rounded-[0.55rem] border border-white/[0.06] bg-[#0e0e12]">
+          <div className="flex h-6 items-center gap-1.5 border-b border-white/[0.06] bg-gradient-to-b from-[#2c2c34] to-[#22222a] px-3 md:h-7">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#ff5f57]/75" />
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#febc2e]/75" />
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#28c840]/75" />
+          </div>
+          {children}
         </div>
-        {children}
+        {/* Reflet oblique très discret sur la dalle. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[0.7rem] bg-gradient-to-tr from-transparent via-white/[0.04] to-transparent"
+        />
       </div>
     </div>
   );
@@ -308,11 +330,16 @@ function StoryShotFrame({
     const isTallPage = shot.image.height / shot.image.width > 1.6;
     const framed = shot.frame === "screen" && !isTallPage;
 
+    // Un PNG est servi intact, sauf demande explicite du catalogue : voir
+    // `ProjectStoryShot.optimize` pour le raisonnement et les exceptions.
+    const lossless = shot.image.src.endsWith(".png") && !shot.optimize;
+
     const picture = (
       <Image
         src={shot.image}
         alt={shot.caption}
         sizes={sizes}
+        unoptimized={lossless}
         // Les captures d'interface marquent vite la compression : on s'écarte
         // ici de la qualité par défaut (75).
         quality={92}
