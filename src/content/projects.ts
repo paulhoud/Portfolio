@@ -138,6 +138,22 @@ export type ProjectStoryShot = {
    * d'interface : une planche d'identité ou une page web entière n'y gagne rien.
    */
   frame?: "screen" | "plain";
+  /**
+   * Force le réencodage avec perte (AVIF/WebP) d'une capture qui serait sinon
+   * servie telle quelle.
+   *
+   * Par défaut, un PNG est diffusé intact : ce format compresse les aplats et
+   * le texte d'interface mieux que tout encodage avec perte, si bien que
+   * l'optimiser abîmerait le texte *et*, mesure à l'appui, alourdirait souvent
+   * le fichier. Les JPEG, eux, sont toujours réencodés — ils sont
+   * photographiques, l'AVIF y gagne massivement.
+   *
+   * L'exception : les grandes planches (identité, bibliothèque de composants).
+   * Elles pèsent plusieurs centaines de kilo-octets en PNG pour un gain de
+   * netteté invisible à la taille où elles sont montrées, et le clic ouvre de
+   * toute façon l'original dans la visionneuse.
+   */
+  optimize?: boolean;
 };
 
 /**
@@ -326,10 +342,16 @@ export const projects: Project[] = [
             body: "J'accompagne les refontes successives, je fais évoluer l'identité graphique et je pose avec l'équipe les fondations du design system.",
           },
           shots: [
-            { caption: "Déclinaisons du logotype", image: upikaLogotype },
-            { caption: "Échelle typographique et tokens", image: upikaTypescale },
-            { caption: "Bibliothèque de composants", image: upikaFigmaComponents },
-            { caption: "Organisation du fichier et styles partagés", image: upikaFigmaTokens },
+            // Planches montrées en petit : l'original PNG pèse ici 5 à 10 fois
+            // le réencodage, pour un gain de netteté qu'on ne voit pas.
+            { caption: "Déclinaisons du logotype", image: upikaLogotype, optimize: true },
+            { caption: "Échelle typographique et tokens", image: upikaTypescale, optimize: true },
+            { caption: "Bibliothèque de composants", image: upikaFigmaComponents, optimize: true },
+            {
+              caption: "Organisation du fichier et styles partagés",
+              image: upikaFigmaTokens,
+              optimize: true,
+            },
           ],
           shotLayout: "grid",
         },

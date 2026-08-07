@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import type { ProjectMedia } from "@/content/projects";
+import { mediaKeyOf } from "./collectProjectMedia";
 import { MediaViewer } from "./MediaViewer";
 
 // Détection « côté client » sans setState-dans-effet ni décalage d'hydratation :
@@ -65,11 +66,13 @@ export function MediaViewerProvider({
 
   const openMedia = useCallback(
     (item: ProjectMedia) => {
-      // Repli sur le titre : les captures du récit sont converties en médias au
-      // moment de la collecte, l'objet transmis n'est donc pas celui de la
-      // liste. Les titres, eux, sont uniques au sein d'un projet.
-      const found = media.indexOf(item);
-      const index = found >= 0 ? found : media.findIndex((m) => m.title === item.title);
+      // Les captures du récit sont converties en médias au moment de la
+      // collecte : l'objet transmis n'est donc pas celui de la liste. On se
+      // repère au fichier plutôt qu'au titre — un même visuel peut être montré
+      // à deux endroits sous des légendes différentes, et deux légendes
+      // identiques peuvent désigner des visuels distincts.
+      const key = mediaKeyOf(item);
+      const index = media.findIndex((m) => m === item || mediaKeyOf(m) === key);
       if (index >= 0) setIndex(index);
     },
     [media],
