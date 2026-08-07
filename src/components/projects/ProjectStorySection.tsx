@@ -11,6 +11,9 @@ import type {
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
 
+/** Deux colonnes sur grand écran : chaque cadre occupe la moitié de la colonne. */
+const HALF_WIDTH = "(max-width: 768px) 92vw, 560px";
+
 /**
  * Récit d'un projet déroulé au fil du défilement.
  *
@@ -30,19 +33,11 @@ export function ProjectStorySection({
   beats: ProjectStoryBeat[];
   trackLabels: { product: string; role: string };
 }) {
-  // Position de l'axe, partagée par le fil et les points. Tous deux sont centrés
-  // dessus par la même translation : l'alignement tient donc à toutes les
-  // largeurs d'écran, sans ajustement au cas par cas.
   return (
     <section
       aria-label="Déroulé du projet"
-      className="relative mt-4 [--axis:0.4rem] md:mt-10 md:[--axis:0.5rem]"
+      className="mt-4 [--axis:0.4rem] md:mt-10 md:[--axis:0.5rem]"
     >
-      <span
-        aria-hidden="true"
-        className="absolute left-[var(--axis)] top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/12 to-transparent"
-      />
-
       <ol>
         {beats.map((beat, index) =>
           beat.type === "pivot" ? (
@@ -65,12 +60,23 @@ function StageBeat({
 }) {
   return (
     <li className="relative pb-16 pl-8 last:pb-0 md:pb-24 md:pl-14">
-      <ScrollReveal>
-        <span
-          aria-hidden="true"
-          className="absolute left-[var(--axis)] top-2 h-2 w-2 -translate-x-1/2 rounded-full bg-white/70 ring-4 ring-[#121212]"
-        />
+      {/* L'axe est tracé étape par étape, et non d'un seul trait sur toute la
+          section : il ne traverse donc jamais les bascules, dont le fond
+          translucide le laissait apparaître au travers. */}
+      <span
+        aria-hidden="true"
+        className="absolute left-[var(--axis)] top-3 bottom-0 w-px -translate-x-1/2 bg-white/12"
+      />
+      {/* Le point reste hors de `ScrollReveal` : l'animation y applique un
+          `transform`, qui ferait de ce bloc le référent des positions absolues.
+          À l'intérieur, le point se calerait sur le texte le temps de
+          l'animation, puis sauterait sur l'axe une fois celle-ci terminée. */}
+      <span
+        aria-hidden="true"
+        className="absolute left-[var(--axis)] top-2 h-2 w-2 -translate-x-1/2 rounded-full bg-white/70 ring-4 ring-[#121212]"
+      />
 
+      <ScrollReveal>
         <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/30">
           {beat.period}
         </span>
@@ -142,6 +148,57 @@ function PivotBeat({ beat }: { beat: { type: "pivot" } & ProjectStoryPivot }) {
 }
 
 /**
+ * Mise en avant placée juste après l'en-tête : elle montre le produit tel qu'il
+ * est aujourd'hui, avant que le récit ne remonte à ses débuts. Un visiteur qui
+ * ne fait que survoler la page a ainsi vu l'essentiel dès le premier écran.
+ */
+export function ProjectStoryHighlight({
+  label,
+  title,
+  body,
+  shots,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  shots: ProjectStoryShot[];
+}) {
+  const [lead, ...rest] = shots;
+
+  return (
+    <section aria-label={title} className="pb-20 md:pb-28">
+      <ScrollReveal>
+        <div className="mx-auto mb-9 max-w-2xl text-center md:mb-12">
+          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+            {label}
+          </span>
+          <h2 className="mt-4 text-balance text-xl font-medium leading-snug text-white md:text-2xl">
+            {title}
+          </h2>
+          <p className="copy mt-4">{body}</p>
+        </div>
+      </ScrollReveal>
+
+      {lead ? (
+        <ScrollReveal delay={0.05}>
+          <StoryShotFrame shot={lead} sizes="(max-width: 768px) 92vw, 1100px" />
+        </ScrollReveal>
+      ) : null}
+
+      {rest.length > 0 ? (
+        <ScrollReveal delay={0.1}>
+          <div className="mt-5 grid gap-5 md:mt-6 md:grid-cols-2">
+            {rest.map((shot) => (
+              <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF_WIDTH} />
+            ))}
+          </div>
+        </ScrollReveal>
+      ) : null}
+    </section>
+  );
+}
+
+/**
  * Présentation des captures. Le mode varie d'une étape à l'autre pour éviter
  * qu'une longue suite d'étapes ne devienne monotone.
  */
@@ -152,15 +209,11 @@ function StoryShots({
   shots: ProjectStoryShot[];
   layout: NonNullable<ProjectStoryStage["shotLayout"]>;
 }) {
-  // Deux colonnes sur grand écran : chaque cadre occupe environ la moitié de
-  // la colonne de contenu.
-  const HALF = "(max-width: 768px) 92vw, 560px";
-
   if (layout === "grid") {
     return (
       <div className="grid gap-4 sm:grid-cols-2 md:gap-5">
         {shots.map((shot) => (
-          <StoryShotFrame key={shot.caption} shot={shot} ratio="square" sizes={HALF} />
+          <StoryShotFrame key={shot.caption} shot={shot} ratio="square" sizes={HALF_WIDTH} />
         ))}
       </div>
     );
@@ -170,7 +223,7 @@ function StoryShots({
     return (
       <div className="grid gap-5 md:grid-cols-2">
         {shots.map((shot) => (
-          <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF} />
+          <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF_WIDTH} />
         ))}
       </div>
     );
@@ -188,10 +241,31 @@ function StoryShots({
       {shots.slice(2).length > 0 ? (
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {shots.slice(2).map((shot) => (
-            <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF} />
+            <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF_WIDTH} />
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Habillage d'écran : châssis vectoriel, net à toute résolution, qui donne aux
+ * captures d'application l'allure d'un logiciel plutôt que d'une image collée.
+ * Réservé aux captures d'interface — une planche d'identité ou une page web
+ * entière n'a rien à y gagner.
+ */
+function ScreenChrome({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[0.7rem] bg-gradient-to-b from-[#34343e] to-[#1b1b21] p-[3px] shadow-[0_30px_90px_rgba(0,0,0,0.55)]">
+      <div className="overflow-hidden rounded-[0.55rem] border border-white/[0.06] bg-[#0e0e12]">
+        <div className="flex h-6 items-center gap-1.5 border-b border-white/[0.06] bg-gradient-to-b from-[#2c2c34] to-[#22222a] px-3 md:h-7">
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#ff5f57]/75" />
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#febc2e]/75" />
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#28c840]/75" />
+        </div>
+        {children}
+      </div>
     </div>
   );
 }
@@ -232,30 +306,39 @@ function StoryShotFrame({
     // est plafonnée et fondue en bas — un repère visuel que la suite se
     // découvre dans la visionneuse, où elle se parcourt au défilement.
     const isTallPage = shot.image.height / shot.image.width > 1.6;
+    const framed = shot.frame === "screen" && !isTallPage;
+
+    const picture = (
+      <Image
+        src={shot.image}
+        alt={shot.caption}
+        sizes={sizes}
+        // Les captures d'interface marquent vite la compression : on s'écarte
+        // ici de la qualité par défaut (75).
+        quality={92}
+        className={cn(
+          "w-full",
+          isTallPage ? "h-[420px] object-cover object-top md:h-[520px]" : "h-auto",
+        )}
+      />
+    );
 
     return (
       <figure>
-        <MediaButton media={{ title: shot.caption, image: shot.image }} className="rounded-[0.6rem]">
-          <div className="relative overflow-hidden rounded-[0.6rem] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
-            <Image
-              src={shot.image}
-              alt={shot.caption}
-              sizes={sizes}
-              // Les captures d'interface marquent vite la compression : on
-              // s'écarte ici de la qualité par défaut (75).
-              quality={92}
-              className={cn(
-                "w-full",
-                isTallPage ? "h-[420px] object-cover object-top md:h-[520px]" : "h-auto",
-              )}
-            />
-            {isTallPage ? (
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#121212] to-transparent"
-              />
-            ) : null}
-          </div>
+        <MediaButton media={{ title: shot.caption, image: shot.image }} className="rounded-[0.7rem]">
+          {framed ? (
+            <ScreenChrome>{picture}</ScreenChrome>
+          ) : (
+            <div className="relative overflow-hidden rounded-[0.6rem] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
+              {picture}
+              {isTallPage ? (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#121212] to-transparent"
+                />
+              ) : null}
+            </div>
+          )}
         </MediaButton>
         {caption}
       </figure>
