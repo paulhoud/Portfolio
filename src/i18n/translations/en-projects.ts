@@ -424,6 +424,17 @@ export const enProjectTranslations: ProjectTranslations = {
     ],
     story: {
       lead: "A platform born to support young talent, now an HRIS. I grew alongside it.",
+      highlight: {
+        label: "The product today",
+        title: "An HRIS that equips HR teams and managers day to day",
+        body: "People steering, review campaigns, skills mapping, tracking indicators — all of it designed screen by screen alongside the engineering team.",
+        shots: [
+          { caption: "The dashboard" },
+          { caption: "HR and managerial steering" },
+          { caption: "Skills mapping" },
+        ],
+      },
+      bridge: "It did not always look like this.",
       trackLabels: { product: "The product", role: "My role" },
       beats: [
         {

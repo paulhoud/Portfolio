@@ -132,6 +132,12 @@ export type ProjectBlock =
 export type ProjectStoryShot = {
   caption: string;
   image?: StaticImageData;
+  /**
+   * `screen` habille la capture d'un châssis d'écran, qui lui donne l'allure
+   * d'un logiciel plutôt que d'une image collée. Réservé aux captures
+   * d'interface : une planche d'identité ou une page web entière n'y gagne rien.
+   */
+  frame?: "screen" | "plain";
 };
 
 /**
@@ -177,6 +183,19 @@ export type ProjectStoryBeat =
  */
 export type ProjectStory = {
   lead: string;
+  /**
+   * Mise en avant placée juste après l'en-tête : le produit tel qu'il est
+   * aujourd'hui. Un visiteur qui ne fait que survoler la page voit ainsi
+   * l'aboutissement avant que le récit ne remonte aux débuts.
+   */
+  highlight?: {
+    label: string;
+    title: string;
+    body: string;
+    shots: ProjectStoryShot[];
+  };
+  /** Phrase de bascule entre la mise en avant et le récit. */
+  bridge?: string;
   /** Intitulés des deux trajectoires suivies en parallèle. */
   trackLabels: { product: string; role: string };
   beats: ProjectStoryBeat[];
@@ -257,6 +276,17 @@ export const projects: Project[] = [
     detailVariant: "story",
     story: {
       lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH. J'ai grandi avec elle.",
+      highlight: {
+        label: "Le produit aujourd'hui",
+        title: "Un SIRH qui outille les équipes RH et les managers au quotidien",
+        body: "Pilotage des collaborateurs, campagnes d'entretiens, cartographie des compétences, indicateurs de suivi — l'ensemble conçu écran par écran avec les équipes techniques.",
+        shots: [
+          { caption: "Le tableau de bord", image: upikaNewDashboard, frame: "screen" },
+          { caption: "Pilotage RH et managérial", image: upikaNewPilotage, frame: "screen" },
+          { caption: "Cartographie des compétences", image: upikaNewCompetences, frame: "screen" },
+        ],
+      },
+      bridge: "Il n'a pas toujours eu ce visage.",
       trackLabels: { product: "Le produit", role: "Mon rôle" },
       beats: [
         {
@@ -271,10 +301,10 @@ export const projects: Project[] = [
             body: "Je reprends les parcours existants, je fiabilise les écrans et j'harmonise les composants.",
           },
           shots: [
-            { caption: "Le tableau de bord à mon arrivée", image: upikaOldDashboard },
-            { caption: "Les jeunes talents en chiffres", image: upikaOldTalents },
-            { caption: "Fiche de suivi d'un alternant", image: upikaOldSuivi },
-            { caption: "Validation des compétences", image: upikaOldCompetences },
+            { caption: "Le tableau de bord à mon arrivée", image: upikaOldDashboard, frame: "screen" },
+            { caption: "Les jeunes talents en chiffres", image: upikaOldTalents, frame: "screen" },
+            { caption: "Fiche de suivi d'un alternant", image: upikaOldSuivi, frame: "screen" },
+            { caption: "Validation des compétences", image: upikaOldCompetences, frame: "screen" },
           ],
           shotLayout: "stage",
         },
@@ -322,7 +352,7 @@ export const projects: Project[] = [
           },
           shots: [
             { caption: "Le tableau de bord de la nouvelle plateforme", image: upikaNewDashboard },
-            { caption: "Nouvelle identité, nouvelle interface", image: upikaNewLogin },
+            { caption: "Nouvelle identité, nouvelle interface", image: upikaNewLogin, frame: "screen" },
             { caption: "Pilotage RH et managérial", image: upikaNewPilotage },
           ],
           shotLayout: "stage",
@@ -339,10 +369,10 @@ export const projects: Project[] = [
             body: "Du cadrage du besoin jusqu'à la mise en production, en travaillant chaque jour avec les développeurs.",
           },
           shots: [
-            { caption: "Campagnes d'entretiens annuels", image: upikaNewEntretiens },
+            { caption: "Campagnes d'entretiens annuels", image: upikaNewEntretiens, frame: "screen" },
             { caption: "Cartographie des compétences", image: upikaNewCompetences },
-            { caption: "Indicateurs et filtres globaux", image: upikaNewIndicateurs },
-            { caption: "Profil collaborateur", image: upikaNewProfil },
+            { caption: "Indicateurs et filtres globaux", image: upikaNewIndicateurs, frame: "screen" },
+            { caption: "Profil collaborateur", image: upikaNewProfil, frame: "screen" },
           ],
           shotLayout: "grid",
         },

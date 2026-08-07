@@ -18,7 +18,7 @@ import type {
   ProjectSection,
 } from "@/content/projects";
 import { AnimatedLogo } from "./AnimatedLogo";
-import { ProjectStorySection } from "./ProjectStorySection";
+import { ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
 
 type ProjectDetailProps = {
   project: Project;
@@ -408,10 +408,29 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
           </header>
         </ScrollReveal>
 
+        {/* L'arc du récit posé en une phrase, juste sous l'en-tête. */}
+        <ScrollReveal>
+          <p className="mx-auto max-w-3xl text-balance pb-14 text-center text-xl font-medium leading-snug text-white md:pb-20 md:text-3xl">
+            {story.lead}
+          </p>
+        </ScrollReveal>
+
+        {/* Le produit abouti vient avant son histoire : un visiteur qui ne fait
+            que survoler la page doit avoir vu ce qui compte dès le premier
+            écran. Le récit remonte ensuite à ses débuts. */}
+        {story.highlight ? (
+          <ProjectStoryHighlight
+            label={story.highlight.label}
+            title={story.highlight.title}
+            body={story.highlight.body}
+            shots={story.highlight.shots}
+          />
+        ) : null}
+
         {/* Vue d'ensemble, enjeu, solution, résultat : même grille de lecture
             que les autres études de cas. */}
         {project.sections.length ? (
-          <ScrollRevealGroup className="mx-auto max-w-3xl space-y-6 pb-20 md:space-y-8 md:pb-28">
+          <ScrollRevealGroup className="mx-auto max-w-3xl space-y-6 pb-16 md:space-y-8 md:pb-24">
             {project.sections.map((section) => (
               <ScrollRevealItem key={section.title}>
                 <CaseStudySection section={section} inline={project.sectionStyle === "inline"} />
@@ -420,13 +439,14 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
           </ScrollRevealGroup>
         ) : null}
 
-        {/* À partir d'ici, la page quitte le format d'étude de cas pour dérouler
-            l'histoire du produit et celle du rôle, en parallèle. */}
-        <ScrollReveal>
-          <p className="mx-auto max-w-3xl text-balance pb-16 text-center text-xl font-medium leading-snug text-white md:pb-24 md:text-3xl">
-            {story.lead}
-          </p>
-        </ScrollReveal>
+        {/* Bascule vers le récit : elle justifie le retour en arrière. */}
+        {story.bridge ? (
+          <ScrollReveal>
+            <p className="mx-auto max-w-2xl text-balance pb-14 text-center text-lg font-medium text-white/70 md:pb-20 md:text-xl">
+              {story.bridge}
+            </p>
+          </ScrollReveal>
+        ) : null}
 
         <ProjectStorySection beats={story.beats} trackLabels={story.trackLabels} />
 

@@ -113,6 +113,20 @@ function mergeStory(
           }
         : undefined,
     },
+    bridge: translated.bridge ?? base.bridge,
+    highlight:
+      base.highlight && translated.highlight
+        ? {
+            ...base.highlight,
+            label: translated.highlight.label ?? base.highlight.label,
+            title: translated.highlight.title ?? base.highlight.title,
+            body: translated.highlight.body ?? base.highlight.body,
+            shots: base.highlight.shots.map((shot, index) => ({
+              ...shot,
+              caption: translated.highlight?.shots?.[index]?.caption ?? shot.caption,
+            })),
+          }
+        : base.highlight,
     trackLabels: translated.trackLabels ?? base.trackLabels,
     beats: base.beats.map((beat, index) => {
       const copy = translated.beats?.[index];

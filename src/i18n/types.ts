@@ -101,6 +101,13 @@ export type ProjectCopy = {
    */
   story?: {
     lead: string;
+    highlight?: {
+      label: string;
+      title: string;
+      body: string;
+      shots: { caption: string }[];
+    };
+    bridge?: string;
     trackLabels: { product: string; role: string };
     /** Même ordre que le catalogue : chaque entrée traduit le temps fort correspondant. */
     beats: (
