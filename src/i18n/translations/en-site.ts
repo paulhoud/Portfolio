@@ -73,7 +73,7 @@ export const enSite: SiteCopy = {
     sections: [
       {
         title: "Background",
-        body: "I graduated from HETIC's Grande École programme (2016–2021), a master's degree combining web design, web development and digital marketing. I started with a UX/UI internship at Fidesio, a web agency (2018), then did two internships as a junior consultant at SÆGUS, in 2019 and 2020, for clients such as Orange, Capgemini and the Sanofi Espoir Foundation. I also worked for Maison Yves Delorme (2019–2020). I then became the first designer at Memento, a startup where I spent a year as an apprentice (2021–2022). Since 2024, I have been UpikaJob's sole designer.",
+        body: "I graduated from HETIC's Grande École programme (2016–2021), a master's degree combining web design, web development and digital marketing. I started with a UX/UI internship at Fidesio, a web agency (2018), then did two internships as a junior consultant at SÆGUS, in 2019 and 2020, for clients such as Orange, Capgemini and the Sanofi Espoir Foundation. At HETIC, I also worked on a professional project for Maison Yves Delorme (2019–2020). I then became the first designer at Memento, a startup where I spent a year as an apprentice (2021–2022). Since 2024, I have been UpikaJob's sole designer.",
       },
       {
         title: "What I do",

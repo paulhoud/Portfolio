@@ -449,12 +449,11 @@ export const projects: Project[] = [
         body: "Une plateforme RH complète, dont je porte aujourd'hui la conception de bout en bout : vision produit, UX/UI, design system et front-end. J'ai aussi conçu puis développé seul le site vitrine, avec des outils de code assistés par l'IA, et je produis les contenus de la marque : vidéo, motion design, print, réseaux sociaux.",
       },
       {
-        // Source : tableau de bord admin « Activité année sur année » d'UpikaJob,
-        // relevé le 8 octobre 2026. Entreprises clientes uniquement (démos, tests,
-        // comptes internes et prospects exclus). Années pleines 2024 et 2025 ;
-        // 2026 comparé à la même date en 2025. À actualiser au moins une fois par an.
+        // Source : profil LinkedIn de Paul (octobre 2026), retenu par Paul le
+        // 8 oct. 2026 à la place des relevés du tableau de bord admin. À tenir à
+        // jour en même temps que LinkedIn.
         title: "En chiffres",
-        body: "Les entretiens, le chatbot et les synthèses générées par l'IA, dont j'ai conçu et construit les écrans, ont décollé depuis mon arrivée. Entre 2024 et 2025, les entretiens menés sont passés de 2 870 à 7 901 (×2,8), les collaborateurs actifs de 1 915 à 3 552, et les synthèses générées par l'IA de 2 880 à 9 216. La croissance se poursuit en 2026 : au 8 octobre, 6 403 entretiens ont déjà été menés, 21 % de plus qu'à la même date en 2025. Au total depuis 2024 : plus de 17 000 entretiens menés et près de 800 000 messages échangés avec le chatbot.",
+        body: "Les entretiens assistés par l'IA, dont j'ai conçu les parcours et construit les écrans, sont au cœur du produit : 200 000 entretiens ont été réalisés à ce jour. UpikaJob est utilisé par 50 000 collaborateurs dans de grands groupes, avec un taux d'utilisation supérieur à 80 %. En 2025, le produit a reçu avec SPIE le Prix de l'innovation IA & RH de Sopra Steria.",
       },
     ],
     gallery: [],
@@ -561,9 +560,9 @@ export const projects: Project[] = [
     eyebrow: "L'Odyssée — refonte de l'écosystème digital",
     description:
       "Refonte globale de l'expérience client pour la Maison Yves Delorme, de la recherche en boutique au prototypage haute fidélité.",
-    // Période : CV (« Yves Delorme — Ld. Designer, 2019-2020 »).
-    // À COMPLÉTER : cadre (stage, école, agence ?).
-    context: "Client : Maison Yves Delorme · 2019–2020",
+    // Période : CV (« Yves Delorme — Ld. Designer, 2019-2020 »). Cadre : projet
+    // professionnalisant de HETIC, mené avec l'entreprise (Paul, 8 oct. 2026).
+    context: "Projet professionnalisant HETIC · Client : Maison Yves Delorme · 2019–2020",
     logo: "/assets/Logo-2-2.svg",
     logoAlt: "Logo Yves Delorme Paris",
     background: "#deebec",
@@ -716,7 +715,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "Lors de mon premier stage chez SÆGUS, j'ai travaillé sur une mission pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal. L'objectif était de mieux comprendre les parcours de soins locaux pour renforcer l'impact des actions de la fondation. J'y ai produit les contenus de restitution des ateliers et contribué à l'experience map du parcours des femmes.",
+        body: "Lors de mon premier stage chez SÆGUS, j'ai travaillé sur une mission pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal. L'objectif était de mieux comprendre les parcours de soins locaux pour renforcer l'impact des actions de la fondation. J'y ai produit les contenus de restitution des ateliers et participé à l'experience map du parcours des femmes.",
       },
       {
         title: "Enjeu",

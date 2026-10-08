@@ -44,7 +44,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "L'Odyssée — redesigning the digital ecosystem",
     description:
       "A full redesign of the customer experience for Maison Yves Delorme, from in-store research to high-fidelity prototyping.",
-    context: "Client: Maison Yves Delorme · 2019–2020",
+    context: "HETIC professional project · Client: Maison Yves Delorme · 2019–2020",
     introParagraphs: [
       "L'Odyssée is a project to fully redesign the digital ecosystem of Maison Yves Delorme. It aims to harmonize the customer experience across the boutique, advisory services, and digital tools.",
       "With the marketing and sales teams, I worked on the customer journey, the interface architecture and the priority scenarios to prototype.",
@@ -412,7 +412,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "By the numbers",
-        body: "Reviews, the chatbot and AI-generated summaries, whose screens I designed and built, have taken off since I joined. Between 2024 and 2025, reviews held rose from 2,870 to 7,901 (×2.8), active employees from 1,915 to 3,552, and AI-generated summaries from 2,880 to 9,216. Growth continues in 2026: as of 8 October, 6,403 reviews had already been held, 21% more than at the same date in 2025. In total since 2024: more than 17,000 reviews held and nearly 800,000 messages exchanged with the chatbot.",
+        body: "AI-assisted reviews, whose flows I designed and whose screens I built, sit at the heart of the product: 200,000 reviews have been held to date. UpikaJob is used by 50,000 employees in large groups, with a usage rate above 80%. In 2025, the product won the Sopra Steria AI & HR Innovation Award, together with SPIE.",
       },
     ],
     story: {
