@@ -240,6 +240,15 @@ export type Project = {
    * n'y en a pas (projet personnel, structure disparue).
    */
   companySite?: ProjectLink;
+  /**
+   * Cadre du projet, affiché sous l'en-tête de chaque page : type de contrat,
+   * employeur, client, période (« Stage chez SÆGUS · Client : Orange »).
+   *
+   * Règle de nommage du site : le titre de la carte reprend la marque dont le
+   * logo est animé sur la carte ; cette ligne dit pour qui et dans quel cadre
+   * le travail a été fait. N'y écrire que des faits confirmés.
+   */
+  context?: string;
   detailVariant?: "default" | "editorial" | "case-study" | "story";
   /** Récit scrollé, utilisé par la variante « story ». */
   story?: ProjectStory;
@@ -277,9 +286,10 @@ export const projects: Project[] = [
     companySite: { label: "UpikaJob", href: "https://www.upikajob.com/" },
     mediaKey: "UPIKAJOB",
     title: "UpikaJob",
-    eyebrow: "Plateforme d'accompagnement de carrière",
+    eyebrow: "SIRH pour les équipes RH et les managers",
     description:
-      "Mon expérience actuelle : design produit pour une plateforme de coaching professionnel.",
+      "Seul designer d'un SIRH depuis 2024 : vision produit, recherche utilisateur, UX/UI, design system et front-end, en binôme avec le développeur.",
+    context: "Poste actuel · depuis janvier 2024 · seul designer",
     logo: "/assets/upikajob.webm",
     logoKind: "video",
     logoAlt: "Logo UpikaJob",
@@ -291,18 +301,18 @@ export const projects: Project[] = [
     animation: "float",
     detailVariant: "story",
     story: {
-      lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH. J'ai grandi avec elle.",
+      lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH. J'en suis le seul designer, de la vision produit jusqu'au front-end.",
       highlight: {
         label: "Le produit aujourd'hui",
         title: "Un SIRH qui outille les équipes RH et les managers au quotidien",
-        body: "Pilotage des collaborateurs, campagnes d'entretiens, cartographie des compétences, indicateurs de suivi — l'ensemble conçu écran par écran avec les équipes techniques.",
+        body: "Pilotage des collaborateurs, campagnes d'entretiens, cartographie des compétences, indicateurs de suivi : conçus écran par écran, puis livrés en binôme avec le développeur.",
         shots: [
           { caption: "Le tableau de bord", image: upikaNewDashboard, frame: "screen" },
           { caption: "Pilotage RH et managérial", image: upikaNewPilotage, frame: "screen" },
           { caption: "Cartographie des compétences", image: upikaNewCompetences, frame: "screen" },
         ],
       },
-      bridge: "Il n'a pas toujours eu ce visage.",
+      bridge: "Le produit n'a pas toujours eu ce visage.",
       trackLabels: { product: "Le produit", role: "Mon rôle" },
       beats: [
         {
@@ -339,7 +349,7 @@ export const projects: Project[] = [
           },
           role: {
             title: "Designer des refontes",
-            body: "J'accompagne les refontes successives, je fais évoluer l'identité graphique et je pose avec l'équipe les fondations du design system.",
+            body: "Je mène les refontes successives, je reprends l'identité graphique et le logotype, et je pose les fondations d'un design system partagé avec le développeur.",
           },
           shots: [
             // Planches montrées en petit : l'original PNG pèse ici 5 à 10 fois
@@ -370,7 +380,7 @@ export const projects: Project[] = [
           },
           role: {
             title: "Product Designer",
-            body: "Je conçois l'interface du nouveau produit et j'installe, écran après écran, les repères d'une plateforme destinée à des professionnels des RH.",
+            body: "Je cadre la vision produit et les choix UX, puis je conçois l'interface du nouveau produit, écran après écran, pour des professionnels des RH.",
           },
           shots: [
             { caption: "Le tableau de bord de la nouvelle plateforme", image: upikaNewDashboard },
@@ -384,11 +394,11 @@ export const projects: Project[] = [
           period: "En profondeur",
           product: {
             title: "Des fonctionnalités à part entière",
-            body: "Entretiens annuels, cartographie des compétences, indicateurs de pilotage, profils collaborateurs : chaque brique demande son propre cadrage.",
+            body: "Entretiens annuels, synthèses générées par l'IA, chatbot, cartographie des compétences, indicateurs de pilotage, profils collaborateurs : chaque brique demande son propre cadrage.",
           },
           role: {
             title: "Conception de bout en bout",
-            body: "Du cadrage du besoin jusqu'à la mise en production, en travaillant chaque jour avec les développeurs.",
+            body: "Interviews et tests utilisateurs, retours clients recueillis en direct, specs, sprints : chaque fonctionnalité, écrans d'IA compris, va du cadrage à la mise en production, en binôme quotidien avec le développeur.",
           },
           shots: [
             { caption: "Campagnes d'entretiens annuels", image: upikaNewEntretiens, frame: "screen" },
@@ -407,7 +417,7 @@ export const projects: Project[] = [
           },
           role: {
             title: "Product Designer — conception & implémentation",
-            body: "Le site vitrine, je l'ai conçu puis développé seul. Le Vibe Coding me permet désormais de livrer moi-même une partie de ce que je dessine.",
+            body: "Je prends en charge le front-end du produit en binôme avec le développeur. Le site vitrine, je l'ai conçu puis développé seul.",
           },
           shots: [
             { caption: "Page d'accueil du site", image: upikaSiteHome },
@@ -419,7 +429,7 @@ export const projects: Project[] = [
       ],
       closing: {
         title: "Ce que ça donne",
-        body: "La plateforme telle qu'elle est en ligne aujourd'hui, et le site vitrine que j'ai conçu puis développé seul.",
+        body: "La plateforme telle qu'elle est en ligne aujourd'hui, ses vidéos de présentation, et le site vitrine que j'ai conçu puis développé seul.",
         link: { label: "Voir le site", href: "https://www.upikajob.com/" },
       },
     },
@@ -427,7 +437,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "UpikaJob est aujourd'hui un SIRH : une plateforme qui outille les équipes RH et les managers dans le suivi de leurs collaborateurs — entretiens, compétences, objectifs, indicateurs de pilotage. Elle est née tout autrement, comme un outil destiné aux organismes de formation pour accompagner l'insertion des jeunes talents. J'y suis Product Designer et j'ai vécu cette transformation de l'intérieur, des premières refontes jusqu'au produit actuel.",
+        body: "UpikaJob est aujourd'hui un SIRH : une plateforme qui outille les équipes RH et les managers dans le suivi de leurs collaborateurs — entretiens, compétences, objectifs, indicateurs de pilotage. Elle est née tout autrement, comme un outil destiné aux organismes de formation pour accompagner l'insertion des jeunes talents. J'en suis le seul designer depuis janvier 2024 et j'ai vécu cette transformation de l'intérieur, des premières refontes jusqu'au produit actuel.",
       },
       {
         title: "Enjeu",
@@ -435,11 +445,19 @@ export const projects: Project[] = [
       },
       {
         title: "Solution",
-        body: "Plusieurs refontes successives, chacune accompagnant un changement de vision plutôt qu'un simple rafraîchissement. Une identité graphique reprise en profondeur, puis un design system partagé avec les développeurs — primitives, tokens, composants documentés — pour que la cohérence tienne à mesure que le produit grossit. Et des fonctionnalités menées de bout en bout : cadrage du besoin, arbitrages, conception, suivi jusqu'à la mise en production.",
+        body: "Plusieurs refontes successives, chacune accompagnant un changement de vision plutôt qu'un simple rafraîchissement. Une identité graphique reprise en profondeur, puis un design system partagé avec le développeur — primitives, tokens, composants documentés — pour que la cohérence tienne à mesure que le produit grossit. Et des fonctionnalités menées de bout en bout : interviews et tests utilisateurs, cadrage, arbitrages, specs, conception, puis front-end en binôme jusqu'à la mise en production.",
       },
       {
         title: "Résultat",
-        body: "Une plateforme RH complète, dont je conçois aujourd'hui les fonctionnalités et dont j'ai dessiné puis développé seul le site vitrine. Mon rôle a suivi la même trajectoire que le produit : d'abord les écrans, puis le produit, jusqu'à l'implémentation — le Vibe Coding me permettant désormais de livrer moi-même une partie de ce que je conçois.",
+        body: "Une plateforme RH complète, dont je porte aujourd'hui la conception de bout en bout : vision produit, UX/UI, design system et front-end. J'ai aussi conçu puis développé seul le site vitrine, avec des outils de code assistés par l'IA, et je produis les contenus de la marque : vidéo, motion design, print, réseaux sociaux.",
+      },
+      {
+        // Source : tableau de bord admin « Activité année sur année » d'UpikaJob,
+        // relevé le 8 octobre 2026. Entreprises clientes uniquement (démos, tests,
+        // comptes internes et prospects exclus). Années pleines 2024 et 2025 ;
+        // 2026 comparé à la même date en 2025. À actualiser au moins une fois par an.
+        title: "En chiffres",
+        body: "Les entretiens, le chatbot et les synthèses générées par l'IA, dont j'ai conçu et construit les écrans, ont décollé depuis mon arrivée. Entre 2024 et 2025, les entretiens menés sont passés de 2 870 à 7 901 (×2,8), les collaborateurs actifs de 1 915 à 3 552, et les synthèses générées par l'IA de 2 880 à 9 216. La croissance se poursuit en 2026 : au 8 octobre, 6 403 entretiens ont déjà été menés, 21 % de plus qu'à la même date en 2025. Au total depuis 2024 : plus de 17 000 entretiens menés et près de 800 000 messages échangés avec le chatbot.",
       },
     ],
     gallery: [],
@@ -463,9 +481,10 @@ export const projects: Project[] = [
     companySite: { label: "Memento", href: "https://event.memento.photo/" },
     mediaKey: "MEMENTO",
     title: "Memento",
-    eyebrow: "Designer le service de redistribution de photo de demain",
+    eyebrow: "Premier designer d'une start-up : produit, design system et contenus",
     description:
-      "Une SaaS de récupération et redistribution de photos individuelles pour événements.",
+      "Un an d'alternance comme premier designer de Memento, SaaS de redistribution de photos pour événements : interfaces, design system, vidéos et supports.",
+    context: "Alternance · janvier 2021 – janvier 2022",
     logo: "/assets/Logo-1-1.svg",
     logoAlt: "Logo Memento",
     background: "#1a1921",
@@ -475,19 +494,21 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "J'ai eu la chance de travailler un an en alternance pour la start-up Memento. Memento est une SaaS qui propose un service de récupération de photos individualisé utilisant le cloud et la reconnaissance faciale. Le service s'adresse aux créateurs d'événements pour redistribuer toutes les photos prises sur leur événement à chacun des invités. La start-up a depuis poussé cette intuition plus loin : la reconnaissance a laissé place à un agent photo propulsé par l'IA, qui remet automatiquement à chaque participant les clichés sur lesquels il apparaît.",
+        body: "Memento est une SaaS qui redistribue à chaque invité les photos prises sur un événement, grâce au cloud et à la reconnaissance faciale. J'y ai passé un an en alternance, de janvier 2021 à janvier 2022. La start-up a depuis poussé l'idée plus loin : un agent photo propulsé par l'IA remet automatiquement à chaque participant les clichés sur lesquels il apparaît.",
       },
       {
         title: "Enjeux",
-        body: "J'ai été recruté par l'entreprise car ils n'avaient pas encore de designer et leur désir de grandir impliquait de créer beaucoup de contenus différents. J'étais en charge de la création de nouvelles maquettes d'interface pour améliorer leur application, des visuels pour les publications sur les réseaux sociaux, des vidéos pour expliquer le fonctionnement de leur service, mais aussi des flyers ou kakémonos pour des événements.",
+        body: "Memento n'avait pas encore de designer. Pour grandir, l'équipe devait à la fois améliorer son application et produire beaucoup de contenus : visuels pour les réseaux sociaux, vidéos expliquant le service, supports pour les événements.",
       },
       {
         title: "Solution",
-        body: "Grâce à mon expertise de Figma, j'ai pu réaliser beaucoup d'interfaces et de prototypes pour les besoins de l'entreprise. J'ai appliqué le design atomique et j'ai pu créer et maintenir un design system pour améliorer le scaling de notre application. Mes compétences sur la suite Adobe m'ont également permis de réaliser des vidéos animées avec du Motion Design dans After Effect ou de créer des Kakemono, des affiches et des flyers sur InDesign.",
+        body: "J'ai conçu dans Figma les nouvelles maquettes et les prototypes de l'application, et créé puis maintenu un design system en design atomique pour qu'elle puisse grandir sans perdre en cohérence. En parallèle, j'ai réalisé les vidéos en motion design sous After Effects et les supports print — kakémonos, affiches, flyers — sous InDesign.",
       },
       {
+        // À CONFIRMER : source et méthode du « 3 fois plus de clients ».
+        // La version anglaise dit « several client leads » : aligner les deux.
         title: "Résultat",
-        body: "Le résultat de mon travail a modernisé l'identité de Memento. Aujourd'hui encore, la vidéo de présentation sert de support aux associés pour présenter la solution et sa diffusion a permis de convertir 3 fois plus de clients durant les 3 mois qui ont suivi.",
+        body: "Mon travail a modernisé l'identité de Memento. La vidéo de présentation est devenue le support des associés pour présenter la solution, et sa diffusion a permis de convertir 3 fois plus de clients durant les 3 mois qui ont suivi.",
       },
     ],
     gallery: ["Prototype produit", "Design system", "Supports social media"],
@@ -543,6 +564,8 @@ export const projects: Project[] = [
     eyebrow: "L'Odyssée — refonte de l'écosystème digital",
     description:
       "Refonte globale de l'expérience client pour la Maison Yves Delorme, de la recherche en boutique au prototypage haute fidélité.",
+    // À COMPLÉTER : cadre (stage, école, agence ?) et année.
+    context: "Client : Maison Yves Delorme",
     logo: "/assets/Logo-2-2.svg",
     logoAlt: "Logo Yves Delorme Paris",
     background: "#deebec",
@@ -552,7 +575,8 @@ export const projects: Project[] = [
     detailVariant: "editorial",
     introParagraphs: [
       "L'Odyssée est un projet de refonte globale de l'écosystème digital de la Maison Yves Delorme. Il vise à harmoniser l'expérience client entre la boutique, le conseil et les outils numériques.",
-      "En collaboration avec les équipes marketing et commerciales, j'ai participé à la réflexion autour du parcours client, de l'architecture des interfaces et des scénarios prioritaires à prototyper.",
+      // À PRÉCISER : ta part exacte parmi immersion, ateliers, charte et prototypes.
+      "Avec les équipes marketing et commerciales, j'ai travaillé sur le parcours client, l'architecture des interfaces et les scénarios prioritaires à prototyper.",
       "La démarche a combiné immersion terrain, formalisation UX/UI et production de livrables concrets pour faire émerger une expérience plus cohérente, premium et orientée service.",
     ],
     sections: [],
@@ -605,6 +629,7 @@ export const projects: Project[] = [
     eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
     description:
       "Conception d'un add-on Jive pour Orange afin d'organiser des ateliers de design thinking directement dans l'intranet.",
+    context: "Stage chez SÆGUS · Client : Orange",
     logo: "/assets/Logo-3.svg",
     logoAlt: "Logo Jive",
     background: "#ffb800",
@@ -617,7 +642,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "Lors de mon second stage chez SÆGUS, j'ai travaillé en tant que consultant junior design au sein d'une équipe Orange. L'objectif était d'améliorer l'usage de Jive, la solution intranet utilisée au quotidien par les collaborateurs.",
+        body: "Lors de mon second stage chez SÆGUS, j'ai rejoint une équipe Orange comme consultant junior design. L'objectif : améliorer l'usage de Jive, l'intranet utilisé au quotidien par les collaborateurs.",
       },
       {
         title: "Enjeux",
@@ -625,11 +650,12 @@ export const projects: Project[] = [
       },
       {
         title: "Solution",
-        body: "Nous avons conçu un add-on Jive fondé sur une démarche de design thinking : atelier Figma pour recueillir les besoins, puis création d'un outil final composé de modules réutilisables.",
+        // À PRÉCISER : qui a animé l'atelier, fait le design system, le prototype ?
+        body: "Nous avons conçu un add-on Jive selon une démarche de design thinking : un atelier Figma pour recueillir les besoins, puis un outil composé de modules réutilisables.",
       },
       {
         title: "Résultat",
-        body: "L'équipe Orange dispose aujourd'hui d'un outil clé en main pour organiser son travail en méthode Kanban au sein même de Jive.",
+        body: "À l'issue de la mission, l'équipe Orange disposait d'un outil clé en main pour organiser son travail en Kanban au sein même de Jive.",
       },
     ],
     gallery: [],
@@ -658,13 +684,16 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "odyssey",
+    // Ancien slug : « odyssey » (redirigé dans next.config.ts).
+    slug: "sanofi-espoir",
     companySite: { label: "Sanofi", href: "https://www.sanofi.com/" },
     mediaKey: "SANOFI",
     title: "Sanofi Espoir",
-    eyebrow: "Projet pour la santé des enfants au Sénégal : renforcer l'impact local",
+    eyebrow: "Santé maternelle et néonatale au Sénégal : renforcer l'impact local",
     description:
       "Mission de design pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal.",
+    // À COMPLÉTER : employeur, année, et ton rôle (la page ne le dit pas encore).
+    context: "Client : Fondation Sanofi Espoir",
     logo: "/assets/Logo-4-1.svg",
     logoAlt: "Logo Sanofi Espoir",
     background: "#f3efed",
@@ -722,7 +751,7 @@ export const projects: Project[] = [
         size: "wide",
       },
       {
-        title: "Une cartographie visuelle de la structure et de l'organisation",
+        title: "Storyboard du film",
         image: sanofiStoryboard,
         size: "wide",
       },
@@ -746,14 +775,17 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "unicorn",
+    // Ancien slug : « unicorn » (redirigé dans next.config.ts).
+    slug: "fidesio",
     companySite: { label: "Fidesio", href: "https://www.fidesio.com/" },
     mediaKey: "FIDESIO",
     title: "Fidesio",
-    eyebrow: "Sanofi – esprit de solidarité",
+    eyebrow: "Sanofi Espoir — esprit de solidarité",
     detailSubtitle: "Professionnels de santé en mission",
     description:
-      "Professionnels de santé en mission : refonte d'outils digitaux et sélection design pour Sanofi Espoir.",
+      "Application de gestion de créneaux, site éditorial et visuels de communication pour les professionnels de santé en mission de Sanofi Espoir.",
+    // À COMPLÉTER : statut chez Fidesio (stage ?) et année.
+    context: "Avec l'agence Fidesio · Client : Sanofi Espoir",
     logo: "/assets/Logo-5-1.svg",
     logoAlt: "Logo Fidesio",
     background: "#ff3345",
@@ -776,7 +808,7 @@ export const projects: Project[] = [
         sections: [
           {
             title: "Vue d'ensemble",
-            body: "Mission réalisée pour Sanofi Espoir autour de la gestion de créneaux professionnels et de la sélection design d'outils destinés aux professionnels de santé en mission.",
+            body: "Mission réalisée pour Sanofi Espoir autour d'outils destinés aux professionnels de santé en mission : gestion de leurs créneaux, site éditorial et communication.",
           },
           {
             title: "Enjeux",
@@ -784,7 +816,8 @@ export const projects: Project[] = [
           },
           {
             title: "Solution",
-            body: "J'ai participé à la conception d'interfaces applicatives, à la définition d'un site éditorial et à la production de visuels de communication cohérents avec l'identité Sanofi Espoir.",
+            // À PRÉCISER : ta part exacte sur chacun des trois volets.
+            body: "J'ai travaillé sur trois volets : les interfaces de l'application de gestion, la définition du site éditorial et les visuels de communication, dans l'identité Sanofi Espoir.",
           },
         ],
       },
@@ -809,7 +842,7 @@ export const projects: Project[] = [
         sections: [
           {
             title: "Direction design",
-            body: "La sélection design a porté sur un univers sobre, institutionnel et rassurant, avec une hiérarchie claire entre contenus éditoriaux, données chiffrées et actions principales.",
+            body: "Un univers sobre, institutionnel et rassurant, avec une hiérarchie claire entre contenus éditoriaux, données chiffrées et actions principales.",
           },
           {
             title: "Site éditorial",
@@ -879,6 +912,8 @@ export const projects: Project[] = [
     eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
     description:
       "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365.",
+    // À PRÉCISER : premier stage SÆGUS ? (Jive est présenté comme le second.)
+    context: "Stage chez SÆGUS · Client : Capgemini",
     logo: "/assets/Logo-6-1.svg",
     logoAlt: "Logo Capgemini",
     background: "#e5f1f3",
@@ -898,15 +933,15 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "Lors de mon stage chez SÆGUS, j'ai travaillé pour Capgemini sur la création de vidéos animées mettant en scène des personnages et des décors à l'aide d'After Effects et du plugin Duik.",
+        body: "Lors d'un stage chez SÆGUS, j'ai travaillé pour Capgemini sur la création de vidéos animées mettant en scène des personnages et des décors, sous After Effects avec le plugin Duik.",
       },
       {
         title: "Enjeux",
-        body: "Il fallait produire quatre cas d'usage animés, avec de nombreuses scènes et une charge d'animation importante, dans un délai court pour un client de longue date.",
+        body: "Il fallait produire quatre cas d'usage animés — trois sont présentés ci-dessous —, avec de nombreuses scènes et une charge d'animation importante, dans un délai court pour un client de longue date.",
       },
       {
         title: "Solution",
-        body: "J'ai gagné en autonomie sur la production, en m'appuyant sur mes compétences en design graphique et direction artistique, ainsi que sur mon intérêt pour la vidéo et l'animation.",
+        body: "J'ai mené la production de plus en plus en autonomie, en m'appuyant sur mes compétences en design graphique, en direction artistique et en animation.",
       },
       {
         title: "Résultat",
@@ -936,12 +971,15 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "lemon",
+    // Ancien slug : « lemon » (redirigé dans next.config.ts).
+    slug: "baio",
     mediaKey: "BAIO",
     title: "Baio",
-    eyebrow: "Créer une application gamifiée qui encourage la consommation de produits healthy",
+    eyebrow: "Créer une application gamifiée qui encourage la consommation de produits sains",
     description:
       "Conception d'une application mobile gamifiée pour encourager une alimentation plus saine.",
+    // À COMPLÉTER : cadre (école, client, perso ?), année, seul ou en équipe.
+    context: "Concept d'application mobile",
     logo: "/assets/Logo-7-1.svg",
     logoAlt: "Logo Baio",
     background: "#58e000",
@@ -983,7 +1021,8 @@ export const projects: Project[] = [
       {
         type: "media",
         layout: "feature-grid",
-        caption: "Screens de l'ancienne version d'application pour Lemon",
+        // À PRÉCISER : ancienne légende « … pour Lemon ». Qu'est-ce que Lemon ?
+        caption: "Écrans de la version précédente de l'application",
         media: [
           { title: "Courses éco-responsables", image: baioEcoCourses, size: "wide" },
           { title: "Communauté avisée", image: baioCommunity, size: "wide" },
@@ -1023,22 +1062,23 @@ export const projects: Project[] = [
           },
         ],
       },
-      {
-        type: "links",
-        links: [{ label: "Voir sur Figma", href: "#" }],
-      },
+      // Lien « Voir sur Figma » retiré : il pointait vers « # ». Le remettre
+      // ici avec l'URL publique du fichier :
+      // { type: "links", links: [{ label: "Voir sur Figma", href: "https://www.figma.com/…" }] },
     ],
     sections: [],
     gallery: [],
   },
   {
-    slug: "alpha",
+    // Ancien slug : « alpha » (redirigé dans next.config.ts).
+    slug: "saegus",
     companySite: { label: "SÆGUS", href: "https://www.saegus.com/" },
     mediaKey: "SAEGUS",
     title: "SÆGUS",
-    eyebrow: "10ème anniversaire Saegus x Le Trianon",
+    eyebrow: "10e anniversaire de SÆGUS × Le Trianon",
     description:
       "Conception de la carte de vœux digitale et des supports de communication pour les 10 ans de SÆGUS.",
+    context: "Stage chez SÆGUS · projet interne",
     logo: "/assets/Logo-8-1.svg",
     logoAlt: "Logo SÆGUS",
     background: "#111111",
@@ -1061,7 +1101,7 @@ export const projects: Project[] = [
         sections: [
           {
             title: "Vue d'ensemble",
-            body: "Mission de conception pour le 10ème anniversaire de SÆGUS : carte de vœux digitale, déclinaisons desktop/mobile et supports de communication pour l'événement au Trianon.",
+            body: "Mission de conception pour le 10e anniversaire de SÆGUS : carte de vœux digitale, déclinaisons desktop et mobile, et supports de communication pour l'événement au Trianon.",
           },
           {
             title: "Enjeux",
@@ -1080,7 +1120,7 @@ export const projects: Project[] = [
       {
         type: "media",
         media: [
-          { title: "Carte de vœux digitale 2021", image: saegusVoeux, size: "wide" },
+          { title: "Carte de vœux digitale", image: saegusVoeux, size: "wide" },
           { title: "Version éditoriale des vœux", image: saegusWishes, size: "wide" },
         ],
       },
@@ -1098,7 +1138,7 @@ export const projects: Project[] = [
         type: "media",
         media: [
           {
-            title: "Accompagnement agile — filé au long cours",
+            title: "Accompagnement agile — filière RH chez Orange",
             image: saegusAgile,
             size: "wide",
           },
@@ -1117,14 +1157,17 @@ export const projects: Project[] = [
     gallery: [],
   },
   {
-    slug: "studio",
+    // Ancien slug : « studio » (redirigé dans next.config.ts).
+    slug: "le-grand-menage",
     mediaKey: "LGM",
-    title: "Film Amateur",
-    eyebrow: "Réaliser un court métrage sur une courte période pour encourager le travail d'équipe digitale",
+    title: "Le Grand Ménage",
+    eyebrow: "Réaliser un court métrage en deux semaines, de l'écriture au montage",
     description:
       "Court métrage « Le Grand Ménage » réalisé en équipe sur deux semaines, de l'écriture au montage.",
+    // À COMPLÉTER : cadre (projet d'école HETIC ?), année, ton rôle précis.
+    context: "Court métrage · équipe pluridisciplinaire · 2 semaines",
     logo: "/assets/Logo-9-2.svg",
-    logoAlt: "Logo Film Amateur",
+    logoAlt: "Logo Le Grand Ménage",
     titleColor: "#BA090B",
     background: "#d6c6a9",
     foreground: "#202020",
@@ -1173,13 +1216,9 @@ export const projects: Project[] = [
           },
         ],
       },
-      {
-        type: "links",
-        links: [
-          { label: "Les voix les traits", href: "#" },
-          { label: "Le dossier de production", href: "#" },
-        ],
-      },
+      // Liens « Les voix les traits » et « Le dossier de production » retirés :
+      // ils pointaient vers « # ». Les remettre ici avec leurs vraies URL :
+      // { type: "links", links: [{ label: "…", href: "https://…" }] },
       {
         type: "media",
         media: [
@@ -1258,7 +1297,7 @@ export const projects: Project[] = [
         title: "Proposition de charte graphique pour un studio de production audiovisuel",
         image: archiveGecko,
         size: "wide",
-        link: { label: "Voir le site", href: "#" },
+        // Lien « Voir le site » retiré : il pointait vers « # ».
       },
       {
         title: "Réalisation et montage d'une vidéo de skate",

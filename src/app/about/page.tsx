@@ -6,7 +6,7 @@ import { profile } from "@/content/profile";
 
 export const metadata: Metadata = {
   title: "À propos",
-  description: `${profile.jobTitle}, ${profile.name} conçoit des interfaces, des design systems et des identités digitales, de la recherche utilisateur à la livraison.`,
+  description: `${profile.jobTitle}, ${profile.name} conçoit des produits de bout en bout : vision produit, recherche utilisateur, UX/UI, design system et front-end.`,
   alternates: { canonical: "/about" },
   openGraph: {
     type: "profile",

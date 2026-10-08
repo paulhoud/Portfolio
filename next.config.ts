@@ -9,6 +9,15 @@ import type { NextConfig } from "next";
 const CANONICAL_HOST = "paulhoudebine.com";
 const REDIRECTED_HOST = "www.paulhoudebine.com";
 
+/** Ancien slug → nouveau slug (cf. `src/content/projects.ts`). */
+const LEGACY_PROJECT_SLUGS: [string, string][] = [
+  ["odyssey", "sanofi-espoir"],
+  ["unicorn", "fidesio"],
+  ["lemon", "baio"],
+  ["alpha", "saegus"],
+  ["studio", "le-grand-menage"],
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -25,6 +34,24 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // Anciennes adresses de projets, héritées du prototype et sans rapport
+      // avec leur contenu (« /odyssey » pour Sanofi, etc.). Les liens déjà
+      // partagés et les pages indexées sont renvoyés vers la nouvelle adresse.
+      //
+      // Sur « www », on vise directement l'adresse canonique : sans ces règles,
+      // la règle relative ci-dessous s'appliquerait d'abord et la redirection
+      // « www » ensuite, soit deux sauts au lieu d'un.
+      ...LEGACY_PROJECT_SLUGS.map(([from, to]) => ({
+        source: `/projects/${from}`,
+        has: [{ type: "host" as const, value: REDIRECTED_HOST }],
+        destination: `https://${CANONICAL_HOST}/projects/${to}`,
+        permanent: true,
+      })),
+      ...LEGACY_PROJECT_SLUGS.map(([from, to]) => ({
+        source: `/projects/${from}`,
+        destination: `/projects/${to}`,
+        permanent: true,
+      })),
       {
         // "www" et le domaine nu servaient tous deux le site : deux URLs pour
         // un même contenu, ce qui divise les signaux de référencement et fait

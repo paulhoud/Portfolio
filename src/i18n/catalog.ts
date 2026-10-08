@@ -18,6 +18,7 @@ function buildFrenchProjectTranslations() {
         eyebrow: project.eyebrow,
         description: project.description,
         detailSubtitle: project.detailSubtitle,
+        context: project.context,
         introParagraphs: project.introParagraphs,
         sections: project.sections,
         media: project.media?.map((item) => ({ title: item.title })),

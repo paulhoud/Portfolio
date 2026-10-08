@@ -50,14 +50,14 @@ export const profile = {
    * lisible avec un seul titre) mais sont déclarés dans le schéma Person, afin
    * que les recherches portant sur ces métiers puissent aussi remonter le site.
    */
-  alternateJobTitles: ["UI Designer"],
+  alternateJobTitles: ["UX/UI Designer", "UI Designer"],
   email: "contact@paulhoudebine.com",
 
   /**
    * Villes d'exercice. La première sert d'adresse principale, l'ensemble
    * alimente le `workLocation` du schéma Person.
    */
-  localities: ["Paris", "Bordeaux"],
+  localities: ["Bordeaux", "Paris"],
   country: "FR",
 
   /** Employeur actuel. Vide = omis. */
@@ -71,17 +71,20 @@ export const profile = {
    * meta description de la page d'accueil et dans le JSON-LD.
    */
   description:
-    "Paul Houdebine, Product Designer : conception d'interfaces, design system, identité digitale et accompagnement produit de la recherche utilisateur à la livraison.",
+    "Paul Houdebine, Product Designer de bout en bout : vision produit, recherche utilisateur, UX/UI, design system et front-end, du cadrage à la mise en production.",
 
   /** Spécialités, utilisées dans le `knowsAbout` du schéma Person. */
   expertise: [
     "Product design",
-    "UX research",
-    "UI design",
+    "Vision produit",
+    "Recherche utilisateur",
+    "UX/UI design",
+    "Design de fonctionnalités IA",
     "Design system",
     "Prototypage",
+    "Développement front-end",
     "Identité visuelle",
-    "Direction artistique",
+    "Motion design",
   ],
 
   /**

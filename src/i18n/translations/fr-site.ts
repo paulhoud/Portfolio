@@ -2,9 +2,9 @@ import type { SiteCopy } from "../types";
 
 export const frSite: SiteCopy = {
   meta: {
-    title: "Paul Houdebine - Portfolio",
+    title: "Paul Houdebine — Product Designer",
     description:
-      "Portfolio de Paul Houdebine, designer produit et identité digitale.",
+      "Portfolio de Paul Houdebine, Product Designer de bout en bout : de la vision produit au front-end.",
   },
   nav: {
     method: "Méthodologie",
@@ -35,57 +35,57 @@ export const frSite: SiteCopy = {
   },
   method: {
     title: "Ma méthode",
-    introTitle: "Kesako ?",
+    introTitle: "En bref",
     introOne:
-      "En fonction des différentes compétences mises en œuvre lors d'un projet et des différents livrables attendus, aborder les problématiques avec une bonne méthodologie est capital.",
+      "Seul designer d'un produit, je couvre tout le cycle : comprendre le besoin, le cadrer, le concevoir, le tester, puis le livrer en code avec le développeur.",
     introTwo:
-      "Voici la liste des étapes qui me permettent d'aborder sereinement les projets dans un cadre Agile autour de la méthodologie du Design Thinking.",
+      "Ces cinq étapes rythment mes sprints. Je les adapte à la taille de l'équipe et à la maturité du produit, sans jamais sauter la dernière.",
   },
   methodSteps: [
     {
-      title: "Comprendre le contexte et les besoins du client",
-      body: "La première étape consiste à comprendre les objectifs, les besoins, le public cible et l'environnement concurrentiel du projet.",
+      title: "Comprendre le besoin",
+      body: "J'écoute les clients, les utilisateurs et les équipes métier pour saisir l'objectif réel, le contexte et les contraintes avant de dessiner quoi que ce soit.",
     },
     {
-      title: "Rechercher et collecter des informations",
-      body: "Je mène une recherche approfondie sur le marché, les tendances, les utilisateurs, les besoins réels et la concurrence.",
+      title: "Aller chercher le terrain",
+      body: "Interviews, tests utilisateurs, retours clients et analyse de l'existant : je collecte les signaux sur lesquels les décisions vont s'appuyer.",
     },
     {
-      title: "Synthétiser et analyser les données",
-      body: "Les informations sont triées et analysées pour produire des conclusions utiles, des insights et une direction claire.",
+      title: "Cadrer et arbitrer",
+      body: "Je synthétise ce que j'ai appris en une direction claire — vision produit, priorités, périmètre — que j'arbitre avec l'équipe.",
     },
     {
       title: "Concevoir, prototyper et tester",
-      body: "Je transforme les hypothèses en interfaces, prototypes et supports testables pour valider rapidement les décisions.",
+      body: "Je transforme les hypothèses en parcours, interfaces et prototypes appuyés sur le design system, et je les teste avant de les figer.",
     },
     {
-      title: "Livrer et accompagner",
-      body: "Les livrables sont préparés proprement, documentés et pensés pour être repris ou déployés par les équipes.",
+      title: "Livrer et suivre en production",
+      body: "Specs, suivi des sprints et front-end en binôme avec le développeur : je reste sur la fonctionnalité jusqu'à sa mise en production.",
     },
   ],
   about: {
     title: "À propos",
     intro: [
-      "Je m'appelle Paul Houdebine et je suis Product Designer. Basé entre Paris et Bordeaux, j'accompagne des équipes sur la conception d'expériences utiles, cohérentes et durables.",
-      "Mon travail relie la stratégie, l'usage réel et l'exécution graphique pour produire des interfaces lisibles, des systèmes visuels solides et des parcours utilisateurs fluides.",
-      "J'interviens aussi bien sur des produits digitaux que sur des dispositifs de communication, en collaboration avec des studios, des startups et des grands comptes.",
+      "Je m'appelle Paul Houdebine, Product Designer. Je conçois des produits de bout en bout : de la vision produit et de la recherche utilisateur jusqu'au front-end, livré en binôme avec les développeurs.",
+      "Chez UpikaJob, j'en suis le seul designer depuis 2024. Je cadre les choix UX, je recueille moi-même les retours des clients, je fais vivre le design system et je prends en charge le front-end. J'y ai conçu et construit les écrans des fonctionnalités d'IA : chatbot et synthèses générées par l'IA. Je porte aussi l'image de la marque : site, print, motion, vidéo.",
+      "Basé entre Bordeaux et Paris.",
     ],
     sections: [
       {
         title: "Parcours",
-        body: "Diplômé de HETIC, j'ai débuté par une alternance d'un an chez Memento, start-up de redistribution de photos, avant de rejoindre SÆGUS comme consultant design junior sur des missions pour Capgemini et Orange. J'ai également accompagné la Fondation Sanofi Espoir et la Maison Yves Delorme. Je suis aujourd'hui Product Designer chez UpikaJob.",
+        body: "Diplômé d'un Master de HETIC, spécialisation Product Design. J'ai débuté par une alternance d'un an chez Memento, start-up dont j'ai été le premier designer, avant de rejoindre SÆGUS comme consultant design junior sur des missions pour Orange et Capgemini. J'ai aussi travaillé sur des projets pour la Fondation Sanofi Espoir et la Maison Yves Delorme. Depuis 2024, je suis le seul designer d'UpikaJob.",
       },
       {
         title: "Ce que je fais",
-        body: "Conception d'interfaces, prototypage, design system, direction artistique, supports print et digital, storytelling produit, facilitation d'ateliers et restitution de parcours utilisateurs.",
+        body: "Vision produit et cadrage, recherche et tests utilisateurs, conception UX/UI, fonctionnalités d'IA, design system, specs et front-end — puis l'identité de la marque : site, print, motion design et vidéo.",
       },
       {
         title: "Compétences",
-        body: "UX research, UI design, design system, prototypage interactif, identité visuelle, motion design léger, collaboration Agile et handoff développeur.",
+        body: "Product discovery, interviews et tests utilisateurs, UX/UI, prototypage, design system et tokens, intégration front-end, travail en sprints avec les développeurs, motion design.",
       },
       {
         title: "Outils",
-        body: "Figma, Adobe Creative Suite, Miro, Notion, Framer, HTML/CSS, et une bonne dose de curiosité pour comprendre les enjeux métier avant de dessiner la solution.",
+        body: "Figma, Miro et la suite Adobe pour concevoir ; HTML, CSS, JavaScript, Tailwind et Symfony pour livrer, avec Cursor, VS Code et Claude.",
       },
     ],
     photoAlt: "Portrait de Paul Houdebine, Product Designer",
@@ -101,7 +101,7 @@ export const frSite: SiteCopy = {
   contact: {
     title: "Contact",
     intro:
-      "Un projet, une mission ou une collaboration ? Échangeons autour de vos besoins, de votre calendrier et de la meilleure façon de travailler ensemble.",
+      "Un produit à faire grandir ? Parlons de votre équipe, de vos utilisateurs et de ce que vous voulez livrer.",
     emailLabel: "Écrire un e-mail",
     socialLabel: "Me retrouver ailleurs",
     locationLabel: "Basé entre",

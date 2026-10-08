@@ -149,8 +149,10 @@ export function creativeWorkSchema(project: Project) {
     inLanguage: "fr-FR",
     creator: { "@id": PERSON_ID },
     author: { "@id": PERSON_ID },
+    // Pas de `keywords` : tirés des expertises du profil, ils prêtaient à
+    // chaque projet — un court métrage, des dessins — des compétences qu'il ne
+    // montre pas.
     isPartOf: { "@id": WEBSITE_ID },
-    keywords: [...profile.expertise].slice(0, 5).join(", "),
   });
 }
 

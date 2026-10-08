@@ -4,7 +4,7 @@ import { profile } from "@/content/profile";
 
 export const metadata: Metadata = {
   title: "Ma méthode",
-  description: `La méthode de travail de ${profile.name}, ${profile.jobTitle} : comprendre le contexte, rechercher, synthétiser, prototyper, tester et accompagner la livraison.`,
+  description: `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre le besoin, aller sur le terrain, cadrer, concevoir, tester, livrer et suivre en production.`,
   alternates: { canonical: "/method" },
   openGraph: {
     title: `Ma méthode — ${profile.name}`,

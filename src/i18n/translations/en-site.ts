@@ -2,9 +2,9 @@ import type { SiteCopy } from "../types";
 
 export const enSite: SiteCopy = {
   meta: {
-    title: "Paul Houdebine - Portfolio",
+    title: "Paul Houdebine — Product Designer",
     description:
-      "Portfolio of Paul Houdebine, product designer and digital identity specialist.",
+      "Portfolio of Paul Houdebine, end-to-end Product Designer: from product vision to front-end.",
   },
   nav: {
     method: "Methodology",
@@ -35,57 +35,57 @@ export const enSite: SiteCopy = {
   },
   method: {
     title: "My method",
-    introTitle: "What is it?",
+    introTitle: "In short",
     introOne:
-      "Depending on the skills involved in a project and the deliverables expected, tackling problems with a solid methodology is essential.",
+      "As the sole designer on a product, I cover the whole cycle: understanding the need, framing it, designing it, testing it, then shipping it in code with the developer.",
     introTwo:
-      "Here are the steps that help me approach projects confidently within an Agile framework built around Design Thinking.",
+      "These five steps set the pace of my sprints. I adapt them to the team's size and the product's maturity, but never skip the last one.",
   },
   methodSteps: [
     {
-      title: "Understand the context and client needs",
-      body: "The first step is to understand the project's goals, needs, target audience, and competitive environment.",
+      title: "Understand the need",
+      body: "I listen to clients, users and business teams to grasp the real goal, the context and the constraints before drawing anything.",
     },
     {
-      title: "Research and gather information",
-      body: "I conduct in-depth research on the market, trends, users, real needs, and competition.",
+      title: "Go to the field",
+      body: "Interviews, user tests, client feedback and a review of what exists: I gather the signals decisions will rest on.",
     },
     {
-      title: "Synthesize and analyze data",
-      body: "Information is sorted and analyzed to produce useful conclusions, insights, and a clear direction.",
+      title: "Frame and prioritise",
+      body: "I turn what I learned into a clear direction — product vision, priorities, scope — and settle the trade-offs with the team.",
     },
     {
-      title: "Design, prototype, and test",
-      body: "I turn hypotheses into interfaces, prototypes, and testable deliverables to validate decisions quickly.",
+      title: "Design, prototype and test",
+      body: "I turn hypotheses into journeys, interfaces and prototypes built on the design system, and test them before locking them in.",
     },
     {
-      title: "Deliver and support",
-      body: "Deliverables are prepared cleanly, documented, and designed to be reused or deployed by teams.",
+      title: "Ship and follow through",
+      body: "Specs, sprint follow-up and front-end paired with the developer: I stay on a feature until it is live in production.",
     },
   ],
   about: {
     title: "About",
     intro: [
-      "My name is Paul Houdebine and I am a Product Designer. Based between Paris and Bordeaux, I help teams build useful, coherent, and lasting experiences.",
-      "My work connects strategy, real-world usage, and graphic execution to produce readable interfaces, strong visual systems, and smooth user journeys.",
-      "I work on digital products and communication materials alike, collaborating with studios, startups, and large organisations.",
+      "My name is Paul Houdebine and I am a Product Designer. I design products end to end: from product vision and user research through to the front-end, shipped in pair with developers.",
+      "At UpikaJob, I have been the sole designer since 2024. I frame the UX decisions, gather client feedback myself, keep the design system alive and take charge of the front-end. I designed and built the screens for its AI features: the chatbot and AI-generated summaries. I also carry the brand: website, print, motion, video.",
+      "Based between Bordeaux and Paris.",
     ],
     sections: [
       {
         title: "Background",
-        body: "A HETIC graduate, I started with a one-year apprenticeship at Memento, a photo redistribution startup, before joining SÆGUS as a junior design consultant on assignments for Capgemini and Orange. I also worked with the Sanofi Espoir Foundation and Maison Yves Delorme. Today I am a Product Designer at UpikaJob.",
+        body: "I hold a Master's degree from HETIC, specialising in Product Design. I started with a one-year apprenticeship at Memento, a startup where I was the first designer, before joining SÆGUS as a junior design consultant on assignments for Orange and Capgemini. I also worked on projects for the Sanofi Espoir Foundation and Maison Yves Delorme. Since 2024, I have been UpikaJob's sole designer.",
       },
       {
         title: "What I do",
-        body: "Interface design, prototyping, design systems, art direction, print and digital assets, product storytelling, workshop facilitation, and user journey documentation.",
+        body: "Product vision and framing, user research and testing, UX/UI design, AI features, design systems, specs and front-end — plus the brand: website, print, motion design and video.",
       },
       {
         title: "Skills",
-        body: "UX research, UI design, design systems, interactive prototyping, visual identity, light motion design, Agile collaboration, and developer handoff.",
+        body: "Product discovery, user interviews and testing, UX/UI, prototyping, design systems and tokens, front-end integration, sprint work with developers, motion design.",
       },
       {
         title: "Tools",
-        body: "Figma, Adobe Creative Suite, Miro, Notion, Framer, HTML/CSS, and enough curiosity to understand business challenges before drawing the solution.",
+        body: "Figma, Miro and the Adobe suite to design; HTML, CSS, JavaScript, Tailwind and Symfony to ship, with Cursor, VS Code and Claude.",
       },
     ],
     photoAlt: "Portrait of Paul Houdebine, Product Designer",
@@ -101,7 +101,7 @@ export const enSite: SiteCopy = {
   contact: {
     title: "Contact",
     intro:
-      "Have a project, mission, or collaboration in mind? Let's talk about your needs, timeline, and the best way to work together.",
+      "A product to grow? Let's talk about your team, your users and what you want to ship.",
     emailLabel: "Send an email",
     socialLabel: "Find me elsewhere",
     locationLabel: "Based between",

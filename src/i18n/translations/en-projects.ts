@@ -5,25 +5,26 @@ import type { ProjectTranslations } from "../types";
 export const enProjectTranslations: ProjectTranslations = {
   memento: {
     title: "Memento",
-    eyebrow: "Designing tomorrow's photo redistribution service",
+    eyebrow: "First designer at a startup: product, design system and content",
     description:
-      "A SaaS platform for retrieving and redistributing individual photos at events.",
+      "A one-year apprenticeship as Memento's first designer, a SaaS redistributing event photos: interfaces, design system, videos and print.",
+    context: "Apprenticeship · January 2021 – January 2022",
     sections: [
       {
         title: "Overview",
-        body: "I had the opportunity to spend a year in an apprenticeship with Memento, a startup offering a personalized photo retrieval service powered by the cloud and facial recognition. The service was aimed at event organisers, handing every guest the pictures taken of them. The startup has since taken that idea further: recognition has given way to an AI-driven photo agent that delivers each attendee their own shots automatically.",
+        body: "Memento is a SaaS that hands every guest the photos taken of them at an event, using the cloud and facial recognition. I spent a year there as an apprentice, from January 2021 to January 2022. The startup has since taken the idea further: an AI-driven photo agent now delivers each attendee their own shots automatically.",
       },
       {
         title: "Challenges",
-        body: "The company needed to structure its interfaces, mockups, communication materials, and content to support its growth.",
+        body: "Memento had no designer yet. To grow, the team needed to improve its app and produce a lot of content at the same time: social media visuals, videos explaining the service, event materials.",
       },
       {
         title: "Solution",
-        body: "I worked on interfaces and Figma prototypes, applied a design system approach, and produced communication visuals for social media, flyers, and events.",
+        body: "I designed the app's new mockups and prototypes in Figma, and built then maintained an atomic design system so it could grow without losing consistency. Alongside, I produced motion design videos in After Effects and print materials — roll-up banners, posters, flyers — in InDesign.",
       },
       {
         title: "Outcome",
-        body: "My work helped modernize Memento's identity. To this day, the presentation video is still used by the founders to showcase the solution, and its distribution helped convert several client leads in the months that followed.",
+        body: "My work modernised Memento's identity. The presentation video became the founders' go-to support to showcase the solution, and its distribution helped convert several client leads in the months that followed.",
       },
     ],
     media: [
@@ -34,6 +35,7 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Commercial poster" },
       { title: "QR code event support" },
       { title: "Offer summary and FAQ" },
+      { title: "B2B presentation video" },
     ],
   },
 
@@ -42,9 +44,10 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "L'Odyssée — redesigning the digital ecosystem",
     description:
       "A full redesign of the customer experience for Maison Yves Delorme, from in-store research to high-fidelity prototyping.",
+    context: "Client: Maison Yves Delorme",
     introParagraphs: [
       "L'Odyssée is a project to fully redesign the digital ecosystem of Maison Yves Delorme. It aims to harmonize the customer experience across the boutique, advisory services, and digital tools.",
-      "Working alongside the marketing and sales teams, I contributed to thinking through the customer journey, interface architecture, and priority scenarios to prototype.",
+      "With the marketing and sales teams, I worked on the customer journey, the interface architecture and the priority scenarios to prototype.",
       "The approach combined field immersion, UX/UI formalization, and the production of concrete deliverables to shape a more cohesive, premium, service-oriented experience.",
     ],
     media: [
@@ -54,6 +57,7 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Creating the visual identity and brand guidelines" },
       { title: "High-fidelity prototyping of the site's key pages" },
       { title: "Site in context on tablet" },
+      { title: "Product configurator video" },
     ],
   },
 
@@ -62,10 +66,11 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Improving an intranet platform with a design thinking add-on",
     description:
       "Designing a Jive add-on for Orange to run design thinking workshops directly within the intranet.",
+    context: "Internship at SÆGUS · Client: Orange",
     sections: [
       {
         title: "Overview",
-        body: "During my second internship at SÆGUS, I worked as a junior design consultant on an Orange team. The goal was to improve how Jive — the intranet solution used daily by employees — was being used.",
+        body: "During my second internship at SÆGUS, I joined an Orange team as a junior design consultant. The goal: improve how Jive, the intranet employees use every day, was being used.",
       },
       {
         title: "Challenges",
@@ -73,25 +78,27 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Solution",
-        body: "We designed a Jive add-on built on a design thinking approach: a Figma workshop to gather requirements, then the creation of a final tool made up of reusable modules.",
+        body: "We designed a Jive add-on following a design thinking approach: a Figma workshop to gather needs, then a tool made of reusable modules.",
       },
       {
         title: "Outcome",
-        body: "The Orange team now has a ready-to-use tool to organize their work in Kanban mode within Jive itself.",
+        body: "By the end of the mission, the Orange team had a ready-to-use tool to organise its work in Kanban within Jive itself.",
       },
     ],
     media: [
       { title: "Design system organization" },
       { title: "Prototype organization" },
+      { title: "Feedback on the Agile training" },
       { title: "Miro board organization" },
     ],
   },
 
-  odyssey: {
+  "sanofi-espoir": {
     title: "Sanofi Espoir",
-    eyebrow: "A project for children's health in Senegal: strengthening local impact",
+    eyebrow: "Maternal and neonatal health in Senegal: strengthening local impact",
     description:
       "A design mission for the Sanofi Espoir Foundation focused on maternal and neonatal health in Senegal.",
+    context: "Client: Sanofi Espoir Foundation",
     sections: [
       {
         title: "Overview",
@@ -115,24 +122,27 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Identifying and accessing local healthcare facilities" },
       { title: "Supporting local teams to improve their services" },
       { title: "A collective, collaborative ideation process with the Sanofi Espoir Foundation teams" },
-      { title: "A visual map of structure and organization" },
+      { title: "Film storyboard" },
+      { title: "Accelerating Local Impact — wrap-up film" },
+      { title: "Project presentation video" },
       { title: "A detailed analysis of the patient experience and pain points along the journey" },
     ],
   },
 
-  unicorn: {
+  fidesio: {
     title: "Fidesio",
-    eyebrow: "Sanofi – spirit of solidarity",
+    eyebrow: "Sanofi Espoir — spirit of solidarity",
     detailSubtitle: "Healthcare professionals on mission",
     description:
-      "Healthcare professionals on mission: redesigning digital tools and design selection for Sanofi Espoir.",
+      "A slot management app, an editorial website and communication visuals for Sanofi Espoir's healthcare professionals on mission.",
+    context: "With the Fidesio agency · Client: Sanofi Espoir",
     blocks: [
       {
         type: "sections",
         sections: [
           {
             title: "Overview",
-            body: "A mission for Sanofi Espoir focused on managing professional time slots and design selection for tools aimed at healthcare professionals on mission.",
+            body: "A mission for Sanofi Espoir around tools for healthcare professionals on mission: managing their time slots, an editorial website and communication.",
           },
           {
             title: "Challenges",
@@ -140,7 +150,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           {
             title: "Solution",
-            body: "I contributed to designing application interfaces, defining an editorial website, and producing communication visuals consistent with the Sanofi Espoir identity.",
+            body: "I worked on three strands: the management app's interfaces, the definition of the editorial website and the communication visuals, all within the Sanofi Espoir identity.",
           },
         ],
       },
@@ -156,7 +166,7 @@ export const enProjectTranslations: ProjectTranslations = {
         sections: [
           {
             title: "Design direction",
-            body: "The design selection focused on a sober, institutional, and reassuring universe, with a clear hierarchy between editorial content, data, and primary actions.",
+            body: "A sober, institutional and reassuring universe, with a clear hierarchy between editorial content, data and primary actions.",
           },
           {
             title: "Editorial website",
@@ -203,18 +213,19 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Illustrating use cases to reach a broad audience",
     description:
       "Creating animated videos for Capgemini to illustrate Microsoft 365 use cases.",
+    context: "Internship at SÆGUS · Client: Capgemini",
     sections: [
       {
         title: "Overview",
-        body: "During my internship at SÆGUS, I worked for Capgemini on creating animated videos featuring characters and sets using After Effects and the Duik plugin.",
+        body: "During an internship at SÆGUS, I worked for Capgemini on animated videos featuring characters and sets, made in After Effects with the Duik plugin.",
       },
       {
         title: "Challenges",
-        body: "The brief called for four animated use cases, with many scenes and a heavy animation workload, within a tight deadline for a long-standing client.",
+        body: "The brief called for four animated use cases — three are shown below — with many scenes and a heavy animation workload, on a tight deadline for a long-standing client.",
       },
       {
         title: "Solution",
-        body: "I became more autonomous in production, drawing on my skills in graphic design and art direction, as well as my interest in video and animation.",
+        body: "I ran production more and more autonomously, drawing on my skills in graphic design, art direction and animation.",
       },
       {
         title: "Outcome",
@@ -228,11 +239,12 @@ export const enProjectTranslations: ProjectTranslations = {
     ],
   },
 
-  lemon: {
+  baio: {
     title: "Baio",
-    eyebrow: "Building a gamified app that encourages healthy product consumption",
+    eyebrow: "Building a gamified app that encourages healthier shopping",
     description:
       "Designing a gamified mobile app to encourage healthier eating habits.",
+    context: "Mobile app concept",
     blocks: [
       {
         type: "sections",
@@ -257,7 +269,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         type: "media",
-        caption: "Screens from the previous version of the Lemon app",
+        caption: "Screens from the previous version of the app",
         media: [
           { title: "Eco-friendly groceries" },
           { title: "Informed community" },
@@ -272,27 +284,28 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         type: "media",
-        media: [{ title: "View organization and filters in Figma" }],
+        media: [{ title: "Animated app presentation" }],
       },
       {
-        type: "links",
-        links: [{ label: "View on Figma" }],
+        type: "media",
+        media: [{ title: "View organization and filters in Figma" }],
       },
     ],
   },
 
-  alpha: {
+  saegus: {
     title: "SÆGUS",
-    eyebrow: "10th anniversary Saegus x Le Trianon",
+    eyebrow: "SÆGUS's 10th anniversary × Le Trianon",
     description:
       "Designing the digital greeting card and communication materials for SÆGUS's 10th anniversary.",
+    context: "Internship at SÆGUS · internal project",
     blocks: [
       {
         type: "sections",
         sections: [
           {
             title: "Overview",
-            body: "A design mission for SÆGUS's 10th anniversary: digital greeting card, desktop/mobile variations, and communication materials for the event at Le Trianon.",
+            body: "A design mission for SÆGUS's 10th anniversary: digital greeting card, desktop and mobile variations, and communication materials for the event at Le Trianon.",
           },
           {
             title: "Challenges",
@@ -300,7 +313,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           {
             title: "Solution",
-            body: "I developed a strong visual direction around purple, key figures, and testimonials, with a modular architecture designed for web and email.",
+            body: "I worked on a strong visual direction around purple, key figures, and testimonials, with a modular architecture designed for web and email.",
           },
           {
             title: "Outcome",
@@ -311,7 +324,7 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [
-          { title: "2021 digital greeting card" },
+          { title: "Digital greeting card" },
           { title: "Editorial version of the greeting card" },
         ],
       },
@@ -321,7 +334,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         type: "media",
-        media: [{ title: "Agile support — long-term partnership" }],
+        media: [{ title: "Agile support — HR function at Orange" }],
       },
       {
         type: "media",
@@ -333,9 +346,10 @@ export const enProjectTranslations: ProjectTranslations = {
     ],
   },
 
-  studio: {
-    title: "Film Amateur",
-    eyebrow: "Making a short film in a short timeframe to encourage digital teamwork",
+  "le-grand-menage": {
+    title: "Le Grand Ménage",
+    eyebrow: "Making a short film in two weeks, from writing to editing",
+    context: "Short film · multidisciplinary team · 2 weeks",
     description:
       "The short film « Le Grand Ménage », produced as a team over two weeks, from writing to editing.",
     blocks: [
@@ -363,14 +377,6 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [{ title: "Short film poster" }],
-      },
-      {
-        type: "links",
-        links: [
-          { label: "Watch the short film" },
-          { label: "Les voix les traits" },
-          { label: "Production dossier" },
-        ],
       },
       {
         type: "media",
@@ -402,12 +408,14 @@ export const enProjectTranslations: ProjectTranslations = {
 
   upikajob: {
     title: "UpikaJob",
-    eyebrow: "Career coaching & professional support platform",
-    description: "My current role: product design for a career coaching platform.",
+    eyebrow: "An HRIS for HR teams and managers",
+    description:
+      "Sole designer of an HRIS since 2024: product vision, user research, UX/UI, design system and front-end, paired with the developer.",
+    context: "Current role · since January 2024 · sole designer",
     sections: [
       {
         title: "Overview",
-        body: "UpikaJob is now an HRIS: a platform that equips HR teams and managers to follow their people — reviews, skills, objectives, steering indicators. It began as something quite different, a tool for training organisations supporting young talent into work. I am its Product Designer, and I lived that transformation from the inside, from the first redesigns through to the product as it stands today.",
+        body: "UpikaJob is now an HRIS: a platform that equips HR teams and managers to follow their people — reviews, skills, objectives, steering indicators. It began as something quite different, a tool for training organisations supporting young talent into work. I have been its sole designer since January 2024, and I lived that transformation from the inside, from the first redesigns through to the product as it stands today.",
       },
       {
         title: "Challenge",
@@ -415,26 +423,30 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Solution",
-        body: "Several successive redesigns, each carrying a shift in vision rather than a simple refresh. A visual identity reworked in depth, then a design system shared with the developers — primitives, tokens, documented components — so that coherence would hold as the product grew. And features taken end to end: framing the need, making the trade-offs, designing, then following through to release.",
+        body: "Several successive redesigns, each carrying a shift in vision rather than a simple refresh. A visual identity reworked in depth, then a design system shared with the developer — primitives, tokens, documented components — so that coherence would hold as the product grew. And features taken end to end: user interviews and tests, framing, trade-offs, specs, design, then front-end in pair through to release.",
       },
       {
         title: "Outcome",
-        body: "A complete HR platform whose features I now design, and whose marketing site I drew then built on my own. My role followed the same trajectory as the product: screens first, then the product, all the way to implementation — Vibe Coding now letting me ship part of what I design myself.",
+        body: "A complete HR platform whose design I now carry end to end: product vision, UX/UI, design system and front-end. I also designed then built the marketing site on my own, with AI-assisted coding tools, and I produce the brand's content: video, motion design, print, social media.",
+      },
+      {
+        title: "By the numbers",
+        body: "Reviews, the chatbot and AI-generated summaries, whose screens I designed and built, have taken off since I joined. Between 2024 and 2025, reviews held rose from 2,870 to 7,901 (×2.8), active employees from 1,915 to 3,552, and AI-generated summaries from 2,880 to 9,216. Growth continues in 2026: as of 8 October, 6,403 reviews had already been held, 21% more than at the same date in 2025. In total since 2024: more than 17,000 reviews held and nearly 800,000 messages exchanged with the chatbot.",
       },
     ],
     story: {
-      lead: "A platform born to support young talent, now an HRIS. I grew alongside it.",
+      lead: "A platform born to support young talent, now an HRIS. I am its sole designer, from product vision through to the front-end.",
       highlight: {
         label: "The product today",
         title: "An HRIS that equips HR teams and managers day to day",
-        body: "People steering, review campaigns, skills mapping, tracking indicators — all of it designed screen by screen alongside the engineering team.",
+        body: "People steering, review campaigns, skills mapping, tracking indicators: designed screen by screen, then shipped in pair with the developer.",
         shots: [
           { caption: "The dashboard" },
           { caption: "HR and managerial steering" },
           { caption: "Skills mapping" },
         ],
       },
-      bridge: "It did not always look like this.",
+      bridge: "The product did not always look like this.",
       trackLabels: { product: "The product", role: "My role" },
       beats: [
         {
@@ -470,7 +482,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           role: {
             title: "Designer of the redesigns",
-            body: "I carried the successive redesigns, evolved the visual identity, and laid the foundations of the design system with the team.",
+            body: "I led the successive redesigns, reworked the visual identity and logotype, and laid the foundations of a design system shared with the developer.",
           },
           shots: [
             { caption: "Logotype variations" },
@@ -494,7 +506,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           role: {
             title: "Product Designer",
-            body: "I design the interface of the new product, screen after screen, setting the bearings of a platform built for HR professionals.",
+            body: "I frame the product vision and UX decisions, then design the new product's interface, screen after screen, for HR professionals.",
           },
           shots: [
             { caption: "The new platform's dashboard" },
@@ -507,11 +519,11 @@ export const enProjectTranslations: ProjectTranslations = {
           period: "In depth",
           product: {
             title: "Features in their own right",
-            body: "Annual reviews, skills mapping, steering indicators, employee profiles: each building block calls for its own framing.",
+            body: "Annual reviews, AI-generated summaries, chatbot, skills mapping, steering indicators, employee profiles: each building block calls for its own framing.",
           },
           role: {
             title: "Designing end to end",
-            body: "From framing the need through to release, working with developers every single day.",
+            body: "User interviews and tests, client feedback gathered first-hand, specs, sprints: every feature, AI screens included, goes from framing to release, paired daily with the developer.",
           },
           shots: [
             { caption: "Annual review campaigns" },
@@ -529,7 +541,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           role: {
             title: "Product Designer — design & implementation",
-            body: "I designed the marketing site, then built it on my own. Vibe Coding now lets me ship part of what I design myself.",
+            body: "I take charge of the product's front-end, paired with the developer. The marketing site, I designed then built on my own.",
           },
           shots: [
             { caption: "Site home page" },
@@ -540,10 +552,14 @@ export const enProjectTranslations: ProjectTranslations = {
       ],
       closing: {
         title: "What it adds up to",
-        body: "The platform as it stands online today, and the marketing site I designed then built on my own.",
+        body: "The platform as it stands online today, its presentation videos, and the marketing site I designed then built on my own.",
         link: { label: "Visit the site" },
       },
     },
+    media: [
+      { title: "The platform in ninety seconds" },
+      { title: "Platform presentation trailer" },
+    ],
   },
 };
 

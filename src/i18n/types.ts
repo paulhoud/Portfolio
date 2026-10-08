@@ -92,6 +92,8 @@ export type ProjectCopy = {
   eyebrow: string;
   description: string;
   detailSubtitle?: string;
+  /** Cadre du projet (contrat, employeur, client, période). */
+  context?: string;
   introParagraphs?: string[];
   sections?: { title: string; body: string }[];
   media?: { title: string }[];

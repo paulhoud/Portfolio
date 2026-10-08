@@ -54,7 +54,7 @@ export default async function OpengraphImage() {
             {profile.name}
           </div>
           <div style={{ fontSize: 30, color: "rgba(245,242,244,0.66)", marginTop: 26 }}>
-            Interfaces, design system et identité digitale
+            De la vision produit au front-end
           </div>
           <div style={{ fontSize: 24, color: "rgba(245,242,244,0.42)", marginTop: 40 }}>
             {`${profile.localities.join(" · ")} — paulhoudebine.com`}

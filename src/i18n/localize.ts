@@ -176,6 +176,7 @@ export function localizeProject(
     eyebrow: copy.eyebrow ?? project.eyebrow,
     description: copy.description ?? project.description,
     detailSubtitle: copy.detailSubtitle ?? project.detailSubtitle,
+    context: copy.context ?? project.context,
     introParagraphs: copy.introParagraphs ?? project.introParagraphs,
     sections: mergeSections(project.sections, copy.sections),
     story: mergeStory(project.story, copy.story),

@@ -70,7 +70,8 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
                 priority
               />
             </div>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <ProjectContext context={project.context} />
               <CompanySiteLink site={project.companySite} />
             </div>
           </header>
@@ -122,8 +123,9 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
             </ScrollRevealItem>
           ) : null}
 
-          {project.companySite ? (
-            <ScrollRevealItem className="mb-12 md:mb-16">
+          {project.context || project.companySite ? (
+            <ScrollRevealItem className="mb-12 flex flex-col items-center gap-3 md:mb-16">
+              <ProjectContext context={project.context} />
               <CompanySiteLink site={project.companySite} />
             </ScrollRevealItem>
           ) : null}
@@ -320,6 +322,21 @@ function externalLinkProps(href: string) {
 }
 
 /**
+ * Cadre du projet (contrat, employeur, client, période), placé au-dessus du
+ * lien vers le site de l'entreprise. Même registre typographique que ce lien :
+ * il situe le projet sans concurrencer le titre.
+ */
+function ProjectContext({ context }: { context?: string }) {
+  if (!context) return null;
+
+  return (
+    <p className="text-balance text-[0.62rem] uppercase tracking-[0.18em] text-white/55">
+      {context}
+    </p>
+  );
+}
+
+/**
  * Lien vers le site officiel de l'entreprise concernée, placé sous le logo.
  * Discret par défaut : il situe le projet sans détourner de la lecture.
  */
@@ -402,7 +419,8 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
                 priority
               />
             </div>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <ProjectContext context={project.context} />
               <CompanySiteLink site={project.companySite} />
             </div>
           </header>
@@ -508,8 +526,9 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
             />
           </ScrollRevealItem>
 
-          {project.companySite ? (
-            <ScrollRevealItem className="mb-10 md:mb-14">
+          {project.context || project.companySite ? (
+            <ScrollRevealItem className="mb-10 flex flex-col items-center gap-3 md:mb-14">
+              <ProjectContext context={project.context} />
               <CompanySiteLink site={project.companySite} />
             </ScrollRevealItem>
           ) : null}
