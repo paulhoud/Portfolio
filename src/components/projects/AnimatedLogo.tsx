@@ -148,8 +148,8 @@ export function AnimatedLogo({
         <motion.span
           aria-hidden="true"
           className="absolute h-28 w-28 rounded-full bg-current opacity-15 blur-2xl md:h-40 md:w-40"
-          animate={reduceMotion ? undefined : { rotate: 360 }}
-          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          animate={reduceMotion ? { rotate: 0 } : { rotate: 360 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 6, repeat: Infinity, ease: "linear" }}
         />
       ) : null}
 
@@ -157,8 +157,8 @@ export function AnimatedLogo({
         <motion.span
           aria-hidden="true"
           className="absolute h-20 w-44 -skew-x-12 bg-white/20 blur-2xl"
-          animate={reduceMotion ? undefined : { x: [-120, 120] }}
-          transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion ? { x: 0 } : { x: [-120, 120] }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
         />
       ) : null}
 

@@ -32,6 +32,7 @@ export type SiteCopy = {
     mobile: string;
     openMenu: string;
     closeMenu: string;
+    skipToContent: string;
   };
   footer: {
     copyright: string;
@@ -46,7 +47,6 @@ export type SiteCopy = {
   gallery: {
     intro: string;
     listLabel: string;
-    skipToList: string;
     viewProject: string;
     overview: string;
     close: string;

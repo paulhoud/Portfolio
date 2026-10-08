@@ -324,7 +324,9 @@ function HeaderNavLink({
 function MotionToggle({ labelled = false }: { labelled?: boolean }) {
   const { t } = useTranslation();
   const [paused, toggle] = useMotionPaused();
-  const label = paused ? t.site.motion.resume : t.site.motion.pause;
+  // Libellé fixe : l'état (en pause ou non) est porté par aria-pressed, et
+  // l'icône bascule entre pause et lecture.
+  const label = t.site.motion.pause;
 
   return (
     <button
@@ -332,11 +334,12 @@ function MotionToggle({ labelled = false }: { labelled?: boolean }) {
       onClick={toggle}
       aria-pressed={paused}
       aria-label={labelled ? undefined : label}
-      title={labelled ? undefined : label}
+      title={labelled ? undefined : paused ? t.site.motion.resume : label}
       className={cn(
-        "flex items-center gap-3 text-white/55 transition-colors duration-300 hover:text-white",
+        "flex items-center gap-3 transition-colors duration-300 hover:text-white",
         "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
-        labelled ? "text-sm" : "h-8 w-8 justify-center",
+        paused ? "text-white" : "text-white/60",
+        labelled ? "min-h-11 text-sm" : "-mx-1.5 h-11 w-11 justify-center",
       )}
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">

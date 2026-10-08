@@ -5,10 +5,11 @@ import { useCallback, useSyncExternalStore } from "react";
 /**
  * Réglage « animations en pause », choisi par le visiteur et mémorisé.
  *
- * Il coupe tout ce qui bouge sans qu'on le demande : animations automatiques
- * des tuiles, boucles des logos, séquences d'arrivée. Ce que le visiteur
- * déclenche lui-même (survol, clic) continue de fonctionner. C'est l'équivalent
- * à la demande du réglage système « réduire les animations ».
+ * Il coupe ce qui bouge sans qu'on le demande (animation en attente des
+ * tuiles, boucles des logos) et réduit les autres mouvements comme le réglage
+ * système « réduire les animations » : AppFrame passe alors framer-motion en
+ * mouvement réduit (glissements de page, apparitions au défilement). Ce que le
+ * visiteur déclenche lui-même (survol, clic) continue de fonctionner.
  */
 
 const STORAGE_KEY = "portfolio-motion-paused";
@@ -16,14 +17,6 @@ const listeners = new Set<() => void>();
 
 // Valeur de secours quand le stockage local est indisponible.
 let memory = false;
-
-function read(): boolean {
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
@@ -51,7 +44,7 @@ export function setMotionPaused(paused: boolean) {
 
 function getSnapshot() {
   try {
-    return read() || memory;
+    return window.localStorage.getItem(STORAGE_KEY) === "1";
   } catch {
     return memory;
   }

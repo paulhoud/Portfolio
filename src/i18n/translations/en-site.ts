@@ -15,6 +15,7 @@ export const enSite: SiteCopy = {
     mobile: "Mobile navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    skipToContent: "Skip to content",
   },
   footer: {
     copyright: "© 2026 Paul Houdebine.",
@@ -28,7 +29,6 @@ export const enSite: SiteCopy = {
     intro:
       "End-to-end Product Designer: product vision, user research, UX/UI, design systems and front-end, from framing to production.",
     listLabel: "Projects",
-    skipToList: "Skip to the project list",
     viewProject: "View project",
     overview: "Overview",
     close: "Close",

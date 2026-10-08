@@ -353,7 +353,7 @@ function CompanySiteLink({ site }: { site?: ProjectLink }) {
       href={site.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.18em] text-white/40 transition-colors hover:text-white/80 focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50"
+      className="group inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.18em] text-white/60 transition-colors hover:text-white/90 focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50"
     >
       {site.label}
       <svg

@@ -33,6 +33,20 @@ const MAX_RESTORE_FRAMES = 12;
  *
  * @param path Chemin de la page concernée.
  */
+/**
+ * Position mémorisée pour une page, ou `null`. Permet à une page de savoir
+ * qu’une restauration est en cours et d’attendre qu’elle aboutisse avant de
+ * s’afficher (cf. GalleryHome).
+ */
+export function readScrollMemory(path: string): number | null {
+  try {
+    const value = Number(window.sessionStorage.getItem(`scroll-memory:${path}`));
+    return Number.isFinite(value) && value > 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useScrollMemory(path: string) {
   const pathname = usePathname();
   const isActive = pathname === path;
@@ -41,6 +55,9 @@ export function useScrollMemory(path: string) {
 
   useIsomorphicLayoutEffect(() => {
     if (!isActive) return;
+    // Une ancre dans l'adresse (#oeuvre-…) désigne une position précise :
+    // elle prime sur celle qu'on avait laissée.
+    if (window.location.hash) return;
 
     const stored = window.sessionStorage.getItem(key);
     const target = Number(stored);
