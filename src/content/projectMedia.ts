@@ -31,6 +31,22 @@ const motionStartAt: Partial<Record<MediaKey, number>> = {
   PERSO: 0.52,
 };
 
+/**
+ * Instant (en secondes) où arrêter une animation de tuile qui s'efface avant
+ * la fin de son fichier. Celle d'UpikaJob garde son logo entier jusqu'à 8,8 s,
+ * puis il disparaît et la tuile reste blanche jusqu'à 12 s (mesuré le 9 oct.
+ * 2026) : comme le survol fige la dernière image, on s'arrête avant.
+ */
+const motionEndAt: Partial<Record<MediaKey, number>> = {
+  UPIKAJOB: 8.8,
+};
+
+/** Instant d'arrêt de l'animation d'une carte, ou `null` pour aller au bout. */
+export function getMotionEnd(key: string | undefined | null): number | null {
+  if (!key) return null;
+  return motionEndAt[key.toUpperCase() as MediaKey] ?? null;
+}
+
 /** Instant de départ de l'animation d'une carte (0 si inconnu). */
 export function getMotionStart(key: string | undefined | null): number {
   if (!key) return 0;

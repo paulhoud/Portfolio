@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, type TargetAndTransition } from "framer-motion";
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { Project } from "@/content/projects";
 import { cn } from "@/lib/utils";
 const sizes: Record<Project["logoSize"], string> = {
@@ -62,6 +62,7 @@ type AnimatedLogoProps = Pick<
   | "logoScale"
   | "logoVideoZoom"
   | "logoFallback"
+  | "logoLoop"
 > & {
   priority?: boolean;
 };
@@ -76,14 +77,48 @@ export function AnimatedLogo({
   logoScale = 1,
   logoVideoZoom = 1,
   logoFallback,
+  logoLoop,
   priority = false,
 }: AnimatedLogoProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const reduceMotion = useReducedMotion();
   const isVideo =
     logoKind === "video" || logo.endsWith(".webm") || logo.endsWith(".mp4");
   // Faux au rendu serveur, puis évalué côté client : pas d'écart d'hydratation.
   const needsFallback = useSyncExternalStore(noopSubscribe, isWebKitWithoutWebmAlpha, () => false);
   const useFallback = isVideo && Boolean(logoFallback) && needsFallback;
+
+  // Boucle partielle (cf. `logoLoop`) : retour à `from` dès `until` atteint.
+  const loopFrom = logoLoop?.from;
+  const loopUntil = logoLoop?.until;
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || loopFrom === undefined || loopUntil === undefined) return;
+
+    let frameHandle = 0;
+    const rewind = () => {
+      video.currentTime = loopFrom;
+      const played = video.play();
+      if (played && typeof played.catch === "function") played.catch(() => {});
+    };
+    const check = () => {
+      if (video.currentTime >= loopUntil) rewind();
+    };
+    const watchFrames = "requestVideoFrameCallback" in video;
+    const onFrame = () => {
+      check();
+      frameHandle = video.requestVideoFrameCallback(onFrame);
+    };
+    if (watchFrames) frameHandle = video.requestVideoFrameCallback(onFrame);
+
+    video.addEventListener("timeupdate", check);
+    video.addEventListener("ended", rewind);
+    return () => {
+      video.removeEventListener("timeupdate", check);
+      video.removeEventListener("ended", rewind);
+      if (watchFrames && frameHandle) video.cancelVideoFrameCallback(frameHandle);
+    };
+  }, [loopFrom, loopUntil, useFallback]);
   const logoMotion = reduceMotion ? undefined : logoMotions[animation];
 
   return (
@@ -131,9 +166,10 @@ export function AnimatedLogo({
           // elle garde ainsi la même taille quel que soit le zoom.
           <div className="drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]">
             <video
+              ref={videoRef}
               src={logo}
               autoPlay
-              loop
+              loop={!logoLoop}
               muted
               playsInline
               aria-label={logoAlt}

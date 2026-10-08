@@ -245,6 +245,13 @@ export type Project = {
    * des vidéos WebM. Recadrée sur la zone utile : aucun grossissement requis.
    */
   logoFallback?: string;
+  /**
+   * Boucle d'un logo vidéo sur une partie seulement de son fichier : lu une
+   * fois depuis le début, il revient ensuite à `from` dès qu'il atteint
+   * `until`. Sert quand l'animation s'efface en fin de fichier : `from` est
+   * choisi sur une pose identique à `until`, pour un raccord invisible.
+   */
+  logoLoop?: { from: number; until: number };
   titleColor?: string;
   /**
    * Site officiel de l'entreprise ou de la marque concernée. Absent lorsqu'il
@@ -308,6 +315,10 @@ export const projects: Project[] = [
     logoKind: "video",
     logoVideoZoom: 960 / 424,
     logoFallback: "/assets/upikajob-logo.webp",
+    // Le logo disparaît de 9,3 s à 12 s. À 8,8 s il a la même pose qu'à 3,6 s
+    // (écart mesuré du même ordre que entre deux images voisines). La version
+    // WebP ne contient que ce passage, qui boucle seul.
+    logoLoop: { from: 3.6, until: 8.8 },
     logoAlt: "Logo UpikaJob",
     background: "#ffffff",
     foreground: "#ffffff",
