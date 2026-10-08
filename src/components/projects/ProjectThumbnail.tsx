@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getProjectMedia } from "@/content/projectMedia";
+import { getMotionStart, getProjectMedia } from "@/content/projectMedia";
 import { requestIdle } from "@/lib/idle";
 import { cn } from "@/lib/utils";
 import { usePassiveAnimation } from "./PassiveAnimationProvider";
@@ -22,6 +22,12 @@ type ProjectThumbnailProps = {
 
 const IMAGE_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
 
+/**
+ * Vitesse de lecture des animations de tuiles : un peu plus vive que l'export,
+ * sans dénaturer le mouvement.
+ */
+const PLAYBACK_RATE = 1.2;
+
 type Mode = "idle" | "hover" | "passive";
 
 /**
@@ -38,6 +44,7 @@ export function ProjectThumbnail({
   priority = false,
 }: ProjectThumbnailProps) {
   const media = getProjectMedia(mediaKey);
+  const motionStart = getMotionStart(mediaKey);
   const passive = usePassiveAnimation();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -68,15 +75,20 @@ export function ProjectThumbnail({
     ensurePreloaded();
     // Le reset se fait au démarrage (et non à l'arrêt) pour éviter d'afficher
     // la frame 0 pendant le fondu de sortie.
+    // On démarre juste avant le premier mouvement : le plan fixe du début est
+    // identique au placeholder (cf. getMotionStart).
     try {
-      video.currentTime = 0;
+      video.currentTime = motionStart;
     } catch {
       /* ignore */
     }
+    // `load()` remet la vitesse à sa valeur par défaut : on règle les deux.
+    video.defaultPlaybackRate = PLAYBACK_RATE;
+    video.playbackRate = PLAYBACK_RATE;
     setVideoVisible(true);
     const played = video.play();
     if (played && typeof played.catch === "function") played.catch(() => {});
-  }, [ensurePreloaded]);
+  }, [ensurePreloaded, motionStart]);
 
   const stopVideo = useCallback(() => {
     setVideoVisible(false);

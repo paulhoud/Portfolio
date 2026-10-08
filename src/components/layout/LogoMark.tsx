@@ -41,12 +41,12 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
         width={61}
         height={70}
         loading="eager"
-        className="transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-0"
+        className="transition-opacity duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-0"
         style={{ transitionTimingFunction: logoFillEase }}
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+        className="absolute inset-0 opacity-0 transition-opacity duration-[400ms] group-hover:opacity-100"
         style={{
           transitionTimingFunction: logoFillEase,
           WebkitMaskImage: "url(/assets/Logo-0-1.svg)",

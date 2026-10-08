@@ -67,6 +67,8 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
                 logoKind={project.logoKind}
                 logoSize={project.logoSize}
                 logoScale={project.logoScale}
+                logoVideoZoom={project.logoVideoZoom}
+                logoFallback={project.logoFallback}
                 priority
               />
             </div>
@@ -418,6 +420,8 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
                 logoKind={project.logoKind}
                 logoSize={project.logoSize}
                 logoScale={project.logoScale}
+                logoVideoZoom={project.logoVideoZoom}
+                logoFallback={project.logoFallback}
                 priority
               />
             </div>

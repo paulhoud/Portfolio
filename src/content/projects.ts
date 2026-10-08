@@ -233,6 +233,18 @@ export type Project = {
   foreground: string;
   logoSize: "sm" | "md" | "lg" | "xl";
   logoScale?: number;
+  /**
+   * Grossissement appliqué à un logo vidéo dont l'image n'occupe qu'une partie
+   * du cadre (export transparent avec de larges marges). Ne change pas la mise
+   * en page : seule la vidéo est agrandie, ses marges transparentes débordent.
+   */
+  logoVideoZoom?: number;
+  /**
+   * Image animée transparente (WebP) affichée à la place d'un logo vidéo par
+   * Safari et les navigateurs d'iPhone/iPad, qui ne gèrent pas la transparence
+   * des vidéos WebM. Recadrée sur la zone utile : aucun grossissement requis.
+   */
+  logoFallback?: string;
   titleColor?: string;
   /**
    * Site officiel de l'entreprise ou de la marque concernée. Absent lorsqu'il
@@ -289,8 +301,13 @@ export const projects: Project[] = [
     description:
       "Seul designer d'un SIRH depuis 2024 : vision produit, recherche utilisateur, UX/UI, design system et front-end, en binôme avec le développeur.",
     context: "Poste actuel · depuis janvier 2024 · seul designer",
-    logo: "/assets/upikajob.webm",
+    // Export transparent sans la feuille blanche (Paul, 8 oct. 2026). L'icône
+    // occupe le centre d'un cadre de 960 px : le zoom lui rend sa taille
+    // d'avant. La version WebP est recadrée sur 424 px autour de l'icône.
+    logo: "/assets/upikajob-logo.webm",
     logoKind: "video",
+    logoVideoZoom: 960 / 424,
+    logoFallback: "/assets/upikajob-logo.webp",
     logoAlt: "Logo UpikaJob",
     background: "#ffffff",
     foreground: "#ffffff",
