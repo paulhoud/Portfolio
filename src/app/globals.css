@@ -44,13 +44,18 @@ body {
   letter-spacing: 0.01em;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* Dans la couche « base » de Tailwind : hors couche, ces règles passaient
+   devant les classes utilitaires, et un lien ne pouvait plus recevoir de
+   couleur propre (« text-black » sur un bouton-lien restait blanc). */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-button {
-  font: inherit;
+  button {
+    font: inherit;
+  }
 }
 
 ::selection {
@@ -89,6 +94,10 @@ button {
 
 .page-transition-layer {
   grid-area: 1 / 1;
+  /* Un élément de grille ne rétrécit pas, par défaut, sous la largeur de son
+     contenu : une rangée défilante plus large que l'écran (les pastilles de la
+     galerie sur mobile) élargissait toute la page. */
+  min-width: 0;
   min-height: 100vh;
   background: var(--background);
 }

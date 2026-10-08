@@ -4,6 +4,7 @@ import { motion, useReducedMotion, type TargetAndTransition } from "framer-motio
 import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { Project } from "@/content/projects";
+import { useMotionPaused } from "@/lib/motionPause";
 import { cn } from "@/lib/utils";
 const sizes: Record<Project["logoSize"], string> = {
   sm: "w-16 md:w-20",
@@ -81,7 +82,10 @@ export function AnimatedLogo({
   priority = false,
 }: AnimatedLogoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const reduceMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion();
+  // La pause demandée par le visiteur vaut comme une préférence système.
+  const [motionPaused] = useMotionPaused();
+  const reduceMotion = prefersReducedMotion || motionPaused;
   const isVideo =
     logoKind === "video" || logo.endsWith(".webm") || logo.endsWith(".mp4");
   // Faux au rendu serveur, puis évalué côté client : pas d'écart d'hydratation.
@@ -119,6 +123,18 @@ export function AnimatedLogo({
       if (watchFrames && frameHandle) video.cancelVideoFrameCallback(frameHandle);
     };
   }, [loopFrom, loopUntil, useFallback]);
+
+  // En pause, le logo vidéo s'arrête sur l'image en cours ; il repart ensuite.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (motionPaused) {
+      video.pause();
+    } else {
+      const played = video.play();
+      if (played && typeof played.catch === "function") played.catch(() => {});
+    }
+  }, [motionPaused, useFallback]);
   const logoMotion = reduceMotion ? undefined : logoMotions[animation];
 
   return (

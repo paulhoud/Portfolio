@@ -37,6 +37,23 @@ export type SiteCopy = {
     copyright: string;
     rights: string;
   };
+  /** Bouton qui met en pause les animations automatiques. */
+  motion: {
+    pause: string;
+    resume: string;
+  };
+  /** Accueil en galerie (branche nav-immersive). */
+  gallery: {
+    intro: string;
+    listLabel: string;
+    skipToList: string;
+    viewProject: string;
+    overview: string;
+    close: string;
+    viewSwitch: string;
+    showGrid: string;
+    showGallery: string;
+  };
   language: {
     switchTo: string;
     french: string;

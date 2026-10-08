@@ -20,6 +20,22 @@ export const enSite: SiteCopy = {
     copyright: "© 2026 Paul Houdebine.",
     rights: "All rights reserved.",
   },
+  motion: {
+    pause: "Pause animations",
+    resume: "Resume animations",
+  },
+  gallery: {
+    intro:
+      "End-to-end Product Designer: product vision, user research, UX/UI, design systems and front-end, from framing to production.",
+    listLabel: "Projects",
+    skipToList: "Skip to the project list",
+    viewProject: "View project",
+    overview: "Overview",
+    close: "Close",
+    viewSwitch: "Home layout",
+    showGrid: "Grid",
+    showGallery: "Gallery",
+  },
   language: {
     switchTo: "Change language",
     french: "French",

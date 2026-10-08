@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/i18n/context";
+import { useMotionPaused } from "@/lib/motionPause";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { cn } from "@/lib/utils";
 import { LanguageFlags } from "./LanguageFlags";
@@ -189,6 +190,8 @@ export function SiteHeader() {
             <SocialLinks />
             <span aria-hidden="true" className="h-5 w-px bg-white/15" />
             <LanguageFlags />
+            <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+            <MotionToggle />
           </div>
 
           <button
@@ -269,6 +272,7 @@ export function SiteHeader() {
               <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
                 <SocialLinks />
                 <LanguageFlags />
+                <MotionToggle labelled />
               </div>
             </motion.div>
           </>
@@ -309,5 +313,36 @@ function HeaderNavLink({
         )}
       />
     </Link>
+  );
+}
+
+/**
+ * Met en pause les animations automatiques (tuiles, logos, séquences
+ * d'arrivée) et mémorise le choix. Icône seule dans le header, icône et
+ * libellé dans le menu mobile.
+ */
+function MotionToggle({ labelled = false }: { labelled?: boolean }) {
+  const { t } = useTranslation();
+  const [paused, toggle] = useMotionPaused();
+  const label = paused ? t.site.motion.resume : t.site.motion.pause;
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-pressed={paused}
+      aria-label={labelled ? undefined : label}
+      title={labelled ? undefined : label}
+      className={cn(
+        "flex items-center gap-3 text-white/55 transition-colors duration-300 hover:text-white",
+        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+        labelled ? "text-sm" : "h-8 w-8 justify-center",
+      )}
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
+        {paused ? <path d="M8 5.5v13l10.5-6.5L8 5.5Z" /> : <path d="M7 5h3.5v14H7V5Zm6.5 0H17v14h-3.5V5Z" />}
+      </svg>
+      {labelled ? <span>{label}</span> : null}
+    </button>
   );
 }
