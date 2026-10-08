@@ -19,7 +19,7 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed left-4 top-[84px] z-40 md:left-[calc(var(--sidebar-width)+1.25rem)] md:top-7"
+      className="fixed left-4 top-[calc(var(--header-height)+0.75rem)] z-40 lg:left-6"
     >
       <Link
         href={href}

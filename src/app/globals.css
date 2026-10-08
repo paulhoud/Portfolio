@@ -6,7 +6,14 @@
   --panel-soft: #23222b;
   --foreground: #f5f2f4;
   --muted: #a7a3ad;
-  --sidebar-width: 258px;
+  /* Hauteur du header flottant (cf. SiteHeader). */
+  --header-height: 56px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-height: 64px;
+  }
 }
 
 * {
@@ -51,9 +58,24 @@ button {
   color: #ffffff;
 }
 
+/* Le header flotte au-dessus du contenu : la grille de l'accueil occupe donc
+   tout l'écran, en largeur comme en hauteur. */
 .portfolio-main {
   min-height: 100vh;
-  padding-left: var(--sidebar-width);
+}
+
+/* Marge haute des sous-pages, pour que leur début ne passe pas sous le header.
+   Portée par chaque page plutôt que par <main> : posée sur <main>, elle
+   changerait au moment de la navigation et ferait sauter la grille pendant la
+   transition. */
+.page-top {
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
+@media (min-width: 768px) {
+  .page-top {
+    padding-top: calc(var(--header-height) + 3rem);
+  }
 }
 
 /* Transition damier ↔ page : les calques occupent la MÊME cellule de grille.
@@ -99,13 +121,3 @@ button {
   text-wrap: balance;
 }
 
-@media (max-width: 767px) {
-  :root {
-    --sidebar-width: 0px;
-  }
-
-  .portfolio-main {
-    padding-left: 0;
-    padding-top: 72px;
-  }
-}

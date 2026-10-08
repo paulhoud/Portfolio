@@ -4,6 +4,7 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ProjectMedia } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
+import { lockPageScroll } from "@/lib/scrollLock";
 import { cn } from "@/lib/utils";
 
 const MIN_SCALE = 1;
@@ -73,13 +74,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   useEffect(() => scale.on("change", (value) => setZoomed(value > 1.01)), [scale]);
 
   // Verrouille le scroll de la page pendant l'ouverture.
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
+  useEffect(() => lockPageScroll(), []);
 
   // Focus initial sur le bouton de fermeture (accessibilité).
   useEffect(() => {
@@ -331,7 +326,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
       </div>
 
       {/* Légende + compteur (bas gauche, toujours visible) */}
-      <figcaption className="pointer-events-none absolute bottom-5 left-5 z-10 max-w-[min(90vw,520px)] md:bottom-6 md:left-[calc(var(--sidebar-width)+2rem)]">
+      <figcaption className="pointer-events-none absolute bottom-5 left-5 z-10 max-w-[min(90vw,520px)] md:bottom-6 md:left-8">
         {count > 1 ? (
           <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-white/50">
             {index + 1} / {count}

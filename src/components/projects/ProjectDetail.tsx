@@ -45,7 +45,7 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
   const hasTextSections = project.sections.length > 0;
 
   return (
-    <article className="min-h-screen bg-[#1a1921] px-6 py-8 md:px-20 md:py-12">
+    <article className="min-h-screen bg-[#1a1921] page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
@@ -101,7 +101,7 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
   const hasBlocks = Boolean(project.blocks?.length);
 
   return (
-    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-12 pt-6 text-center md:pb-16 md:pt-10">
           <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
@@ -396,7 +396,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
   if (!story) return <DefaultProjectDetail project={project} />;
 
   return (
-    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-6xl">
         {/* En-tête commun aux pages projet : accroche puis logo flottant.
             C'est le repère qui rattache visuellement cette page aux autres. */}
@@ -505,7 +505,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
 
 function EditorialProjectDetail({ project }: ProjectDetailProps) {
   return (
-    <article className="min-h-screen bg-[#121212] px-6 py-8 md:px-20 md:py-12">
+    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-8 text-center md:pb-24 md:pt-12">
           {/* Cette variante n'affiche pas de titre : le h1 reste accessible

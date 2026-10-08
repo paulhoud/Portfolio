@@ -30,7 +30,7 @@ export function TextPage({
   const contentClass = cn("mx-auto", wide ? "max-w-5xl" : "copy max-w-3xl");
 
   return (
-    <section className="min-h-screen bg-[linear-gradient(120deg,#172237_0%,#191820_46%,#17161d_100%)] px-6 py-8 md:px-20 md:py-12">
+    <section className="min-h-screen bg-[linear-gradient(120deg,#172237_0%,#191820_46%,#17161d_100%)] page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className={cn("mx-auto", wide ? "max-w-6xl" : "max-w-4xl")}>
         <ScrollReveal>
           <header className="mb-16 pt-2 text-center md:mb-20">

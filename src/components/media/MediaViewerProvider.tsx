@@ -41,7 +41,7 @@ export function useMediaViewer() {
  * L'overlay est rendu via un portail dans `document.body` : il échappe ainsi au
  * contexte d'empilement du calque de transition (qui porte un `transform`), et
  * son `z-index` s'applique au niveau racine — au-dessus de toute la navigation
- * (sidebar, nav mobile, bouton retour-en-haut). C'est une vraie modale.
+ * (header, menu mobile, bouton retour-en-haut). C'est une vraie modale.
  */
 export function MediaViewerProvider({
   media,
