@@ -71,10 +71,22 @@ button {
   background: var(--background);
 }
 
+/*
+ * Texte courant. Tailles en pixels entiers, par paliers : une taille calée sur
+ * la largeur de la fenêtre (clamp + vw) tombait sur des valeurs comme 13,76 px,
+ * trop petites et fractionnaires, qui rendent le Lato flou sur fond sombre.
+ * Le contraste est relevé pour la même raison.
+ */
 .copy {
-  color: rgba(245, 242, 244, 0.72);
-  font-size: clamp(0.86rem, 1vw, 1rem);
+  color: rgba(245, 242, 244, 0.8);
+  font-size: 0.9375rem; /* 15 px */
   line-height: 1.7;
+}
+
+@media (min-width: 1440px) {
+  .copy {
+    font-size: 1rem; /* 16 px */
+  }
 }
 
 .copy strong {

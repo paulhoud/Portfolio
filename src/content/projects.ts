@@ -71,6 +71,8 @@ import baioFigma from "../../assets/img-38.png";
 import saegusVoeux from "../../assets/img-23.png";
 import saegusWishes from "../../assets/img-25.png";
 import saegusFigma from "../../assets/img-26.png";
+import saegusRexSteps from "../../assets/img-30.png";
+import saegusRexThanks from "../../assets/img-31.png";
 import grandMenagePoster from "../../assets/img-19.png";
 import grandMenageFilming from "../../assets/img-20.png";
 import grandMenageEditing from "../../assets/img-21.png";
@@ -1080,7 +1082,7 @@ export const projects: Project[] = [
     // de voeux 2020 format web, emailing et print »). Cette page regroupe le
     // travail mené pour SÆGUS en interne ; les missions clients (Orange, Sanofi
     // Espoir, Capgemini) ont chacune leur page.
-    context: "Stage chez SÆGUS · projet interne · 2020",
+    context: "Stages chez SÆGUS · projets internes",
     logo: "/assets/Logo-8-1.svg",
     logoAlt: "Logo SÆGUS",
     background: "#111111",
@@ -1132,6 +1134,33 @@ export const projects: Project[] = [
           {
             title: "Organisation des écrans dans Figma",
             image: saegusFigma,
+            size: "wide",
+          },
+        ],
+      },
+      {
+        type: "sections",
+        sections: [
+          {
+            // Paul a créé la vidéo REX de cet atelier ; les planches montrent
+            // comment il en a construit le storyboard (précision du 8 oct. 2026).
+            title: "Vidéo REX",
+            body: "J'ai aussi créé la vidéo de retour d'expérience (REX) d'un atelier. Ces planches montrent comment j'en ai construit le storyboard.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        layout: "row",
+        media: [
+          {
+            title: "Storyboard de la vidéo REX : les étapes de l'atelier",
+            image: saegusRexSteps,
+            size: "wide",
+          },
+          {
+            title: "Storyboard de la vidéo REX : l'écran de remerciements",
+            image: saegusRexThanks,
             size: "wide",
           },
         ],

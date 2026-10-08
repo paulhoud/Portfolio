@@ -290,7 +290,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "2021 greeting card: landing page, emailing and social media",
     description:
       "Designing SÆGUS's 2021 digital greeting card: desktop and mobile landing page, personalised email, print version and LinkedIn visuals.",
-    context: "Internship at SÆGUS · internal project · 2020",
+    context: "Internships at SÆGUS · internal projects",
     blocks: [
       {
         type: "sections",
@@ -323,6 +323,22 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [{ title: "Screen organization in Figma" }],
+      },
+      {
+        type: "sections",
+        sections: [
+          {
+            title: "Feedback video",
+            body: "I also created the feedback (REX) video for a workshop. These boards show how I built its storyboard.",
+          },
+        ],
+      },
+      {
+        type: "media",
+        media: [
+          { title: "Feedback video storyboard: the workshop steps" },
+          { title: "Feedback video storyboard: the thank-you screen" },
+        ],
       },
     ],
   },
