@@ -73,7 +73,7 @@ export const enSite: SiteCopy = {
     sections: [
       {
         title: "Background",
-        body: "I hold a Master's degree from HETIC, specialising in Product Design. I started with a one-year apprenticeship at Memento, a startup where I was the first designer, before joining SÆGUS as a junior design consultant on assignments for Orange and Capgemini. I also worked on projects for the Sanofi Espoir Foundation and Maison Yves Delorme. Since 2024, I have been UpikaJob's sole designer.",
+        body: "I hold a Master's degree from HETIC (2016–2021), specialising in Product Design. I started in 2018 as a UX/UI designer at Fidesio, then worked for Maison Yves Delorme (2019–2020) before joining SÆGUS as a junior design consultant (2020–2021), on assignments for Orange and Capgemini. I also worked on projects for the Sanofi Espoir Foundation. I then became the first designer at Memento, a startup where I spent a year as an apprentice (2021–2022). Since 2024, I have been UpikaJob's sole designer.",
       },
       {
         title: "What I do",

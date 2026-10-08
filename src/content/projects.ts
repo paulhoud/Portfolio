@@ -564,8 +564,9 @@ export const projects: Project[] = [
     eyebrow: "L'Odyssée — refonte de l'écosystème digital",
     description:
       "Refonte globale de l'expérience client pour la Maison Yves Delorme, de la recherche en boutique au prototypage haute fidélité.",
-    // À COMPLÉTER : cadre (stage, école, agence ?) et année.
-    context: "Client : Maison Yves Delorme",
+    // Période : CV (« Yves Delorme — Ld. Designer, 2019-2020 »).
+    // À COMPLÉTER : cadre (stage, école, agence ?).
+    context: "Client : Maison Yves Delorme · 2019–2020",
     logo: "/assets/Logo-2-2.svg",
     logoAlt: "Logo Yves Delorme Paris",
     background: "#deebec",
@@ -629,7 +630,7 @@ export const projects: Project[] = [
     eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
     description:
       "Conception d'un add-on Jive pour Orange afin d'organiser des ateliers de design thinking directement dans l'intranet.",
-    context: "Stage chez SÆGUS · Client : Orange",
+    context: "Stage chez SÆGUS · Client : Orange · 2020–2021",
     logo: "/assets/Logo-3.svg",
     logoAlt: "Logo Jive",
     background: "#ffb800",
@@ -784,8 +785,13 @@ export const projects: Project[] = [
     detailSubtitle: "Professionnels de santé en mission",
     description:
       "Application de gestion de créneaux, site éditorial et visuels de communication pour les professionnels de santé en mission de Sanofi Espoir.",
-    // À COMPLÉTER : statut chez Fidesio (stage ?) et année.
-    context: "Avec l'agence Fidesio · Client : Sanofi Espoir",
+    // Intitulé et période : CV (« Fidésio — Designer UX/UI, sept.-déc. 2018 »).
+    // À COMPLÉTER : statut chez Fidesio (stage ?).
+    // À CONFIRMER : le client. La page attribue tout à Sanofi Espoir, mais ses
+    // visuels montrent le site de Montaigne Capital (img-44/45), une newsletter
+    // de boutique de musée (img-46/47) et un outil interne de suivi des projets
+    // (img-42/43). Client retiré du cadre en attendant la réponse de Paul.
+    context: "Designer UX/UI à l'agence Fidesio · sept.–déc. 2018",
     logo: "/assets/Logo-5-1.svg",
     logoAlt: "Logo Fidesio",
     background: "#ff3345",
@@ -913,7 +919,7 @@ export const projects: Project[] = [
     description:
       "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365.",
     // À PRÉCISER : premier stage SÆGUS ? (Jive est présenté comme le second.)
-    context: "Stage chez SÆGUS · Client : Capgemini",
+    context: "Stage chez SÆGUS · Client : Capgemini · 2020–2021",
     logo: "/assets/Logo-6-1.svg",
     logoAlt: "Logo Capgemini",
     background: "#e5f1f3",
@@ -1078,7 +1084,7 @@ export const projects: Project[] = [
     eyebrow: "10e anniversaire de SÆGUS × Le Trianon",
     description:
       "Conception de la carte de vœux digitale et des supports de communication pour les 10 ans de SÆGUS.",
-    context: "Stage chez SÆGUS · projet interne",
+    context: "Stage chez SÆGUS · projet interne · 2020",
     logo: "/assets/Logo-8-1.svg",
     logoAlt: "Logo SÆGUS",
     background: "#111111",

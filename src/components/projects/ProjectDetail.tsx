@@ -331,7 +331,9 @@ function ProjectContext({ context }: { context?: string }) {
 
   return (
     <p className="text-balance text-[0.62rem] uppercase tracking-[0.18em] text-white/55">
-      {context}
+      {/* Espace insécable avant « : » et « · » : sur mobile, une ligne ne doit
+          jamais commencer par un deux-points ou un séparateur. */}
+      {context.replace(/ ([:·])/g, " $1")}
     </p>
   );
 }

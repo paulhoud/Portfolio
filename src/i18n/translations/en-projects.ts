@@ -44,7 +44,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "L'Odyssée — redesigning the digital ecosystem",
     description:
       "A full redesign of the customer experience for Maison Yves Delorme, from in-store research to high-fidelity prototyping.",
-    context: "Client: Maison Yves Delorme",
+    context: "Client: Maison Yves Delorme · 2019–2020",
     introParagraphs: [
       "L'Odyssée is a project to fully redesign the digital ecosystem of Maison Yves Delorme. It aims to harmonize the customer experience across the boutique, advisory services, and digital tools.",
       "With the marketing and sales teams, I worked on the customer journey, the interface architecture and the priority scenarios to prototype.",
@@ -66,7 +66,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Improving an intranet platform with a design thinking add-on",
     description:
       "Designing a Jive add-on for Orange to run design thinking workshops directly within the intranet.",
-    context: "Internship at SÆGUS · Client: Orange",
+    context: "Internship at SÆGUS · Client: Orange · 2020–2021",
     sections: [
       {
         title: "Overview",
@@ -135,7 +135,7 @@ export const enProjectTranslations: ProjectTranslations = {
     detailSubtitle: "Healthcare professionals on mission",
     description:
       "A slot management app, an editorial website and communication visuals for Sanofi Espoir's healthcare professionals on mission.",
-    context: "With the Fidesio agency · Client: Sanofi Espoir",
+    context: "UX/UI designer at the Fidesio agency · Sept–Dec 2018",
     blocks: [
       {
         type: "sections",
@@ -213,7 +213,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Illustrating use cases to reach a broad audience",
     description:
       "Creating animated videos for Capgemini to illustrate Microsoft 365 use cases.",
-    context: "Internship at SÆGUS · Client: Capgemini",
+    context: "Internship at SÆGUS · Client: Capgemini · 2020–2021",
     sections: [
       {
         title: "Overview",
@@ -298,7 +298,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "SÆGUS's 10th anniversary × Le Trianon",
     description:
       "Designing the digital greeting card and communication materials for SÆGUS's 10th anniversary.",
-    context: "Internship at SÆGUS · internal project",
+    context: "Internship at SÆGUS · internal project · 2020",
     blocks: [
       {
         type: "sections",
