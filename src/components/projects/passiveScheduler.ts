@@ -56,8 +56,8 @@ export class PassiveScheduler {
     this.clearTimer = deps.clearTimer;
     this.random = deps.random ?? Math.random;
     this.now = deps.now ?? (() => performance.now());
-    this.minDelayMs = deps.minDelayMs ?? 10_000;
-    this.maxDelayMs = deps.maxDelayMs ?? 15_000;
+    this.minDelayMs = deps.minDelayMs ?? 5_000;
+    this.maxDelayMs = deps.maxDelayMs ?? 8_000;
     this.rescheduleThrottleMs = deps.rescheduleThrottleMs ?? 250;
   }
 

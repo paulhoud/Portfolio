@@ -43,7 +43,7 @@ export function ProjectTile({ project, index }: ProjectTileProps) {
           background={project.background}
           priority={index < 3}
         />
-        <span className="pointer-events-none absolute inset-x-8 bottom-7 z-10 translate-y-5 opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="pointer-events-none absolute inset-x-8 bottom-7 z-10 translate-y-5 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <span
             className="block text-sm font-bold uppercase tracking-[0.18em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
             style={project.titleColor ? { color: project.titleColor } : undefined}
