@@ -1,6 +1,10 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { ImageResponse } from "next/og";
+import {
+  readPortrait,
+  readShareFonts,
+  shareImageTheme as theme,
+} from "@/components/seo/shareImageTheme";
+import { shareImage } from "@/components/seo/shareMetadata";
 import { profile } from "@/content/profile";
 
 /**
@@ -12,17 +16,17 @@ import { profile } from "@/content/profile";
  * visuel reste cohérent avec l'identité du portfolio.
  *
  * Next réutilise cette image pour la Twitter Card en l'absence de
- * `twitter-image`.
+ * `twitter-image`. Il ne l'injecte toutefois que sur les pages sans `openGraph`
+ * propre : les autres la redéclarent via `shareMetadata`, d'où les dimensions
+ * et le texte alternatif partagés avec `shareImage`. Les pages projet ont leur
+ * propre image, dans la même direction artistique (`shareImageTheme`).
  */
-export const alt = `${profile.name} — ${profile.jobTitle}`;
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const alt = shareImage.alt;
+export const size = { width: shareImage.width, height: shareImage.height };
+export const contentType = shareImage.type;
 
 export default async function OpengraphImage() {
-  const portrait = await readFile(
-    path.join(process.cwd(), "public", profile.photo.replace(/^\//, "")),
-  );
-  const portraitSrc = `data:image/jpeg;base64,${portrait.toString("base64")}`;
+  const [portraitSrc, fonts] = await Promise.all([readPortrait(), readShareFonts()]);
 
   return new ImageResponse(
     (
@@ -34,9 +38,9 @@ export default async function OpengraphImage() {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "80px 90px",
-          background: "linear-gradient(120deg, #191820 0%, #14131a 100%)",
-          color: "#f5f2f4",
-          fontFamily: "sans-serif",
+          background: theme.background,
+          color: theme.text,
+          fontFamily: theme.fontFamily,
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 640 }}>
@@ -45,7 +49,7 @@ export default async function OpengraphImage() {
               fontSize: 26,
               letterSpacing: 6,
               textTransform: "uppercase",
-              color: "#46ebb5",
+              color: theme.accent,
             }}
           >
             {profile.jobTitle}
@@ -53,10 +57,10 @@ export default async function OpengraphImage() {
           <div style={{ fontSize: 84, fontWeight: 700, marginTop: 18, lineHeight: 1.05 }}>
             {profile.name}
           </div>
-          <div style={{ fontSize: 30, color: "rgba(245,242,244,0.66)", marginTop: 26 }}>
+          <div style={{ fontSize: 30, color: theme.muted, marginTop: 26 }}>
             De la vision produit au front-end
           </div>
-          <div style={{ fontSize: 24, color: "rgba(245,242,244,0.42)", marginTop: 40 }}>
+          <div style={{ fontSize: 24, color: theme.subtle, marginTop: 40 }}>
             {`${profile.localities.join(" · ")} — paulhoudebine.com`}
           </div>
         </div>
@@ -73,6 +77,6 @@ export default async function OpengraphImage() {
         />
       </div>
     ),
-    size,
+    { ...size, fonts },
   );
 }

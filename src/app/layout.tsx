@@ -1,6 +1,7 @@
 import { AppFrame } from "@/components/layout/AppFrame";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { personSchema, webSiteSchema } from "@/components/seo/schemas";
+import { siteOpenGraph, siteTitle } from "@/components/seo/shareMetadata";
 import { profile, siteUrl } from "@/content/profile";
 import { LanguageProvider } from "@/i18n/context";
 import type { Metadata } from "next";
@@ -17,8 +18,6 @@ const lato = Lato({
   weight: ["400", "700"],
   variable: "--font-lato",
 });
-
-const siteTitle = `${profile.name} — ${profile.jobTitle}`;
 
 export const metadata: Metadata = {
   // Indispensable pour que les URLs Open Graph / canonical soient absolues.
@@ -47,9 +46,10 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    // Nom du site et langue : partagés avec les pages qui redéfinissent
+    // `openGraph` (cf. `shareMetadata`).
+    ...siteOpenGraph,
     url: siteUrl,
-    siteName: siteTitle,
     title: siteTitle,
     description: profile.description,
   },

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LocalizedProjectPageView } from "@/components/pages/LocalizedProjectPageView";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { creativeWorkSchema, projectBreadcrumbSchema } from "@/components/seo/schemas";
+import { shareMetadata } from "@/components/seo/shareMetadata";
 import { profile } from "@/content/profile";
 import { getProject, projects } from "@/content/projects";
 
@@ -35,12 +36,17 @@ export async function generateMetadata({
     title: `${project.title} — ${project.eyebrow}`,
     description: project.description,
     alternates: { canonical: url },
-    openGraph: {
+    ...shareMetadata({
       type: "article",
       title: `${project.title} — ${profile.name}`,
       description: project.description,
       url,
-    },
+      // Générée par `opengraph-image.tsx`, dans ce même dossier.
+      image: {
+        url: `${url}/opengraph-image`,
+        alt: `${project.title} — ${project.eyebrow}`,
+      },
+    }),
   };
 }
 
