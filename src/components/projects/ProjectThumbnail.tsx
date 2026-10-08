@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getMotionStart, getProjectMedia } from "@/content/projectMedia";
+import { getMotionEnd, getMotionStart, getProjectMedia } from "@/content/projectMedia";
 import { requestIdle } from "@/lib/idle";
 import { cn } from "@/lib/utils";
 import { usePassiveAnimation } from "./PassiveAnimationProvider";
@@ -45,6 +45,7 @@ export function ProjectThumbnail({
 }: ProjectThumbnailProps) {
   const media = getProjectMedia(mediaKey);
   const motionStart = getMotionStart(mediaKey);
+  const motionEnd = getMotionEnd(mediaKey);
   const passive = usePassiveAnimation();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -122,6 +123,39 @@ export function ProjectThumbnail({
       onEnded?.();
     }
   }, [stopVideo]);
+
+  // Fin anticipée : certaines animations s'effacent avant la fin de leur
+  // fichier (cf. getMotionEnd). On s'arrête au dernier instant où le logo est
+  // entier, et l'arrêt compte comme une fin de lecture. Le suivi image par
+  // image est précis ; `timeupdate` sert de filet là où il n'existe pas.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || motionEnd === null) return;
+
+    let frameHandle = 0;
+    const check = () => {
+      if (!video.paused && video.currentTime >= motionEnd) {
+        video.pause();
+        handleEnded();
+      }
+    };
+    const watchFrames = "requestVideoFrameCallback" in video;
+    const onFrame = () => {
+      check();
+      if (!video.paused) frameHandle = video.requestVideoFrameCallback(onFrame);
+    };
+    const onPlay = () => {
+      if (watchFrames) frameHandle = video.requestVideoFrameCallback(onFrame);
+    };
+
+    video.addEventListener("play", onPlay);
+    video.addEventListener("timeupdate", check);
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("timeupdate", check);
+      if (watchFrames && frameHandle) video.cancelVideoFrameCallback(frameHandle);
+    };
+  }, [motionEnd, handleEnded]);
 
   // Enregistrement auprès du contrôleur passif + observation de la visibilité.
   useEffect(() => {
