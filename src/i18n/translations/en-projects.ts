@@ -24,7 +24,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Outcome",
-        body: "My work modernised Memento's identity. The presentation video became the founders' go-to support to showcase the solution, and its distribution helped convert several client leads in the months that followed.",
+        body: "My work modernised Memento's identity. The presentation video became the founders' go-to support to showcase the solution, and its release went hand in hand with the client count tripling over three months.",
       },
     ],
     media: [
@@ -66,7 +66,7 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Improving an intranet platform with a design thinking add-on",
     description:
       "Designing a Jive add-on for Orange to run design thinking workshops directly within the intranet.",
-    context: "Internship at SÆGUS · Client: Orange · 2020–2021",
+    context: "Internship at SÆGUS · Client: Orange · 2020",
     sections: [
       {
         title: "Overview",
@@ -78,7 +78,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Solution",
-        body: "We designed a Jive add-on following a design thinking approach: a Figma workshop to gather needs, then a tool made of reusable modules.",
+        body: "I led the design of a Jive add-on following a design thinking approach: a design thinking workshop (Miro, Figma) to gather needs, then a tool made of reusable modules, designed together with a developer, from mockup through to integration.",
       },
       {
         title: "Outcome",
@@ -88,7 +88,7 @@ export const enProjectTranslations: ProjectTranslations = {
     media: [
       { title: "Design system organization" },
       { title: "Prototype organization" },
-      { title: "Feedback on the Agile training" },
+      { title: "Agile training feedback video, made for Orange during my first internship (2019)" },
       { title: "Miro board organization" },
     ],
   },
@@ -98,11 +98,11 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Maternal and neonatal health in Senegal: strengthening local impact",
     description:
       "A design mission for the Sanofi Espoir Foundation focused on maternal and neonatal health in Senegal.",
-    context: "Client: Sanofi Espoir Foundation",
+    context: "Internship at SÆGUS · Client: Sanofi Espoir Foundation · 2019",
     sections: [
       {
         title: "Overview",
-        body: "A mission carried out for the Sanofi Espoir Foundation around maternal and neonatal health in Senegal. The goal was to better understand local care pathways to strengthen the foundation's impact.",
+        body: "During my first internship at SÆGUS, I worked on a mission for the Sanofi Espoir Foundation around maternal and neonatal health in Senegal. The goal was to better understand local care pathways to strengthen the foundation's impact. I produced the workshop wrap-up content and contributed to the experience map of the women's journey.",
       },
       {
         title: "Challenge",
@@ -131,33 +131,33 @@ export const enProjectTranslations: ProjectTranslations = {
 
   fidesio: {
     title: "Fidesio",
-    eyebrow: "Sanofi Espoir — spirit of solidarity",
-    detailSubtitle: "Healthcare professionals on mission",
+    eyebrow: "UX/UI internship at an agency: a website, an internal tool and newsletters",
+    detailSubtitle: "UX/UI and branding work at a web agency",
     description:
-      "A slot management app, an editorial website and communication visuals for Sanofi Espoir's healthcare professionals on mission.",
-    context: "UX/UI designer at the Fidesio agency · Sept–Dec 2018",
+      "A UX/UI internship at the Fidesio web agency: mockups for the Montaigne Capital website, an internal project-tracking tool and newsletter banners for a museum shop.",
+    context: "UX/UI internship at the Fidesio agency · Jul–Sep 2018",
     blocks: [
       {
         type: "sections",
         sections: [
           {
             title: "Overview",
-            body: "A mission for Sanofi Espoir around tools for healthcare professionals on mission: managing their time slots, an editorial website and communication.",
+            body: "In summer 2018, I spent three months as a UX/UI intern at Fidesio, a Paris web agency. I worked on interface and branding assignments for several clients, and on the agency's internal tools.",
           },
           {
             title: "Challenges",
-            body: "The goal was to clarify use cases, structure user journeys, and propose more readable interfaces to support teams in their day-to-day work.",
+            body: "Designing web and software interfaces that stay consistent from one project to the next, both for tender responses and for in-house tools.",
           },
           {
             title: "Solution",
-            body: "I worked on three strands: the management app's interfaces, the definition of the editorial website and the communication visuals, all within the Sanofi Espoir identity.",
+            body: "I designed these interfaces following an atomic design convention, and ran \"How Might We\" UX workshops with user interviews and tests.",
           },
         ],
       },
       {
         type: "media",
         media: [
-          { title: "Management application organization" },
+          { title: "Internal project-tracking tool" },
           { title: "Weekly view and activity tracking" },
         ],
       },
@@ -165,44 +165,36 @@ export const enProjectTranslations: ProjectTranslations = {
         type: "sections",
         sections: [
           {
-            title: "Design direction",
-            body: "A sober, institutional and reassuring universe, with a clear hierarchy between editorial content, data and primary actions.",
+            title: "Internal tool",
+            body: "For the agency, a project-tracking application: tickets by client and by team member, time spent, weekly and monthly views.",
           },
           {
-            title: "Editorial website",
-            body: "The public site highlights performance, news, and institutional messages from Sanofi Espoir in a modular, responsive layout.",
-          },
-          {
-            title: "Professional portal",
-            body: "The dedicated space for healthcare professionals offers dashboards, indicators, and visualizations to track activity and support decision-making.",
+            title: "Montaigne Capital",
+            body: "Mockups for an asset manager's website: home page, fund pages with performance indicators, regulatory documents to download and a historical price simulator.",
           },
         ],
       },
       {
         type: "media",
         media: [
-          { title: "Landing page and editorial architecture" },
-          { title: "Healthcare professional dashboard" },
+          { title: "Montaigne Capital — home page" },
+          { title: "Montaigne Capital — fund page" },
         ],
       },
       {
         type: "sections",
         sections: [
           {
-            title: "Communication",
-            body: "Visual variations draw on Sanofi Espoir codes through colored blocks, product imagery, and strong calls to action.",
-          },
-          {
-            title: "Outcome",
-            body: "The full set of deliverables provides a cohesive foundation for deploying a clearer, more engaging digital experience better aligned with the brand's solidarity missions.",
+            title: "Newsletters",
+            body: "Banners for a museum shop's newsletters: time-limited promotional offers on products inspired by works by Van Gogh and Monet, with a strong call to action.",
           },
         ],
       },
       {
         type: "media",
         media: [
-          { title: "Spirit of solidarity visual variation" },
-          { title: "Institutional communication support" },
+          { title: "Newsletter — fashion offer" },
+          { title: "Newsletter — Impressionist selection" },
         ],
       },
     ],
@@ -213,11 +205,11 @@ export const enProjectTranslations: ProjectTranslations = {
     eyebrow: "Illustrating use cases to reach a broad audience",
     description:
       "Creating animated videos for Capgemini to illustrate Microsoft 365 use cases.",
-    context: "Internship at SÆGUS · Client: Capgemini · 2020–2021",
+    context: "Internship at SÆGUS · Client: Capgemini · 2019",
     sections: [
       {
         title: "Overview",
-        body: "During an internship at SÆGUS, I worked for Capgemini on animated videos featuring characters and sets, made in After Effects with the Duik plugin.",
+        body: "During my first internship at SÆGUS, I worked for Capgemini on animated videos featuring characters and sets, made in After Effects with the Duik plugin.",
       },
       {
         title: "Challenges",
@@ -295,9 +287,9 @@ export const enProjectTranslations: ProjectTranslations = {
 
   saegus: {
     title: "SÆGUS",
-    eyebrow: "SÆGUS's 10th anniversary × Le Trianon",
+    eyebrow: "2021 greeting card: landing page, emailing and social media",
     description:
-      "Designing the digital greeting card and communication materials for SÆGUS's 10th anniversary.",
+      "Designing SÆGUS's 2021 digital greeting card: desktop and mobile landing page, personalised email, print version and LinkedIn visuals.",
     context: "Internship at SÆGUS · internal project · 2020",
     blocks: [
       {
@@ -305,7 +297,7 @@ export const enProjectTranslations: ProjectTranslations = {
         sections: [
           {
             title: "Overview",
-            body: "A design mission for SÆGUS's 10th anniversary: digital greeting card, desktop and mobile variations, and communication materials for the event at Le Trianon.",
+            body: "During my second internship at SÆGUS, in 2020, I designed the firm's digital greeting card for 2021: a landing page in desktop and mobile versions, adapted for emailing, print and LinkedIn.",
           },
           {
             title: "Challenges",
@@ -331,17 +323,6 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [{ title: "Screen organization in Figma" }],
-      },
-      {
-        type: "media",
-        media: [{ title: "Agile support — HR function at Orange" }],
-      },
-      {
-        type: "media",
-        media: [
-          { title: "Key project moments" },
-          { title: "Thanks to the teams" },
-        ],
       },
     ],
   },

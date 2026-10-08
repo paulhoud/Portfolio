@@ -71,9 +71,6 @@ import baioFigma from "../../assets/img-38.png";
 import saegusVoeux from "../../assets/img-23.png";
 import saegusWishes from "../../assets/img-25.png";
 import saegusFigma from "../../assets/img-26.png";
-import saegusAgile from "../../assets/img-28.png";
-import saegusTeamCards from "../../assets/img-30.png";
-import saegusPolaroids from "../../assets/img-31.png";
 import grandMenagePoster from "../../assets/img-19.png";
 import grandMenageFilming from "../../assets/img-20.png";
 import grandMenageEditing from "../../assets/img-21.png";
@@ -505,10 +502,10 @@ export const projects: Project[] = [
         body: "J'ai conçu dans Figma les nouvelles maquettes et les prototypes de l'application, et créé puis maintenu un design system en design atomique pour qu'elle puisse grandir sans perdre en cohérence. En parallèle, j'ai réalisé les vidéos en motion design sous After Effects et les supports print — kakémonos, affiches, flyers — sous InDesign.",
       },
       {
-        // À CONFIRMER : source et méthode du « 3 fois plus de clients ».
-        // La version anglaise dit « several client leads » : aligner les deux.
+        // Source : profil LinkedIn (« La vidéo de présentation a accompagné une
+        // multiplication par trois du nombre de clients sur trois mois »).
         title: "Résultat",
-        body: "Mon travail a modernisé l'identité de Memento. La vidéo de présentation est devenue le support des associés pour présenter la solution, et sa diffusion a permis de convertir 3 fois plus de clients durant les 3 mois qui ont suivi.",
+        body: "Mon travail a modernisé l'identité de Memento. La vidéo de présentation est devenue le support des associés pour présenter la solution, et sa diffusion a accompagné un triplement du nombre de clients en trois mois.",
       },
     ],
     gallery: ["Prototype produit", "Design system", "Supports social media"],
@@ -630,7 +627,7 @@ export const projects: Project[] = [
     eyebrow: "Améliorer un logiciel intranet grâce à un add-on de design thinking",
     description:
       "Conception d'un add-on Jive pour Orange afin d'organiser des ateliers de design thinking directement dans l'intranet.",
-    context: "Stage chez SÆGUS · Client : Orange · 2020–2021",
+    context: "Stage chez SÆGUS · Client : Orange · 2020",
     logo: "/assets/Logo-3.svg",
     logoAlt: "Logo Jive",
     background: "#ffb800",
@@ -651,8 +648,10 @@ export const projects: Project[] = [
       },
       {
         title: "Solution",
-        // À PRÉCISER : qui a animé l'atelier, fait le design system, le prototype ?
-        body: "Nous avons conçu un add-on Jive selon une démarche de design thinking : un atelier Figma pour recueillir les besoins, puis un outil composé de modules réutilisables.",
+        // Sources : Paul (8 oct. 2026 : projet qu'il a mené chez SÆGUS) et LinkedIn
+        // (pôle Factory, juil.-déc. 2020 : plug-in conçu en binôme avec un
+        // développeur, de la maquette à l'intégration ; ateliers de design thinking).
+        body: "J'ai mené la conception d'un add-on Jive selon une démarche de design thinking : un atelier de design thinking (Miro, Figma) pour recueillir les besoins, puis un outil composé de modules réutilisables, conçu en binôme avec un développeur, de la maquette jusqu'à l'intégration.",
       },
       {
         title: "Résultat",
@@ -672,7 +671,7 @@ export const projects: Project[] = [
         size: "wide",
       },
       {
-        title: "Retour d'expérience sur la formation Agile",
+        title: "Retour d'expérience sur la formation Agile, réalisé pour Orange lors de mon premier stage (2019)",
         image: videoOrangeAgile,
         size: "wide",
         youtubeId: "9jyKLH6kMH4",
@@ -693,8 +692,11 @@ export const projects: Project[] = [
     eyebrow: "Santé maternelle et néonatale au Sénégal : renforcer l'impact local",
     description:
       "Mission de design pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal.",
-    // À COMPLÉTER : employeur, année, et ton rôle (la page ne le dit pas encore).
-    context: "Client : Fondation Sanofi Espoir",
+    // Sources : Paul (8 oct. 2026 : mission SÆGUS) et LinkedIn (stage SÆGUS, pôle
+    // Acceleration Tactics, juil.-déc. 2019 : contenus de restitution d'ateliers UX
+    // pour Sanofi, experience map construite avec des consultants data).
+    // L'experience map de la page porte d'ailleurs le logo SÆGUS.
+    context: "Stage chez SÆGUS · Client : Fondation Sanofi Espoir · 2019",
     logo: "/assets/Logo-4-1.svg",
     logoAlt: "Logo Sanofi Espoir",
     background: "#f3efed",
@@ -714,7 +716,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "Mission menée pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal. L'objectif était de mieux comprendre les parcours de soins locaux pour renforcer l'impact des actions de la fondation.",
+        body: "Lors de mon premier stage chez SÆGUS, j'ai travaillé sur une mission pour la Fondation Sanofi Espoir autour de la santé maternelle et néonatale au Sénégal. L'objectif était de mieux comprendre les parcours de soins locaux pour renforcer l'impact des actions de la fondation. J'y ai produit les contenus de restitution des ateliers et contribué à l'experience map du parcours des femmes.",
       },
       {
         title: "Enjeu",
@@ -781,17 +783,15 @@ export const projects: Project[] = [
     companySite: { label: "Fidesio", href: "https://www.fidesio.com/" },
     mediaKey: "FIDESIO",
     title: "Fidesio",
-    eyebrow: "Sanofi Espoir — esprit de solidarité",
-    detailSubtitle: "Professionnels de santé en mission",
+    eyebrow: "Stage UX/UI en agence : site web, outil interne et newsletters",
+    detailSubtitle: "Missions UX/UI et branding en agence web",
     description:
-      "Application de gestion de créneaux, site éditorial et visuels de communication pour les professionnels de santé en mission de Sanofi Espoir.",
-    // Intitulé et période : CV (« Fidésio — Designer UX/UI, sept.-déc. 2018 »).
-    // À COMPLÉTER : statut chez Fidesio (stage ?).
-    // À CONFIRMER : le client. La page attribue tout à Sanofi Espoir, mais ses
-    // visuels montrent le site de Montaigne Capital (img-44/45), une newsletter
-    // de boutique de musée (img-46/47) et un outil interne de suivi des projets
-    // (img-42/43). Client retiré du cadre en attendant la réponse de Paul.
-    context: "Designer UX/UI à l'agence Fidesio · sept.–déc. 2018",
+      "Stage UX/UI à l'agence web Fidesio : maquettes du site de Montaigne Capital, outil interne de suivi des projets et bannières de newsletters pour une boutique de musée.",
+    // Sources : profil LinkedIn (« Fidesio — Stagiaire UX/UI, juillet - septembre
+    // 2018 ») et précisions de Paul du 8 oct. 2026 : missions UX/UI et branding
+    // pour Montaigne Capital, une boutique de musée et l'agence elle-même.
+    // Sanofi Espoir, longtemps attribué à cette page, était une mission SÆGUS.
+    context: "Stage UX/UI à l'agence Fidesio · juil.–sept. 2018",
     logo: "/assets/Logo-5-1.svg",
     logoAlt: "Logo Fidesio",
     background: "#ff3345",
@@ -801,11 +801,11 @@ export const projects: Project[] = [
     detailVariant: "case-study",
     headerLogo: {
       kind: "image",
-      src: "/assets/Logo-4-2.svg",
-      alt: "Sanofi Espoir",
-      width: 260,
-      height: 57,
-      className: "h-auto w-48 md:w-56",
+      src: "/assets/Logo-5-2.svg",
+      alt: "Logo Fidesio",
+      width: 251,
+      height: 252,
+      className: "h-auto w-24 md:w-28",
     },
     sectionStyle: "inline",
     blocks: [
@@ -814,16 +814,15 @@ export const projects: Project[] = [
         sections: [
           {
             title: "Vue d'ensemble",
-            body: "Mission réalisée pour Sanofi Espoir autour d'outils destinés aux professionnels de santé en mission : gestion de leurs créneaux, site éditorial et communication.",
+            body: "À l'été 2018, j'ai passé trois mois en stage UX/UI chez Fidesio, une agence web parisienne. J'y ai travaillé sur des missions d'interface et de branding pour plusieurs clients, et sur les outils internes de l'agence.",
           },
           {
             title: "Enjeux",
-            body: "Il fallait clarifier les usages, structurer les parcours et proposer des interfaces plus lisibles pour accompagner les équipes dans leur activité quotidienne.",
+            body: "Concevoir des interfaces web et logicielles cohérentes d'un projet à l'autre, aussi bien pour des réponses à appels d'offres que pour des outils développés en interne.",
           },
           {
             title: "Solution",
-            // À PRÉCISER : ta part exacte sur chacun des trois volets.
-            body: "J'ai travaillé sur trois volets : les interfaces de l'application de gestion, la définition du site éditorial et les visuels de communication, dans l'identité Sanofi Espoir.",
+            body: "J'ai conçu ces interfaces selon une convention de design atomique, et animé des ateliers UX « How Might We », avec entretiens et tests utilisateurs.",
           },
         ],
       },
@@ -832,7 +831,7 @@ export const projects: Project[] = [
         layout: "row",
         media: [
           {
-            title: "Organisation de l'application de gestion",
+            title: "Outil interne de suivi des projets",
             image: fidesioAppCalendar,
             size: "wide",
           },
@@ -847,16 +846,12 @@ export const projects: Project[] = [
         type: "sections",
         sections: [
           {
-            title: "Direction design",
-            body: "Un univers sobre, institutionnel et rassurant, avec une hiérarchie claire entre contenus éditoriaux, données chiffrées et actions principales.",
+            title: "Outil interne",
+            body: "Pour l'agence, une application de suivi des projets : tickets par client et par collaborateur, temps passé, vues par semaine et par mois.",
           },
           {
-            title: "Site éditorial",
-            body: "Le site public met en avant la performance, les actualités et les messages institutionnels de Sanofi Espoir dans une mise en page modulaire et responsive.",
-          },
-          {
-            title: "Espace professionnel",
-            body: "L'espace dédié aux professionnels de santé propose tableaux de bord, indicateurs et visualisations pour suivre l'activité et faciliter la prise de décision.",
+            title: "Montaigne Capital",
+            body: "Des maquettes pour le site d'une société de gestion : page d'accueil, fiches de fonds avec indicateurs de performance, documents réglementaires à télécharger et simulation des cours historiques.",
           },
         ],
       },
@@ -864,13 +859,13 @@ export const projects: Project[] = [
         type: "media",
         media: [
           {
-            title: "Landing page et architecture éditoriale",
+            title: "Montaigne Capital — page d'accueil",
             image: fidesioWebsite,
             size: "wide",
             variant: "light",
           },
           {
-            title: "Tableau de bord professionnel de santé",
+            title: "Montaigne Capital — fiche d'un fonds",
             image: fidesioDashboard,
             size: "wide",
             variant: "light",
@@ -881,12 +876,8 @@ export const projects: Project[] = [
         type: "sections",
         sections: [
           {
-            title: "Communication",
-            body: "Les déclinaisons visuelles reprennent les codes Sanofi Espoir à travers des blocs colorés, des visuels produits et des messages d'appel à l'action forts.",
-          },
-          {
-            title: "Résultat",
-            body: "L'ensemble des livrables offre une base cohérente pour déployer une expérience digitale plus claire, plus engageante et mieux alignée avec les missions de solidarité de la marque.",
+            title: "Newsletters",
+            body: "Des bannières pour les newsletters d'une boutique de musée : offres promotionnelles à durée limitée sur des produits inspirés d'œuvres de Van Gogh et de Monet, avec un appel à l'action fort.",
           },
         ],
       },
@@ -895,12 +886,12 @@ export const projects: Project[] = [
         layout: "row",
         media: [
           {
-            title: "Déclinaison visuelle esprit de solidarité",
+            title: "Newsletter — offre mode",
             image: fidesioBannerTeal,
             size: "wide",
           },
           {
-            title: "Support de communication institutionnel",
+            title: "Newsletter — sélection impressionniste",
             image: fidesioBannerRed,
             size: "wide",
           },
@@ -918,8 +909,9 @@ export const projects: Project[] = [
     eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
     description:
       "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365.",
-    // À PRÉCISER : premier stage SÆGUS ? (Jive est présenté comme le second.)
-    context: "Stage chez SÆGUS · Client : Capgemini · 2020–2021",
+    // Source : LinkedIn (stage SÆGUS, pôle Acceleration Tactics, juil.-déc. 2019 :
+    // Capgemini parmi les clients). Premier des deux stages ; Jive est le second.
+    context: "Stage chez SÆGUS · Client : Capgemini · 2019",
     logo: "/assets/Logo-6-1.svg",
     logoAlt: "Logo Capgemini",
     background: "#e5f1f3",
@@ -939,7 +931,7 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "Lors d'un stage chez SÆGUS, j'ai travaillé pour Capgemini sur la création de vidéos animées mettant en scène des personnages et des décors, sous After Effects avec le plugin Duik.",
+        body: "Lors de mon premier stage chez SÆGUS, j'ai travaillé pour Capgemini sur la création de vidéos animées mettant en scène des personnages et des décors, sous After Effects avec le plugin Duik.",
       },
       {
         title: "Enjeux",
@@ -1081,9 +1073,14 @@ export const projects: Project[] = [
     companySite: { label: "SÆGUS", href: "https://www.saegus.com/" },
     mediaKey: "SAEGUS",
     title: "SÆGUS",
-    eyebrow: "10e anniversaire de SÆGUS × Le Trianon",
+    eyebrow: "Carte de vœux 2021 : landing page, e-mailing et réseaux sociaux",
     description:
-      "Conception de la carte de vœux digitale et des supports de communication pour les 10 ans de SÆGUS.",
+      "Conception de la carte de vœux digitale 2021 de SÆGUS : landing page desktop et mobile, e-mail personnalisé, version imprimée et visuels pour LinkedIn.",
+    // Sources : LinkedIn (stage SÆGUS, pôle Factory, juil.-déc. 2020 : « refonte de
+    // la communication interne par le design de landing pages ») et CV (« carte
+    // de voeux 2020 format web, emailing et print »). Cette page regroupe le
+    // travail mené pour SÆGUS en interne ; les missions clients (Orange, Sanofi
+    // Espoir, Capgemini) ont chacune leur page.
     context: "Stage chez SÆGUS · projet interne · 2020",
     logo: "/assets/Logo-8-1.svg",
     logoAlt: "Logo SÆGUS",
@@ -1107,7 +1104,7 @@ export const projects: Project[] = [
         sections: [
           {
             title: "Vue d'ensemble",
-            body: "Mission de conception pour le 10e anniversaire de SÆGUS : carte de vœux digitale, déclinaisons desktop et mobile, et supports de communication pour l'événement au Trianon.",
+            body: "Pendant mon second stage chez SÆGUS, en 2020, j'ai conçu la carte de vœux digitale du cabinet pour l'année 2021 : une landing page en versions desktop et mobile, déclinée pour l'e-mailing, l'impression et LinkedIn.",
           },
           {
             title: "Enjeux",
@@ -1138,24 +1135,6 @@ export const projects: Project[] = [
             image: saegusFigma,
             size: "wide",
           },
-        ],
-      },
-      {
-        type: "media",
-        media: [
-          {
-            title: "Accompagnement agile — filière RH chez Orange",
-            image: saegusAgile,
-            size: "wide",
-          },
-        ],
-      },
-      {
-        type: "media",
-        layout: "row",
-        media: [
-          { title: "Moments clés du projet", image: saegusTeamCards, size: "wide" },
-          { title: "Remerciements aux équipes", image: saegusPolaroids, size: "wide" },
         ],
       },
     ],

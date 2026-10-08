@@ -73,7 +73,7 @@ export const frSite: SiteCopy = {
     sections: [
       {
         title: "Parcours",
-        body: "Diplômé d'un Master de HETIC (2016–2021), spécialisation Product Design. J'ai commencé en 2018 comme designer UX/UI chez Fidesio, puis travaillé pour la Maison Yves Delorme (2019–2020) avant de rejoindre SÆGUS comme consultant design junior (2020–2021), sur des missions pour Orange et Capgemini. J'ai aussi travaillé sur des projets pour la Fondation Sanofi Espoir. J'ai ensuite été le premier designer de Memento, une start-up où j'ai passé un an en alternance (2021–2022). Depuis 2024, je suis le seul designer d'UpikaJob.",
+        body: "Diplômé du programme Grande École de HETIC (2016–2021), un master qui mêle web design, développement web et webmarketing. J'ai commencé par un stage UX/UI chez Fidesio, une agence web (2018), puis deux stages de consultant junior chez SÆGUS, en 2019 et en 2020, pour des clients comme Orange, Capgemini et la Fondation Sanofi Espoir. J'ai aussi travaillé pour la Maison Yves Delorme (2019–2020). J'ai ensuite été le premier designer de Memento, une start-up où j'ai passé un an en alternance (2021–2022). Depuis 2024, je suis le seul designer d'UpikaJob.",
       },
       {
         title: "Ce que je fais",
