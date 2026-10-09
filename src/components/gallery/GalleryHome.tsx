@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type CSSProperties,
   type FocusEvent,
   type MouseEvent,
 } from "react";
@@ -608,6 +609,18 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
   const shown = preview ?? (live ? hovered3d : null) ?? active;
   const project = projects[shown];
+  // La lumière du projet affiché teinte la navigation (liste, repère mobile,
+  // capsule du header) : la même couleur que son reflet dans la scène.
+  const accent = getTileLight(project.mediaKey).glow;
+  useEffect(() => {
+    document.documentElement.style.setProperty("--accent-glow", accent);
+  }, [accent]);
+  useEffect(
+    () => () => {
+      document.documentElement.style.removeProperty("--accent-glow");
+    },
+    [],
+  );
   const instant = calm || jumped;
   const fade = { duration: instant ? 0 : 0.35, ease: "easeOut" as const };
 
@@ -754,46 +767,83 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   {t.site.gallery.intro}
                 </p>
 
+                {/* Liste des projets : un fin rail de lumière à gauche, où le
+                    repère du projet affiché brille de sa couleur ; une lueur y
+                    glisse de temps en temps jusqu'à lui ; le survol d'un projet
+                    l'affiche, la lumière le suit. (Marge négative :
+                    la lueur du repère a la place de rayonner sans être rognée.) */}
                 <nav
                   aria-label={t.site.gallery.listLabel}
-                  className={cn("mt-8 hidden min-h-0 overflow-y-auto pl-4 lg:block [@media(max-height:780px)]:mt-5", NO_SCROLLBAR)}
+                  className={cn("-ml-3 mt-8 hidden min-h-0 overflow-y-auto pl-7 lg:block [@media(max-height:780px)]:mt-5", NO_SCROLLBAR)}
                 >
-                  <ol className="flex flex-col">
-                    {projects.map((item, index) => {
-                      const isActive = index === shown;
-                      return (
-                        <li key={item.slug} data-pull className="relative">
-                          {isActive ? (
-                            <motion.span
-                              layoutId="gallery-marker"
-                              aria-hidden="true"
-                              className="absolute -left-4 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-white"
-                              transition={{ duration: instant ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
-                            />
-                          ) : null}
-                          <Link
-                            href={`/projects/${item.slug}`}
-                            onClick={onProjectClick(index)}
-                            onMouseEnter={() => setPreview(index)}
-                            onMouseLeave={clearPreview}
-                            onFocus={onLinkFocus(index)}
-                            onBlur={clearPreview}
-                            className={cn(
-                              "flex items-baseline gap-3 py-1 text-sm uppercase tracking-[0.06em] transition-colors duration-300 [@media(max-height:780px)]:py-0.5",
-                              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
-                              isActive ? "font-bold text-white" : "text-white/60 hover:text-white",
-                            )}
-                          >
-                            <span aria-hidden="true" className="w-6 font-normal tabular-nums text-white/55">
-                              {pad(index + 1)}
-                            </span>
-                            {item.title}
-                            <span className="sr-only"> — {item.eyebrow}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ol>
+                  <div
+                    className="relative"
+                    style={synced ? ({ "--spark-to": `${((shown + 0.5) / count) * 100}%` } as CSSProperties) : undefined}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-y-1 -left-[15px] w-px [background:linear-gradient(180deg,transparent,rgba(255,255,255,0.13)_14%,rgba(255,255,255,0.13)_86%,transparent)]"
+                    >
+                      {synced && !calm && shown > 0 ? <span className="rail-spark rail-spark-down" /> : null}
+                      {synced && !calm && shown < count - 1 ? <span className="rail-spark rail-spark-up" /> : null}
+                    </span>
+                    <ol className="flex flex-col">
+                      {projects.map((item, index) => {
+                        const isActive = index === shown;
+                        return (
+                          <li key={item.slug} data-pull className="relative">
+                            {isActive ? (
+                              <>
+                                <motion.span
+                                  layoutId="gallery-halo"
+                                  aria-hidden="true"
+                                  className="pointer-events-none absolute inset-y-0 -left-[15px] right-0 rounded-r-full [background:linear-gradient(90deg,color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,transparent),transparent_75%)]"
+                                  transition={{ duration: instant ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                />
+                                <motion.span
+                                  layoutId="gallery-marker"
+                                  aria-hidden="true"
+                                  className="absolute -left-4 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full transition-[background-color,box-shadow] duration-500 [background-color:var(--accent-glow,#ffffff)] [box-shadow:0_0_8px_var(--accent-glow,#ffffff),0_0_20px_color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,transparent)]"
+                                  transition={{ duration: instant ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                />
+                              </>
+                            ) : null}
+                            <Link
+                              href={`/projects/${item.slug}`}
+                              onClick={onProjectClick(index)}
+                              onMouseEnter={() => setPreview(index)}
+                              onMouseLeave={clearPreview}
+                              onFocus={onLinkFocus(index)}
+                              onBlur={clearPreview}
+                              className={cn(
+                                "relative flex items-baseline gap-3 py-1 text-sm uppercase tracking-[0.06em] transition-colors duration-300 [@media(max-height:780px)]:py-0.5",
+                                "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+                                isActive
+                                  ? "font-bold text-white [text-shadow:0_0_18px_color-mix(in_srgb,var(--accent-glow,#ffffff)_40%,transparent)]"
+                                  : "text-white/60 hover:text-white",
+                              )}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "w-6 font-normal tabular-nums transition-colors duration-500",
+                                  isActive ? "[color:color-mix(in_srgb,var(--accent-glow,#ffffff)_60%,white)]" : "text-white/45",
+                                )}
+                              >
+                                {pad(index + 1)}
+                              </span>
+                              <span
+                                className={cn("transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", isActive && "translate-x-1")}
+                              >
+                                {item.title}
+                              </span>
+                              <span className="sr-only"> — {item.eyebrow}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
                 </nav>
               </div>
 
@@ -889,7 +939,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                               aria-hidden="true"
                               className={cn(
                                 "block w-1.5 rounded-full transition-all duration-300",
-                                index === shown ? "h-4 bg-white" : "h-1.5 bg-white/30",
+                                index === shown
+                                  ? "h-4 [background-color:var(--accent-glow,#ffffff)] [box-shadow:0_0_8px_var(--accent-glow,#ffffff)]"
+                                  : "h-1.5 bg-white/30",
                               )}
                             />
                           </button>

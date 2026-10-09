@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
 import { initSound, useSoundOn } from "@/lib/sound/sound";
@@ -36,6 +36,11 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Header flottant du site, qui remplace l'ancienne barre latérale.
+ *
+ * Une capsule de verre dépoli, décollée des bords de l'écran : la scène 3D
+ * reste visible tout autour. Un fin contour lumineux, qu'un reflet balaie de
+ * temps en temps, prend une pointe de la couleur du projet affiché sur
+ * l'accueil (`--accent-glow`) ; au survol, un halo suit la souris.
  *
  * Il se superpose au contenu au lieu de lui réserver une colonne : la grille de
  * l'accueil occupe ainsi tout l'écran. Sur les pages de lecture, il se masque
@@ -156,6 +161,13 @@ export function SiteHeader() {
 
   const visible = isOpen || !isHidden || pathname === "/";
   const barTransition = { duration: reduceMotion ? 0 : 0.28, ease };
+  const [motionPaused] = useMotionPaused();
+
+  // Halo qui suit la souris dans la capsule (sans rendu React à chaque pas).
+  const onCapsulePointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--spot-x", `${event.clientX - box.left}px`);
+  };
 
   return (
     <>
@@ -164,66 +176,87 @@ export function SiteHeader() {
         // Un lien atteint au clavier ne doit jamais rester hors de l'écran.
         onFocusCapture={() => setIsHidden(false)}
         initial={false}
-        animate={{ y: visible ? 0 : "-100%" }}
+        animate={{ y: visible ? 0 : "-120%" }}
         transition={{ duration: reduceMotion ? 0 : 0.35, ease }}
-        className="fixed inset-x-0 top-0 z-50 h-[var(--header-height)] border-b border-white/[0.06] bg-[#17161d]/80 text-white backdrop-blur-md"
+        // Seule la capsule capte les clics : autour, on atteint la scène.
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[var(--header-height)] text-white"
       >
-        <div className="relative flex h-full items-center justify-between px-5 lg:px-8">
-          {/* Le logo garde sa taille de dessin (61 × 70) et son effet au
-              survol ; il est seulement réduit à l'affichage. */}
-          <div className="relative h-[42px] w-[37px] shrink-0">
-            <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.6]" />
-          </div>
+        <div
+          onPointerMove={onCapsulePointer}
+          className={cn(
+            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 overflow-hidden rounded-full lg:inset-x-6 lg:top-3",
+            "border bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)] transition-[border-color] duration-700",
+            "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
+          )}
+        >
+          {/* Halo de la souris, reflet du contour, et lisière éclairée en bas. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,rgba(255,255,255,0.08),transparent_70%)]"
+          />
+          {!motionPaused ? <span aria-hidden="true" className="capsule-sweep" /> : null}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]"
+          />
+          <div className="relative flex h-full items-center justify-between pl-4 pr-2 lg:pl-5 lg:pr-4">
+            {/* Le logo garde sa taille de dessin (61 × 70) et son effet au
+                survol ; il est seulement réduit à l'affichage. */}
+            <div className="relative h-[36px] w-[32px] shrink-0 lg:h-[42px] lg:w-[37px]">
+              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.52] lg:scale-[0.6]" />
+            </div>
 
-          <nav
-            aria-label={t.site.nav.main}
-            className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 lg:flex"
-          >
-            {navigation.map((item) => (
-              <HeaderNavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                isActive={pathname === item.href}
+            <nav
+              aria-label={t.site.nav.main}
+              className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
+            >
+              {navigation.map((item) => (
+                <HeaderNavLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  isActive={pathname === item.href}
+                />
+              ))}
+            </nav>
+
+            <div className="hidden items-center gap-6 lg:flex">
+              <SocialLinks />
+              <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+              <LanguageFlags />
+              <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+              <SoundToggle />
+              <MotionToggle />
+            </div>
+
+            <button
+              type="button"
+              aria-label={isOpen ? t.site.nav.closeMenu : t.site.nav.openMenu}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setIsOpen((current) => !current)}
+              className="relative flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
+            >
+              {/* Les deux barres extrêmes convergent vers le centre en pivotant,
+                  la barre médiane s'efface : le burger devient une croix. */}
+              <motion.span
+                className="h-0.5 w-7 origin-center rounded-full bg-current"
+                animate={isOpen ? { rotate: 45, y: BAR_OFFSET } : { rotate: 0, y: 0 }}
+                transition={barTransition}
               />
-            ))}
-          </nav>
-
-          <div className="hidden items-center gap-6 lg:flex">
-            <SocialLinks />
-            <span aria-hidden="true" className="h-5 w-px bg-white/15" />
-            <LanguageFlags />
-            <span aria-hidden="true" className="h-5 w-px bg-white/15" />
-            <SoundToggle />
-            <MotionToggle />
+              <motion.span
+                className="h-0.5 w-7 origin-center rounded-full bg-current"
+                animate={isOpen ? { opacity: 0, scaleX: 0.4 } : { opacity: 1, scaleX: 1 }}
+                transition={barTransition}
+              />
+              <motion.span
+                className="h-0.5 w-7 origin-center rounded-full bg-current"
+                animate={isOpen ? { rotate: -45, y: -BAR_OFFSET } : { rotate: 0, y: 0 }}
+                transition={barTransition}
+              />
+            </button>
           </div>
-
-          <button
-            type="button"
-            aria-label={isOpen ? t.site.nav.closeMenu : t.site.nav.openMenu}
-            aria-expanded={isOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setIsOpen((current) => !current)}
-            className="relative -mr-2 flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
-          >
-            {/* Les deux barres extrêmes convergent vers le centre en pivotant,
-                la barre médiane s'efface : le burger devient une croix. */}
-            <motion.span
-              className="h-0.5 w-7 origin-center rounded-full bg-current"
-              animate={isOpen ? { rotate: 45, y: BAR_OFFSET } : { rotate: 0, y: 0 }}
-              transition={barTransition}
-            />
-            <motion.span
-              className="h-0.5 w-7 origin-center rounded-full bg-current"
-              animate={isOpen ? { opacity: 0, scaleX: 0.4 } : { opacity: 1, scaleX: 1 }}
-              transition={barTransition}
-            />
-            <motion.span
-              className="h-0.5 w-7 origin-center rounded-full bg-current"
-              animate={isOpen ? { rotate: -45, y: -BAR_OFFSET } : { rotate: 0, y: 0 }}
-              transition={barTransition}
-            />
-          </button>
         </div>
       </motion.header>
 
@@ -251,7 +284,7 @@ export function SiteHeader() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: reduceMotion ? 0 : 0.22, ease: "easeOut" }}
-              className="fixed inset-x-0 top-[var(--header-height)] z-[45] bg-[#17161d]/98 px-6 py-8 shadow-2xl backdrop-blur lg:hidden"
+              className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] rounded-3xl border border-white/10 bg-[#121118]/90 px-6 py-8 shadow-2xl backdrop-blur-xl lg:hidden"
             >
               <nav aria-label={t.site.nav.mobile} className="flex flex-col gap-5">
                 {mobileNavigation.map((item) => {
@@ -291,8 +324,8 @@ export function SiteHeader() {
 }
 
 /**
- * Lien du header grand écran : trait qui se déroule sous le libellé au survol,
- * page active en gras et soulignée.
+ * Lien du header grand écran : une pastille de verre s'allume au survol ; la
+ * page active garde la sienne, en gras, avec un trait de lumière dessous.
  */
 function HeaderNavLink({
   href,
@@ -308,16 +341,20 @@ function HeaderNavLink({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative py-1.5 text-[0.8rem] uppercase tracking-[0.06em] transition-colors duration-300",
-        isActive ? "font-bold text-white" : "font-medium text-white/75 hover:text-white",
+        "group relative rounded-full px-4 py-1.5 text-[0.8rem] uppercase tracking-[0.06em] transition-[color,background-color,box-shadow] duration-300",
+        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/50",
+        isActive
+          ? "bg-white/[0.08] font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]"
+          : "font-medium text-white/75 hover:bg-white/[0.06] hover:text-white",
       )}
     >
       {label}
       <span
         aria-hidden="true"
         className={cn(
-          "absolute inset-x-0 bottom-0 h-px origin-left bg-current transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+          "absolute bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 rounded-full transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "[background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)] shadow-[0_0_6px_var(--accent-glow,#ffffff)]",
+          isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100",
         )}
       />
     </Link>
