@@ -108,6 +108,8 @@ export class PassiveScheduler {
 
   /** Libère les ressources (minuteur, animation en cours). */
   dispose(): void {
+    // Désactivé pour de bon : un rappel tardif ne relance plus le cycle.
+    this.enabled = false;
     this.cancelTimer();
     this.interrupt();
   }

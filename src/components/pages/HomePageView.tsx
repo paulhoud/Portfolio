@@ -7,11 +7,19 @@ import { getLocalizedProjects } from "@/i18n/catalog";
 import { useTranslation } from "@/i18n/context";
 import { setHomeView, useHomeView } from "@/lib/homeView";
 import { useScrollMemory } from "@/lib/useScrollMemory";
+import { useEffect } from "react";
 
 export function HomePageView() {
   const { locale, t } = useTranslation();
   const projects = getLocalizedProjects(locale);
   const view = useHomeView();
+
+  // Une fois la galerie affichée, le masquage d'avant affichage n'a plus
+  // lieu d'être (sinon la grille resterait cachée si l'on y revient). Pas
+  // avant : pendant l'hydratation, c'est encore la grille qui est rendue.
+  useEffect(() => {
+    if (view === "gallery") document.documentElement.removeAttribute("data-home-view");
+  }, [view]);
 
   // Revenir au damier depuis une fiche projet reprend le défilement là où il
   // avait été laissé, plutôt que de tout remonter en haut.
@@ -20,7 +28,7 @@ export function HomePageView() {
   if (view === "gallery") return <GalleryHome projects={projects} />;
 
   return (
-    <>
+    <div className="home-grid">
       {/* Titre principal du site : associe explicitement le nom au métier.
           Masqué visuellement pour préserver le damier plein écran. */}
       <h1 className="sr-only">
@@ -39,6 +47,6 @@ export function HomePageView() {
       >
         {t.site.gallery.showGallery}
       </button>
-    </>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getMotionEnd, getMotionStart, getProjectMedia } from "@/content/projectMedia";
+import { PLAYBACK_RATE, getMotionEnd, getMotionStart, getProjectMedia } from "@/content/projectMedia";
 import { requestIdle } from "@/lib/idle";
 import { cn } from "@/lib/utils";
 import { usePassiveAnimation } from "./PassiveAnimationProvider";
@@ -21,12 +21,6 @@ type ProjectThumbnailProps = {
 };
 
 const IMAGE_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
-
-/**
- * Vitesse de lecture des animations de tuiles : un peu plus vive que l'export,
- * sans dénaturer le mouvement.
- */
-const PLAYBACK_RATE = 1.2;
 
 type Mode = "idle" | "hover" | "passive";
 

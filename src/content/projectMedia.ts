@@ -41,6 +41,45 @@ const motionEndAt: Partial<Record<MediaKey, number>> = {
   UPIKAJOB: 8.8,
 };
 
+/**
+ * Vitesse de lecture des animations de tuiles : un peu plus vive que l'export,
+ * sans dénaturer le mouvement.
+ */
+export const PLAYBACK_RATE = 1.2;
+
+/**
+ * Lumière de chaque tableau dans la galerie 3D.
+ *
+ * - `glow` : couleur que le tableau projette sur le mur et le sol, prise dans
+ *   la marque (le logo plutôt que le fond quand le fond est blanc ou noir).
+ * - `exposure` : luminosité du tableau. Les tuiles à fond clair éblouissent
+ *   dans la salle sombre : elles sont baissées, sans changer leur teinte.
+ *
+ * Réglé à l'œil le 9 oct. 2026, à revoir avec Paul sur son écran.
+ */
+export type TileLight = { glow: string; exposure: number };
+
+const tileLights: Partial<Record<MediaKey, TileLight>> = {
+  UPIKAJOB: { glow: "#2f9bff", exposure: 0.8 },
+  MEMENTO: { glow: "#3cc9b0", exposure: 1 },
+  YDL: { glow: "#a9c7cc", exposure: 0.8 },
+  JIVE: { glow: "#ffb800", exposure: 0.92 },
+  SANOFI: { glow: "#d4ac7c", exposure: 0.8 },
+  FIDESIO: { glow: "#ff3345", exposure: 0.95 },
+  CAPGEMINI: { glow: "#1f8fd6", exposure: 0.8 },
+  BAIO: { glow: "#7fe03a", exposure: 0.9 },
+  SAEGUS: { glow: "#b9b9c8", exposure: 1 },
+  LGM: { glow: "#d8603e", exposure: 0.85 },
+  PERSO: { glow: "#ef5a4c", exposure: 1 },
+};
+
+/** Lumière d'un tableau, avec un repli neutre. */
+export function getTileLight(key: string | undefined | null): TileLight {
+  const fallback = { glow: "#c8c8d0", exposure: 0.9 };
+  if (!key) return fallback;
+  return tileLights[key.toUpperCase() as MediaKey] ?? fallback;
+}
+
 /** Instant d'arrêt de l'animation d'une carte, ou `null` pour aller au bout. */
 export function getMotionEnd(key: string | undefined | null): number | null {
   if (!key) return null;
