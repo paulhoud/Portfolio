@@ -51,8 +51,10 @@ export type GalleryPieceInput = {
   motionEnd: number | null;
   /** Couleur de fond de la tuile. */
   background: string;
-  /** Couleur de la lumière projetée et des arêtes. */
+  /** Couleur de la lumière projetée au sol. */
   glow: string;
+  /** Couleur des petits volumes autour de la plaque (par défaut, `glow`). */
+  accent?: string;
   exposure: number;
 };
 
@@ -157,6 +159,8 @@ const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 /** Durées (s) : avancée dans la plaque, sortie à reculons. */
 const DIVE = 0.8;
 const EMERGE = 1.05;
+/** Recul (m) du trou noir derrière le projet regardé. */
+const HOLE_BEHIND = 2.6;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const random = (min: number, max: number) => min + Math.random() * (max - min);
@@ -233,6 +237,12 @@ export function createGalleryRenderer(
     uFogFar: { value: 34 },
   };
   const lightDir = new Vector3(-0.55, 0.8, 0.6).normalize();
+  // Courbure de l'espace autour du trou noir, partagée par tous les volumes.
+  const warp = {
+    uWarpCenter: { value: new Vector3() },
+    uWarpAxis: { value: new Vector3(0, 0, 1) },
+    uWarp: { value: 0 },
+  };
   const blank = new DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1, RGBAFormat);
   blank.needsUpdate = true;
 
@@ -242,6 +252,7 @@ export function createGalleryRenderer(
       fragmentShader: slabFragment,
       uniforms: {
         ...fog,
+        ...warp,
         uLightDir: { value: lightDir },
         uMap: { value: blank },
         uVideo: { value: blank },
@@ -320,7 +331,8 @@ export function createGalleryRenderer(
     satelliteSignature = signature;
     disposeSatellites();
     satellites = satelliteLayouts.map((layout) => {
-      const glow = candyColor(inputs[layout.owner].glow);
+      const owner = inputs[layout.owner];
+      const glow = candyColor(owner.accent ?? owner.glow);
       const body = layout.dark ? new Color("#16161c") : glow;
       const material = slabMaterial(body, glow, 1, true, 0);
       const [w, h, d] = layout.size;
@@ -357,6 +369,9 @@ export function createGalleryRenderer(
   const floorGeometry = new PlaneGeometry(260, 260);
   floorGeometry.rotateX(-Math.PI / 2);
   const floor = new Mesh(floorGeometry, floorMaterial);
+  // Dessiné en premier : le trou noir passe par-dessus le sol, les objets
+  // par-dessus le trou noir.
+  floor.renderOrder = -3;
   scene.add(floor);
 
   // --- État ----------------------------------------------------------------
@@ -411,6 +426,8 @@ export function createGalleryRenderer(
     start: number;
     center: Vector3;
     axis: Vector3;
+    /** Agrandissement du trou, pour qu'il paraisse de la même taille de loin. */
+    scale: number;
     onPhase: (phase: WorldPhase) => void;
     reached: Set<WorldPhase>;
   };
@@ -1039,10 +1056,17 @@ export function createGalleryRenderer(
       floorUniforms.uSwirl.value =
         wt < 4.0 ? clamp01((wt - 0.3) / 3.2) : wt < 6.0 ? 1 : 1 - clamp01((wt - 6.0) / 1.4);
       floorUniforms.uDim.value = wt < 4.3 ? 0 : wt < 6.0 ? clamp01((wt - 4.3) / 0.3) : 1 - clamp01((wt - 6.0) / 0.8);
+      // L'espace se courbe de plus en plus : les volumes s'étirent et se
+      // tordent en approchant ; à la renaissance, ils se redressent.
+      const bend = clamp01((wt - 0.4) / 3.4);
+      warp.uWarpCenter.value.copy(doom.center);
+      warp.uWarpAxis.value.copy(doom.axis);
+      warp.uWarp.value = wt < 4.0 ? bend * bend * (3 - 2 * bend) : wt < 6.0 ? 1 : (1 - clamp01((wt - 6.0) / 1.3)) ** 2;
       if (wt >= 7.8) {
         world = null;
         floorUniforms.uSwirl.value = 0;
         floorUniforms.uDim.value = 0;
+        warp.uWarp.value = 0;
         doom.onPhase("done");
         updateScheduler();
       }
@@ -1241,6 +1265,7 @@ export function createGalleryRenderer(
       const glow = wt < 0.8 ? wt / 0.8 : wt < 4.0 ? 1 : 1 - clamp01((wt - 4.0) / 0.3);
       const flash = wt < 4.25 ? 0 : wt < 4.35 ? (wt - 4.25) / 0.1 : Math.exp(-(wt - 4.35) * 4.5);
       blackHole.group.position.copy(doom.center);
+      blackHole.group.scale.setScalar(doom.scale);
       blackHole.update(camera, Math.max(0, size), Math.max(0, glow), wt < 6.0 ? flash : 0, wt);
       // Le monde tremble pendant l'aspiration.
       if (wt > 0.5 && wt < 4.2) {
@@ -1268,13 +1293,16 @@ export function createGalleryRenderer(
         blackHole = createBlackHole();
         scene.add(blackHole.group);
       }
-      // Le trou s'ouvre juste derrière le projet qu'on regarde.
+      // Le trou s'ouvre au milieu de l'écran (et non du cadre), au loin
+      // derrière le projet qu'on regarde.
       const pose = cameraPose(layouts, station, 1);
-      const axis = new Vector3(...pose.target).sub(camera.position).normalize();
+      const depth = camera.position.distanceTo(new Vector3(...pose.target)) + HOLE_BEHIND;
+      const axis = new Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize();
       world = {
         start: performance.now(),
-        center: new Vector3(...pose.target).addScaledVector(axis, 1.2),
+        center: camera.position.clone().addScaledVector(axis, depth),
         axis,
+        scale: (1.15 * depth) / (depth - HOLE_BEHIND + 1.2),
         onPhase,
         reached: new Set(),
       };

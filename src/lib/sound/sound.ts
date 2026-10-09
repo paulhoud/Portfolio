@@ -6,15 +6,15 @@ import type { SoundEffect, SoundEngine } from "./soundEngine";
 /**
  * Son du site : réglage du visiteur (mémorisé) et accès au moteur.
  *
- * Le son est actif par défaut, mais les navigateurs n'en autorisent aucun
- * avant un premier geste (clic, toucher, touche) : la musique démarre donc
- * en fondu à ce moment-là. Le moteur n'est chargé qu'à cet instant, et
- * seulement si le son n'a pas été coupé.
+ * Le son est coupé par défaut : le visiteur l'active avec le bouton du
+ * haut-parleur, et ce choix est mémorisé. Les navigateurs n'autorisent aucun
+ * son avant un premier geste (clic, toucher, touche) : le contexte audio est
+ * préparé à ce moment-là, et le moteur n'est chargé que si le son est actif.
  */
 
 const STORAGE_KEY = "portfolio-sound";
 const listeners = new Set<() => void>();
-let memory = true;
+let memory = false;
 
 let context: AudioContext | null = null;
 let engine: SoundEngine | null = null;
@@ -23,7 +23,7 @@ let initialised = false;
 
 function getSnapshot(): boolean {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) !== "off";
+    return window.localStorage.getItem(STORAGE_KEY) === "on";
   } catch {
     return memory;
   }
@@ -57,7 +57,7 @@ function ensureEngine(): Promise<SoundEngine | null> {
 
 function apply() {
   const on = getSnapshot() && !document.hidden;
-  if (!context) return;
+  if (!context || (!on && !engine)) return;
   void ensureEngine().then((ready) => ready?.setOn(on));
 }
 
@@ -90,8 +90,8 @@ export function initSound() {
 
 export function setSoundOn(on: boolean) {
   try {
-    if (on) window.localStorage.removeItem(STORAGE_KEY);
-    else window.localStorage.setItem(STORAGE_KEY, "off");
+    if (on) window.localStorage.setItem(STORAGE_KEY, "on");
+    else window.localStorage.removeItem(STORAGE_KEY);
   } catch {
     /* stockage indisponible : le réglage vaut pour cette page seulement */
   }
@@ -100,9 +100,9 @@ export function setSoundOn(on: boolean) {
   apply();
 }
 
-/** `[son actif, basculer]` — actif au rendu serveur. */
+/** `[son actif, basculer]` — coupé au rendu serveur. */
 export function useSoundOn(): [boolean, () => void] {
-  const on = useSyncExternalStore(subscribe, getSnapshot, () => true);
+  const on = useSyncExternalStore(subscribe, getSnapshot, () => false);
   const toggle = useCallback(() => setSoundOn(!getSnapshot()), []);
   return [on, toggle];
 }

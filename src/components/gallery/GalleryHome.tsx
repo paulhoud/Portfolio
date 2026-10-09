@@ -101,6 +101,7 @@ function buildPieces(projects: Project[]): GalleryPieceInput[] {
       motionEnd: getMotionEnd(project.mediaKey),
       background: project.background,
       glow: light.glow,
+      accent: light.accent,
       exposure: light.exposure,
     };
   });
@@ -337,11 +338,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const destroyWorld = useCallback(() => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
-    // Le texte est aspiré vers le trou, au centre de la plaque active.
-    const frame = measureFrame();
+    // Le texte est aspiré vers le trou, au milieu de l'écran.
     const stage = stageRef.current?.getBoundingClientRect();
     const box = contentRef.current?.getBoundingClientRect();
-    if (frame && stage && box) setDoomOrigin(`${frame.cx - (box.left - stage.left)}px ${frame.cy - (box.top - stage.top)}px`);
+    if (stage && box) {
+      setDoomOrigin(`${stage.left + stage.width / 2 - box.left}px ${stage.top + stage.height / 2 - box.top}px`);
+    }
     playSfx("blackhole");
     const finish = () => {
       doomRef.current = false;
@@ -361,7 +363,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     window.setTimeout(() => onPhase("void"), 1100);
     window.setTimeout(() => onPhase("rebirth"), 2600);
     window.setTimeout(() => onPhase("done"), 3600);
-  }, [measureFrame]);
+  }, []);
   const destroyRef = useRef(destroyWorld);
   useEffect(() => {
     destroyRef.current = destroyWorld;

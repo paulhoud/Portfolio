@@ -277,6 +277,72 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
     osc.onended = () => gain.disconnect();
   };
 
+  /**
+   * Aspiration : de l'air happé de plus en plus fort et de plus en plus aigu,
+   * qui siffle, tremble et tourne autour de l'auditeur, puis se coupe net
+   * quand le trou se referme.
+   */
+  const suction = (duration: number) => {
+    const now = ctx.currentTime;
+    const end = now + duration;
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, now);
+    out.gain.exponentialRampToValueAtTime(0.25, now + duration * 0.45);
+    out.gain.exponentialRampToValueAtTime(1, end - 0.04);
+    out.gain.linearRampToValueAtTime(0, end);
+    // Tourbillon : le souffle passe d'une oreille à l'autre, de plus en plus vite.
+    const panner = ctx.createStereoPanner();
+    const swirl = ctx.createOscillator();
+    swirl.frequency.setValueAtTime(0.3, now);
+    swirl.frequency.exponentialRampToValueAtTime(5, end);
+    const swirlDepth = ctx.createGain();
+    swirlDepth.gain.value = 0.75;
+    swirl.connect(swirlDepth).connect(panner.pan);
+    // Turbulences : le volume tremble, de plus en plus vite.
+    const shake = ctx.createGain();
+    shake.gain.value = 0.7;
+    const flutter = ctx.createOscillator();
+    flutter.frequency.setValueAtTime(4, now);
+    flutter.frequency.exponentialRampToValueAtTime(26, end);
+    const flutterDepth = ctx.createGain();
+    flutterDepth.gain.value = 0.3;
+    flutter.connect(flutterDepth).connect(shake.gain);
+    shake.connect(out).connect(panner).connect(effects);
+
+    const source = ctx.createBufferSource();
+    source.buffer = whiteNoise;
+    source.loop = true;
+    // Souffle : une bande large qui monte vers l'aigu.
+    const low = ctx.createBiquadFilter();
+    low.type = "highpass";
+    low.frequency.setValueAtTime(120, now);
+    low.frequency.exponentialRampToValueAtTime(700, end);
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.Q.value = 1.2;
+    band.frequency.setValueAtTime(320, now);
+    band.frequency.exponentialRampToValueAtTime(3600, end);
+    const air = ctx.createGain();
+    air.gain.value = 1.6;
+    source.connect(low).connect(band).connect(air).connect(shake);
+    // Sifflement : une bande très étroite qui monte aussi, comme l'air
+    // aspiré par une fente.
+    const whistle = ctx.createBiquadFilter();
+    whistle.type = "bandpass";
+    whistle.Q.value = 16;
+    whistle.frequency.setValueAtTime(520, now);
+    whistle.frequency.exponentialRampToValueAtTime(2600, end);
+    const whistleLevel = ctx.createGain();
+    whistleLevel.gain.value = 4.5;
+    source.connect(whistle).connect(whistleLevel).connect(shake);
+
+    for (const node of [source, swirl, flutter]) {
+      node.start(now);
+      node.stop(end + 0.05);
+    }
+    source.onended = () => panner.disconnect();
+  };
+
   const boom = () => {
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -343,9 +409,9 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
         whoosh(1.1, false, 0.7);
       }
       if (name === "blackhole") {
-        // Grondement qui monte, et un souffle aspiré de plus en plus aigu.
+        // Grondement qui monte, et l'air aspiré jusqu'à l'effondrement (4 s).
         rumble(4);
-        whoosh(3.8, true, 1.2);
+        suction(4);
       }
       if (name === "collapse") {
         boom();

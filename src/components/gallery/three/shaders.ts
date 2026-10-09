@@ -7,20 +7,50 @@
  * le résultat pour l'écran.
  */
 
-/** Sommet des plaques : normale et direction de l'œil dans la salle. */
+/**
+ * Sommet des plaques : normale et direction de l'œil dans la salle. Près du
+ * trou noir (`uWarp`), l'espace se courbe : chaque point tourne autour du
+ * trou d'autant plus vite qu'il en est proche, ce qui tord les volumes en
+ * arc, et y tombe plus vite que ses voisins plus éloignés, ce qui les étire
+ * vers lui (et les comprime en largeur), comme happés par la gravité.
+ */
 export const slabVertex = /* glsl */ `
+  uniform vec3 uWarpCenter;
+  uniform vec3 uWarpAxis;
+  uniform float uWarp;
   varying vec2 vUv;
   varying vec3 vNormalW;
   varying vec3 vViewW;
   varying float vFront;
   varying float vDist;
+  varying float vSink;
+
+  // Rotation d'angle a autour de l'axe unitaire k.
+  vec3 turn(vec3 v, vec3 k, float a) {
+    float c = cos(a);
+    return v * c + cross(k, v) * sin(a) + k * dot(k, v) * (1.0 - c);
+  }
+
   void main() {
     vUv = uv;
     // Normale propre à la plaque : 1 sur la face avant, décroît sur l'arrondi.
     vFront = normal.z;
     vec4 world = modelMatrix * vec4(position, 1.0);
     // Inverse transposée : juste même quand la plaque est aplatie (relais).
-    vNormalW = normalize(transpose(inverse(mat3(modelMatrix))) * normal);
+    vec3 normalW = normalize(transpose(inverse(mat3(modelMatrix))) * normal);
+    vSink = 1.0;
+    if (uWarp > 0.0) {
+      vec3 rel = world.xyz - uWarpCenter;
+      float r = length(rel);
+      float twist = uWarp * 2.4 / (0.7 + r);
+      rel = turn(rel, uWarpAxis, twist);
+      normalW = turn(normalW, uWarpAxis, twist);
+      rel *= 1.0 - 0.8 * uWarp / (1.0 + 0.45 * r);
+      world.xyz = uWarpCenter + rel;
+      // La lumière s'éteint en approchant de l'horizon.
+      vSink = mix(1.0, smoothstep(0.2, 2.4, length(rel)), uWarp);
+    }
+    vNormalW = normalW;
     vViewW = cameraPosition - world.xyz;
     vec4 view = viewMatrix * world;
     vDist = length(view.xyz);
@@ -38,6 +68,7 @@ export const slabFragment = /* glsl */ `
   varying vec3 vViewW;
   varying float vFront;
   varying float vDist;
+  varying float vSink;
   uniform sampler2D uMap;
   uniform sampler2D uVideo;
   uniform float uHasMap;
@@ -119,7 +150,7 @@ export const slabFragment = /* glsl */ `
     // Survol seulement : les arêtes s'éclairent, en blanc (la couleur du
     // projet reste au sol : sur les boîtes sombres, elle faisait un néon).
     color += vec3(0.9) * pow(1.0 - ndv, 3.0) * 0.35 * uRim;
-    color *= uLit;
+    color *= uLit * vSink;
     color = mix(color, uFogColor, smoothstep(uFogNear, uFogFar, vDist));
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
