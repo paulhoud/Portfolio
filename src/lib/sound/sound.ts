@@ -197,9 +197,30 @@ export function playSfx(name: SoundEffect, duration?: number) {
 
 type Clip = { buffer: AudioBuffer; gain: number };
 
-/** Niveau moyen visé (valeur efficace) : audible sans couvrir la musique. */
-const CLIP_LEVEL = 0.06;
-const CLIP_MAX_GAIN = 0.7;
+/**
+ * Niveau visé (valeur efficace des passages audibles) : le même pour tous les
+ * sons, un peu sous la nappe d'ambiance, mesurée vers 0,013 en sortie.
+ */
+const CLIP_LEVEL = 0.011;
+
+/**
+ * Niveau d'un son sur ses seuls passages audibles (tranches de 50 ms à moins
+ * de 20 dB de la plus forte) : les silences ne faussent pas la mesure.
+ */
+function loudness(buffer: AudioBuffer) {
+  const samples = buffer.getChannelData(0);
+  const size = Math.max(1, Math.round(buffer.sampleRate * 0.05));
+  const slices: number[] = [];
+  for (let start = 0; start + size <= samples.length; start += size) {
+    let sum = 0;
+    for (let i = start; i < start + size; i += 2) sum += samples[i] * samples[i];
+    slices.push(sum / Math.ceil(size / 2));
+  }
+  if (slices.length === 0) return 1;
+  const loudest = slices.reduce((max, value) => Math.max(max, value), 0);
+  const audible = slices.filter((value) => value > loudest * 0.01);
+  return Math.sqrt(audible.reduce((total, value) => total + value, 0) / Math.max(1, audible.length)) || 1;
+}
 /** Durée au-delà de laquelle un son s'estompe (secondes). */
 const CLIP_LONGEST = 8;
 
@@ -212,17 +233,7 @@ function loadClip(ctx: AudioContext, url: string): Promise<Clip | null> {
     clip = fetch(url)
       .then((response) => response.arrayBuffer())
       .then((data) => ctx.decodeAudioData(data))
-      .then((buffer) => {
-        const samples = buffer.getChannelData(0);
-        let sum = 0;
-        let count = 0;
-        for (let i = 0; i < samples.length; i += 4) {
-          sum += samples[i] * samples[i];
-          count += 1;
-        }
-        const rms = Math.sqrt(sum / Math.max(1, count)) || 1;
-        return { buffer, gain: Math.min(CLIP_MAX_GAIN, CLIP_LEVEL / rms) };
-      })
+      .then((buffer) => ({ buffer, gain: Math.min(1, CLIP_LEVEL / loudness(buffer)) }))
       .catch(() => null);
     clips.set(url, clip);
   }
@@ -254,12 +265,13 @@ export function playClip(url: string) {
     const source = ctx.createBufferSource();
     source.buffer = clip.buffer;
     source.connect(gain).connect(ctx.destination);
+    // Lancé avant tout arrêt programmé : le navigateur refuse l'inverse.
+    source.start(now);
     if (clip.buffer.duration > CLIP_LONGEST) {
       gain.gain.setValueAtTime(clip.gain, now + CLIP_LONGEST - 1.5);
       gain.gain.linearRampToValueAtTime(0, now + CLIP_LONGEST);
       source.stop(now + CLIP_LONGEST + 0.05);
     }
-    source.start(now);
     const playing = { source, gain };
     clipPlaying = playing;
     source.onended = () => {
