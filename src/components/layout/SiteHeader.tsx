@@ -50,9 +50,14 @@ const ease = [0.22, 1, 0.36, 1] as const;
  * sans aller-retour qui distrairait de la scène.
  *
  * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux et
- *   langues à droite.
- * - En dessous : logo et bouton menu ; le menu déroule les liens (accueil
- *   compris), les réseaux et les langues, sur un voile qui assombrit la page.
+ *   réglages (langue, son, pause) à droite. Le rang est une grille à trois
+ *   colonnes « 1fr auto 1fr » : les colonnes latérales sont égales tant qu'il
+ *   y a la place (liens exactement au centre) et, quand la place manque, la
+ *   colonne de droite garde sa largeur et les liens glissent vers le logo —
+ *   jamais de chevauchement, sans point de rupture supplémentaire.
+ * - Tablette (≥ 768 px) : logo, liens au centre, bouton menu pour le reste.
+ * - Téléphone : logo et bouton menu ; le menu déroule les liens (accueil
+ *   compris), les réseaux et les réglages, sur un voile qui assombrit la page.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -62,6 +67,7 @@ export function SiteHeader() {
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollRef = useRef(0);
   const headerRef = useRef<HTMLElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
   const isOpenRef = useRef(false);
   const settleUntilRef = useRef(0);
 
@@ -73,6 +79,12 @@ export function SiteHeader() {
   const mobileNavigation = [{ href: "/", label: t.site.nav.home }, ...navigation];
 
   const close = () => setIsOpen(false);
+  // Fermeture sans navigation (Échap, clic sur le voile) : le focus revient au
+  // bouton du menu, sinon il tomberait sur la page avec le menu démonté.
+  const dismiss = () => {
+    setIsOpen(false);
+    burgerRef.current?.focus();
+  };
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -129,7 +141,7 @@ export function SiteHeader() {
     if (!isOpen) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
+      if (event.key === "Escape") dismiss();
     };
     window.addEventListener("keydown", onKeyDown);
 
@@ -184,33 +196,31 @@ export function SiteHeader() {
         <div
           onPointerMove={onCapsulePointer}
           className={cn(
-            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 overflow-hidden rounded-full lg:inset-x-6 lg:top-3",
+            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 rounded-full lg:inset-x-6 lg:top-3",
             "border bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150",
             "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)] transition-[border-color] duration-700",
             "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
           )}
         >
-          {/* Halo de la souris, reflet du contour, et lisière éclairée en bas. */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,rgba(255,255,255,0.08),transparent_70%)]"
-          />
-          {!motionPaused ? <span aria-hidden="true" className="capsule-sweep" /> : null}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]"
-          />
-          <div className="relative flex h-full items-center justify-between pl-4 pr-2 lg:pl-5 lg:pr-4">
+          {/* Halo de la souris, reflet du contour et lisière éclairée en bas,
+              rognés au contour de la capsule. Le contenu, lui, peut déborder :
+              les lignes du logo se déploient au survol au-delà de la capsule. */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+            <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,rgba(255,255,255,0.08),transparent_70%)]" />
+            {!motionPaused ? <span className="capsule-sweep" /> : null}
+            <span className="absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]" />
+          </div>
+
+          {/* Rang en grille « 1fr auto 1fr » dès la tablette (cf. doc du
+              composant) ; en dessous, logo et bouton menu aux deux bouts. */}
+          <div className="relative flex h-full items-center justify-between pl-4 pr-2 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-x-6 lg:pl-5 lg:pr-3">
             {/* Le logo garde sa taille de dessin (61 × 70) et son effet au
                 survol ; il est seulement réduit à l'affichage. */}
-            <div className="relative h-[36px] w-[32px] shrink-0 lg:h-[42px] lg:w-[37px]">
-              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.52] lg:scale-[0.6]" />
+            <div className="relative h-[36px] w-[32px] shrink-0 md:justify-self-start lg:h-[42px] lg:w-[37px]">
+              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.52] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 lg:scale-[0.6]" />
             </div>
 
-            <nav
-              aria-label={t.site.nav.main}
-              className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
-            >
+            <nav aria-label={t.site.nav.main} className="hidden items-center gap-1 md:flex md:justify-self-center">
               {navigation.map((item) => (
                 <HeaderNavLink
                   key={item.href}
@@ -221,22 +231,26 @@ export function SiteHeader() {
               ))}
             </nav>
 
-            <div className="hidden items-center gap-6 lg:flex">
+            {/* Réseaux d'un côté, langue et réglages de l'autre : deux groupes
+                au même rythme, chaque icône dans une zone de clic de 32 px. */}
+            <div className="hidden items-center lg:flex lg:justify-self-end">
               <SocialLinks />
-              <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+              <span aria-hidden="true" className="mx-3 h-5 w-px bg-white/15" />
               <LanguageFlags />
-              <span aria-hidden="true" className="h-5 w-px bg-white/15" />
-              <SoundToggle />
-              <MotionToggle />
+              <div className="ml-2 flex items-center">
+                <SoundToggle />
+                <MotionToggle />
+              </div>
             </div>
 
             <button
+              ref={burgerRef}
               type="button"
               aria-label={isOpen ? t.site.nav.closeMenu : t.site.nav.openMenu}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
               onClick={() => setIsOpen((current) => !current)}
-              className="relative flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
+              className="relative flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70 md:justify-self-end lg:hidden"
             >
               {/* Les deux barres extrêmes convergent vers le centre en pivotant,
                   la barre médiane s'efface : le burger devient une croix. */}
@@ -269,8 +283,9 @@ export function SiteHeader() {
                 page, en z-40), mais restent sous le header (z-50). */}
             <motion.button
               type="button"
+              tabIndex={-1}
               aria-label={t.site.nav.closeMenu}
-              onClick={close}
+              onClick={dismiss}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -284,33 +299,47 @@ export function SiteHeader() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: reduceMotion ? 0 : 0.22, ease: "easeOut" }}
-              className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] rounded-3xl border border-white/10 bg-[#121118]/90 px-6 py-8 shadow-2xl backdrop-blur-xl lg:hidden"
+              // Jamais plus haut que l'écran : le panneau défile de lui-même
+              // si la place manque (la page, elle, est verrouillée).
+              className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] max-h-[calc(100svh-var(--header-height)-1.25rem)] overflow-y-auto rounded-3xl border border-white/10 bg-[#121118]/90 p-3 shadow-2xl backdrop-blur-xl lg:hidden"
             >
-              <nav aria-label={t.site.nav.mobile} className="flex flex-col gap-5">
-                {mobileNavigation.map((item) => {
-                  const isActive = pathname === item.href;
+              {/* Écran bas (téléphone en paysage) : liens à gauche, réseaux et
+                  réglages à droite, pour que tout tienne sans défiler. Sur
+                  tablette, les liens sont déjà dans la capsule. */}
+              <div className="[@media(max-height:520px)]:grid [@media(max-height:520px)]:grid-cols-2 [@media(max-height:520px)]:gap-x-3">
+                <nav aria-label={t.site.nav.mobile} className="flex flex-col md:hidden">
+                  {mobileNavigation.map((item) => {
+                    const isActive = pathname === item.href;
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={close}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "text-lg uppercase tracking-[0.03em] transition-colors",
-                        isActive ? "font-bold text-white" : "font-medium text-white/80",
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
-                <SocialLinks />
-                <LanguageFlags />
-                {/* Réglages côte à côte, sans l'espacement des blocs. */}
-                <div className="flex flex-col">
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={close}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                          "relative flex min-h-11 items-center rounded-2xl px-3 text-base uppercase tracking-[0.04em] transition-colors",
+                          "focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-white/60",
+                          isActive ? "bg-white/[0.08] font-bold text-white" : "font-medium text-white/75 active:bg-white/[0.06]",
+                        )}
+                      >
+                        {isActive ? (
+                          // Même repère que la liste des projets : un trait à la couleur d'accent.
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full [background-color:var(--accent-glow,#ffffff)] [box-shadow:0_0_8px_var(--accent-glow,#ffffff)]"
+                          />
+                        ) : null}
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+                <div className="mt-2 border-t border-white/10 pt-2 md:mt-0 md:border-t-0 md:pt-0 [@media(max-height:520px)]:mt-0 [@media(max-height:520px)]:border-l [@media(max-height:520px)]:border-t-0 [@media(max-height:520px)]:pl-3 [@media(max-height:520px)]:pt-0">
+                  <div className="flex min-h-11 items-center justify-between px-3">
+                    <SocialLinks />
+                    <LanguageFlags />
+                  </div>
                   <SoundToggle labelled />
                   <MotionToggle labelled />
                 </div>
@@ -325,7 +354,8 @@ export function SiteHeader() {
 
 /**
  * Lien du header grand écran : une pastille de verre s'allume au survol ; la
- * page active garde la sienne, en gras, avec un trait de lumière dessous.
+ * page active garde la sienne, en gras, avec un trait de lumière dessous —
+ * réservé à elle, pour qu'un lien survolé ne se confonde pas avec elle.
  */
 function HeaderNavLink({
   href,
@@ -349,23 +379,35 @@ function HeaderNavLink({
       )}
     >
       {label}
-      <span
-        aria-hidden="true"
-        className={cn(
-          "absolute bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 rounded-full transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          "[background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)] shadow-[0_0_6px_var(--accent-glow,#ffffff)]",
-          isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100",
-        )}
-      />
+      {isActive ? (
+        <span
+          aria-hidden="true"
+          className="absolute bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 rounded-full [background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)] shadow-[0_0_6px_var(--accent-glow,#ffffff)]"
+        />
+      ) : null}
     </Link>
   );
 }
 
 /**
- * Met en pause les animations automatiques (tuiles, logos, séquences
- * d'arrivée) et mémorise le choix. Icône seule dans le header, icône et
- * libellé dans le menu mobile.
+ * Apparence commune des deux réglages (son, pause). Dans la capsule : icône
+ * seule dans une zone de clic ronde, même repos et même survol que les icônes
+ * de réseaux ; enfoncé (son coupé, animations en pause), la pastille de verre
+ * de la page active. Dans le menu mobile : rangée avec icône et libellé.
  */
+function toggleClasses(labelled: boolean, pressed: boolean) {
+  return cn(
+    "flex cursor-pointer items-center gap-3 transition-colors duration-300 hover:text-white",
+    "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/50",
+    labelled
+      ? cn("min-h-11 rounded-2xl px-3 text-sm", pressed ? "text-white" : "text-white/70")
+      : cn(
+          "h-8 w-8 justify-center rounded-full hover:bg-white/[0.06]",
+          pressed ? "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]" : "text-white/50",
+        ),
+  );
+}
+
 /**
  * Musique d'ambiance et effets sonores : actifs par défaut (ils ne démarrent
  * qu'au premier clic, comme l'exigent les navigateurs), coupés d'un geste et
@@ -384,12 +426,7 @@ function SoundToggle({ labelled = false }: { labelled?: boolean }) {
       aria-pressed={!on}
       aria-label={labelled ? undefined : label}
       title={labelled ? undefined : on ? label : t.site.sound.unmute}
-      className={cn(
-        "flex items-center gap-3 transition-colors duration-300 hover:text-white",
-        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
-        on ? "text-white/60" : "text-white",
-        labelled ? "min-h-11 text-sm" : "-mx-1.5 h-11 w-11 justify-center",
-      )}
+      className={toggleClasses(labelled, !on)}
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor" stroke="none" />
@@ -407,6 +444,10 @@ function SoundToggle({ labelled = false }: { labelled?: boolean }) {
   );
 }
 
+/**
+ * Met en pause les animations automatiques (tuiles, logos, séquences
+ * d'arrivée) et mémorise le choix.
+ */
 function MotionToggle({ labelled = false }: { labelled?: boolean }) {
   const { t } = useTranslation();
   const [paused, toggle] = useMotionPaused();
@@ -421,12 +462,7 @@ function MotionToggle({ labelled = false }: { labelled?: boolean }) {
       aria-pressed={paused}
       aria-label={labelled ? undefined : label}
       title={labelled ? undefined : paused ? t.site.motion.resume : label}
-      className={cn(
-        "flex items-center gap-3 transition-colors duration-300 hover:text-white",
-        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
-        paused ? "text-white" : "text-white/60",
-        labelled ? "min-h-11 text-sm" : "-mx-1.5 h-11 w-11 justify-center",
-      )}
+      className={toggleClasses(labelled, paused)}
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
         {paused ? <path d="M8 5.5v13l10.5-6.5L8 5.5Z" /> : <path d="M7 5h3.5v14H7V5Zm6.5 0H17v14h-3.5V5Z" />}

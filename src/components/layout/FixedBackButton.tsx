@@ -60,7 +60,8 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed left-4 top-[calc(var(--header-height)+0.75rem)] z-40 lg:left-6"
+      // Sur l'axe du logo de la capsule, juste en dessous.
+      className="fixed left-6 top-[calc(var(--header-height)+0.75rem)] z-40 lg:left-[42px]"
     >
       <Link
         href={href}

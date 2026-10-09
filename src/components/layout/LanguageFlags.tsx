@@ -61,7 +61,7 @@ export function LanguageFlags() {
   const { locale, setLocale, t } = useTranslation();
 
   return (
-    <div className="flex items-center gap-3" aria-label={t.site.language.switchTo}>
+    <div className="flex items-center gap-2" aria-label={t.site.language.switchTo}>
       {languages.map((language) => {
         const isActive = locale === language.code;
         const FlagIcon = flagIcons[language.code];
@@ -75,7 +75,7 @@ export function LanguageFlags() {
             onClick={() => setLocale(language.code)}
             className={cn(
               // Au survol, le drapeau ondule et un reflet le traverse (cf. globals.css).
-              "flag-button relative block overflow-hidden p-[1.5px] transition-opacity duration-300",
+              "flag-button relative block cursor-pointer overflow-hidden p-[1.5px] transition-opacity duration-300",
               "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60",
               FLAG_OUTER_RADIUS,
               isActive

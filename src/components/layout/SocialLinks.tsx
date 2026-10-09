@@ -34,7 +34,7 @@ export function SocialLinks({
 
   return (
     <nav aria-label={`Profils professionnels de ${profile.name}`} className={className}>
-      <ul className={cn("flex flex-wrap", labelled ? "gap-2.5" : "items-center gap-4")}>
+      <ul className={cn("flex", labelled ? "flex-wrap gap-2.5" : "items-center")}>
         {activeSocialLinks.map((link) => {
           const path = brandIconPaths[link.id as BrandIconId];
 
@@ -50,14 +50,15 @@ export function SocialLinks({
                   "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
                   labelled
                     ? "gap-2.5 rounded-full border border-white/12 px-4 py-2.5 text-white/70 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/5 hover:text-white"
-                    : "text-white/40 hover:text-white focus-visible:text-white",
+                    : // Zone de clic ronde de 32 px, même survol que les autres icônes du header.
+                      "h-8 w-8 justify-center rounded-full text-white/50 hover:bg-white/[0.06] hover:text-white focus-visible:text-white",
                 )}
               >
                 {path ? (
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 24 24"
-                    className={labelled ? "h-4 w-4 shrink-0" : "h-[1.05rem] w-[1.05rem]"}
+                    className="h-4 w-4 shrink-0"
                     fill="currentColor"
                   >
                     <path d={path} />
