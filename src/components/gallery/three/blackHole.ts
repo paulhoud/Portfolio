@@ -14,9 +14,9 @@ import {
  * Trou noir de la fonction cachée « destroy the world », dans l'esprit de
  * Gargantua (Interstellar) : une ombre parfaitement noire, cerclée d'un fin
  * anneau de lumière ; un disque de matière blanche, presque vu par la
- * tranche, qui passe devant l'ombre et s'étire d'un bord à l'autre de
- * l'écran ; et l'arrière de ce disque, replié par la gravité, qui reparaît en
- * arc au-dessus de l'ombre (et, plus fin, en dessous). La matière est striée
+ * tranche, qui passe devant l'ombre et déborde de chaque côté sur environ
+ * trois fois sa largeur ; et l'arrière de ce disque, replié par la gravité,
+ * qui reparaît en arc au-dessus de l'ombre (et, plus fin, en dessous). La matière est striée
  * comme du verre brossé, tourne plus vite près du centre, et brille davantage
  * du côté où elle vient vers nous.
  *
@@ -39,9 +39,9 @@ export type BlackHole = {
 /** Ordre de dessin : sol (-3), puis le trou noir, puis les objets (0). */
 const ORDER = { hole: -2.2, flash: 10 };
 /** Rayon de l'ombre pour `size` = 1, dans le repère du trou. */
-const HORIZON = 0.7;
-/** Demi-côté du panneau (repère du trou) : le disque y tient jusqu'à neuf rayons. */
-const EXTENT = 9 * HORIZON * 1.3;
+export const HORIZON = 0.58;
+/** Demi-côté du panneau (repère du trou) : le disque y tient jusqu'à six rayons. */
+const EXTENT = 6 * HORIZON * 1.3;
 
 const holeVertex = /* glsl */ `
   varying vec2 vPlane;
@@ -66,7 +66,7 @@ const holeFragment = /* glsl */ `
   float noise(vec3 x) {
     vec3 i = floor(x);
     vec3 f = fract(x);
-    f = f * f * (3.0 - 2.0 * f);
+    f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
     return mix(
       mix(mix(hash(i), hash(i + vec3(1, 0, 0)), f.x), mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
       mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x), mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y),
@@ -75,20 +75,24 @@ const holeFragment = /* glsl */ `
   }
 
   /*
-   * Stries de la matière : très étirées le long de l'orbite (angle), fines en
-   * travers (rayon). L'angle passe par cos/sin pour ne laisser aucune couture.
+   * Stries de la matière : très étirées le long de l'orbite (angle), fines et
+   * nettes en travers (rayon). L'angle passe par cos/sin pour ne laisser
+   * aucune couture.
    */
   float streaks(float radius, float angle, float spin) {
     float a = angle + uTime * spin / pow(max(radius, 0.6), 1.5);
-    vec3 q = vec3(cos(a) * 1.6, sin(a) * 1.6, radius * 9.0);
+    vec3 q = vec3(cos(a) * 1.8, sin(a) * 1.8, radius * 15.0);
     float v = 0.0;
-    float amp = 0.55;
+    float amp = 0.5;
+    float total = 0.0;
     for (int i = 0; i < 4; i++) {
       v += amp * noise(q);
-      q = q * vec3(1.7, 1.7, 2.3) + 3.1;
-      amp *= 0.5;
+      total += amp;
+      q = q * vec3(1.6, 1.6, 2.1) + 3.1;
+      amp *= 0.7;
     }
-    return v;
+    // Contraste : des filets nets plutôt qu'un voile.
+    return smoothstep(0.25, 0.8, v / total);
   }
 
   void main() {
@@ -118,25 +122,21 @@ const holeFragment = /* glsl */ `
     vec2 d = vec2(p.x, p.y / squash);
     float rd = length(d);
     float phi = atan(d.y, d.x);
-    float profile = smoothstep(1.45, 1.8, rd) * exp(-(rd - 1.8) / 2.0) * (1.0 - smoothstep(6.0, 9.0, rd));
+    float profile = smoothstep(1.45, 1.8, rd) * exp(-(rd - 1.8) / 1.0) * (1.0 - smoothstep(2.8, 4.3, rd));
     float diskGrain = streaks(rd, phi, 1.4);
     float disk = profile * mix(0.35, 1.4, diskGrain) * (1.0 - 0.5 * cos(phi));
     // Moitié avant (sous le centre) : devant l'ombre ; moitié arrière : cachée par elle.
     float shadow = 1.0 - smoothstep(0.985, 1.0, rho);
     float front = step(d.y, 0.0);
     // Devant l'ombre, seule la partie proche du centre reste vive (bande fine).
-    float diskSeen = disk * mix(1.0 - shadow, mix(1.0, exp(-max(rd - 2.2, 0.0) / 1.2), shadow), front);
+    float diskSeen = disk * mix(1.0 - shadow, mix(1.0, exp(-max(rd - 2.2, 0.0) / 0.9), shadow), front);
 
     // Halo très léger autour de l'ombre.
     float glow = exp(-max(rho - 1.0, 0.0) / 0.9) * 0.035;
 
     float energy = diskSeen + (1.0 - shadow) * (arcs + ring + glow);
-    // Le plus chaud est blanc bleuté ; ce qui s'éloigne tire vers le pêche.
-    vec3 hot = vec3(0.86, 0.91, 1.0);
-    vec3 warm = vec3(0.86, 0.62, 0.48);
-    vec3 tint = mix(warm, hot, smoothstep(0.05, 0.5, energy));
-    // Les lueurs faibles sont écrasées : le fond reste noir, comme dans l'espace.
-    vec3 color = (1.0 - exp(-tint * pow(energy, 1.35) * 1.4)) * uGlow;
+    // Blanc pur ; les lueurs faibles sont écrasées : le fond reste noir.
+    vec3 color = vec3(1.0 - exp(-pow(energy, 1.35) * 1.5)) * uGlow;
     // Prémultiplié : l'ombre masque ce qu'il y a derrière, la lumière s'ajoute.
     gl_FragColor = vec4(color, shadow * min(1.0, uGlow * 1.5));
     #include <colorspace_fragment>

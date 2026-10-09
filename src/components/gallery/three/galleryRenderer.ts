@@ -1,6 +1,7 @@
 import {
   BufferGeometry,
   Color,
+  CanvasTexture,
   DataTexture,
   LinearFilter,
   LinearMipmapLinearFilter,
@@ -38,7 +39,7 @@ import {
   type PieceLayout,
   type SatelliteLayout,
 } from "./layout";
-import { createBlackHole, type BlackHole } from "./blackHole";
+import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
 import { buildIdentityModels } from "./identity";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
@@ -116,6 +117,11 @@ export type GalleryRenderer = {
    * projet en cours, mode calme…).
    */
   destroyWorld(onPhase: (phase: WorldPhase) => void): boolean;
+  /**
+   * Photographie du texte de la page (cf. textSnapshot), que le trou noir
+   * tord et avale à la place du texte lui-même ; `null` la retire.
+   */
+  setTextLayer(source: HTMLCanvasElement | null): void;
   /** Quitte l'autre dimension : le monde renaît. Faux s'il n'y a rien à quitter. */
   returnFromVoid(): boolean;
   setProgress(raw: number): void;
@@ -169,6 +175,50 @@ const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 /** Durées (s) : avancée dans la plaque, sortie à reculons. */
 const DIVE = 0.8;
 const EMERGE = 1.05;
+/**
+ * Texte photographié, plaqué sur tout l'écran puis tordu par le trou noir :
+ * chaque point de l'écran va chercher le texte plus loin du trou et tourné en
+ * arrière. Le texte glisse donc vers le trou en s'amincissant en travers et
+ * s'enroule en spirale (davantage près du centre) ; ce qui atteint l'ombre
+ * disparaît, et ce qui l'approche s'assombrit.
+ */
+const textVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = vec4(position.xy, 0.0, 1.0);
+  }
+`;
+
+const textFragment = /* glsl */ `
+  varying vec2 vUv;
+  uniform sampler2D uText;
+  uniform vec2 uSize;
+  uniform vec2 uCenter;
+  uniform float uHorizon;
+  uniform float uPull;
+  uniform float uOpacity;
+  void main() {
+    // Pixels de l'écran, origine en haut à gauche (comme la page).
+    vec2 px = vec2(vUv.x, 1.0 - vUv.y) * uSize;
+    vec2 d = px - uCenter;
+    float r = length(d);
+    float reach = max(uSize.x, uSize.y);
+    float t = uPull * uPull;
+    float source = r + t * 0.9 * reach;
+    float twist = t * 4.5 * exp(-r / (0.32 * reach)) + t * 0.6;
+    float angle = atan(d.y, d.x) - twist;
+    vec2 from = uCenter + vec2(cos(angle), sin(angle)) * source;
+    vec2 uv = vec2(from.x / uSize.x, 1.0 - from.y / uSize.y);
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) discard;
+    vec4 color = texture2D(uText, uv);
+    float swallowed = smoothstep(uHorizon * 0.92, uHorizon * 1.12, r);
+    float dim = mix(1.0, smoothstep(uHorizon, uHorizon * 2.4, r), uPull);
+    gl_FragColor = vec4(color.rgb * dim, color.a * swallowed * uOpacity);
+    #include <colorspace_fragment>
+  }
+`;
+
 /** Recul (m) du trou noir derrière le projet regardé. */
 const HOLE_BEHIND = 2.6;
 /** Instant (s) où l'horloge du trou noir s'arrête, en attendant le retour. */
@@ -693,6 +743,21 @@ export function createGalleryRenderer(
 
   // --- Animations automatiques, de temps en temps --------------------------
   const projected = new Vector3();
+
+  // --- Texte photographié, tordu par le trou noir ---------------------------
+  type TextLayer = { mesh: Mesh<PlaneGeometry, ShaderMaterial>; texture: CanvasTexture };
+  let textLayer: TextLayer | null = null;
+  const holeOnScreen = new Vector3();
+  const holeEdge = new Vector3();
+  const cameraRight = new Vector3();
+  const removeTextLayer = () => {
+    if (!textLayer) return;
+    scene.remove(textLayer.mesh);
+    textLayer.mesh.geometry.dispose();
+    textLayer.mesh.material.dispose();
+    textLayer.texture.dispose();
+    textLayer = null;
+  };
   const scheduler = new PassiveScheduler({
     getCandidates: () => {
       const ids: string[] = [];
@@ -995,7 +1060,9 @@ export function createGalleryRenderer(
     skipFrame = idle ? !skipFrame : false;
     if (!skipFrame) {
       renderer.render(scene, camera);
-      monitor(now, busy && !calm);
+      // Le trou noir ne dure que quelques secondes : on ne baisse pas la
+      // définition pendant qu'il est à l'écran.
+      monitor(now, busy && !calm && world === null);
       if (!ready && (pieces[activeIndex()].loaded || now - createdAt > 1800)) {
         ready = true;
         callbacks.onReady();
@@ -1294,6 +1361,7 @@ export function createGalleryRenderer(
     }
 
     // Le trou noir lui-même : il grossit, tourbillonne, se referme dans un éclair.
+    let holeSize = 0;
     if (doom && blackHole) {
       const size =
         wt < 0.8 ? easeOutCubic(wt / 0.8) : wt < 4.0 ? 1 + 0.3 * ((wt - 0.8) / 3.2) : 1.3 * (1 - easeInCubic(clamp01((wt - 4.0) / 0.4)));
@@ -1301,7 +1369,8 @@ export function createGalleryRenderer(
       const flash = wt < 4.25 ? 0 : wt < 4.35 ? (wt - 4.25) / 0.1 : Math.exp(-(wt - 4.35) * 4.5);
       blackHole.group.position.copy(doom.center);
       blackHole.group.scale.setScalar(doom.scale);
-      blackHole.update(camera, Math.max(0, size), Math.max(0, glow), wt < 5.0 ? flash : 0, wt);
+      holeSize = Math.max(0, size);
+      blackHole.update(camera, holeSize, Math.max(0, glow), wt < 5.0 ? flash : 0, wt);
       // Le monde tremble pendant l'aspiration.
       if (wt > 0.5 && wt < 4.2) {
         const shake = 0.05 * clamp01((wt - 0.5) / 2.5);
@@ -1310,6 +1379,22 @@ export function createGalleryRenderer(
       }
     } else if (blackHole) {
       blackHole.update(camera, 0, 0, 0, 0);
+    }
+    // Le texte : aspiré en spirale pendant l'aspiration, absent dans l'autre
+    // dimension, déroulé jusqu'à sa place au retour.
+    if (doom && textLayer) {
+      const uniforms = textLayer.mesh.material.uniforms;
+      const back = doom.returnAt === null ? 0 : clamp01((now - doom.returnAt) / 1200);
+      uniforms.uPull.value = doom.returnAt === null ? clamp01((raw - 0.5) / 3.4) : 1 - easeOutCubic(back);
+      uniforms.uOpacity.value = doom.returnAt !== null || raw < 4.2 ? 1 : 0;
+      uniforms.uSize.value.set(width, height);
+      holeOnScreen.copy(doom.center).project(camera);
+      const cx = ((holeOnScreen.x + 1) / 2) * width;
+      const cy = ((1 - holeOnScreen.y) / 2) * height;
+      uniforms.uCenter.value.set(cx, cy);
+      cameraRight.setFromMatrixColumn(camera.matrixWorld, 0);
+      holeEdge.copy(doom.center).addScaledVector(cameraRight, HORIZON * holeSize * doom.scale).project(camera);
+      uniforms.uHorizon.value = Math.hypot(((holeEdge.x + 1) / 2) * width - cx, ((1 - holeEdge.y) / 2) * height - cy);
     }
     // L'autre dimension : elle apparaît dans l'éclair et s'efface au retour.
     if (doom && dimension) {
@@ -1347,7 +1432,8 @@ export function createGalleryRenderer(
         start: performance.now(),
         center: camera.position.clone().addScaledVector(axis, depth),
         axis,
-        scale: (1.15 * depth) / (depth - HOLE_BEHIND + 1.2),
+        // Plus petit sur un écran en hauteur (téléphone), où il remplirait la largeur.
+        scale: ((1.15 * depth) / (depth - HOLE_BEHIND + 1.2)) * clamp(camera.aspect / 1.1, 0.65, 1),
         returnAt: null,
         onPhase,
         reached: new Set(),
@@ -1355,6 +1441,35 @@ export function createGalleryRenderer(
       updateScheduler();
       invalidate();
       return true;
+    },
+    setTextLayer(source) {
+      removeTextLayer();
+      if (!source || disposed) return;
+      const texture = new CanvasTexture(source);
+      texture.colorSpace = SRGBColorSpace;
+      texture.minFilter = LinearFilter;
+      texture.generateMipmaps = false;
+      const material = new ShaderMaterial({
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        uniforms: {
+          uText: { value: texture },
+          uSize: { value: new Vector2(width, height) },
+          uCenter: { value: new Vector2(width / 2, height / 2) },
+          uHorizon: { value: 0 },
+          uPull: { value: 0 },
+          uOpacity: { value: 1 },
+        },
+        vertexShader: textVertex,
+        fragmentShader: textFragment,
+      });
+      const mesh = new Mesh(new PlaneGeometry(2, 2), material);
+      mesh.frustumCulled = false;
+      mesh.renderOrder = 9;
+      scene.add(mesh);
+      textLayer = { mesh, texture };
+      invalidate();
     },
     returnFromVoid() {
       const doom = world;
@@ -1481,6 +1596,7 @@ export function createGalleryRenderer(
       blackHole?.dispose();
       for (const geometry of identityModels ?? []) geometry.dispose();
       dimension?.dispose();
+      removeTextLayer();
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();

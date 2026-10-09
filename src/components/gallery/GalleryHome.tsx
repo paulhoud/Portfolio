@@ -30,6 +30,7 @@ import {
 import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx } from "@/lib/sound/sound";
+import { snapshotText } from "./textSnapshot";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
 import type {
@@ -337,31 +338,27 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const [doom, setDoom] = useState<WorldPhase | null>(null);
   const doomRef = useRef(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  /** Animations du texte aspiré, rejouées à l'envers à la renaissance. */
+  /** Sans 3D : animations du texte aspiré, rejouées à l'envers à la renaissance. */
   const textPullRef = useRef<Animation[]>([]);
+  /** Avec la 3D : le texte est remplacé par sa photographie, que le trou noir tord. */
+  const [textAsImage, setTextAsImage] = useState(false);
   /** Sortie de l'autre dimension (bouton « Retour », touche Échap). */
   const leaveVoidRef = useRef<() => void>(() => {});
   const destroyWorld = useCallback(() => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
     const renderer = rendererRef.current;
-    const withScene = !calmRef.current && renderer !== null;
-    // Le texte s'étire vers le trou, au milieu de l'écran, et s'y engouffre.
     const stage = stageRef.current?.getBoundingClientRect();
-    if (!calmRef.current && stage) {
-      textPullRef.current = pullText(
-        contentRef.current,
-        stage.left + stage.width / 2,
-        stage.top + stage.height / 2,
-        withScene ? [0.5, 3.9] : [0, 0.9],
-      );
-    }
     playSfx("blackhole");
+    let started = false;
     const finish = () => {
       doomRef.current = false;
       for (const animation of textPullRef.current) animation.cancel();
       textPullRef.current = [];
       setDoom(null);
+      setTextAsImage(false);
+      // La photographie s'efface une fois le vrai texte réaffiché dessous.
+      if (started) requestAnimationFrame(() => requestAnimationFrame(() => renderer?.setTextLayer(null)));
     };
     const onPhase = (phase: WorldPhase) => {
       if (phase === "collapse") playSfx("collapse");
@@ -376,14 +373,28 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       if (phase === "done") finish();
       else setDoom(phase);
     };
-    if (renderer?.destroyWorld(onPhase)) {
+    started = renderer?.destroyWorld(onPhase) ?? false;
+    if (started && renderer) {
       leaveVoidRef.current = () => {
         renderer.returnFromVoid();
       };
+      // Le texte est photographié tel qu'il est à l'écran : c'est la photo,
+      // plaquée dans la scène, que le trou noir tord et avale.
+      const content = contentRef.current;
+      if (content && stage) {
+        void snapshotText(content, stage, Math.min(window.devicePixelRatio || 1, 2)).then((canvas) => {
+          if (!canvas || !doomRef.current) return;
+          renderer.setTextLayer(canvas);
+          setTextAsImage(true);
+        });
+      }
       return;
     }
-    // Sans 3D, ou en mode calme : un fondu au noir, la même dimension (le
-    // message seul) et le même retour.
+    // Sans 3D, ou en mode calme : le texte s'étire en bloc vers le centre (ou
+    // s'efface), puis la même dimension (le message seul) et le même retour.
+    if (!calmRef.current && stage) {
+      textPullRef.current = pullText(contentRef.current, stage.left + stage.width / 2, stage.top + stage.height / 2, [0, 0.9]);
+    }
     onPhase("suck");
     window.setTimeout(() => onPhase("collapse"), 900);
     window.setTimeout(() => onPhase("lost"), 1100);
@@ -674,7 +685,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             <div
               ref={contentRef}
               style={
-                doom === null
+                textAsImage
+                  ? { opacity: 0, pointerEvents: "none" }
+                  : doom === null
                   ? undefined
                   : doom === "rebirth"
                     ? { transition: "opacity 1s ease-out" }
