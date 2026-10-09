@@ -1,4 +1,5 @@
 import {
+  AdditiveBlending,
   BufferGeometry,
   Color,
   CanvasTexture,
@@ -46,6 +47,7 @@ import {
 import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
 import { createImageDimension, type ImageDimension, type ImageDimensionKind } from "./imageDimension";
+import { playClip } from "@/lib/sound/sound";
 import { IDENTITY_CATALOG } from "./identity";
 import { loadIdentityModel, type LoadedModel } from "./identityFiles";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
@@ -415,9 +417,83 @@ export function createGalleryRenderer(
     identityLooks.set(index, look);
     return look;
   };
+  /*
+   * Halo d'un écran allumé (le téléphone) : une lueur douce posée devant
+   * l'écran, qui s'additionne à la scène. Elle s'éteint quand l'écran se
+   * détourne et s'estompe dans le brouillard, comme les objets.
+   */
+  const haloGeometry = new PlaneGeometry(1, 1);
+  const haloMaterial = new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    uniforms: { ...fog, uColor: { value: new Color(1, 0.98, 0.95) }, uStrength: { value: 0.7 } },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      varying float vFacing;
+      varying float vDist;
+      void main() {
+        vUv = uv;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vec3 n = normalize(normalMatrix * vec3(0.0, 0.0, 1.0));
+        vFacing = max(dot(n, normalize(-mv.xyz)), 0.0);
+        vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      uniform float uStrength;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying vec2 vUv;
+      varying float vFacing;
+      varying float vDist;
+      void main() {
+        float d = length((vUv - 0.5) * 2.0);
+        float a = pow(max(1.0 - d, 0.0), 1.8) * uStrength * vFacing;
+        a *= 1.0 - smoothstep(uFogNear, uFogFar, vDist);
+        gl_FragColor = vec4(uColor, a);
+      }
+    `,
+  });
+  const haloFront = new Vector3(0, 0, 1);
+  // L’écran lui-même : un blanc franc, qui ne dépend pas de l’éclairage.
+  const screenMaterial = new ShaderMaterial({
+    side: DoubleSide,
+    uniforms: { ...fog },
+    vertexShader: /* glsl */ `
+      varying float vDist;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying float vDist;
+      void main() {
+        vec3 color = mix(vec3(0.96, 0.97, 1.0), uFogColor, smoothstep(uFogNear, uFogFar, vDist));
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `,
+  });
+
   /** Habille un satellite de son objet : géométrie partagée, une matière par pièce. */
   const dressSatellite = (mesh: Mesh<BufferGeometry, SatelliteMaterial>, look: LoadedModel) => {
     forEachMaterial(mesh.material, (material) => material.dispose());
+    for (const child of [...mesh.children]) mesh.remove(child);
+    if (look.glow) {
+      const halo = new Mesh(haloGeometry, haloMaterial);
+      halo.quaternion.setFromUnitVectors(haloFront, look.glow.normal);
+      halo.position.copy(look.glow.center).addScaledVector(look.glow.normal, 0.02);
+      halo.scale.setScalar(look.glow.size * 2.1);
+      halo.renderOrder = 2;
+      mesh.add(halo, new Mesh(look.glow.surface, screenMaterial));
+    }
     const glow = new Color(inputs[mesh.userData.owner as number].glow);
     const materials = look.parts.map((part) => {
       const material = slabMaterial(part.color, glow, 1, true, 0, part.map);
@@ -451,7 +527,7 @@ export function createGalleryRenderer(
   };
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
-    satelliteLayouts = layoutSatellites(layouts, currentSpacing);
+    satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index % IDENTITY_CATALOG.length].place);
     const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}`).join("|");
     if (signature === satelliteSignature) return;
     satelliteSignature = signature;
@@ -1077,6 +1153,22 @@ export function createGalleryRenderer(
     activity();
   };
   const onPointerLeave = () => setHovered(null);
+  // Son d'objet : chaque objet a les siens, joués à tour de rôle ; un double
+  // déclenchement rapproché (appui puis clic) n'en joue qu'un.
+  const soundTurns = new Map<number, number>();
+  let lastVoice = { index: -1, at: 0 };
+  const voice = (index: number) => {
+    const now = performance.now();
+    if (lastVoice.index === index && now - lastVoice.at < 400) return;
+    lastVoice = { index, at: now };
+    const entry = satellites[index]?.userData.entry as number | undefined;
+    if (entry === undefined) return;
+    const sounds = IDENTITY_CATALOG[entry].sounds;
+    if (!sounds?.length) return;
+    const turn = soundTurns.get(entry) ?? 0;
+    soundTurns.set(entry, turn + 1);
+    playClip(`/sounds/objects/${sounds[turn % sounds.length]}.mp3`);
+  };
   const onPointerDown = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
     suppressClick = false;
@@ -1087,6 +1179,7 @@ export function createGalleryRenderer(
       if (hit) {
         event.preventDefault();
         const body = hit.kind === "piece" ? pieceBodies[hit.index] : satelliteBodies[hit.index];
+        if (hit.kind === "satellite") voice(hit.index);
         const center = hit.object.position;
         camera.getWorldDirection(viewDirection);
         drag = {
@@ -1159,6 +1252,9 @@ export function createGalleryRenderer(
     }
     const index = pick(event.clientX, event.clientY);
     const hit = index === null ? pickAny(event.clientX, event.clientY) : null;
+    // Son de l'objet touché : au doigt ici, à la souris dès l'appui (plus
+    // haut) ; en mode calme, où on ne l'attrape pas, au clic.
+    if (hit?.kind === "satellite" && (lastPointerType === "touch" || calm)) voice(hit.index);
     // Un satellite qu'on touche sans le tirer reçoit une pichenette.
     if (hit?.kind === "satellite" && !calm) {
       const body = satelliteBodies[hit.index];
@@ -1876,6 +1972,9 @@ export function createGalleryRenderer(
         for (const part of look.parts) part.map?.dispose();
       }
       emptyGeometry.dispose();
+      haloGeometry.dispose();
+      haloMaterial.dispose();
+      screenMaterial.dispose();
       dimension?.dispose();
       scenery?.dispose();
       removeTextLayer();

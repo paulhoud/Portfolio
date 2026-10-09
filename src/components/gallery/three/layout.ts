@@ -184,6 +184,15 @@ export function cameraPose(pieces: PieceLayout[], station: number, distance: num
   };
 }
 
+/**
+ * Réglage de placement propre à un objet du catalogue : `near` < 1 le
+ * rapproche de sa plaque (0,6 : aux trois cinquièmes de sa distance) ;
+ * `textSide` le pose, sur ordinateur, entre la colonne de texte et la plaque,
+ * tout près d'elle et un peu en retrait : de l'autre côté, la place est le
+ * passage de la caméra vers le projet suivant, qui repousserait l'objet loin.
+ */
+export type SatelliteHint = { near?: number; textSide?: boolean };
+
 /** Petit objet décoratif qui flotte autour d'une plaque, à la manière de Spline. */
 export type SatelliteLayout = {
   owner: number;
@@ -209,7 +218,12 @@ export type SatelliteLayout = {
  * une plaque sur deux en a un de l'autre côté, un peu en retrait : il occupe
  * la bande libre entre la colonne de texte et la plaque.
  */
-export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): SatelliteLayout[] {
+export function layoutSatellites(
+  pieces: PieceLayout[],
+  spacing: Spacing,
+  /** Réglage propre à l'objet qui prendra la place n° `index` (cf. identity.ts). */
+  hint?: (index: number) => SatelliteHint | undefined,
+): SatelliteLayout[] {
   const satellites: SatelliteLayout[] = [];
   const wide = !spacing.portrait;
   const dist = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
@@ -235,13 +249,17 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
 
       // Assez grands pour qu'on reconnaisse l'objet : plus gros au loin (le
       // brouillard les estompe) et au premier plan.
-      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1), 0.4 + 0.15 * r(1)][k] * (wide ? 1.35 : 1);
-      const size: Vec3 = [s, s, s];
+      let s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1), 0.4 + 0.15 * r(1)][k] * (wide ? 1.35 : 1);
+      const wish = hint?.(satellites.length);
+      const near = wish?.near ?? 1;
+      const textSide = Boolean(wish?.textSide) && wide;
+      // Sens dans lequel on l'écarte s'il gêne : vers l'extérieur de l'allée.
+      const away = textSide ? -out : out;
 
       let position: Vec3;
       if (k === 0) {
         position = [
-          px + out * (half + 1.1 + 1.3 * r(3)) * spacing.spread,
+          px + out * (half + 0.9 + 1.0 * r(3)) * spacing.spread,
           py + (r(4) - 0.5) * 1.6,
           pz + (r(5) - 0.5) * spacing.depth * 0.45,
         ];
@@ -263,16 +281,29 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
         // entre le texte et elle, sans jamais la masquer.
         position = [px - out * (half + 0.75 + 0.25 * r(7)), py + (r(8) - 0.5) * half * 1.2, pz - 0.8 - 0.5 * r(9)];
       }
+      if (textSide) position = [px - out * (half + 0.55 + 0.2 * r(7)), py + (r(8) - 0.5) * half * 0.8, pz - 1.4 - 0.4 * r(9)];
+      // Objet qu'on veut plus près de sa plaque (cf. SatelliteHint).
+      if (near !== 1 && !textSide) {
+        position[0] = px + (position[0] - px) * near;
+        position[1] = py + (position[1] - py) * near;
+        position[2] = pz + (position[2] - pz) * near;
+      }
       // Les objets tiennent dans un cube de côté `s` mais ne le remplissent pas.
-      const extent = 0.6 * s;
+      let extent = 0.6 * s;
       // Jamais à travers la grille, même en tournant sur lui-même.
       position[1] = Math.max(0.23 + extent, position[1]);
       // Ni sur le trajet de la caméra, ni devant une plaque qu'on regarde :
       // on l'écarte vers l'extérieur, ou on y renonce.
       const fits = () => satelliteClear(pieces, spacing, owner, position, extent) && roomy(position, extent);
+      // Plutôt que de l'envoyer au loin, on l'écarte par petits pas en le
+      // réduisant un peu : il reste près de sa plaque, et reconnaissable.
       let tries = 0;
-      while (!fits() && tries < 6) {
-        position[0] += out * 0.6;
+      while (!fits() && tries < 7) {
+        position[0] += away * 0.35;
+        if (tries % 2 === 1) {
+          s *= 0.9;
+          extent = 0.6 * s;
+        }
         tries += 1;
       }
       if (!fits()) continue;
@@ -281,7 +312,7 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
       satellites.push({
         owner,
         position,
-        size,
+        size: [s, s, s],
         spin: [(r(10) - 0.5) * 0.5, (r(11) - 0.5) * 0.7, (r(12) - 0.5) * 0.4],
         phase: r(13) * Math.PI * 2,
       });
@@ -308,6 +339,20 @@ function satelliteClear(pieces: PieceLayout[], spacing: Spacing, owner: number, 
 
   for (let station = from; station <= to + 1e-6; station += 0.05) {
     if (dist(position, cameraAt(pieces, spacing, station)) < extent + 0.9) return false;
+  }
+
+  // Vu depuis sa plaque, il ne se cache pas derrière elle ni derrière la
+  // suivante : il reste presque entier hors de leur silhouette.
+  const home = cameraAt(pieces, spacing, owner);
+  for (let station = owner; station <= Math.min(last, owner + 1); station += 1) {
+    const piece = pieces[station];
+    const axis: Vec3 = [piece.position[0] - home[0], piece.position[1] - home[1], piece.position[2] - home[2]];
+    const length2 = axis[0] ** 2 + axis[1] ** 2 + axis[2] ** 2;
+    const rel: Vec3 = [position[0] - home[0], position[1] - home[1], position[2] - home[2]];
+    const u = (rel[0] * axis[0] + rel[1] * axis[1] + rel[2] * axis[2]) / length2;
+    if (u <= 1) continue;
+    const behind: Vec3 = [home[0] + axis[0] * u, home[1] + axis[1] * u, home[2] + axis[2] * u];
+    if (dist(position, behind) < (piece.size / 2) * 1.1 * u + extent * 0.6) return false;
   }
 
   for (let station = from; station <= to; station += 1) {

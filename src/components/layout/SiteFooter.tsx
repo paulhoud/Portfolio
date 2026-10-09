@@ -16,6 +16,7 @@ export function SiteFooter() {
       <p className="text-[0.6rem] uppercase tracking-[0.06em] text-white/40">
         {t.site.footer.copyright} {t.site.footer.rights}
       </p>
+      {MODEL_CREDITS.length > 0 ? (
       <p className="mt-2 text-[0.6rem] tracking-[0.04em] text-white/30">
         {t.site.footer.models} :{" "}
         {MODEL_CREDITS.map((credit, index) => (
@@ -32,6 +33,7 @@ export function SiteFooter() {
           </span>
         ))}
       </p>
+      ) : null}
     </footer>
   );
 }

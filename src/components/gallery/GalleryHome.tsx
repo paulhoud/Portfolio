@@ -30,7 +30,7 @@ import {
 } from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
-import { playSfx } from "@/lib/sound/sound";
+import { playSfx, playThemes, stopThemes } from "@/lib/sound/sound";
 import { snapshotText } from "./textSnapshot";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
@@ -348,6 +348,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const leaveVoidRef = useRef<() => void>(() => {});
   /** Dimension où l'on a atterri (le treillis, ou une image animée). */
   const [landed, setLanded] = useState<DimensionKind>("lattice");
+  // En quittant l’accueil, la musique d’une dimension s’arrête.
+  useEffect(() => () => stopThemes(), []);
   const destroyWorld = useCallback(() => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
@@ -373,6 +375,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     const onPhase = (phase: WorldPhase) => {
       if (phase === "collapse") playSfx("collapse");
       if (phase === "rebirth") {
+        stopThemes();
         playSfx("rebirth");
         // Le texte ressort du trou en se redressant.
         for (const animation of textPullRef.current) {
@@ -380,7 +383,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           animation.play();
         }
       }
-      if (phase === "lost") setLanded(renderer?.shownDimension() ?? "lattice");
+      if (phase === "lost") {
+        const shown = renderer?.shownDimension() ?? "lattice";
+        setLanded(shown);
+        // La musique de la dimension, une seule fois (cf. playThemes).
+        if (shown !== "lattice") playThemes(DIMENSION_THEMES[shown]);
+      }
       if (phase === "done") finish();
       else setDoom(phase);
     };
@@ -670,7 +678,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             className={cn(
               "pointer-events-none absolute inset-0 transition-opacity duration-700",
               "bg-[linear-gradient(0deg,#08080b_0%,rgba(8,8,11,0.9)_32%,transparent_44%),linear-gradient(180deg,rgba(8,8,11,0.85)_0%,transparent_20%)]",
-              "lg:bg-[linear-gradient(90deg,#08080b_0%,rgba(8,8,11,0.9)_40%,transparent_52%),linear-gradient(0deg,rgba(8,8,11,0.85)_0%,rgba(8,8,11,0.55)_20%,transparent_34%)]",
+              "lg:bg-[linear-gradient(90deg,#08080b_0%,rgba(8,8,11,0.9)_30%,rgba(8,8,11,0.45)_38%,transparent_44%),linear-gradient(0deg,rgba(8,8,11,0.85)_0%,rgba(8,8,11,0.55)_20%,transparent_34%)]",
               "[@media(max-height:500px)]:bg-[linear-gradient(90deg,transparent_0%,transparent_44%,rgba(8,8,11,0.88)_58%,#08080b_100%)]",
               // Effacé pendant l'entrée dans un projet et pendant le trou noir.
               live && !immersed && doom === null ? "opacity-100" : "opacity-0",
@@ -1036,6 +1044,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 /**
  * Les dimensions où l'on peut tomber (images dans public/dimensions).
  */
+/** Musiques jouées à l’arrivée dans une dimension, l’une après l’autre. */
+const DIMENSION_THEMES: Record<Exclude<DimensionKind, "lattice">, string[]> = {
+  southpark: ["/sounds/dimensions/south-park-start.mp3", "/sounds/dimensions/south-park-theme.mp3"],
+  dofus: ["/sounds/dimensions/dofus-theme.mp3"],
+};
+
 const DIMENSIONS: DimensionKind[] = ["lattice", "dofus", "southpark"];
 const DIMENSION_KEY = "portfolio-dimension";
 function readDimension(): DimensionKind | null {

@@ -11,12 +11,6 @@ export type ModelCredit = {
   licenseUrl: string;
 };
 
-export const MODEL_CREDITS: ModelCredit[] = [
-  {
-    title: "Shiba",
-    author: "zixisun02",
-    source: "https://sketchfab.com/3d-models/shiba-faef9fe5ace445e7b2989d1c1ece361c",
-    license: "CC BY 4.0",
-    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
-  },
-];
+// Aucun aujourd’hui : le shiba (CC BY 4.0, zixisun02) a été remplacé par
+// un chiot sous licence « Sketchfab Standard ».
+export const MODEL_CREDITS: ModelCredit[] = [];

@@ -40,7 +40,16 @@ export type ModelPart = {
   alphaCut: number;
 };
 
-export type LoadedModel = { geometry: BufferGeometry; parts: ModelPart[] };
+/** Écran allumé : où poser le halo, dans le repère de l'objet (cube de côté 1). */
+export type ModelGlow = {
+  center: Vector3;
+  normal: Vector3;
+  size: number;
+  /** La surface de l’écran, à peindre en blanc lumineux, hors éclairage. */
+  surface: BufferGeometry;
+};
+
+export type LoadedModel = { geometry: BufferGeometry; parts: ModelPart[]; glow?: ModelGlow };
 
 /**
  * Image posée sur une pièce, comme un autocollant : l'écran d'une télé, le
@@ -68,6 +77,11 @@ export type ModelOptions = {
   pixelated?: boolean;
   /** Rotation appliquée à l'objet (radians), pour tourner sa face vers nous. */
   turn?: [number, number, number];
+  /**
+   * Écran allumé : la pièce (nom du matériau ou de la pièce) devient un aplat
+   * blanc lumineux, et un halo s'en échappe (cf. galleryRenderer).
+   */
+  screen?: { piece: string; glow?: number };
 };
 
 let textureLoader: TextureLoader | null = null;
@@ -229,7 +243,7 @@ function cutDecal(geometry: BufferGeometry, decal: ModelDecal, portrait: boolean
  * texture conservée ; `decals` y pose des images (cf. ModelDecal).
  */
 export async function loadIdentityModel(file: string, options: ModelOptions = {}): Promise<LoadedModel> {
-  const { tints = {}, decals = [], pixelated = false, turn } = options;
+  const { tints = {}, decals = [], pixelated = false, turn, screen } = options;
   if (!loader) {
     loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
@@ -290,6 +304,19 @@ export async function loadIdentityModel(file: string, options: ModelOptions = {}
       names.push([]);
     }
   });
+  // Écran allumé : blanc uni, plus lumineux que l'éclairage de la scène.
+  const screenPart = screen ? names.findIndex((pair) => pair.includes(screen.piece)) : -1;
+  if (screenPart >= 0) {
+    const glow = screen!.glow ?? 1.8;
+    parts[screenPart] = { ...parts[screenPart], color: new Color(glow, glow, glow), map: null, doubleSided: true };
+    // Ses couleurs par sommet (un dégradé sombre) teinteraient le blanc.
+    (geometries[screenPart].attributes.color as BufferAttribute).array.fill(1);
+    // La vitre teintée posée devant (zones semi-transparentes du boîtier)
+    // laisserait l’écran gris : on ne garde que ses parties opaques.
+    parts.forEach((part, index) => {
+      if (index !== screenPart && part.alphaCut > 0) part.alphaCut = 0.92;
+    });
+  }
   const merged = mergeGeometries(geometries, true);
   for (const geometry of geometries) geometry.dispose();
   if (!merged) throw new Error(`identité : ${file} illisible`);
@@ -304,5 +331,49 @@ export async function loadIdentityModel(file: string, options: ModelOptions = {}
   merged.translate(-center.x, -center.y, -center.z);
   merged.scale(scale, scale, scale);
   merged.computeBoundingSphere();
-  return { geometry: merged, parts };
+  const glow = screenPart >= 0 ? glowOf(merged, screenPart) : undefined;
+  if (glow) {
+    // L’écran est dans le plan même de la façade : avancé d’un cheveu, il
+    // passe devant elle au lieu de clignoter avec elle.
+    const group = merged.groups[screenPart];
+    const position = merged.attributes.position as BufferAttribute;
+    for (let i = group.start; i < group.start + group.count; i += 1) {
+      position.setXYZ(i, position.getX(i) + glow.normal.x * 0.004, position.getY(i) + glow.normal.y * 0.004, position.getZ(i) + glow.normal.z * 0.004);
+    }
+    glow.center.addScaledVector(glow.normal, 0.004);
+    // Sa surface, un rien plus en avant, devient une plaque lumineuse.
+    const surface = new BufferGeometry();
+    const points = new Float32Array(group.count * 3);
+    for (let i = 0; i < group.count; i += 1) {
+      points[i * 3] = position.getX(group.start + i) + glow.normal.x * 0.002;
+      points[i * 3 + 1] = position.getY(group.start + i) + glow.normal.y * 0.002;
+      points[i * 3 + 2] = position.getZ(group.start + i) + glow.normal.z * 0.002;
+    }
+    surface.setAttribute("position", new Float32BufferAttribute(points, 3));
+    glow.surface = surface;
+  }
+  return { geometry: merged, parts, glow };
+}
+
+/** Centre, orientation et taille de l'écran, une fois l'objet mis à l'échelle. */
+function glowOf(geometry: BufferGeometry, part: number): ModelGlow | undefined {
+  const group = geometry.groups[part];
+  if (!group) return undefined;
+  const position = geometry.attributes.position as BufferAttribute;
+  const normal = geometry.attributes.normal as BufferAttribute;
+  const center = new Vector3();
+  const facing = new Vector3();
+  const min = new Vector3(Infinity, Infinity, Infinity);
+  const max = new Vector3(-Infinity, -Infinity, -Infinity);
+  const point = new Vector3();
+  for (let i = group.start; i < group.start + group.count; i += 1) {
+    point.fromBufferAttribute(position, i);
+    center.add(point);
+    min.min(point);
+    max.max(point);
+    facing.add(point.fromBufferAttribute(normal, i));
+  }
+  center.divideScalar(Math.max(1, group.count));
+  const size = max.sub(min);
+  return { center, normal: facing.normalize(), size: Math.max(size.x, size.y, size.z), surface: new BufferGeometry() };
 }

@@ -16,13 +16,14 @@ import {
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { ModelDecal } from "./identityFiles";
+import type { SatelliteHint } from "./layout";
 
 /**
  * Petits objets qui flottent autour des plaques : des choses qui racontent
  * Paul (listes données par Paul le 9 oct. 2026).
  *
  * Ce sont des modèles 3D trouvés par Paul (fichiers de public/models, cf.
- * identityFiles.ts) : sneaker, burger, shiba, Pokéball, sushi, Power Cube,
+ * identityFiles.ts) : chiot, sneaker, burger, Pokéball, sushi, Power Cube,
  * skate, chat, Rondoudou, ours en peluche.
  *
  * Certains ont ici un équivalent construit en code à partir de formes
@@ -53,6 +54,15 @@ export type IdentityEntry = {
    * lui-même (un animal qu’on verrait sinon de dos).
    */
   front?: boolean;
+  /** Écran allumé : la pièce devient blanche et lumineuse, avec un halo. */
+  screen?: { piece: string; glow?: number };
+  /** Placement : plus près de sa plaque (cf. SatelliteHint). */
+  place?: SatelliteHint;
+  /**
+   * Sons joués à tour de rôle quand on attrape ou touche l’objet (fichiers
+   * de public/sounds/objects, sans extension), si le son du site est actif.
+   */
+  sounds?: string[];
 };
 
 type Place = {
@@ -255,6 +265,18 @@ function cat() {
 // sushi et maki construits en code, cartes Yu-Gi-Oh!, sneaker Adidas, Lapras,
 // 3DS et kebab.
 export const IDENTITY_CATALOG: IdentityEntry[] = [
+  // Le chiot remplace le shiba (licence plus libre). Premier du catalogue :
+  // il prend la place la plus en vue près d’UpikaJob, à droite de la plaque
+  // (hors du voile du texte), et reste de face. Remplacer le modèle : changer
+  // `file` (un loup Minecraft est prévu).
+  {
+    name: "dog",
+    file: "dog.glb",
+    front: true,
+    sounds: ["bark-1", "bark-2", "minecraft-dog-bark"],
+  },
+  { name: "burger", file: "burger.glb", build: burger, sounds: ["heavy-eating"] },
+  { name: "pokeball", file: "pokeball.glb", build: pokeball, sounds: ["pokeball-1", "pokeball-2", "pokeball-3"] },
   {
     name: "sneakers",
     file: "white-sneaker.glb",
@@ -262,12 +284,18 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     // Sneaker blanche colorisée (demande de Paul) : empiècements de daim rouges,
     // doublure noire, semelle intérieure sombre, cuir et semelle blancs.
     tints: { WhiteSuede: "#c8102e", WhiteSatin: "#1b1b1f", Insole: "#26262b", WhiteSole: "#f1efe8" },
+    sounds: ["run-sound", "run-meme"],
   },
-  { name: "burger", file: "burger.glb", build: burger },
-  // De face, la tête vers nous : de trois quarts, on le voyait de dos.
-  { name: "shiba", file: "shiba.glb", front: true },
-  { name: "pokeball", file: "pokeball.glb", build: pokeball },
-  { name: "smartphone", file: "smartphone.glb" },
+  // Écran allumé : blanc uni et halo, à la place du fond d’écran du modèle.
+  {
+    name: "smartphone",
+    file: "smartphone.glb",
+    screen: { piece: "Wallpaper", glow: 3.2 },
+    // De face et côté texte sur ordinateur : son écran allumé reste en vue.
+    front: true,
+    place: { textSide: true },
+    sounds: ["phone-vibrate"],
+  },
   {
     name: "lego",
     file: "lego.glb",
@@ -286,39 +314,61 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
       Cube001_Bunny_0: "#0d4fb3",
       Cube002_Bunny_0: "#0d4fb3",
     },
+    sounds: ["lego"],
   },
-  { name: "sushi", file: "sushi.glb" },
-  // Un cube plein paraît plus gros que les autres objets : un peu réduit.
-  { name: "minecraftCube", file: "minecraft-cube.glb", pixelated: true, size: 0.8 },
+  // Le plateau flotte, le dessus incliné vers nous : on voit les sushis.
+  { name: "sushi", file: "sushi.glb", front: true, turn: [0.55, 0, 0], sounds: ["sushi-koto"] },
+  {
+    name: "minecraftCube",
+    file: "minecraft-cube.glb",
+    pixelated: true,
+    // Côté texte sur ordinateur, plus près de sa plaque sur téléphone : bien en vue.
+    place: { textSide: true, near: 0.6 },
+    sounds: ["minecraft-pop", "minecraft-up", "minecraft-creeper", "eating-minecraft"],
+  },
   // Le fichier assombrit sa texture de 60 % : on rend au ballon son blanc.
-  { name: "football", file: "football.glb", tints: { Baked: "#ffffff" } },
+  { name: "football", file: "football.glb", tints: { Baked: "#ffffff" }, sounds: ["football-1", "football-2"] },
   {
     name: "tv",
     file: "tv.glb",
-    // Une partie de Tony Hawk’s Underground à l’écran (image choisie par Paul).
+    // De face (l’écran vers nous), entre le texte et sa plaque.
+    front: true,
+    size: 1.15,
+    place: { textSide: true },
     // Plastique presque noir dans le fichier : éclairci pour se détacher du fond.
     tints: { BlackPlastic: "#3a3a42" },
+    // Une partie de Tony Hawk’s Underground à l’écran (image choisie par Paul).
     decals: [{ piece: "Screen", image: "/models/decals/tv-screen.webp", glow: 1.35 }],
+    sounds: ["tv-ps2", "tv-effect"],
   },
   // Couleurs franches du Power Cube (vert vif, éclair jaune), un peu réduit.
-  { name: "powerCube", file: "power-cube.glb", build: starDrop, size: 0.72, tints: { green: "#1fd34a", yellow: "#ffd400" } },
-  { name: "cat", file: "cat.glb", build: cat },
-  { name: "banana", file: "banana.glb", size: 1.25 },
+  {
+    name: "powerCube",
+    file: "power-cube.glb",
+    build: starDrop,
+    size: 0.72,
+    tints: { green: "#1fd34a", yellow: "#ffd400" },
+    sounds: ["brawlstars"],
+  },
+  { name: "cat", file: "cat.glb", build: cat, sounds: ["cat-1", "cat-2", "cat-3"] },
+  // Au-dessus de sa plaque : visible pendant les trajets de la caméra.
   { name: "kitsuneMask", file: "kitsune-mask.glb" },
-  { name: "earbuds", file: "earbuds.glb", size: 0.88 },
+  { name: "banana", file: "banana.glb", size: 1.25, sounds: ["banana"] },
+  { name: "earbuds", file: "earbuds.glb", size: 0.88, sounds: ["earbuds-1", "earbuds-2", "earbuds-3"] },
   {
     name: "skateboard",
     file: "skateboard.glb",
     build: skateboard,
     size: 1.7,
-    // Une planche Deathwish dessous (image choisie par Paul).
+    // Le logo Deathwish dessous, sur fond rose (image choisie par Paul).
     decals: [{ piece: "skateboard", image: "/models/decals/deathwish-deck.webp", side: [0, -1, 0] }],
+    sounds: ["skateboard-1", "skateboard-2"],
   },
-  { name: "candy", file: "candy.glb" },
-  { name: "jigglypuff", file: "jigglypuff.glb" },
-  { name: "minecraftSword", file: "minecraft-sword.glb", pixelated: true, size: 1.2 },
-  { name: "sodaCan", file: "soda-can.glb" },
-  { name: "potatOS", file: "potatos.glb" },
-  { name: "shuriken", file: "shuriken.glb" },
-  { name: "teddy", file: "teddy.glb" },
+  { name: "candy", file: "candy.glb", sounds: ["candy-1", "candy-2"] },
+  { name: "jigglypuff", file: "jigglypuff.glb", sounds: ["jigglypuff-1", "jigglypuff-2"] },
+  { name: "minecraftSword", file: "minecraft-sword.glb", pixelated: true, size: 1.2, sounds: ["minecraft-hurt"] },
+  { name: "sodaCan", file: "soda-can.glb", sounds: ["can-open"] },
+  { name: "potatOS", file: "potatos.glb", sounds: ["portal-1", "portal-2", "portal-3"] },
+  { name: "shuriken", file: "shuriken.glb", sounds: ["shuriken-1", "shuriken-2"] },
+  { name: "teddy", file: "teddy.glb", sounds: ["teddybear"] },
 ];
