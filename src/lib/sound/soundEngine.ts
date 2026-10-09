@@ -9,7 +9,7 @@
  * caméra, un scintillement quand on entre dans la plaque, l'inverse au retour.
  */
 
-export type SoundEffect = "travel" | "enter" | "return";
+export type SoundEffect = "travel" | "enter" | "return" | "blackhole" | "collapse" | "rebirth";
 
 export type SoundEngine = {
   /** Joue (fondu d'entrée) ou se tait (fondu de sortie, puis veille). */
@@ -251,6 +251,60 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
     osc.onended = () => gain.disconnect();
   };
 
+  const rumble = (duration: number) => {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(34, now);
+    osc.frequency.linearRampToValueAtTime(58, now + duration);
+    const low = ctx.createBufferSource();
+    low.buffer = whiteNoise;
+    low.loop = true;
+    const lowFilter = ctx.createBiquadFilter();
+    lowFilter.type = "lowpass";
+    lowFilter.frequency.value = 160;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + duration * 0.9);
+    gain.gain.linearRampToValueAtTime(0, now + duration);
+    osc.connect(gain);
+    low.connect(lowFilter).connect(gain);
+    gain.connect(effects);
+    osc.start(now);
+    low.start(now);
+    osc.stop(now + duration + 0.05);
+    low.stop(now + duration + 0.05);
+    osc.onended = () => gain.disconnect();
+  };
+
+  const boom = () => {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(70, now);
+    osc.frequency.exponentialRampToValueAtTime(22, now + 1.6);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.6, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+    osc.connect(gain).connect(effects);
+    osc.start(now);
+    osc.stop(now + 1.9);
+    osc.onended = () => gain.disconnect();
+    const burst = ctx.createBufferSource();
+    burst.buffer = whiteNoise;
+    const burstFilter = ctx.createBiquadFilter();
+    burstFilter.type = "lowpass";
+    burstFilter.frequency.setValueAtTime(2400, now);
+    burstFilter.frequency.exponentialRampToValueAtTime(120, now + 1.2);
+    const burstGain = ctx.createGain();
+    burstGain.gain.setValueAtTime(0.5, now);
+    burstGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+    burst.connect(burstFilter).connect(burstGain).connect(effects);
+    burst.start(now);
+    burst.stop(now + 1.4);
+    burst.onended = () => burstGain.disconnect();
+  };
+
   const arpeggio = (notes: number[], level: number) => {
     const now = ctx.currentTime + 0.02;
     notes.forEach((note, i) => bell(note, now + i * 0.07, level * (1 - i * 0.15), -0.3 + i * 0.2));
@@ -287,6 +341,18 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
       if (name === "return") {
         arpeggio([93, 88, 86, 81], 0.05);
         whoosh(1.1, false, 0.7);
+      }
+      if (name === "blackhole") {
+        // Grondement qui monte, et un souffle aspiré de plus en plus aigu.
+        rumble(4);
+        whoosh(3.8, true, 1.2);
+      }
+      if (name === "collapse") {
+        boom();
+      }
+      if (name === "rebirth") {
+        arpeggio([74, 81, 86, 90, 93, 98], 0.07);
+        whoosh(1.4, false, 0.6);
       }
     },
     dispose() {

@@ -55,6 +55,11 @@ export type SiteCopy = {
     viewProject: string;
     /** Invitation à faire défiler, à l'arrivée sur la galerie. */
     scrollHint: string;
+    /** Fonction cachée « destroy the world » : message pendant le vide. */
+    worldGone: string;
+    worldBack: string;
+    /** Indice glissé dans la console du navigateur. */
+    secretHint: string;
   };
   language: {
     switchTo: string;

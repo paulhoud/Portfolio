@@ -35,6 +35,9 @@ export const frSite: SiteCopy = {
     listLabel: "Projets",
     viewProject: "Voir le projet",
     scrollHint: "Faire défiler",
+    worldGone: "Le monde a été aspiré par un trou noir.",
+    worldBack: "Il se reforme…",
+    secretHint: "Psst… tapez « destroy » sur l'accueil.",
   },
   language: {
     switchTo: "Changer de langue",

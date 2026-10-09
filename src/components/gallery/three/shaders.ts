@@ -52,13 +52,29 @@ export const slabFragment = /* glsl */ `
   uniform vec3 uFogColor;
   uniform float uFogNear;
   uniform float uFogFar;
+
+  /*
+   * Studio photo imaginaire que reflètent les plaques : un fond sombre en
+   * dégradé, une grande boîte à lumière au-dessus et derrière l'objectif, un
+   * bandeau lumineux à droite et une rampe au plafond. Ces reflets neutres
+   * dessinent les arêtes, même des boîtes noires, sans couleur parasite.
+   */
+  vec3 studio(vec3 r) {
+    vec3 color = mix(vec3(0.010, 0.010, 0.013), vec3(0.050, 0.051, 0.060), smoothstep(-0.35, 0.85, r.y));
+    float key = smoothstep(0.78, 0.97, dot(r, normalize(vec3(-0.45, 0.6, 0.66))));
+    float strip = smoothstep(0.92, 0.99, dot(r, normalize(vec3(0.95, 0.15, 0.27))));
+    float top = smoothstep(0.86, 0.985, r.y);
+    return color + vec3(1.0, 0.98, 0.95) * key * 1.3 + vec3(0.85, 0.9, 1.0) * strip * 0.65 + vec3(0.9) * top * 0.4;
+  }
+
   void main() {
     vec3 n = normalize(vNormalW);
     vec3 v = normalize(vViewW);
     vec3 l = normalize(uLightDir);
-    float wrap = dot(n, l) * 0.5 + 0.5;
-    float spec = pow(max(dot(n, normalize(l + v)), 0.0), 36.0);
-    float fresnel = pow(1.0 - max(dot(n, v), 0.0), 2.6);
+    float ndl = max(dot(n, l), 0.0);
+    float ndv = max(dot(n, v), 0.0);
+    // Ciel clair, sol sombre : lumière d'ambiance qui vient d'en haut.
+    float hemi = 0.5 + 0.5 * n.y;
 
     vec3 still = uHasMap > 0.5 ? texture2D(uMap, vUv).rgb : uBody;
     // La vidéo arrive encodée (three ne la décode que pour ses propres
@@ -88,17 +104,21 @@ export const slabFragment = /* glsl */ `
       }
       casing = mix(uHasMap > 0.5 ? edgeStill / 8.0 : uBody, edgeMoving / 8.0, uMix);
     }
-    vec3 body = casing * uExposure * (0.16 + 0.9 * wrap * wrap);
-    vec3 color = mix(body, face, frontMix);
+    // Le boîtier est éclairé franchement (volume) ; la face imprimée reste
+    // presque à plat, pour garder la tuile fidèle et lisible.
+    vec3 body = casing * uExposure * (0.14 + 0.62 * ndl + 0.3 * hemi);
+    vec3 print = face * (0.9 + 0.1 * ndl);
+    vec3 color = mix(body, print, frontMix);
 
-    // Reflet large qui glisse sur la face quand la plaque pivote.
-    vec3 r = reflect(-v, n);
-    float k = dot(r.xy, vec2(-0.6, 0.8));
-    float sheen = smoothstep(-0.05, 0.12, k) * (1.0 - smoothstep(0.18, 0.4, k));
-    color += vec3(0.06) * sheen;
-    color += vec3(spec * 0.28);
-    // Arête brillante plutôt que néon : la couleur du projet, adoucie de blanc.
-    color += mix(vec3(0.8), uGlow, 0.45) * fresnel * (0.15 + 0.75 * uRim);
+    // Vernis : reflet du studio, plus fort sur les arêtes (Fresnel), plus
+    // discret sur la face imprimée.
+    float fresnel = 0.04 + 0.96 * pow(1.0 - ndv, 5.0);
+    color += studio(reflect(-v, n)) * fresnel * (0.95 - 0.45 * frontMix);
+    // Petit éclat de la lumière principale.
+    color += vec3(pow(max(dot(n, normalize(l + v)), 0.0), 70.0) * 0.3);
+    // Survol seulement : les arêtes s'éclairent, en blanc (la couleur du
+    // projet reste au sol : sur les boîtes sombres, elle faisait un néon).
+    color += vec3(0.9) * pow(1.0 - ndv, 3.0) * 0.35 * uRim;
     color *= uLit;
     color = mix(color, uFogColor, smoothstep(uFogNear, uFogFar, vDist));
     gl_FragColor = vec4(color, 1.0);
@@ -129,6 +149,8 @@ export const floorFragment = /* glsl */ `
   uniform vec3 uBase;
   uniform vec3 uGrid;
   uniform float uDim;
+  uniform vec3 uHole;
+  uniform float uSwirl;
   uniform vec3 uPiecePos[PIECES];
   uniform vec3 uPieceGlow[PIECES];
   uniform vec3 uFogColor;
@@ -143,15 +165,28 @@ export const floorFragment = /* glsl */ `
 
   void main() {
     float vDist = length(vWorld - cameraPosition);
+    // Trou noir : la grille s'enroule et s'étire vers lui.
+    vec2 p = vWorld.xz;
+    float pit = 1.0;
+    if (uSwirl > 0.0) {
+      vec2 d = p - uHole.xz;
+      float dist = length(d);
+      float twist = uSwirl * 5.0 / (1.0 + dist * 0.35);
+      float cs = cos(twist);
+      float sn = sin(twist);
+      d = mat2(cs, -sn, sn, cs) * d * (1.0 + uSwirl * 2.5 / (1.0 + dist));
+      p = uHole.xz + d;
+      pit = mix(1.0, smoothstep(0.0, 3.0 + uSwirl * 6.0, dist), uSwirl);
+    }
     vec3 light = vec3(0.0);
     for (int i = 0; i < PIECES; i++) {
-      vec2 d = vWorld.xz - uPiecePos[i].xz;
+      vec2 d = p - uPiecePos[i].xz;
       light += uPieceGlow[i] * exp(-dot(d, d) / 1.8);
     }
-    float line = gridLine(vWorld.xz, 1.25);
+    float line = gridLine(p, 1.25);
     // La grille s'estompe au loin avant le brouillard, comme un projecteur au sol.
     float reach = 1.0 - smoothstep(uFogNear * 0.5, uFogFar * 0.6, vDist);
-    vec3 color = uBase + light + uGrid * line * reach * (1.0 + 1.2 * length(light));
+    vec3 color = (uBase + light + uGrid * line * reach * (1.0 + 1.2 * length(light))) * pit;
     color = mix(color, uFogColor, max(smoothstep(uFogNear, uFogFar, vDist), uDim));
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>

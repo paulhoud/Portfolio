@@ -74,14 +74,19 @@ export function LanguageFlags() {
             aria-pressed={isActive}
             onClick={() => setLocale(language.code)}
             className={cn(
-              "block p-[1.5px] transition-opacity duration-300",
+              // Au survol, le drapeau ondule et un reflet le traverse (cf. globals.css).
+              "flag-button relative block overflow-hidden p-[1.5px] transition-opacity duration-300",
+              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60",
               FLAG_OUTER_RADIUS,
               isActive
                 ? "border border-white opacity-100"
                 : "border border-transparent opacity-70 hover:opacity-100",
             )}
           >
-            <FlagIcon />
+            <span className="flag-art block">
+              <FlagIcon />
+            </span>
+            <span aria-hidden="true" className="flag-shine pointer-events-none absolute inset-y-0 left-0" />
           </button>
         );
       })}

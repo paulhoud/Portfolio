@@ -31,7 +31,13 @@ import { useMotionPaused } from "@/lib/motionPause";
 import { playSfx } from "@/lib/sound/sound";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
-import type { FrameRect, GalleryFailure, GalleryPieceInput, GalleryRenderer } from "./three/galleryRenderer";
+import type {
+  FrameRect,
+  GalleryFailure,
+  GalleryPieceInput,
+  GalleryRenderer,
+  WorldPhase,
+} from "./three/galleryRenderer";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -39,6 +45,10 @@ const pad = (value: number) => String(value).padStart(2, "0");
 const ARRIVED_KEY = "portfolio-gallery-arrived";
 /** Le visiteur a déjà fait défiler la galerie : plus d'invitation à le faire. */
 const SCROLLED_KEY = "portfolio-gallery-scrolled";
+/** L'indice de la fonction cachée n'est glissé qu'une fois par visite. */
+const HINT_KEY = "portfolio-gallery-hint";
+/** Code Konami : une autre façon de tout détruire. */
+const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 const NO_3D_KEY = "portfolio-gallery-3d-off";
 
 function readSession(key: string) {
@@ -316,6 +326,85 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     };
   }, []);
 
+  // --- « Destroy the world » (fonction cachée) --------------------------------
+  // Un trou noir aspire les plaques, le sol et le texte, se referme dans un
+  // éclair, puis le monde renaît. Se déclenche en tapant « destroy » (ou le
+  // code Konami), ou par sept clics rapides dans le vide de la scène.
+  const [doom, setDoom] = useState<WorldPhase | null>(null);
+  const doomRef = useRef(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [doomOrigin, setDoomOrigin] = useState("50% 50%");
+  const destroyWorld = useCallback(() => {
+    if (doomRef.current || enteringRef.current) return;
+    doomRef.current = true;
+    // Le texte est aspiré vers le trou, au centre de la plaque active.
+    const frame = measureFrame();
+    const stage = stageRef.current?.getBoundingClientRect();
+    const box = contentRef.current?.getBoundingClientRect();
+    if (frame && stage && box) setDoomOrigin(`${frame.cx - (box.left - stage.left)}px ${frame.cy - (box.top - stage.top)}px`);
+    playSfx("blackhole");
+    const finish = () => {
+      doomRef.current = false;
+      setDoom(null);
+    };
+    const onPhase = (phase: WorldPhase) => {
+      if (phase === "collapse") playSfx("collapse");
+      if (phase === "rebirth") playSfx("rebirth");
+      if (phase === "done") finish();
+      else setDoom(phase);
+    };
+    const renderer = rendererRef.current;
+    if (renderer?.destroyWorld(onPhase)) return;
+    // Sans 3D, ou en mode calme : un simple fondu au noir et retour.
+    onPhase("suck");
+    window.setTimeout(() => onPhase("collapse"), 900);
+    window.setTimeout(() => onPhase("void"), 1100);
+    window.setTimeout(() => onPhase("rebirth"), 2600);
+    window.setTimeout(() => onPhase("done"), 3600);
+  }, [measureFrame]);
+  const destroyRef = useRef(destroyWorld);
+  useEffect(() => {
+    destroyRef.current = destroyWorld;
+  }, [destroyWorld]);
+
+  useEffect(() => {
+    let typed = "";
+    let keys: string[] = [];
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, [contenteditable='true']")) return;
+      keys = [...keys, event.key].slice(-KONAMI.length);
+      typed = (typed + (event.key.length === 1 ? event.key.toLowerCase() : " ")).slice(-12);
+      if (typed.endsWith("destroy") || keys.join() === KONAMI.join()) {
+        typed = "";
+        keys = [];
+        destroyRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  // Un indice pour les curieux qui ouvrent la console.
+  const secretHint = t.site.gallery.secretHint;
+  useEffect(() => {
+    if (readSession(HINT_KEY)) return;
+    writeSession(HINT_KEY);
+    console.info("%c🕳  " + secretHint, "font: 600 13px system-ui; color: #ff8a2a;");
+  }, [secretHint]);
+  const clicksRef = useRef<number[]>([]);
+  const onEmptyClick = () => {
+    const now = performance.now();
+    clicksRef.current = [...clicksRef.current.filter((at) => now - at < 2500), now];
+    if (clicksRef.current.length >= 7) {
+      clicksRef.current = [];
+      destroyRef.current();
+    }
+  };
+  const onEmptyClickRef = useRef(onEmptyClick);
+  useEffect(() => {
+    onEmptyClickRef.current = onEmptyClick;
+  });
+
   // La 3D se charge après l'affichage, quand le navigateur est libre.
   useEffect(() => {
     if (!synced || readSession(NO_3D_KEY)) return;
@@ -357,6 +446,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               else enterProjectRef.current(index);
             },
             onSelect: (index) => scrollToPieceRef.current(index),
+            onEmptyClick: () => onEmptyClickRef.current(),
             onReady: () => {
               if (arrival) writeSession(ARRIVED_KEY);
               if (returning >= 0) {
@@ -489,12 +579,48 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               "bg-[linear-gradient(0deg,#08080b_0%,rgba(8,8,11,0.9)_32%,transparent_44%),linear-gradient(180deg,rgba(8,8,11,0.85)_0%,transparent_20%)]",
               "lg:bg-[linear-gradient(90deg,#08080b_0%,rgba(8,8,11,0.9)_40%,transparent_52%),linear-gradient(0deg,rgba(8,8,11,0.85)_0%,rgba(8,8,11,0.55)_20%,transparent_34%)]",
               "[@media(max-height:500px)]:bg-[linear-gradient(90deg,transparent_0%,transparent_44%,rgba(8,8,11,0.88)_58%,#08080b_100%)]",
-              live && !immersed ? "opacity-100" : "opacity-0",
+              // Effacé pendant l'entrée dans un projet et pendant le trou noir.
+              live && !immersed && doom === null ? "opacity-100" : "opacity-0",
             )}
           />
 
+          <AnimatePresence>
+            {doom === "void" ? (
+              <motion.div
+                role="status"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.5 } }}
+                exit={{ opacity: 0, transition: { duration: 0.4 } }}
+                className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 px-6 text-center"
+              >
+                <p className="text-sm uppercase tracking-[0.24em] text-white/80">{t.site.gallery.worldGone}</p>
+                <p className="text-[0.65rem] uppercase tracking-[0.24em] text-white/45">{t.site.gallery.worldBack}</p>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           <PassiveAnimationProvider>
             <div
+              ref={contentRef}
+              style={
+                doom === null
+                  ? undefined
+                  : doom === "rebirth"
+                    ? {
+                        transformOrigin: doomOrigin,
+                        transition: "transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1s ease-out, filter 1s ease-out",
+                      }
+                    : {
+                        transformOrigin: doomOrigin,
+                        transform: calm ? undefined : "scale(0.04) rotate(-70deg)",
+                        opacity: 0,
+                        filter: calm ? undefined : "blur(10px)",
+                        pointerEvents: "none",
+                        transition: calm
+                          ? "opacity 0.8s ease-out"
+                          : "transform 3s cubic-bezier(0.6, 0, 0.9, 0.4), opacity 3s cubic-bezier(0.6, 0, 0.9, 0.4), filter 3s ease-in",
+                      }
+              }
               className={cn(
                 "relative mx-auto flex h-full max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
                 // Avec la 3D, les clics traversent jusqu'aux plaques, sauf sur le texte et les boutons.

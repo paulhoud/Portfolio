@@ -5,6 +5,7 @@ import {
   LinearMipmapLinearFilter,
   Mesh,
   PerspectiveCamera,
+  Plane,
   PlaneGeometry,
   Raycaster,
   RGBAFormat,
@@ -36,6 +37,8 @@ import {
   type PieceLayout,
   type SatelliteLayout,
 } from "./layout";
+import { createBlackHole, type BlackHole } from "./blackHole";
+import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
 import { floorFragment, floorVertex, slabFragment, slabVertex } from "./shaders";
 
 /** Une plaque de la galerie, telle que la page la décrit. */
@@ -70,7 +73,12 @@ export type GalleryCallbacks = {
   onReady: () => void;
   /** 3D indisponible, perdue ou trop lente : on revient au cadre HTML. */
   onFail: (reason: GalleryFailure) => void;
+  /** Clic dans le vide de la scène (ni plaque ni satellite). */
+  onEmptyClick?: () => void;
 };
+
+/** Étapes de « destroy the world » : aspiration, effondrement, vide, renaissance. */
+export type WorldPhase = "suck" | "collapse" | "void" | "rebirth" | "done";
 
 export type GalleryOptions = {
   calm: boolean;
@@ -94,6 +102,12 @@ export type GalleryRenderer = {
    * durée du trajet jusqu'à la plaque, en secondes (0 sans trajet).
    */
   enter(index: number, onCovered: () => void): number;
+  /**
+   * Fonction cachée : un trou noir aspire tout, se referme, puis le monde
+   * renaît. Renvoie faux si ce n'est pas possible maintenant (entrée dans un
+   * projet en cours, mode calme…).
+   */
+  destroyWorld(onPhase: (phase: WorldPhase) => void): boolean;
   setProgress(raw: number): void;
   setFrame(frame: FrameRect): void;
   setHighlight(index: number | null): void;
@@ -145,6 +159,8 @@ const DIVE = 0.8;
 const EMERGE = 1.05;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+const random = (min: number, max: number) => min + Math.random() * (max - min);
+const easeInCubic = (t: number) => t * t * t;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 /** Amorti exponentiel, indépendant de la cadence d'affichage. */
 const damp = (current: number, target: number, lambda: number, dt: number) =>
@@ -245,7 +261,7 @@ export function createGalleryRenderer(
   const slabGeometry = (size: number) => {
     const cached = geometries.get(size);
     if (cached) return cached;
-    const geometry = new RoundedBoxGeometry(size, size, SLAB_DEPTH, 6, SLAB_RADIUS);
+    const geometry = new RoundedBoxGeometry(size, size, SLAB_DEPTH, 12, SLAB_RADIUS);
     // Projection à plat de l'image : l'essentiel tombe sur la face plane, le
     // bord déborde sur l'arrondi, où le shader le fond dans la couleur du boîtier.
     const position = geometry.attributes.position;
@@ -267,6 +283,7 @@ export function createGalleryRenderer(
     const material = slabMaterial(new Color(input.background), new Color(input.glow), input.exposure, false, 0);
     const mesh = new Mesh(slabGeometry(layouts[index].size), material);
     mesh.userData.index = index;
+    mesh.userData.kind = "piece";
     scene.add(mesh);
     return {
       mesh,
@@ -280,10 +297,12 @@ export function createGalleryRenderer(
     };
   });
   const meshes = pieces.map((piece) => piece.mesh);
+  const pieceBodies: Body[] = pieces.map(() => createBody());
 
   // --- Satellites : petits volumes décoratifs autour des plaques ------------
   let satelliteLayouts: SatelliteLayout[] = [];
   let satellites: Mesh<RoundedBoxGeometry, ShaderMaterial>[] = [];
+  let satelliteBodies: Body[] = [];
   let satelliteSignature = "";
   const disposeSatellites = () => {
     for (const mesh of satellites) {
@@ -303,12 +322,17 @@ export function createGalleryRenderer(
     satellites = satelliteLayouts.map((layout) => {
       const glow = candyColor(inputs[layout.owner].glow);
       const body = layout.dark ? new Color("#16161c") : glow;
-      const material = slabMaterial(body, glow, 1, true, layout.dark ? 0.6 : 0.1);
+      const material = slabMaterial(body, glow, 1, true, 0);
       const [w, h, d] = layout.size;
-      const mesh = new Mesh(new RoundedBoxGeometry(w, h, d, 3, layout.radius), material);
+      const mesh = new Mesh(new RoundedBoxGeometry(w, h, d, 6, layout.radius), material);
       scene.add(mesh);
       return mesh;
     });
+    satellites.forEach((mesh, index) => {
+      mesh.userData.kind = "satellite";
+      mesh.userData.index = index;
+    });
+    satelliteBodies = satellites.map(() => createBody());
   };
 
   // --- Sol -----------------------------------------------------------------
@@ -326,6 +350,8 @@ export function createGalleryRenderer(
       uPiecePos: { value: floorPos },
       uPieceGlow: { value: floorGlow },
       uDim: { value: 0 },
+      uHole: { value: new Vector3() },
+      uSwirl: { value: 0 },
     },
   });
   const floorGeometry = new PlaneGeometry(260, 260);
@@ -364,6 +390,32 @@ export function createGalleryRenderer(
       : null;
   /** Part de l'immersion : 0 au repos, 1 quand la plaque remplit l'écran. */
   let cover = immersion ? 1 : 0;
+
+  /** Objet attrapé à la souris (plaque ou satellite) et lancé. */
+  type Drag = {
+    body: Body;
+    plane: Plane;
+    grab: Vector3;
+    startX: number;
+    startY: number;
+    moved: boolean;
+    last: Vector3;
+    lastAt: number;
+    velocity: Vector3;
+    pointerId: number;
+  };
+  let drag: Drag | null = null;
+
+  /** Trou noir en cours (fonction cachée). */
+  type World = {
+    start: number;
+    center: Vector3;
+    axis: Vector3;
+    onPhase: (phase: WorldPhase) => void;
+    reached: Set<WorldPhase>;
+  };
+  let world: World | null = null;
+  let blackHole: BlackHole | null = null;
   let ready = false;
   const createdAt = performance.now();
 
@@ -626,7 +678,9 @@ export function createGalleryRenderer(
     clearTimer: (handle) => window.clearTimeout(handle),
   });
   const updateScheduler = () =>
-    scheduler.setEnabled(running && !calm && ready && !disposed && intro === null && immersion === null);
+    scheduler.setEnabled(
+      running && !calm && ready && !disposed && intro === null && immersion === null && world === null,
+    );
 
   const activity = () => {
     lastActivity = performance.now();
@@ -662,10 +716,29 @@ export function createGalleryRenderer(
     return hit ? (hit.object.userData.index as number) : null;
   };
 
+  /** Plaque ou satellite sous le pointeur, avec le point touché. */
+  const pickAny = (clientX: number, clientY: number) => {
+    const rect = canvas.getBoundingClientRect();
+    ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    const hit = raycaster.intersectObjects([...meshes, ...satellites], false)[0];
+    if (!hit) return null;
+    const { kind, index } = hit.object.userData as { kind: "piece" | "satellite"; index: number };
+    return { kind, index, point: hit.point.clone(), object: hit.object };
+  };
+  const pointerRay = (clientX: number, clientY: number) => {
+    const rect = canvas.getBoundingClientRect();
+    ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    return raycaster.ray;
+  };
+  const viewDirection = new Vector3();
+  const planeHit = new Vector3();
+
   function setHovered(index: number | null) {
     if (index === hovered) return;
     hovered = index;
-    canvas.style.cursor = index === null ? "" : "pointer";
+    if (!drag) canvas.style.cursor = index === null ? "" : "pointer";
     callbacks.onHover(index);
     refreshPlays();
     invalidate();
@@ -677,14 +750,65 @@ export function createGalleryRenderer(
 
   const onPointerMove = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
-    if (immersion) return;
-    if (event.pointerType === "mouse") setHovered(pick(event.clientX, event.clientY));
+    if (immersion || world) return;
+    if (drag) {
+      // Au-delà de quelques pixels, l'appui devient une prise : l'objet suit
+      // le pointeur dans un plan face à la caméra.
+      if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 5) {
+        drag.moved = true;
+        drag.body.held = true;
+        canvas.style.cursor = "grabbing";
+        setHovered(null);
+      }
+      if (drag.moved && pointerRay(event.clientX, event.clientY).intersectPlane(drag.plane, planeHit)) {
+        const now = performance.now();
+        planeHit.sub(drag.grab).sub(drag.body.rest);
+        const dt = Math.max(0.001, (now - drag.lastAt) / 1000);
+        // Vitesse lissée : c'est elle qui donnera l'élan au lâcher.
+        drag.velocity.lerp(planeHit.clone().sub(drag.last).divideScalar(dt), 0.35);
+        drag.last.copy(planeHit);
+        drag.lastAt = now;
+        drag.body.offset.copy(planeHit);
+        invalidate();
+      }
+      activity();
+      return;
+    }
+    if (event.pointerType === "mouse") {
+      const index = pick(event.clientX, event.clientY);
+      setHovered(index);
+      if (index === null && !calm) canvas.style.cursor = pickAny(event.clientX, event.clientY) ? "grab" : "";
+    }
     activity();
   };
   const onPointerLeave = () => setHovered(null);
   const onPointerDown = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
     suppressClick = false;
+    // Souris et stylet : on peut attraper plaques et satellites (au doigt, le
+    // glisser sert déjà à défiler et à changer de projet).
+    if (event.pointerType !== "touch" && event.button === 0 && !calm && !immersion && !world) {
+      const hit = pickAny(event.clientX, event.clientY);
+      if (hit) {
+        event.preventDefault();
+        const body = hit.kind === "piece" ? pieceBodies[hit.index] : satelliteBodies[hit.index];
+        const center = hit.object.position;
+        camera.getWorldDirection(viewDirection);
+        drag = {
+          body,
+          plane: new Plane().setFromNormalAndCoplanarPoint(viewDirection.clone(), hit.point),
+          grab: hit.point.clone().sub(center),
+          startX: event.clientX,
+          startY: event.clientY,
+          moved: false,
+          last: body.offset.clone(),
+          lastAt: performance.now(),
+          velocity: new Vector3(),
+          pointerId: event.pointerId,
+        };
+        canvas.setPointerCapture(event.pointerId);
+      }
+    }
     if (event.pointerType !== "mouse") {
       touchStart = { x: event.clientX, y: event.clientY };
     } else if (event.button === 1 && pick(event.clientX, event.clientY) !== null) {
@@ -693,7 +817,24 @@ export function createGalleryRenderer(
       event.preventDefault();
     }
   };
+  const release = (event: PointerEvent) => {
+    if (!drag || event.pointerId !== drag.pointerId) return false;
+    const current = drag;
+    drag = null;
+    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    canvas.style.cursor = "";
+    if (!current.moved) return false;
+    // Lâché avec son élan, il file puis revient à sa place (cf. physics).
+    current.body.held = false;
+    current.body.velocity.copy(current.velocity);
+    if (current.body.velocity.length() > 28) current.body.velocity.setLength(28);
+    current.body.spin.set(-current.velocity.y * 0.35, current.velocity.x * 0.35, -current.velocity.x * 0.15);
+    suppressClick = true;
+    invalidate();
+    return true;
+  };
   const onPointerUp = (event: PointerEvent) => {
+    if (release(event)) return;
     if (event.pointerType === "mouse" || !touchStart) return;
     const dx = event.clientX - touchStart.x;
     const dy = event.clientY - touchStart.y;
@@ -707,8 +848,22 @@ export function createGalleryRenderer(
   // Le toucher agit au « clic » du navigateur : un appui qui arrête un
   // défilement lancé n'en produit pas, et n'ouvre donc rien par mégarde.
   const onClick = (event: MouseEvent) => {
-    if (immersion) return;
+    if (immersion || world) return;
+    if (suppressClick && lastPointerType !== "touch") {
+      suppressClick = false;
+      return;
+    }
     const index = pick(event.clientX, event.clientY);
+    const hit = index === null ? pickAny(event.clientX, event.clientY) : null;
+    // Un satellite qu'on touche sans le tirer reçoit une pichenette.
+    if (hit?.kind === "satellite" && !calm) {
+      const body = satelliteBodies[hit.index];
+      body.velocity.add(new Vector3(random(-1, 1), random(0.5, 1.5), random(-1, 1)).multiplyScalar(4));
+      body.spin.add(new Vector3(random(-6, 6), random(-6, 6), random(-6, 6)));
+      invalidate();
+      return;
+    }
+    if (index === null) callbacks.onEmptyClick?.();
     if (lastPointerType === "mouse") {
       if (index !== null) callbacks.onActivate(index, event.ctrlKey || event.metaKey || event.shiftKey);
       return;
@@ -737,6 +892,7 @@ export function createGalleryRenderer(
   canvas.addEventListener("pointerleave", onPointerLeave);
   canvas.addEventListener("pointerdown", onPointerDown);
   canvas.addEventListener("pointerup", onPointerUp);
+  canvas.addEventListener("pointercancel", release);
   canvas.addEventListener("click", onClick);
   canvas.addEventListener("auxclick", onAuxClick);
   canvas.addEventListener("webglcontextlost", onContextLost);
@@ -862,6 +1018,68 @@ export function createGalleryRenderer(
       floorMaterial.uniforms.uDim.value = cover;
     }
     const focus = diving ? diving.index : -1;
+
+    // « Destroy the world » : horloge et étapes.
+    const doom = world;
+    const wt = doom ? (now - doom.start) / 1000 : -1;
+    if (doom) {
+      busy = true;
+      const reach = (phase: WorldPhase, at: number) => {
+        if (wt >= at && !doom.reached.has(phase)) {
+          doom.reached.add(phase);
+          doom.onPhase(phase);
+        }
+      };
+      reach("suck", 0.5);
+      reach("collapse", 4.0);
+      reach("void", 4.6);
+      reach("rebirth", 6.0);
+      const floorUniforms = floorMaterial.uniforms;
+      floorUniforms.uHole.value.copy(doom.center);
+      floorUniforms.uSwirl.value =
+        wt < 4.0 ? clamp01((wt - 0.3) / 3.2) : wt < 6.0 ? 1 : 1 - clamp01((wt - 6.0) / 1.4);
+      floorUniforms.uDim.value = wt < 4.3 ? 0 : wt < 6.0 ? clamp01((wt - 4.3) / 0.3) : 1 - clamp01((wt - 6.0) / 0.8);
+      if (wt >= 7.8) {
+        world = null;
+        floorUniforms.uSwirl.value = 0;
+        floorUniforms.uDim.value = 0;
+        doom.onPhase("done");
+        updateScheduler();
+      }
+    }
+    /** Part d'un objet déjà avalé (0 à 1), selon son éloignement du trou. */
+    const swallowed = (delay: number) => {
+      if (!doom || wt < 0.5) return 0;
+      if (wt < 4.0) return easeInCubic(clamp01((wt - 0.5 - delay) / 2.3));
+      if (wt < 6.0) return 1;
+      return 1 - easeOutBack(clamp01((wt - 6.0 - delay * 0.5) / 1.2));
+    };
+    const holeOffset = new Vector3();
+    /** Applique la physique, puis l'aspiration, à un objet déjà placé. */
+    const finish = (mesh: Mesh, body: Body, spring: typeof SLAB_SPRING) => {
+      body.rest.copy(mesh.position);
+      if (stepBody(body, dt, spring)) busy = true;
+      mesh.position.add(body.offset);
+      mesh.rotation.x += body.turn.x;
+      mesh.rotation.y += body.turn.y;
+      mesh.rotation.z += body.turn.z;
+      if (!doom) return 1;
+      holeOffset.copy(mesh.position).sub(doom.center);
+      const behind = holeOffset.clone().add(doom.center).sub(camera.position).dot(doom.axis) < 0.3;
+      const amount = behind
+        ? (wt < 6.0 ? clamp01((wt - 0.5) / 0.8) : 1 - clamp01((wt - 6.0) / 1.0))
+        : swallowed(Math.min(1.2, holeOffset.length() / 25));
+      if (amount <= 0) return 1;
+      if (!behind) {
+        // Spirale vers le centre, de plus en plus serrée.
+        holeOffset.applyAxisAngle(doom.axis, amount * amount * 7).multiplyScalar(Math.max(0, 1 - amount) ** 1.5);
+        mesh.position.copy(doom.center).add(holeOffset);
+        mesh.rotation.z += amount * 9;
+        mesh.rotation.x += amount * 4;
+      }
+      mesh.scale.multiplyScalar(Math.max(0.0001, (1 - Math.min(1, amount)) ** 0.8));
+      return 1 - amount;
+    };
     const room = 1 - cover;
 
     const parallax = calm ? 0 : 1;
@@ -972,12 +1190,13 @@ export function createGalleryRenderer(
       const shrink = 1 - 0.2 * part;
       mesh.scale.set(scaleXY * shrink, scaleXY * shrink, scaleZ * shrink);
       if (mesh.geometry !== slabGeometry(layout.size)) mesh.geometry = slabGeometry(layout.size);
+      const present = finish(mesh, pieceBodies[index], SLAB_SPRING);
 
       uniforms.uLit.value = clamp01(arrive * 1.6) * (index === focus ? 1 : room);
-      uniforms.uRim.value = (0.1 * facing + 0.9 * piece.hover) * room;
+      uniforms.uRim.value = 0.9 * piece.hover * room;
       uniforms.uMix.value = piece.mix;
 
-      const glow = (0.035 + 0.07 * facing + 0.2 * piece.hover) * clamp01(arrive * 1.4) * room;
+      const glow = (0.035 + 0.07 * facing + 0.2 * piece.hover) * clamp01(arrive * 1.4) * room * present;
       floorPos[index].set(mesh.position.x, 0, mesh.position.z);
       floorGlow[index].set(glowColors[index].r * glow, glowColors[index].g * glow, glowColors[index].b * glow);
     }
@@ -1010,7 +1229,27 @@ export function createGalleryRenderer(
         mesh.position.set(layout.position[0], restY - (1 - pop) * 0.9, layout.position[2] - (1 - arrive) * 9);
       }
       mesh.scale.setScalar(Math.max(0.001, pop));
+      const body = satelliteBodies[index];
+      if (body) finish(mesh, body, SATELLITE_SPRING);
       mesh.material.uniforms.uLit.value = clamp01(arrive * 1.6) * room;
+    }
+
+    // Le trou noir lui-même : il grossit, tourbillonne, se referme dans un éclair.
+    if (doom && blackHole) {
+      const size =
+        wt < 0.8 ? easeOutCubic(wt / 0.8) : wt < 4.0 ? 1 + 0.3 * ((wt - 0.8) / 3.2) : 1.3 * (1 - easeInCubic(clamp01((wt - 4.0) / 0.4)));
+      const glow = wt < 0.8 ? wt / 0.8 : wt < 4.0 ? 1 : 1 - clamp01((wt - 4.0) / 0.3);
+      const flash = wt < 4.25 ? 0 : wt < 4.35 ? (wt - 4.25) / 0.1 : Math.exp(-(wt - 4.35) * 4.5);
+      blackHole.group.position.copy(doom.center);
+      blackHole.update(camera, Math.max(0, size), Math.max(0, glow), wt < 6.0 ? flash : 0, wt);
+      // Le monde tremble pendant l'aspiration.
+      if (wt > 0.5 && wt < 4.2) {
+        const shake = 0.05 * clamp01((wt - 0.5) / 2.5);
+        camera.position.x += random(-shake, shake);
+        camera.position.y += random(-shake, shake);
+      }
+    } else if (blackHole) {
+      blackHole.update(camera, 0, 0, 0, 0);
     }
 
     return busy;
@@ -1020,12 +1259,35 @@ export function createGalleryRenderer(
   invalidate();
 
   return {
+    destroyWorld(onPhase) {
+      if (calm || disposed || immersion || world) return false;
+      skipIntro();
+      setHovered(null);
+      for (let i = 0; i < count; i += 1) if (pieces[i].mode !== null) stop(i);
+      if (!blackHole) {
+        blackHole = createBlackHole();
+        scene.add(blackHole.group);
+      }
+      // Le trou s'ouvre juste derrière le projet qu'on regarde.
+      const pose = cameraPose(layouts, station, 1);
+      const axis = new Vector3(...pose.target).sub(camera.position).normalize();
+      world = {
+        start: performance.now(),
+        center: new Vector3(...pose.target).addScaledVector(axis, 1.2),
+        axis,
+        onPhase,
+        reached: new Set(),
+      };
+      updateScheduler();
+      invalidate();
+      return true;
+    },
     enter(index, onCovered) {
       if (calm || disposed) {
         onCovered();
         return 0;
       }
-      if (immersion) return 0;
+      if (immersion || world) return 0;
       skipIntro();
       setHovered(null);
       // La plaque visée reprend son image fixe : l'écran se remplit de sa couleur.
@@ -1114,6 +1376,7 @@ export function createGalleryRenderer(
       canvas.removeEventListener("pointerleave", onPointerLeave);
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", release);
       canvas.removeEventListener("click", onClick);
       canvas.removeEventListener("auxclick", onAuxClick);
       canvas.removeEventListener("webglcontextlost", onContextLost);
@@ -1125,6 +1388,7 @@ export function createGalleryRenderer(
         piece.mesh.material.dispose();
       }
       disposeSatellites();
+      blackHole?.dispose();
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();
