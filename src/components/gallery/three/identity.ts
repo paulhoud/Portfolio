@@ -1,6 +1,5 @@
 import {
   BufferGeometry,
-  CapsuleGeometry,
   Color,
   ConeGeometry,
   CylinderGeometry,
@@ -19,32 +18,30 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 
 /**
  * Petits objets qui flottent autour des plaques : des choses qui racontent
- * Paul (liste donnée par Paul le 9 oct. 2026) — paire de sneakers, barre
- * chocolatée, maki, sushi, Star Drop de Brawl Stars, Pokéball, boîte de
- * kebab, burger, skate, chat, cartes Yu-Gi-Oh!, manette Xbox, BD.
+ * Paul (listes données par Paul le 9 oct. 2026).
  *
- * Ce sont des jouets stylisés, assemblés à partir de formes simples (aucun
- * modèle téléchargé) : chaque objet est fusionné en une seule géométrie dont
- * les couleurs sont portées par les sommets, pour un seul dessin par objet.
- * Chaque géométrie est centrée et tient dans un cube de côté 1.
+ * Ce sont des modèles 3D trouvés par Paul (fichiers de public/models, cf.
+ * identityFiles.ts) : sneaker, burger, shiba, Pokéball, sushi, Power Cube,
+ * skate, chat, Rondoudou, ours en peluche.
+ *
+ * Certains ont ici un équivalent construit en code à partir de formes
+ * simples, affiché seulement si leur fichier ne se charge pas. Chacun est
+ *   fusionné en une seule géométrie dont les couleurs sont portées par les
+ *   sommets, centrée et tenant dans un cube de côté 1.
  */
 
-export const IDENTITY_MODELS = [
-  "pokeball",
-  "sneakers",
-  "burger",
-  "controller",
-  "sushi",
-  "starDrop",
-  "skateboard",
-  "cat",
-  "maki",
-  "cards",
-  "chocolate",
-  "kebab",
-  "comic",
-] as const;
-export type IdentityModel = (typeof IDENTITY_MODELS)[number];
+/** Un objet du catalogue : un fichier, une construction, ou les deux (secours). */
+export type IdentityEntry = {
+  name: string;
+  /** Fichier de public/models. */
+  file?: string;
+  /** Construction en code : l'objet lui-même, ou son secours. */
+  build?: () => BufferGeometry;
+  /** Agrandissement, pour les objets longs et fins qui paraîtraient petits. */
+  size?: number;
+  /** Couleurs imposées à certaines pièces du fichier (nom du matériau → couleur). */
+  tints?: Record<string, string>;
+};
 
 type Place = {
   at?: [number, number, number];
@@ -172,39 +169,7 @@ function burger() {
   ]);
 }
 
-function controller() {
-  const body = "#eef0f2";
-  const dark = "#27282c";
-  return assemble([
-    part(box(0.74, 0.17, 0.4, 0.08), body),
-    ...[-1, 1].map((side) =>
-      part(new CapsuleGeometry(0.12, 0.24, 6, 16), body, { at: [side * 0.29, -0.03, 0.2], rot: [Math.PI / 2, side * 0.38, 0] }),
-    ),
-    part(cylinder(0.055, 0.055, 0.07), dark, { at: [-0.21, 0.1, -0.03] }),
-    part(cylinder(0.075, 0.07, 0.025), dark, { at: [-0.21, 0.14, -0.03] }),
-    part(cylinder(0.055, 0.055, 0.07), dark, { at: [0.1, 0.1, 0.1] }),
-    part(cylinder(0.075, 0.07, 0.025), dark, { at: [0.1, 0.14, 0.1] }),
-    part(box(0.13, 0.035, 0.045, 0.012), dark, { at: [-0.09, 0.095, 0.1] }),
-    part(box(0.045, 0.035, 0.13, 0.012), dark, { at: [-0.09, 0.095, 0.1] }),
-    part(sphere(0.03, 12, 8), "#3dbb4c", { at: [0.24, 0.09, 0.065] }),
-    part(sphere(0.03, 12, 8), "#e0403a", { at: [0.3, 0.09, 0] }),
-    part(sphere(0.03, 12, 8), "#2f8de4", { at: [0.18, 0.09, 0] }),
-    part(sphere(0.03, 12, 8), "#f2c23a", { at: [0.24, 0.09, -0.065] }),
-    part(cylinder(0.045, 0.045, 0.02), "#b9bcc2", { at: [0, 0.09, -0.1] }),
-    ...[-1, 1].map((side) => part(box(0.22, 0.05, 0.07, 0.02), dark, { at: [side * 0.24, 0.04, -0.21] })),
-  ]);
-}
 
-function sushi() {
-  return assemble([
-    part(box(0.86, 0.3, 0.44, 0.14), "#f7f4ec"),
-    part(box(1.0, 0.13, 0.5, 0.06), "#ff8656", { at: [0, 0.2, 0], rot: [0, 0, 0.04] }),
-    ...[-0.28, -0.08, 0.12, 0.32].map((x) =>
-      part(box(0.035, 0.135, 0.46, 0.012), "#ffd2bd", { at: [x, 0.205, 0], rot: [0, 0.55, 0.04] }),
-    ),
-    part(box(0.16, 0.47, 0.47, 0.02), "#1f3a2b", { at: [0, 0.07, 0] }),
-  ]);
-}
 
 function starDrop() {
   const star = new Shape();
@@ -261,123 +226,36 @@ function cat() {
   ]);
 }
 
-function maki() {
-  return assemble([
-    part(cylinder(0.5, 0.5, 0.5, 36, true), "#1f3a2b"),
-    part(cylinder(0.47, 0.47, 0.52, 36), "#f7f4ec"),
-    part(cylinder(0.17, 0.17, 0.54, 20), "#ff7f50", { at: [-0.04, 0, 0] }),
-    part(cylinder(0.08, 0.08, 0.545, 12), "#8cc63f", { at: [0.17, 0, 0.06] }),
-  ]);
-}
 
-function card(face: boolean, place: Place): BufferGeometry[] {
-  const lift = (z: number): Place => ({ ...place, at: [place.at![0], place.at![1], place.at![2] + z] });
-  const local = (x: number, y: number, z: number, w: number, h: number, color: string) => {
-    const rot = place.rot ?? [0, 0, 0];
-    const c = Math.cos(rot[2]);
-    const s = Math.sin(rot[2]);
-    const [px, py, pz] = place.at!;
-    return part(box(w, h, 0.004, 0.002), color, { at: [px + x * c - y * s, py + x * s + y * c, pz + z], rot });
-  };
-  const parts = [part(box(0.59, 0.86, 0.016, 0.03), face ? "#c99a45" : "#6b3e1f", lift(0))];
-  if (face) {
-    parts.push(local(0, 0.34, 0.009, 0.5, 0.07, "#f3e6c4"));
-    parts.push(local(0, 0.06, 0.009, 0.48, 0.4, "#3d5fae"));
-    parts.push(local(0.06, 0.1, 0.012, 0.18, 0.18, "#f2c23a"));
-    parts.push(local(0, -0.27, 0.009, 0.5, 0.2, "#efe3c2"));
-  } else {
-    parts.push(local(0, 0, 0.009, 0.36, 0.56, "#3b2412"));
-  }
-  return parts;
-}
 
-function cards() {
-  return assemble([
-    ...card(false, { at: [-0.16, -0.02, -0.03], rot: [0, 0, 0.32] }),
-    ...card(false, { at: [0, 0, 0], rot: [0, 0, 0.08] }),
-    ...card(true, { at: [0.16, -0.03, 0.03], rot: [0, 0, -0.18] }),
-  ]);
-}
 
-function chocolate() {
-  return assemble([
-    part(box(1.0, 0.1, 0.48, 0.03), "#5a3418"),
-    ...[0.13, 0.37].flatMap((x) =>
-      [-0.115, 0.115].map((z) => part(box(0.21, 0.06, 0.21, 0.03), "#6e401e", { at: [x, 0.065, z] })),
-    ),
-    part(box(0.56, 0.16, 0.54, 0.04), "#c8102e", { at: [-0.24, 0, 0] }),
-    part(box(0.3, 0.012, 0.22, 0.004), "#f2c14e", { at: [-0.26, 0.085, 0] }),
-    part(box(0.06, 0.165, 0.545, 0.02), "#cfd3da", { at: [0.06, 0, 0] }),
-  ]);
-}
 
-function kebab() {
-  const random = seeded(3);
-  const box_ = "#f2efe8";
-  const lidAngle = -1.9;
-  const fries = Array.from({ length: 10 }, () =>
-    part(box(0.055, 0.055, 0.3, 0.015), "#f4c542", {
-      at: [-0.3 + random() * 0.3, 0.17 + random() * 0.05, -0.18 + random() * 0.36],
-      rot: [random() * 0.3, random() * Math.PI, random() * 0.3],
-    }),
-  );
-  const meat = Array.from({ length: 6 }, () =>
-    part(box(0.17, 0.07, 0.12, 0.03), "#8b4a2b", {
-      at: [0.12 + random() * 0.28, 0.18 + random() * 0.04, -0.2 + random() * 0.4],
-      rot: [random() * 0.3, random() * Math.PI, random() * 0.2],
-    }),
-  );
-  const salad = Array.from({ length: 4 }, () =>
-    part(box(0.14, 0.02, 0.09, 0.008), "#7cc14b", { at: [0.05 + random() * 0.3, 0.23, -0.2 + random() * 0.4], rot: [0, random() * Math.PI, 0.2] }),
-  );
-  const tomato = Array.from({ length: 3 }, () =>
-    part(cylinder(0.065, 0.065, 0.03, 14), "#e63b2e", { at: [0.1 + random() * 0.3, 0.235, -0.15 + random() * 0.3] }),
-  );
-  return assemble([
-    part(box(1.0, 0.3, 0.7, 0.05), box_),
-    part(box(1.0, 0.04, 0.7, 0.02), box_, {
-      at: [0, 0.17 + 0.35 * Math.sin(-lidAngle), -0.35 + 0.35 * Math.cos(-lidAngle)],
-      rot: [lidAngle, 0, 0],
-    }),
-    ...fries,
-    ...meat,
-    ...salad,
-    ...tomato,
-    part(sphere(0.12, 14, 10), "#fffaf0", { at: [0.3, 0.24, 0.12], scale: [1.6, 0.4, 1.2] }),
-  ]);
-}
 
-function comic() {
-  return assemble([
-    part(box(0.72, 0.98, 0.012, 0.006), "#2f7dd1", { at: [0, 0, 0.034] }),
-    part(box(0.72, 0.98, 0.012, 0.006), "#2f7dd1", { at: [0, 0, -0.034] }),
-    part(box(0.024, 0.98, 0.08, 0.008), "#235fa0", { at: [-0.36, 0, 0] }),
-    part(box(0.69, 0.95, 0.056, 0.004), "#fbf7ec", { at: [0.01, 0, 0] }),
-    part(box(0.6, 0.15, 0.006, 0.003), "#ffe04a", { at: [0, 0.36, 0.042] }),
-    part(cylinder(0.15, 0.15, 0.008, 24), "#ffffff", { at: [0.1, 0.04, 0.042], rot: [Math.PI / 2, 0, 0], scale: [1.25, 1, 0.85] }),
-    part(new ConeGeometry(0.05, 0.12, 3), "#ffffff", { at: [0.01, -0.1, 0.042], rot: [0, 0, 2.6], scale: [1, 1, 0.08] }),
-    part(sphere(0.09, 16, 12), "#ff8a3d", { at: [-0.16, -0.25, 0.042], scale: [1, 1, 0.12] }),
-    part(box(0.4, 0.035, 0.006, 0.003), "#ffffff", { at: [0.05, -0.42, 0.042] }),
-  ]);
-}
 
-const BUILDERS: Record<IdentityModel, () => BufferGeometry> = {
-  pokeball,
-  sneakers,
-  burger,
-  controller,
-  sushi,
-  starDrop,
-  skateboard,
-  cat,
-  maki,
-  cards,
-  chocolate,
-  kebab,
-  comic,
-};
-
-/** Les treize objets, dans l'ordre de `IDENTITY_MODELS`. */
-export function buildIdentityModels(): BufferGeometry[] {
-  return IDENTITY_MODELS.map((name) => BUILDERS[name]());
-}
+/**
+ * Ordre de passage : les objets se suivent d'un satellite au suivant, si bien
+ * que chaque plaque en a de différents (les quatre premiers accompagnent le
+ * premier projet).
+ */
+// Retirés à la demande de Paul (9 oct. 2026) : BD, manette, barre chocolatée,
+// sushi et maki construits en code, cartes Yu-Gi-Oh!, sneaker Adidas, Lapras,
+// 3DS et kebab.
+export const IDENTITY_CATALOG: IdentityEntry[] = [
+  {
+    name: "sneakers",
+    file: "white-sneaker.glb",
+    build: sneakers,
+    // Sneaker blanche colorisée (demande de Paul) : empiècements de daim rouges,
+    // doublure noire, semelle intérieure sombre, cuir et semelle blancs.
+    tints: { WhiteSuede: "#c8102e", WhiteSatin: "#1b1b1f", Insole: "#26262b", WhiteSole: "#f1efe8" },
+  },
+  { name: "burger", file: "burger.glb", build: burger },
+  { name: "shiba", file: "shiba.glb" },
+  { name: "pokeball", file: "pokeball.glb", build: pokeball },
+  { name: "sushi", file: "sushi.glb" },
+  { name: "powerCube", file: "power-cube.glb", build: starDrop },
+  { name: "skateboard", file: "skateboard.glb", build: skateboard, size: 1.35 },
+  { name: "cat", file: "cat.glb", build: cat },
+  { name: "jigglypuff", file: "jigglypuff.glb" },
+  { name: "teddy", file: "teddy.glb" },
+];

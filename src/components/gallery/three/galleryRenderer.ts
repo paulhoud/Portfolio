@@ -3,6 +3,7 @@ import {
   Color,
   CanvasTexture,
   DataTexture,
+  DoubleSide,
   LinearFilter,
   LinearMipmapLinearFilter,
   Mesh,
@@ -41,7 +42,8 @@ import {
 } from "./layout";
 import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
-import { buildIdentityModels } from "./identity";
+import { IDENTITY_CATALOG } from "./identity";
+import { loadIdentityModel, type LoadedModel } from "./identityFiles";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
 import { floorFragment, floorVertex, slabFragment, slabVertex } from "./shaders";
 
@@ -300,7 +302,7 @@ export function createGalleryRenderer(
   const blank = new DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1, RGBAFormat);
   blank.needsUpdate = true;
 
-  const slabMaterial = (body: Color, glow: Color, exposure: number, solid: boolean, rim: number) =>
+  const slabMaterial = (body: Color, glow: Color, exposure: number, solid: boolean, rim: number, map: Texture | null = null) =>
     new ShaderMaterial({
       // Les objets qui flottent portent leurs couleurs sur leurs sommets.
       vertexColors: solid,
@@ -310,9 +312,10 @@ export function createGalleryRenderer(
         ...fog,
         ...warp,
         uLightDir: { value: lightDir },
-        uMap: { value: blank },
+        uMap: { value: map ?? blank },
         uVideo: { value: blank },
-        uHasMap: { value: 0 },
+        uHasMap: { value: map ? 1 : 0 },
+        uAlphaCut: { value: 0 },
         uMix: { value: 0 },
         uBody: { value: body },
         uGlow: { value: glow },
@@ -366,19 +369,70 @@ export function createGalleryRenderer(
   const meshes = pieces.map((piece) => piece.mesh);
   const pieceBodies: Body[] = pieces.map(() => createBody());
 
-  // --- Satellites : petits volumes décoratifs autour des plaques ------------
+  // --- Satellites : objets qui racontent Paul, autour des plaques -----------
+  type SatelliteMaterial = ShaderMaterial | ShaderMaterial[];
   let satelliteLayouts: SatelliteLayout[] = [];
-  let satellites: Mesh<BufferGeometry, ShaderMaterial>[] = [];
-  /** Les treize objets, construits une fois et partagés (cf. identity.ts). */
-  let identityModels: BufferGeometry[] | null = null;
+  let satellites: Mesh<BufferGeometry, SatelliteMaterial>[] = [];
   let satelliteBodies: Body[] = [];
   let satelliteSignature = "";
+  /** Objets du catalogue prêts (construits ou chargés), par rang (cf. identity.ts). */
+  const identityLooks = new Map<number, LoadedModel>();
+  /** Fichiers demandés ; ils se chargent une fois la scène affichée. */
+  const identityWanted = new Set<number>();
+  const identityLoading = new Set<number>();
+  const emptyGeometry = new BufferGeometry();
+  const forEachMaterial = (material: SatelliteMaterial, run: (material: ShaderMaterial) => void) => {
+    if (Array.isArray(material)) material.forEach(run);
+    else run(material);
+  };
   const disposeSatellites = () => {
     for (const mesh of satellites) {
       scene.remove(mesh);
-      mesh.material.dispose();
+      forEachMaterial(mesh.material, (material) => material.dispose());
     }
     satellites = [];
+  };
+  /** L'objet construit en code, tout prêt (couleurs sur les sommets). */
+  const builtLook = (index: number): LoadedModel | null => {
+    const entry = IDENTITY_CATALOG[index];
+    if (!entry.build) return null;
+    const look = { geometry: entry.build(), parts: [{ color: new Color(1, 1, 1), map: null, doubleSided: false, alphaCut: 0 }] };
+    identityLooks.set(index, look);
+    return look;
+  };
+  /** Habille un satellite de son objet : géométrie partagée, une matière par pièce. */
+  const dressSatellite = (mesh: Mesh<BufferGeometry, SatelliteMaterial>, look: LoadedModel) => {
+    forEachMaterial(mesh.material, (material) => material.dispose());
+    const glow = new Color(inputs[mesh.userData.owner as number].glow);
+    const materials = look.parts.map((part) => {
+      const material = slabMaterial(part.color, glow, 1, true, 0, part.map);
+      material.uniforms.uAlphaCut.value = part.alphaCut;
+      if (part.doubleSided) material.side = DoubleSide;
+      return material;
+    });
+    mesh.material = materials.length === 1 ? materials[0] : materials;
+    mesh.geometry = look.geometry;
+    mesh.visible = true;
+  };
+  /** Charge les fichiers demandés ; chaque objet apparaît dès qu'il est prêt. */
+  const loadIdentityFiles = () => {
+    for (const index of identityWanted) {
+      if (identityLoading.has(index) || identityLooks.has(index)) continue;
+      identityLoading.add(index);
+      const entry = IDENTITY_CATALOG[index];
+      loadIdentityModel(entry.file!, entry.tints)
+        .catch(() => builtLook(index))
+        .then((look) => {
+          if (disposed || !look) return;
+          identityLooks.set(index, look);
+          for (const mesh of satellites) {
+            if (mesh.userData.entry !== index) continue;
+            dressSatellite(mesh, look);
+            mesh.userData.appearAt = performance.now();
+          }
+          invalidate();
+        });
+    }
   };
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
@@ -387,16 +441,24 @@ export function createGalleryRenderer(
     if (signature === satelliteSignature) return;
     satelliteSignature = signature;
     disposeSatellites();
-    identityModels ??= buildIdentityModels();
-    const models = identityModels;
     satellites = satelliteLayouts.map((layout, index) => {
-      const material = slabMaterial(new Color("#ffffff"), new Color(inputs[layout.owner].glow), 1, true, 0);
       // Les objets se suivent dans l'ordre : chaque plaque en a de différents.
-      const mesh = new Mesh(models[index % models.length], material);
-      mesh.userData.baseScale = Math.max(...layout.size);
+      const entry = index % IDENTITY_CATALOG.length;
+      const mesh = new Mesh<BufferGeometry, SatelliteMaterial>(emptyGeometry, slabMaterial(new Color(1, 1, 1), new Color(1, 1, 1), 1, true, 0));
+      mesh.userData.owner = layout.owner;
+      mesh.userData.entry = entry;
+      mesh.userData.baseScale = Math.max(...layout.size) * (IDENTITY_CATALOG[entry].size ?? 1);
+      const look = identityLooks.get(entry) ?? (IDENTITY_CATALOG[entry].file ? null : builtLook(entry));
+      if (look) dressSatellite(mesh, look);
+      else {
+        // Fichier pas encore chargé : l'objet attend, invisible.
+        mesh.visible = false;
+        identityWanted.add(entry);
+      }
       scene.add(mesh);
       return mesh;
     });
+    if (ready) loadIdentityFiles();
     satellites.forEach((mesh, index) => {
       mesh.userData.kind = "satellite";
       mesh.userData.index = index;
@@ -822,7 +884,7 @@ export function createGalleryRenderer(
     const rect = canvas.getBoundingClientRect();
     ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    const hit = raycaster.intersectObjects([...meshes, ...satellites], false)[0];
+    const hit = raycaster.intersectObjects([...meshes, ...satellites.filter((mesh) => mesh.visible)], false)[0];
     if (!hit) return null;
     const { kind, index } = hit.object.userData as { kind: "piece" | "satellite"; index: number };
     return { kind, index, point: hit.point.clone(), object: hit.object };
@@ -1066,6 +1128,7 @@ export function createGalleryRenderer(
       if (!ready && (pieces[activeIndex()].loaded || now - createdAt > 1800)) {
         ready = true;
         callbacks.onReady();
+        loadIdentityFiles();
         if (!introHeld) startIntro(now);
         if (immersion && immersion.start < 0) immersion.start = now;
         updateScheduler();
@@ -1354,10 +1417,17 @@ export function createGalleryRenderer(
       } else {
         mesh.position.set(layout.position[0], restY - (1 - pop) * 0.9, layout.position[2] - (1 - arrive) * 9);
       }
-      mesh.scale.setScalar(Math.max(0.001, pop) * (mesh.userData.baseScale as number));
+      // Un objet tout juste chargé apparaît en rebondissant.
+      const appearAt = mesh.userData.appearAt as number | undefined;
+      const appear = appearAt === undefined ? 1 : easeOutBack(clamp01((now - appearAt) / 600));
+      if (appear < 1) busy = true;
+      mesh.scale.setScalar(Math.max(0.001, pop * appear) * (mesh.userData.baseScale as number));
       const body = satelliteBodies[index];
       if (body) finish(mesh, body, SATELLITE_SPRING);
-      mesh.material.uniforms.uLit.value = clamp01(arrive * 1.6) * room;
+      const lit = clamp01(arrive * 1.6) * room;
+      forEachMaterial(mesh.material, (material) => {
+        material.uniforms.uLit.value = lit;
+      });
     }
 
     // Le trou noir lui-même : il grossit, tourbillonne, se referme dans un éclair.
@@ -1594,7 +1664,11 @@ export function createGalleryRenderer(
       }
       disposeSatellites();
       blackHole?.dispose();
-      for (const geometry of identityModels ?? []) geometry.dispose();
+      for (const look of identityLooks.values()) {
+        look.geometry.dispose();
+        for (const part of look.parts) part.map?.dispose();
+      }
+      emptyGeometry.dispose();
       dimension?.dispose();
       removeTextLayer();
       for (const geometry of geometries.values()) geometry.dispose();

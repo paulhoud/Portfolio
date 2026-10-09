@@ -20,6 +20,8 @@ export const enSite: SiteCopy = {
   footer: {
     copyright: "© 2026 Paul Houdebine.",
     rights: "All rights reserved.",
+    models: "3D models",
+    by: "by",
   },
   motion: {
     pause: "Pause animations",

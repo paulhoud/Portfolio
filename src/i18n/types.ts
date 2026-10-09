@@ -37,6 +37,9 @@ export type SiteCopy = {
   footer: {
     copyright: string;
     rights: string;
+    /** Crédits des modèles 3D de la galerie (« Modèles 3D », « par »). */
+    models: string;
+    by: string;
   };
   /** Bouton qui met en pause les animations automatiques. */
   motion: {

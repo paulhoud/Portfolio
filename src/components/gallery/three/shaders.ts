@@ -98,6 +98,7 @@ export const slabFragment = /* glsl */ `
   uniform float uRim;
   uniform float uLit;
   uniform float uSolid;
+  uniform float uAlphaCut;
   uniform vec3 uLightDir;
   uniform vec3 uFogColor;
   uniform float uFogNear;
@@ -141,6 +142,13 @@ export const slabFragment = /* glsl */ `
     // finit en noir…). Huit points près du bord, moyennés ; l'image fixe est
     // lue floutée (niveau de détail réduit) pour une couleur bien moyenne.
     vec3 casing = uBody * vTint;
+    // Objets venus d'un fichier : leur texture peint la pièce (et en découpe
+    // les bords transparents, comme une feuille de salade).
+    if (uSolid > 0.5 && uHasMap > 0.5) {
+      vec4 albedo = texture2D(uMap, vUv);
+      if (albedo.a < uAlphaCut) discard;
+      casing *= albedo.rgb;
+    }
     if (uSolid < 0.5 && frontMix < 0.999) {
       vec2 edge[8] = vec2[8](
         vec2(0.04, 0.04), vec2(0.5, 0.03), vec2(0.96, 0.04), vec2(0.97, 0.5),
