@@ -21,6 +21,7 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { PassiveScheduler } from "@/components/projects/passiveScheduler";
 import { PLAYBACK_RATE } from "@/content/projectMedia";
 import {
+  EYE_LIFT,
   PIECE_SIZE,
   SLAB_DEPTH,
   SLAB_RADIUS,
@@ -78,9 +79,20 @@ export type GalleryOptions = {
   /** Position de départ (défilement déjà restauré), en numéro de projet. */
   progress: number;
   frame: FrameRect;
+  /**
+   * Retour d'un projet : la caméra part de l'intérieur de cette plaque (qui
+   * remplit l'écran, sous le voile) et recule jusqu'à sa place.
+   */
+  returning?: number | null;
 };
 
 export type GalleryRenderer = {
+  /**
+   * Entrer dans un projet : la caméra rejoint sa plaque, s'avance jusqu'à ce
+   * qu'elle remplisse l'écran, les autres s'éteignent ; `onCovered` est appelé
+   * quand l'écran est presque couvert (moment de changer de page).
+   */
+  enter(index: number, onCovered: () => void): void;
   setProgress(raw: number): void;
   setFrame(frame: FrameRect): void;
   setHighlight(index: number | null): void;
@@ -114,6 +126,23 @@ type PieceState = {
 };
 
 type Intro = { start: number; full: boolean; active: number };
+
+/** Entrée dans une plaque (trajet puis avancée) ou sortie à reculons. */
+type Immersion = {
+  kind: "enter" | "return";
+  index: number;
+  /** Début en ms ; négatif tant que la scène n'est pas prête (retour). */
+  start: number;
+  from: number;
+  travel: number;
+  onCovered: (() => void) | null;
+};
+
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+/** Durées (s) : avancée dans la plaque, sortie à reculons. */
+const DIVE = 0.8;
+const EMERGE = 1.05;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -296,6 +325,7 @@ export function createGalleryRenderer(
       uGrid: { value: new Color("#24242c") },
       uPiecePos: { value: floorPos },
       uPieceGlow: { value: floorGlow },
+      uDim: { value: 0 },
     },
   });
   const floorGeometry = new PlaneGeometry(260, 260);
@@ -325,13 +355,37 @@ export function createGalleryRenderer(
   let intro: Intro | null = null;
   // À la première visite, l'arrivée complète ; ensuite, la tuile HTML se
   // contente de prendre du volume. Rien en mode calme.
-  let introPending: "full" | "settle" | null = calm ? null : options.arrival ? "full" : "settle";
+  let introPending: "full" | "settle" | null =
+    calm || options.returning != null ? null : options.arrival ? "full" : "settle";
+  // Retour d'un projet : la caméra attend dans la plaque que la scène soit prête.
+  let immersion: Immersion | null =
+    options.returning != null && !calm
+      ? { kind: "return", index: options.returning, start: -1, from: options.returning, travel: 0, onCovered: null }
+      : null;
+  /** Part de l'immersion : 0 au repos, 1 quand la plaque remplit l'écran. */
+  let cover = immersion ? 1 : 0;
   let ready = false;
   const createdAt = performance.now();
 
   const activeIndex = () => Math.min(count - 1, Math.max(0, Math.round(calm ? calmStation : stationTarget)));
 
   // --- Dimensions et cadrage -----------------------------------------------
+  /**
+   * Le projet actif se place au centre du cadre HTML (à droite du texte sur
+   * ordinateur, en haut sur téléphone) tout en restant vu bien en face ; en
+   * entrant dans une plaque, ce centre glisse vers celui de l'écran.
+   */
+  function applyView() {
+    const cx = frame.cx + (width / 2 - frame.cx) * cover;
+    const cy = frame.cy + (height / 2 - frame.cy) * cover;
+    camera.setViewOffset(width, height, width / 2 - cx, height / 2 - cy, width, height);
+    camera.updateProjectionMatrix();
+  }
+  /** Recul pour que l'image de la plaque déborde de tout l'écran. */
+  const coverDistance = (size: number) => {
+    const half = Math.tan((camera.fov * Math.PI) / 360);
+    return (size - SLAB_RADIUS) / 2 / (half * Math.max(1, camera.aspect) * 1.06) + SLAB_DEPTH / 2;
+  };
   const resize = () => {
     const w = Math.max(1, canvas.clientWidth);
     const h = Math.max(1, canvas.clientHeight);
@@ -346,10 +400,7 @@ export function createGalleryRenderer(
     fill = framing.fill;
     camera.aspect = aspect;
     camera.fov = framing.fov;
-    // Le projet actif se place au centre du cadre HTML (à droite du texte sur
-    // ordinateur, en haut sur téléphone) tout en restant vu bien en face.
-    camera.setViewOffset(w, h, w / 2 - frame.cx, h / 2 - frame.cy, w, h);
-    camera.updateProjectionMatrix();
+    applyView();
     baseDistance = viewDistance(framing.fov, h, frame.size * framing.fill);
     currentSpacing = spacingFor(baseDistance, aspect);
     layouts = layoutPieces(count, currentSpacing);
@@ -574,7 +625,8 @@ export function createGalleryRenderer(
     setTimer: (callback, delay) => window.setTimeout(callback, delay),
     clearTimer: (handle) => window.clearTimeout(handle),
   });
-  const updateScheduler = () => scheduler.setEnabled(running && !calm && ready && !disposed && intro === null);
+  const updateScheduler = () =>
+    scheduler.setEnabled(running && !calm && ready && !disposed && intro === null && immersion === null);
 
   const activity = () => {
     lastActivity = performance.now();
@@ -625,6 +677,7 @@ export function createGalleryRenderer(
 
   const onPointerMove = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
+    if (immersion) return;
     if (event.pointerType === "mouse") setHovered(pick(event.clientX, event.clientY));
     activity();
   };
@@ -654,6 +707,7 @@ export function createGalleryRenderer(
   // Le toucher agit au « clic » du navigateur : un appui qui arrête un
   // défilement lancé n'en produit pas, et n'ouvre donc rien par mégarde.
   const onClick = (event: MouseEvent) => {
+    if (immersion) return;
     const index = pick(event.clientX, event.clientY);
     if (lastPointerType === "mouse") {
       if (index !== null) callbacks.onActivate(index, event.ctrlKey || event.metaKey || event.shiftKey);
@@ -757,6 +811,7 @@ export function createGalleryRenderer(
           intro = { start: now, full: introPending === "full", active: activeIndex() };
           introPending = null;
         }
+        if (immersion && immersion.start < 0) immersion.start = now;
         updateScheduler();
       }
     }
@@ -768,6 +823,39 @@ export function createGalleryRenderer(
     const target = calm ? calmStation : stationTarget;
     station = calm ? target : damp(station, target, 5.5, dt);
     if (Math.abs(station - target) > 1e-4) busy = true;
+
+    // Immersion : la caméra suit son propre trajet, plus le défilement.
+    const diving = immersion;
+    if (diving) {
+      busy = true;
+      const t = diving.start < 0 ? 0 : (now - diving.start) / 1000;
+      if (diving.kind === "enter") {
+        if (t < diving.travel) {
+          station = diving.from + (diving.index - diving.from) * easeInOutCubic(t / diving.travel);
+          cover = 0;
+        } else {
+          station = diving.index;
+          cover = easeInOutSine(clamp01((t - diving.travel) / DIVE));
+          if (cover > 0.72 && diving.onCovered) {
+            const onCovered = diving.onCovered;
+            diving.onCovered = null;
+            window.setTimeout(onCovered, 0);
+          }
+        }
+      } else {
+        station = diving.index;
+        cover = 1 - easeOutCubic(clamp01(t / EMERGE));
+        if (t >= EMERGE) {
+          immersion = null;
+          cover = 0;
+          updateScheduler();
+        }
+      }
+      applyView();
+      floorMaterial.uniforms.uDim.value = cover;
+    }
+    const focus = diving ? diving.index : -1;
+    const room = 1 - cover;
 
     const parallax = calm ? 0 : 1;
     pointer.x = damp(pointer.x, pointer.tx * parallax, 3.5, dt);
@@ -788,11 +876,16 @@ export function createGalleryRenderer(
     }
     const dolly = full ? 1 - easeOutCubic(clamp01(introT / 2.3)) : 0;
 
-    const distance = baseDistance * (sizeAt(layouts, station) / PIECE_SIZE) * (1 + 0.12 * dolly);
+    const rest = baseDistance * (sizeAt(layouts, station) / PIECE_SIZE) * (1 + 0.12 * dolly);
+    // On avance en taille apparente (inverse de la distance) : la plaque grandit
+    // régulièrement à l'écran au lieu de tout faire dans les derniers instants.
+    const distance =
+      focus >= 0 ? 1 / (1 / rest + (1 / coverDistance(layouts[focus].size) - 1 / rest) * cover) : rest;
     const pose = cameraPose(layouts, station, distance);
+    // En entrant, le regard se met bien en face : ni surplomb ni parallaxe.
     camera.position.set(
-      pose.position[0] + pointer.x * 0.32,
-      pose.position[1] + pointer.y * 0.18 + dolly * 0.35,
+      pose.position[0] + pointer.x * 0.32 * room,
+      pose.position[1] + (pointer.y * 0.18 + dolly * 0.35) * room - EYE_LIFT * cover,
       pose.position[2],
     );
     camera.lookAt(pose.target[0], pose.target[1], pose.target[2]);
@@ -834,8 +927,9 @@ export function createGalleryRenderer(
       let scaleXY = (1 + 0.04 * piece.hover) * (0.5 + 0.5 * pop);
       let scaleZ = scaleXY;
       let swing = 0;
-      // Mouvement propre (souris, pivot lent) : nul au premier instant du relais.
-      let motion = 1;
+      // Mouvement propre (souris, pivot lent) : nul au premier instant du
+      // relais, et sur la plaque où l'on entre.
+      let motion = index === focus ? room : 1;
       if (lifting) {
         // Au départ, la plaque est à plat, exactement à la place et à la
         // taille de la tuile HTML ; elle prend ensuite du volume.
@@ -872,11 +966,11 @@ export function createGalleryRenderer(
       mesh.scale.set(scaleXY * shrink, scaleXY * shrink, scaleZ * shrink);
       if (mesh.geometry !== slabGeometry(layout.size)) mesh.geometry = slabGeometry(layout.size);
 
-      uniforms.uLit.value = clamp01(arrive * 1.6);
-      uniforms.uRim.value = 0.1 * facing + 0.9 * piece.hover;
+      uniforms.uLit.value = clamp01(arrive * 1.6) * (index === focus ? 1 : room);
+      uniforms.uRim.value = (0.1 * facing + 0.9 * piece.hover) * room;
       uniforms.uMix.value = piece.mix;
 
-      const glow = (0.035 + 0.07 * facing + 0.2 * piece.hover) * clamp01(arrive * 1.4);
+      const glow = (0.035 + 0.07 * facing + 0.2 * piece.hover) * clamp01(arrive * 1.4) * room;
       floorPos[index].set(mesh.position.x, 0, mesh.position.z);
       floorGlow[index].set(glowColors[index].r * glow, glowColors[index].g * glow, glowColors[index].b * glow);
     }
@@ -909,7 +1003,7 @@ export function createGalleryRenderer(
         mesh.position.set(layout.position[0], restY - (1 - pop) * 0.9, layout.position[2] - (1 - arrive) * 9);
       }
       mesh.scale.setScalar(Math.max(0.001, pop));
-      mesh.material.uniforms.uLit.value = clamp01(arrive * 1.6);
+      mesh.material.uniforms.uLit.value = clamp01(arrive * 1.6) * room;
     }
 
     return busy;
@@ -919,6 +1013,30 @@ export function createGalleryRenderer(
   invalidate();
 
   return {
+    enter(index, onCovered) {
+      if (calm || disposed) {
+        onCovered();
+        return;
+      }
+      if (immersion) return;
+      skipIntro();
+      setHovered(null);
+      // La plaque visée reprend son image fixe : l'écran se remplit de sa couleur.
+      for (let i = 0; i < count; i += 1) if (pieces[i].mode !== null) stop(i);
+      const distanceToGo = Math.abs(station - index);
+      immersion = {
+        kind: "enter",
+        index,
+        start: performance.now(),
+        from: station,
+        travel: distanceToGo < 0.05 ? 0 : clamp(0.35 + 0.09 * distanceToGo, 0.4, 1.1),
+        onCovered,
+      };
+      stationTarget = index;
+      calmStation = index;
+      updateScheduler();
+      invalidate();
+    },
     setProgress(raw) {
       // Comme pour la liste : un défilement efface le survol, sinon le cartel
       // suivrait les plaques qui passent sous un curseur immobile.

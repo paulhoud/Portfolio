@@ -86,6 +86,33 @@ export function getTileLight(key: string | undefined | null): TileLight {
   return tileLights[key.toUpperCase() as MediaKey] ?? fallback;
 }
 
+/**
+ * Couleur du pourtour de chaque image de tuile (moyenne d'une bande de 4 % le
+ * long des bords, mesurée le 9 oct. 2026). C'est la couleur du voile qui
+ * couvre l'écran quand on entre dans un projet depuis la galerie 3D : la
+ * plaque qui remplit l'écran se prolonge sans saut. Elle diffère du fond
+ * déclaré pour Archive, dont la tuile est sombre.
+ */
+const tileEdges: Partial<Record<MediaKey, string>> = {
+  UPIKAJOB: "#ffffff",
+  MEMENTO: "#1d1d23",
+  YDL: "#e4eff1",
+  JIVE: "#ffb800",
+  SANOFI: "#f5f2ef",
+  FIDESIO: "#fe373b",
+  CAPGEMINI: "#e4eff1",
+  BAIO: "#78da31",
+  SAEGUS: "#171718",
+  LGM: "#dad0c1",
+  PERSO: "#272731",
+};
+
+/** Couleur du pourtour d'une tuile, ou `fallback` si elle n'est pas mesurée. */
+export function getTileEdge(key: string | undefined | null, fallback: string): string {
+  if (!key) return fallback;
+  return tileEdges[key.toUpperCase() as MediaKey] ?? fallback;
+}
+
 /** Instant d'arrêt de l'animation d'une carte, ou `null` pour aller au bout. */
 export function getMotionEnd(key: string | undefined | null): number | null {
   if (!key) return null;

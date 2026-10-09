@@ -128,6 +128,7 @@ export const floorFragment = /* glsl */ `
   varying vec3 vWorld;
   uniform vec3 uBase;
   uniform vec3 uGrid;
+  uniform float uDim;
   uniform vec3 uPiecePos[PIECES];
   uniform vec3 uPieceGlow[PIECES];
   uniform vec3 uFogColor;
@@ -151,7 +152,7 @@ export const floorFragment = /* glsl */ `
     // La grille s'estompe au loin avant le brouillard, comme un projecteur au sol.
     float reach = 1.0 - smoothstep(uFogNear * 0.5, uFogFar * 0.6, vDist);
     vec3 color = uBase + light + uGrid * line * reach * (1.0 + 1.2 * length(light));
-    color = mix(color, uFogColor, smoothstep(uFogNear, uFogFar, vDist));
+    color = mix(color, uFogColor, max(smoothstep(uFogNear, uFogFar, vDist), uDim));
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
   }

@@ -2,16 +2,49 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { getTileEdge } from "@/content/projectMedia";
+import { projects } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
+import { requestGalleryReturn, setNextTransition, showVeil } from "@/lib/immersion";
 
 /**
  * Bouton retour fixe, rendu hors de la zone animée (dans AppFrame) afin de
  * rester réellement épinglé au viewport pendant le scroll et les transitions.
  * Positionné en haut à gauche de la zone de contenu, avec une marge cohérente
  * et sans recouvrir le contenu (qui est centré).
+ *
+ * Depuis une page projet, le retour se fait à reculons dans la galerie 3D :
+ * un voile à la couleur du projet couvre l'écran, l'accueil se met en place
+ * devant sa plaque, et la caméra en ressort (cf. GalleryHome).
  */
 export function FixedBackButton({ href = "/" }: { href?: string }) {
   const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const slug = pathname.startsWith("/projects/") ? pathname.split("/")[2] : null;
+  const index = slug ? projects.findIndex((item) => item.slug === slug) : -1;
+
+  const goBack = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (index < 0 || href !== "/") return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const project = projects[index];
+    // La galerie reprendra devant ce projet : une tranche de défilement par
+    // projet, 35 % de la hauteur d'écran sur ordinateur, 40 % sur mobile.
+    const slot = window.matchMedia("(min-width: 1024px)").matches ? 0.35 : 0.4;
+    try {
+      window.sessionStorage.setItem("scroll-memory:/", String(Math.round(index * slot * window.innerHeight)));
+    } catch {
+      /* ignore */
+    }
+    void showVeil(getTileEdge(project.mediaKey, project.background), 240).then(() => {
+      requestGalleryReturn(project.slug);
+      setNextTransition("/", "cut");
+      router.push("/", { scroll: false });
+    });
+  };
 
   return (
     <motion.div
@@ -26,6 +59,7 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
         // Next repositionne en haut à chaque navigation : on le laisse à
         // `useScrollMemory`, qui restaure la position précédente du damier.
         scroll={false}
+        onClick={goBack}
         aria-label={t.site.common.back}
         className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 backdrop-blur-md transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
       >

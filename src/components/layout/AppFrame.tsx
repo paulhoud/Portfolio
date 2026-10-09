@@ -10,6 +10,7 @@ import { PageTransition } from "./PageTransition";
 import { ScrollToTop } from "./ScrollToTop";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
+import { Veil } from "./Veil";
 
 /**
  * Cadre applicatif persistant. Rend la chrome (header, bouton retour fixe,
@@ -42,9 +43,12 @@ export function AppFrame({ children }: { children: ReactNode }) {
         <PageTransition>{children}</PageTransition>
       </main>
 
-      <SiteFooter />
+      {/* Sur l'accueil, la mention de droits flotte sur la galerie (cf. GalleryHome). */}
+      {!isHome ? <SiteFooter /> : null}
 
       <ScrollToTop />
+
+      <Veil />
     </MotionConfig>
   );
 }

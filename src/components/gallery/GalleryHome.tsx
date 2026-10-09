@@ -3,14 +3,30 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type FocusEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FocusEvent,
+  type MouseEvent,
+} from "react";
 import { PassiveAnimationProvider } from "@/components/projects/PassiveAnimationProvider";
 import { ProjectThumbnail } from "@/components/projects/ProjectThumbnail";
-import { getMotionEnd, getMotionStart, getProjectMedia, getTileLight } from "@/content/projectMedia";
+import { getMotionEnd, getMotionStart, getProjectMedia, getTileEdge, getTileLight } from "@/content/projectMedia";
 import type { Project } from "@/content/projects";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { requestIdle } from "@/lib/idle";
+import {
+  clearGalleryReturn,
+  hideVeil,
+  peekGalleryReturn,
+  revealWhenOn,
+  setNextTransition,
+  showVeil,
+} from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
@@ -76,6 +92,10 @@ function buildPieces(projects: Project[]): GalleryPieceInput[] {
     };
   });
 }
+
+/** Clic simple (ni nouvel onglet ni autre modificateur). */
+const isPlainClick = (event: MouseEvent) =>
+  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
 /** Masque la barre d'une zone qui défile, sans retirer le défilement. */
 const NO_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
@@ -219,17 +239,58 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     setPreview(null);
   };
 
+  // --- Entrée dans un projet ----------------------------------------------
+  // La caméra rejoint la plaque du projet, puis s'avance jusqu'à ce qu'elle
+  // remplisse l'écran ; un voile de sa couleur couvre alors le changement de
+  // page, puis s'efface sur la page projet. Sans 3D, seul le voile joue.
+  const enteringRef = useRef(false);
+  // Pendant l'entrée (et le retour), le texte s'efface : seule la plaque compte.
+  // (Sans 3D, il n'y a pas de recul à attendre : le texte reste affiché.)
+  const [immersed, setImmersed] = useState(() => peekGalleryReturn() !== null && !readSession(NO_3D_KEY));
+  const enterProject = useCallback(
+    (index: number) => {
+      if (enteringRef.current) return;
+      enteringRef.current = true;
+      setImmersed(true);
+      const target = projects[index];
+      const href = `/projects/${target.slug}`;
+      // Le défilement se cale sur sa tranche : c'est là que le retour ramènera.
+      window.scrollTo({ top: trackTop() + index * slotHeight(), behavior: "auto" });
+      const go = async () => {
+        await showVeil(getTileEdge(target.mediaKey, target.background), 200);
+        setNextTransition(href, "cut");
+        router.push(href);
+        revealWhenOn(href, 520);
+      };
+      const renderer = rendererRef.current;
+      if (renderer) renderer.enter(index, () => void go());
+      else void go();
+    },
+    [projects, router, slotHeight],
+  );
+  // De retour sur l'accueil (bouton précédent du navigateur…), on peut repartir.
+  useEffect(() => {
+    enteringRef.current = false;
+  }, []);
+  const onProjectClick = (index: number) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!isPlainClick(event)) return;
+    event.preventDefault();
+    enterProject(index);
+  };
+
   // --- Scène 3D ------------------------------------------------------------
   // Lus au moment de créer la scène, sans la recréer quand ils changent (la
   // liste des projets est reconstruite à chaque rendu de la page parente).
   const calmRef = useRef(calm);
   const scrollToPieceRef = useRef(scrollToPiece);
   const projectsRef = useRef(projects);
+  const enterProjectRef = useRef(enterProject);
   useEffect(() => {
     calmRef.current = calm;
     scrollToPieceRef.current = scrollToPiece;
     projectsRef.current = projects;
-  }, [calm, scrollToPiece, projects]);
+    enterProjectRef.current = enterProject;
+  }, [calm, scrollToPiece, projects, enterProject]);
 
   /** Emplacement du cadre HTML dans la scène, que la 3D reprend. */
   const measureFrame = useCallback((): FrameRect | null => {
@@ -263,12 +324,16 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       if (reason !== "context-lost") writeSession(NO_3D_KEY);
       setScene("failed");
     };
-    const cancelIdle = requestIdle(() => {
+    // Retour d'un projet : la scène se crée tout de suite, la caméra part de
+    // l'intérieur de sa plaque (sous le voile) et recule.
+    const returningSlug = peekGalleryReturn();
+    const returning = returningSlug ? projectsRef.current.findIndex((item) => item.slug === returningSlug) : -1;
+    const create = () => {
       void import("./three/galleryRenderer").then(({ createGalleryRenderer }) => {
         const host = sceneHostRef.current;
         const frame = measureFrame();
         if (cancelled || !host || !frame) return;
-        const arrival = !calmRef.current && !readSession(ARRIVED_KEY);
+        const arrival = !calmRef.current && !readSession(ARRIVED_KEY) && returning < 0;
         renderer = createGalleryRenderer(
           host,
           buildPieces(projectsRef.current),
@@ -277,27 +342,49 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             onActivate: (index, newTab) => {
               const href = `/projects/${projectsRef.current[index].slug}`;
               if (newTab) window.open(href, "_blank", "noopener");
-              else router.push(href);
+              else enterProjectRef.current(index);
             },
             onSelect: (index) => scrollToPieceRef.current(index),
             onReady: () => {
               if (arrival) writeSession(ARRIVED_KEY);
+              if (returning >= 0) {
+                clearGalleryReturn();
+                hideVeil(450);
+                // Le texte revient pendant que la caméra recule.
+                window.setTimeout(() => setImmersed(false), 420);
+              }
               setScene("ready");
             },
             onFail: (reason) => window.setTimeout(() => fail(reason), 0),
           },
-          { calm: calmRef.current, arrival, progress: readProgress(), frame },
+          {
+            calm: calmRef.current,
+            arrival,
+            progress: readProgress(),
+            frame,
+            returning: returning >= 0 ? returning : null,
+          },
         );
         rendererRef.current = renderer;
       });
-    }, 1500);
+    };
+    const cancelIdle = returning >= 0 ? (create(), () => {}) : requestIdle(create, 1500);
     return () => {
       cancelled = true;
       cancelIdle();
       rendererRef.current = null;
       renderer?.dispose();
     };
-  }, [synced, router, measureFrame, readProgress, attempt]);
+  }, [synced, measureFrame, readProgress, attempt]);
+
+  // Sans 3D (indisponible, écartée), le voile d'un retour se lève tout de suite.
+  useEffect(() => {
+    if (!synced) return;
+    if (scene === "failed" || readSession(NO_3D_KEY)) {
+      clearGalleryReturn();
+      hideVeil(400);
+    }
+  }, [synced, scene]);
 
   // Le cadre change de place ou de taille : la scène suit. Sa boîte et celle
   // qui le contient sont observées, et la fenêtre aussi : il peut se déplacer
@@ -390,22 +477,22 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               "bg-[linear-gradient(0deg,#08080b_0%,rgba(8,8,11,0.9)_32%,transparent_44%),linear-gradient(180deg,rgba(8,8,11,0.85)_0%,transparent_20%)]",
               "lg:bg-[linear-gradient(90deg,#08080b_0%,rgba(8,8,11,0.9)_40%,transparent_52%),linear-gradient(0deg,rgba(8,8,11,0.85)_0%,rgba(8,8,11,0.55)_20%,transparent_34%)]",
               "[@media(max-height:500px)]:bg-[linear-gradient(90deg,transparent_0%,transparent_44%,rgba(8,8,11,0.88)_58%,#08080b_100%)]",
-              live ? "opacity-100" : "opacity-0",
+              live && !immersed ? "opacity-100" : "opacity-0",
             )}
           />
 
           <PassiveAnimationProvider>
             <div
               className={cn(
-                "relative mx-auto flex h-full max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-150",
+                "relative mx-auto flex h-full max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
                 // Avec la 3D, les clics traversent jusqu'aux plaques, sauf sur le texte et les boutons.
                 live && "pointer-events-none",
                 "lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-12 lg:pb-10 lg:pt-[calc(var(--header-height)+2.5rem)]",
-                synced ? "opacity-100" : "opacity-0",
+                synced && (!immersed || scene === "failed") ? "opacity-100" : "pointer-events-none opacity-0",
               )}
             >
               {/* Colonne texte : identité, liste des projets, réglages. */}
-              <div className="pointer-events-auto flex min-h-0 flex-col">
+              <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center">
                 <h1 className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-white lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
                   <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-white/60 lg:mt-3 lg:text-sm">
@@ -418,7 +505,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
                 <nav
                   aria-label={t.site.gallery.listLabel}
-                  className={cn("mt-8 hidden min-h-0 flex-1 overflow-y-auto pl-4 lg:block [@media(max-height:780px)]:mt-5", NO_SCROLLBAR)}
+                  className={cn("mt-8 hidden min-h-0 overflow-y-auto pl-4 lg:block [@media(max-height:780px)]:mt-5", NO_SCROLLBAR)}
                 >
                   <ol className="flex flex-col">
                     {projects.map((item, index) => {
@@ -435,6 +522,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                           ) : null}
                           <Link
                             href={`/projects/${item.slug}`}
+                            onClick={onProjectClick(index)}
                             onMouseEnter={() => setPreview(index)}
                             onMouseLeave={clearPreview}
                             onFocus={onLinkFocus(index)}
@@ -491,6 +579,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                           {/* Doublon visuel du lien de la liste : hors du parcours clavier. */}
                           <Link
                             href={`/projects/${project.slug}`}
+                            onClick={onProjectClick(shown)}
                             tabIndex={-1}
                             aria-hidden="true"
                             className="relative block h-full w-full"
@@ -541,6 +630,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 <div className="pointer-events-auto mx-auto mt-3 w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
                   <Link
                     href={`/projects/${project.slug}`}
+                    onClick={onProjectClick(shown)}
                     className="flex h-11 items-center justify-center rounded-full bg-white text-sm font-bold uppercase tracking-[0.12em] text-black"
                   >
                     {t.site.gallery.viewProject}
@@ -551,6 +641,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                         <li key={item.slug}>
                           <Link
                             href={`/projects/${item.slug}`}
+                            onClick={onProjectClick(index)}
                             aria-label={`${pad(index + 1)}. ${item.title} — ${item.eyebrow}`}
                             className={cn(
                               "flex h-11 min-w-11 items-center justify-center rounded-full border px-3 text-xs tabular-nums transition-colors",
@@ -563,8 +654,16 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       ))}
                     </ol>
                   </nav>
+                  <p className="mt-2 text-[0.55rem] uppercase tracking-[0.06em] text-white/35">
+                    {t.site.footer.copyright} {t.site.footer.rights}
+                  </p>
                 </div>
               </div>
+
+              {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la scène. */}
+              <p className="pointer-events-auto absolute bottom-6 left-12 hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
+                {t.site.footer.copyright} {t.site.footer.rights}
+              </p>
             </div>
           </PassiveAnimationProvider>
         </div>

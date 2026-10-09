@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { transitionFor, type TransitionKind } from "@/lib/immersion";
 import { FrozenRouter } from "./FrozenRouter";
 
 /**
@@ -18,18 +19,24 @@ import { FrozenRouter } from "./FrozenRouter";
  * Les deux calques occupent la même cellule de grille (cf. `globals.css`), ce
  * qui les superpose sans positionnement absolu ni recalcul de mise en page.
  * {@link FrozenRouter} fige le contenu du calque sortant le temps de l'animation.
+ *
+ * Entre la galerie 3D et un projet, c'est la caméra qui fait le mouvement
+ * (elle entre dans la plaque, ou en ressort) sous un voile de couleur : les
+ * calques s'échangent alors d'un coup (« cut », cf. lib/immersion).
  */
 
+const instant = { duration: 0 };
+
 const overlayVariants: Variants = {
-  initial: { x: "100%" },
+  initial: (kind: TransitionKind) => (kind === "cut" ? { x: 0 } : { x: "100%" }),
   animate: { x: 0 },
-  exit: { x: "100%" },
+  exit: (kind: TransitionKind) => (kind === "cut" ? { opacity: 0, transition: instant } : { x: "100%" }),
 };
 
 const baseVariants: Variants = {
-  initial: { opacity: 0, scale: 1.01 },
+  initial: (kind: TransitionKind) => (kind === "cut" ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.01 }),
   animate: { opacity: 1, scale: 1 },
-  exit: { opacity: 0.5, scale: 0.96 },
+  exit: (kind: TransitionKind) => (kind === "cut" ? { opacity: 0, transition: instant } : { opacity: 0.5, scale: 0.96 }),
 };
 
 const transition = { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const };
@@ -44,6 +51,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const reduceMotion = useReducedMotion();
   const isBase = pathname === "/";
   const variants = isBase ? baseVariants : overlayVariants;
+  const kind = transitionFor(pathname);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const previousPathRef = useRef(pathname);
@@ -98,9 +106,10 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   return (
     <div ref={viewportRef} className="page-transition-viewport">
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} custom={kind}>
         <motion.div
           key={pathname}
+          custom={kind}
           data-page-path={pathname}
           className="page-transition-layer"
           style={{
