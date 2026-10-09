@@ -9,10 +9,10 @@
 
 /**
  * Sommet des plaques : normale et direction de l'œil dans la salle. Près du
- * trou noir (`uWarp`), l'espace se courbe : chaque point tourne autour du
- * trou d'autant plus vite qu'il en est proche, ce qui tord les volumes en
- * arc, et y tombe plus vite que ses voisins plus éloignés, ce qui les étire
- * vers lui (et les comprime en largeur), comme happés par la gravité.
+ * trou noir (`uWarp`), l'espace se courbe : chaque volume s'allonge vers le
+ * trou et s'amincit en travers (comme un spaghetti happé par la gravité) ;
+ * chaque point tourne autour du trou d'autant plus vite qu'il en est proche,
+ * ce qui le tord en arc, et y tombe plus vite que ses voisins plus éloignés.
  */
 export const slabVertex = /* glsl */ `
   uniform vec3 uWarpCenter;
@@ -40,6 +40,17 @@ export const slabVertex = /* glsl */ `
     vec3 normalW = normalize(transpose(inverse(mat3(modelMatrix))) * normal);
     vSink = 1.0;
     if (uWarp > 0.0) {
+      // Étirement de marée : chaque volume s'allonge vers le trou et
+      // s'amincit en travers, d'autant plus qu'il en est proche.
+      vec3 origin = modelMatrix[3].xyz;
+      vec3 toHole = uWarpCenter - origin;
+      float reach = length(toHole);
+      vec3 axis = toHole / max(reach, 1e-4);
+      float tide = uWarp * clamp(2.4 / (0.5 + reach), 0.0, 2.6);
+      vec3 offset = world.xyz - origin;
+      float along = dot(offset, axis);
+      vec3 across = offset - axis * along;
+      world.xyz = origin + axis * along * (1.0 + 2.2 * tide) + across / (1.0 + 1.1 * tide);
       vec3 rel = world.xyz - uWarpCenter;
       float r = length(rel);
       float twist = uWarp * 2.4 / (0.7 + r);

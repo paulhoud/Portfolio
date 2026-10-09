@@ -21,7 +21,7 @@ import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
  * Logo PH en 3D, joué au survol (three.js).
  *
  * Au repos, rien n'est dessiné : c'est le logo SVG habituel qui s'affiche. Au
- * survol, le logo prend le dégradé orange du survol et se dédouble en
+ * survol, le logo, en blanc pur, se dédouble en
  * contours empilés en profondeur ; le tout pivote vers la souris pendant que
  * de la lumière court le long des lignes. À la sortie, les lignes se
  * replient dans le logo et le SVG reprend la main.
@@ -35,10 +35,14 @@ export const LOGO_HEIGHT = 70;
 
 /** Contours empilés derrière le logo. */
 const LAYERS = 4;
-/** Couleurs du dégradé de survol (cf. LogoMark), de l'avant vers le fond. */
+/**
+ * Couleurs du survol, de l'avant vers le fond : blanc pur partout (demande de
+ * Paul, 9 oct. 2026, à la place du dégradé orange) ; la profondeur vient de
+ * l'opacité des couches.
+ */
 // Rayon du dégradé CSS « circle at 35% 68% » : jusqu'au coin le plus éloigné.
 const GRADIENT_RADIUS = Math.hypot(0.65 * 61, 0.68 * 70);
-const GRADIENT = ["#FF9A00", "#FF4D00", "#E20E0E", "#C40000"];
+const GRADIENT = ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"];
 
 export type LogoScene = {
   /** Survol (ou focus clavier) : déploie ou replie les lignes. */
@@ -180,7 +184,7 @@ export function createLogoScene(
   }
   // Un trait de lumière qui fait le tour du contour avant.
   const comet = new LineMaterial({
-    color: new Color("#FFE7C2"),
+    color: new Color("#FFFFFF"),
     linewidth: 3.2,
     transparent: true,
     opacity: 0,
@@ -228,7 +232,7 @@ export function createLogoScene(
     // Le logo pivote pour montrer la profondeur, et suit un peu la souris.
     pivot.rotation.set((-0.25 + pointer.y * 0.25) * progress, (0.7 + pointer.x * 0.35) * progress, 0);
 
-    // Le plein prend le dégradé dès l'entrée, puis s'efface quand les lignes
+    // Le plein s'allume dès l'entrée, puis s'efface quand les lignes
     // se déploient : au plus fort, le logo n'est plus que ses contours.
     fill.uniforms.uOpacity.value = Math.min(1, progress * 4) * (1 - 0.88 * Math.max(0, (progress - 0.35) / 0.65));
     layers.forEach((group, layer) => {

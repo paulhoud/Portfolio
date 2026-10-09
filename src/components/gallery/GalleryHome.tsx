@@ -120,7 +120,9 @@ const NO_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
  *
  * Une longue piste de défilement porte une scène collée à l'écran. Chaque
  * projet occupe une tranche de la piste (`--slot`) : on fait défiler
- * normalement, et le projet actif change à chaque tranche. La scène montre ce
+ * normalement, et le projet actif change à chaque tranche. Sur téléphone, une
+ * tranche fait un écran entier et le défilement s'arrête sur chacune : un
+ * geste mène au projet suivant ou précédent, jamais plus loin. La scène montre ce
  * projet dans un cadre (la tuile actuelle, animée au survol) avec son cartel.
  * Le cadre est l'emplacement où viendra la salle 3D.
  *
@@ -330,41 +332,80 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
   // --- « Destroy the world » (fonction cachée) --------------------------------
   // Un trou noir aspire les plaques, le sol et le texte, se referme dans un
-  // éclair, puis le monde renaît. Se déclenche en tapant « destroy » (ou le
-  // code Konami), ou par sept clics rapides dans le vide de la scène.
+  // éclair ; on dérive alors dans une autre dimension, d'où le bouton
+  // « Retour » fait renaître le monde. Se déclenche en tapant « destroy » (ou
+  // le code Konami), ou par sept clics rapides dans le vide de la scène.
   const [doom, setDoom] = useState<WorldPhase | null>(null);
   const doomRef = useRef(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [doomOrigin, setDoomOrigin] = useState("50% 50%");
+  /** Animations du texte aspiré, rejouées à l'envers à la renaissance. */
+  const textPullRef = useRef<Animation[]>([]);
+  /** Sortie de l'autre dimension (bouton « Retour », touche Échap). */
+  const leaveVoidRef = useRef<() => void>(() => {});
   const destroyWorld = useCallback(() => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
-    // Le texte est aspiré vers le trou, au milieu de l'écran.
+    const renderer = rendererRef.current;
+    const withScene = !calmRef.current && renderer !== null;
+    // Le texte s'étire vers le trou, au milieu de l'écran, et s'y engouffre.
     const stage = stageRef.current?.getBoundingClientRect();
-    const box = contentRef.current?.getBoundingClientRect();
-    if (stage && box) {
-      setDoomOrigin(`${stage.left + stage.width / 2 - box.left}px ${stage.top + stage.height / 2 - box.top}px`);
+    if (!calmRef.current && stage) {
+      textPullRef.current = pullText(
+        contentRef.current,
+        stage.left + stage.width / 2,
+        stage.top + stage.height / 2,
+        withScene ? [0.5, 3.9] : [0, 0.9],
+      );
     }
     playSfx("blackhole");
     const finish = () => {
       doomRef.current = false;
+      for (const animation of textPullRef.current) animation.cancel();
+      textPullRef.current = [];
       setDoom(null);
     };
     const onPhase = (phase: WorldPhase) => {
       if (phase === "collapse") playSfx("collapse");
-      if (phase === "rebirth") playSfx("rebirth");
+      if (phase === "rebirth") {
+        playSfx("rebirth");
+        // Le texte ressort du trou en se redressant.
+        for (const animation of textPullRef.current) {
+          animation.playbackRate = -2.6;
+          animation.play();
+        }
+      }
       if (phase === "done") finish();
       else setDoom(phase);
     };
-    const renderer = rendererRef.current;
-    if (renderer?.destroyWorld(onPhase)) return;
-    // Sans 3D, ou en mode calme : un simple fondu au noir et retour.
+    if (renderer?.destroyWorld(onPhase)) {
+      leaveVoidRef.current = () => {
+        renderer.returnFromVoid();
+      };
+      return;
+    }
+    // Sans 3D, ou en mode calme : un fondu au noir, la même dimension (le
+    // message seul) et le même retour.
     onPhase("suck");
     window.setTimeout(() => onPhase("collapse"), 900);
-    window.setTimeout(() => onPhase("void"), 1100);
-    window.setTimeout(() => onPhase("rebirth"), 2600);
-    window.setTimeout(() => onPhase("done"), 3600);
+    window.setTimeout(() => onPhase("lost"), 1100);
+    let left = false;
+    leaveVoidRef.current = () => {
+      if (left) return;
+      left = true;
+      onPhase("rebirth");
+      window.setTimeout(() => onPhase("done"), 1000);
+    };
   }, []);
+  const backFromVoidRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (doom !== "lost") return;
+    backFromVoidRef.current?.focus({ preventScroll: true });
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") leaveVoidRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [doom]);
   const destroyRef = useRef(destroyWorld);
   useEffect(() => {
     destroyRef.current = destroyWorld;
@@ -554,7 +595,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     <>
       <section
         ref={trackRef}
-        className="relative [--slot:40svh] lg:[--slot:35svh]"
+        className="relative [--slot:100svh] lg:[--slot:35svh]"
         style={{ height: `calc(100lvh + ${count - 1} * var(--slot) + 1px)` }}
       >
         {/* Ancres de chaque projet, à la hauteur de sa tranche. */}
@@ -604,16 +645,28 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           />
 
           <AnimatePresence>
-            {doom === "void" ? (
+            {doom === "lost" ? (
               <motion.div
-                role="status"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.5 } }}
+                animate={{ opacity: 1, transition: { delay: calm ? 0 : 0.6, duration: 0.8 } }}
                 exit={{ opacity: 0, transition: { duration: 0.4 } }}
-                className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 px-6 text-center"
+                className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-end gap-3 px-6 pb-[20svh] text-center"
               >
-                <p className="text-sm uppercase tracking-[0.24em] text-white/80">{t.site.gallery.worldGone}</p>
-                <p className="text-[0.65rem] uppercase tracking-[0.24em] text-white/45">{t.site.gallery.worldBack}</p>
+                <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85">
+                  {t.site.gallery.lostTitle}
+                </p>
+                <p className="text-[0.65rem] uppercase tracking-[0.24em] text-white/50">{t.site.gallery.lostHint}</p>
+                <button
+                  ref={backFromVoidRef}
+                  type="button"
+                  onClick={() => leaveVoidRef.current()}
+                  className="pointer-events-auto mt-5 flex h-11 items-center gap-2.5 rounded-full bg-white pl-4 pr-5 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5M11 6l-6 6 6 6" />
+                  </svg>
+                  {t.site.gallery.lostBack}
+                </button>
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -625,20 +678,10 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 doom === null
                   ? undefined
                   : doom === "rebirth"
-                    ? {
-                        transformOrigin: doomOrigin,
-                        transition: "transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1s ease-out, filter 1s ease-out",
-                      }
-                    : {
-                        transformOrigin: doomOrigin,
-                        transform: calm ? undefined : "scale(0.04) rotate(-70deg)",
-                        opacity: 0,
-                        filter: calm ? undefined : "blur(10px)",
-                        pointerEvents: "none",
-                        transition: calm
-                          ? "opacity 0.8s ease-out"
-                          : "transform 3s cubic-bezier(0.6, 0, 0.9, 0.4), opacity 3s cubic-bezier(0.6, 0, 0.9, 0.4), filter 3s ease-in",
-                      }
+                    ? { transition: "opacity 1s ease-out" }
+                    : calm
+                      ? { opacity: 0, pointerEvents: "none", transition: "opacity 0.8s ease-out" }
+                      : { pointerEvents: "none" }
               }
               className={cn(
                 "relative mx-auto flex h-[100svh] max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
@@ -652,13 +695,13 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               {/* Centrée en hauteur sur la plaque (qui se tient au-dessus du cartel),
                   et non sur l'écran entier : elle paraissait trop basse. */}
               <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center lg:pb-40">
-                <h1 className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-white lg:text-5xl [@media(max-height:500px)]:sr-only">
+                <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-white lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
                   <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-white/60 lg:mt-3 lg:text-sm">
                     {profile.jobTitle}
                   </span>
                 </h1>
-                <p className="copy mt-5 hidden max-w-md shrink-0 lg:block [@media(max-height:780px)]:hidden">
+                <p data-pull className="copy mt-5 hidden max-w-md shrink-0 lg:block [@media(max-height:780px)]:hidden">
                   {t.site.gallery.intro}
                 </p>
 
@@ -670,7 +713,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     {projects.map((item, index) => {
                       const isActive = index === shown;
                       return (
-                        <li key={item.slug} className="relative">
+                        <li key={item.slug} data-pull className="relative">
                           {isActive ? (
                             <motion.span
                               layoutId="gallery-marker"
@@ -759,7 +802,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
                   {/* Invitation à défiler : à l'arrivée seulement, jusqu'au premier défilement. */}
                   <AnimatePresence>
-                    {synced && !scrolled && !immersed && active === 0 ? (
+                    {synced && !scrolled && !immersed && active === 0 && doom === null ? (
                       <motion.div
                         aria-hidden="true"
                         initial={{ opacity: 0 }}
@@ -783,7 +826,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     aria-label={t.site.gallery.listLabel}
                     className="pointer-events-auto absolute -right-4 top-1/2 flex -translate-y-1/2 flex-col items-center lg:hidden"
                   >
-                    <ol className="flex flex-col items-center">
+                    <ol data-pull className="flex flex-col items-center">
                       {projects.map((item, index) => (
                         <li key={item.slug}>
                           <button
@@ -806,6 +849,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     </ol>
                     <button
                       type="button"
+                      data-pull
                       onClick={() => scrollToPiece(Math.min(count - 1, active + 1))}
                       aria-label={t.site.gallery.nextProject}
                       className={cn(
@@ -830,7 +874,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 </div>
 
                 {/* Cartel : doublon visuel, la liste porte l'information accessible. */}
-                <div aria-hidden="true" className="mx-auto mt-4 grid w-full max-w-xl shrink-0 grid-cols-[minmax(0,1fr)] lg:mt-6 [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
+                <div data-pull aria-hidden="true" className="mx-auto mt-4 grid w-full max-w-xl shrink-0 grid-cols-[minmax(0,1fr)] lg:mt-6 [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
                   {/* Les onze cartels, invisibles et superposés, réservent la
                       hauteur du plus long : le cadre (et la scène 3D qui s'y
                       cale) ne bouge pas d'un projet à l'autre. */}
@@ -859,7 +903,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 {/* Mobile : un bouton qui dit ce qu'il fait, pour entrer dans le
                     projet affiché (en plus d'un toucher sur la plaque). On passe
                     d'un projet à l'autre en faisant défiler (cf. le repère vertical). */}
-                <div className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
+                <div data-pull className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
                   <Link
                     href={`/projects/${project.slug}`}
                     onClick={onProjectClick(shown)}
@@ -875,7 +919,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               </div>
 
               {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la scène. */}
-              <p className="pointer-events-auto absolute bottom-6 left-12 hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
+              <p data-pull className="pointer-events-auto absolute bottom-6 left-12 hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
                 {t.site.footer.copyright} {t.site.footer.rights}
               </p>
             </div>
@@ -884,6 +928,43 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       </section>
     </>
   );
+}
+
+/**
+ * Le texte aspiré par le trou noir : chaque bloc marqué `data-pull` s'étire
+ * vers le trou (en `cx`, `cy` à l'écran), s'amincit en travers, tourne un peu
+ * et s'y engouffre ; les plus proches partent les premiers. `span` : début et
+ * fin de l'aspiration (s). Les animations restent sur leur dernière image
+ * jusqu'à la renaissance, qui les rejoue à l'envers.
+ */
+function pullText(container: HTMLElement | null, cx: number, cy: number, span: [number, number]): Animation[] {
+  if (!container || typeof container.animate !== "function") return [];
+  const targets = [...container.querySelectorAll<HTMLElement>("[data-pull]")].filter(
+    (element) => element.getClientRects().length > 0,
+  );
+  const spots = targets.map((element) => {
+    const rect = element.getBoundingClientRect();
+    const dx = cx - (rect.left + rect.width / 2);
+    const dy = cy - (rect.top + rect.height / 2);
+    return { element, dx, dy, distance: Math.hypot(dx, dy) };
+  });
+  const farthest = Math.max(1, ...spots.map((spot) => spot.distance));
+  const [from, to] = span;
+  return spots.map(({ element, dx, dy, distance }) => {
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const pose = (share: number, along: number, across: number, turn: number) =>
+      `translate(${dx * share}px, ${dy * share}px) rotate(${angle + turn}deg) scale(${along}, ${across}) rotate(${-angle}deg)`;
+    const delay = (from + (distance / farthest) * (to - from) * 0.3) * 1000;
+    return element.animate(
+      [
+        { transform: "none", filter: "blur(0px)", opacity: 1 },
+        { transform: pose(0.08, 1.4, 0.82, -6), filter: "blur(0px)", opacity: 1, offset: 0.35 },
+        { transform: pose(0.5, 2.8, 0.32, -30), filter: "blur(1px)", opacity: 0.9, offset: 0.72 },
+        { transform: pose(1, 3.6, 0.02, -75), filter: "blur(3px)", opacity: 0 },
+      ],
+      { delay, duration: to * 1000 - delay, easing: "cubic-bezier(0.55, 0, 0.85, 0.4)", fill: "both" },
+    );
+  });
 }
 
 /** Cartel d'un projet, comme au musée : numéro, titre, accroche, cadre et période. */

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
 import { FixedBackButton } from "./FixedBackButton";
@@ -24,6 +24,12 @@ export function AppFrame({ children }: { children: ReactNode }) {
   const isHome = pathname === "/";
   const { t } = useTranslation();
   const [motionPaused] = useMotionPaused();
+
+  // Accueil sur téléphone : le défilement s'arrête sur chaque projet (cf. globals.css).
+  useEffect(() => {
+    document.documentElement.classList.toggle("home-snap", isHome);
+    return () => document.documentElement.classList.remove("home-snap");
+  }, [isHome]);
 
   return (
     // En pause, framer-motion réduit tous les mouvements comme le ferait le

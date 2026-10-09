@@ -34,10 +34,16 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
     playSfx("return");
     const project = projects[index];
     // La galerie reprendra devant ce projet : une tranche de défilement par
-    // projet, 35 % de la hauteur d'écran sur ordinateur, 40 % sur mobile.
-    const slot = window.matchMedia("(min-width: 1024px)").matches ? 0.35 : 0.4;
+    // projet, 35 % de la hauteur d'écran sur ordinateur, un écran entier sur mobile —
+    // la hauteur barre d'adresse affichée (100svh), comme dans la galerie.
+    const slot = window.matchMedia("(min-width: 1024px)").matches ? 0.35 : 1;
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;top:0;height:100svh;visibility:hidden;pointer-events:none";
+    document.body.append(probe);
+    const screenHeight = probe.offsetHeight || window.innerHeight;
+    probe.remove();
     try {
-      window.sessionStorage.setItem("scroll-memory:/", String(Math.round(index * slot * window.innerHeight)));
+      window.sessionStorage.setItem("scroll-memory:/", String(Math.round(index * slot * screenHeight)));
     } catch {
       /* ignore */
     }

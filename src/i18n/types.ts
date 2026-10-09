@@ -57,9 +57,11 @@ export type SiteCopy = {
     nextProject: string;
     /** Invitation à faire défiler, à l'arrivée sur la galerie. */
     scrollHint: string;
-    /** Fonction cachée « destroy the world » : message pendant le vide. */
-    worldGone: string;
-    worldBack: string;
+    /** Fonction cachée « destroy the world » : perdu dans une autre dimension. */
+    lostTitle: string;
+    lostHint: string;
+    /** Bouton qui fait renaître le monde (retour à l'accueil et aux projets). */
+    lostBack: string;
     /** Indice glissé dans la console du navigateur. */
     secretHint: string;
   };

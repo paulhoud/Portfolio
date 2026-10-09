@@ -38,6 +38,7 @@ import {
   type SatelliteLayout,
 } from "./layout";
 import { createBlackHole, type BlackHole } from "./blackHole";
+import { createDimension, type Dimension } from "./dimension";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
 import { floorFragment, floorVertex, slabFragment, slabVertex } from "./shaders";
 
@@ -79,8 +80,11 @@ export type GalleryCallbacks = {
   onEmptyClick?: () => void;
 };
 
-/** Étapes de « destroy the world » : aspiration, effondrement, vide, renaissance. */
-export type WorldPhase = "suck" | "collapse" | "void" | "rebirth" | "done";
+/**
+ * Étapes de « destroy the world » : aspiration, effondrement, puis on reste
+ * perdu dans une autre dimension jusqu'à `returnFromVoid` ; renaissance, fin.
+ */
+export type WorldPhase = "suck" | "collapse" | "lost" | "rebirth" | "done";
 
 export type GalleryOptions = {
   calm: boolean;
@@ -112,6 +116,8 @@ export type GalleryRenderer = {
    * projet en cours, mode calme…).
    */
   destroyWorld(onPhase: (phase: WorldPhase) => void): boolean;
+  /** Quitte l'autre dimension : le monde renaît. Faux s'il n'y a rien à quitter. */
+  returnFromVoid(): boolean;
   setProgress(raw: number): void;
   setFrame(frame: FrameRect): void;
   setHighlight(index: number | null): void;
@@ -165,6 +171,8 @@ const DIVE = 0.8;
 const EMERGE = 1.05;
 /** Recul (m) du trou noir derrière le projet regardé. */
 const HOLE_BEHIND = 2.6;
+/** Instant (s) où l'horloge du trou noir s'arrête, en attendant le retour. */
+const LOST_HOLD = 5.2;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const random = (min: number, max: number) => min + Math.random() * (max - min);
@@ -395,6 +403,8 @@ export function createGalleryRenderer(
   let lastScrollAt = 0;
   let hovered: number | null = null;
   let highlight: number | null = null;
+  /** Téléphone : projet sur lequel le défilement s'est posé (cf. update). */
+  let arrived: number | null = null;
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
   let lastActivity = performance.now();
   let intro: Intro | null = null;
@@ -439,11 +449,14 @@ export function createGalleryRenderer(
     axis: Vector3;
     /** Agrandissement du trou, pour qu'il paraisse de la même taille de loin. */
     scale: number;
+    /** Instant du retour demandé depuis l'autre dimension (sinon on y reste). */
+    returnAt: number | null;
     onPhase: (phase: WorldPhase) => void;
     reached: Set<WorldPhase>;
   };
   let world: World | null = null;
   let blackHole: BlackHole | null = null;
+  let dimension: Dimension | null = null;
   let ready = false;
   const createdAt = performance.now();
 
@@ -665,7 +678,7 @@ export function createGalleryRenderer(
   const refreshPlays = () => {
     for (let index = 0; index < count; index += 1) {
       const piece = pieces[index];
-      const wanted = index === hovered || index === highlight;
+      const wanted = index === hovered || index === highlight || index === arrived;
       if (wanted && piece.mode !== "hover" && piece.mode !== "held") {
         if (piece.mode === "passive") {
           // La lecture passive en cours devient un survol : le cycle passif
@@ -690,7 +703,7 @@ export function createGalleryRenderer(
       const ids: string[] = [];
       for (let index = 0; index < count; index += 1) {
         const piece = pieces[index];
-        if (piece.mode !== null || !inputs[index].video || index === hovered || index === highlight) continue;
+        if (piece.mode !== null || !inputs[index].video || index === hovered || index === highlight || index === arrived) continue;
         projected.copy(piece.mesh.position).project(camera);
         const inView = Math.abs(projected.x) < 0.9 && Math.abs(projected.y) < 0.9 && projected.z < 1;
         const near = piece.mesh.position.distanceTo(camera.position) < fog.uFogFar.value * 0.6;
@@ -1005,6 +1018,21 @@ export function createGalleryRenderer(
     station = calm ? target : damp(station, target, 5.5, dt);
     if (Math.abs(station - target) > 1e-4) busy = true;
 
+    // Téléphone (pas de survol) : une fois posé sur un projet, son animation
+    // se joue comme au survol ; elle s'arrête quand on en repart.
+    if (coarse) {
+      let next: number | null = null;
+      if (!calm && ready && intro === null && immersion === null && world === null) {
+        const resting = Math.round(target);
+        if (Math.abs(target - resting) < 0.001 && Math.abs(station - resting) < 0.04 && now - lastScrollAt > 180) next = resting;
+        else if (arrived !== null && Math.abs(station - arrived) < 0.3) next = arrived;
+      }
+      if (next !== arrived) {
+        arrived = next;
+        refreshPlays();
+      }
+    }
+
     // Immersion : la caméra suit son propre trajet, plus le défilement.
     const diving = immersion;
     // Grue : pendant un long trajet, la caméra prend du recul et de la hauteur
@@ -1046,7 +1074,8 @@ export function createGalleryRenderer(
 
     // « Destroy the world » : horloge et étapes.
     const doom = world;
-    const wt = doom ? (now - doom.start) / 1000 : -1;
+    const raw = doom ? (now - doom.start) / 1000 : -1;
+    const wt = !doom ? -1 : doom.returnAt === null ? Math.min(raw, LOST_HOLD) : 6.0 + Math.max(0, now - doom.returnAt) / 1000;
     if (doom) {
       busy = true;
       const reach = (phase: WorldPhase, at: number) => {
@@ -1057,13 +1086,15 @@ export function createGalleryRenderer(
       };
       reach("suck", 0.5);
       reach("collapse", 4.0);
-      reach("void", 4.6);
+      reach("lost", 4.6);
       reach("rebirth", 6.0);
       const floorUniforms = floorMaterial.uniforms;
       floorUniforms.uHole.value.copy(doom.center);
       floorUniforms.uSwirl.value =
         wt < 4.0 ? clamp01((wt - 0.3) / 3.2) : wt < 6.0 ? 1 : 1 - clamp01((wt - 6.0) / 1.4);
-      floorUniforms.uDim.value = wt < 4.3 ? 0 : wt < 6.0 ? clamp01((wt - 4.3) / 0.3) : 1 - clamp01((wt - 6.0) / 0.8);
+      // La salle s'assombrit comme l'espace pendant l'aspiration, puis disparaît.
+      floorUniforms.uDim.value =
+        wt < 4.3 ? 0.85 * clamp01((wt - 0.4) / 2.2) : wt < 6.0 ? Math.max(0.85, clamp01((wt - 4.3) / 0.3)) : 1 - clamp01((wt - 6.0) / 0.8);
       // L'espace se courbe de plus en plus : les volumes s'étirent et se
       // tordent en approchant ; à la renaissance, ils se redressent.
       const bend = clamp01((wt - 0.4) / 3.4);
@@ -1075,6 +1106,7 @@ export function createGalleryRenderer(
         floorUniforms.uSwirl.value = 0;
         floorUniforms.uDim.value = 0;
         warp.uWarp.value = 0;
+        dimension?.update(camera, 0, 0);
         doom.onPhase("done");
         updateScheduler();
       }
@@ -1274,7 +1306,7 @@ export function createGalleryRenderer(
       const flash = wt < 4.25 ? 0 : wt < 4.35 ? (wt - 4.25) / 0.1 : Math.exp(-(wt - 4.35) * 4.5);
       blackHole.group.position.copy(doom.center);
       blackHole.group.scale.setScalar(doom.scale);
-      blackHole.update(camera, Math.max(0, size), Math.max(0, glow), wt < 6.0 ? flash : 0, wt);
+      blackHole.update(camera, Math.max(0, size), Math.max(0, glow), wt < 5.0 ? flash : 0, wt);
       // Le monde tremble pendant l'aspiration.
       if (wt > 0.5 && wt < 4.2) {
         const shake = 0.05 * clamp01((wt - 0.5) / 2.5);
@@ -1283,6 +1315,12 @@ export function createGalleryRenderer(
       }
     } else if (blackHole) {
       blackHole.update(camera, 0, 0, 0, 0);
+    }
+    // L'autre dimension : elle apparaît dans l'éclair et s'efface au retour.
+    if (doom && dimension) {
+      const presence =
+        doom.returnAt === null ? easeOutCubic(clamp01((raw - 4.4) / 1.2)) : 1 - clamp01((now - doom.returnAt) / 700);
+      dimension.update(camera, presence, now / 1000);
     }
 
     return busy;
@@ -1301,6 +1339,10 @@ export function createGalleryRenderer(
         blackHole = createBlackHole();
         scene.add(blackHole.group);
       }
+      if (!dimension) {
+        dimension = createDimension(pieces.filter((piece) => piece.loaded).map((piece) => piece.mesh.material.uniforms.uMap.value));
+        scene.add(dimension.group);
+      }
       // Le trou s'ouvre au milieu de l'écran (et non du cadre), au loin
       // derrière le projet qu'on regarde.
       const pose = cameraPose(layouts, station, 1);
@@ -1311,10 +1353,18 @@ export function createGalleryRenderer(
         center: camera.position.clone().addScaledVector(axis, depth),
         axis,
         scale: (1.15 * depth) / (depth - HOLE_BEHIND + 1.2),
+        returnAt: null,
         onPhase,
         reached: new Set(),
       };
       updateScheduler();
+      invalidate();
+      return true;
+    },
+    returnFromVoid() {
+      const doom = world;
+      if (!doom || doom.returnAt !== null || !doom.reached.has("lost")) return false;
+      doom.returnAt = performance.now();
       invalidate();
       return true;
     },
@@ -1434,6 +1484,7 @@ export function createGalleryRenderer(
       }
       disposeSatellites();
       blackHole?.dispose();
+      dimension?.dispose();
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();

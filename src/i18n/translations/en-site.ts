@@ -36,8 +36,9 @@ export const enSite: SiteCopy = {
     viewProject: "View project",
     nextProject: "Next project",
     scrollHint: "Scroll",
-    worldGone: "The world was swallowed by a black hole.",
-    worldBack: "It is coming back…",
+    lostTitle: "You are drifting through another dimension.",
+    lostHint: "The projects are floating somewhere around here…",
+    lostBack: "Back",
     secretHint: "Psst… type “destroy” on the home page.",
   },
   language: {

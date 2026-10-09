@@ -189,6 +189,20 @@ body {
   }
 }
 
+/* Accueil sur téléphone et tablette : un geste de défilement mène au projet
+   suivant ou précédent, jamais plus loin (les ancres de chaque projet servent
+   de points d'arrêt, cf. GalleryHome). */
+@media (max-width: 1023.98px) {
+  html.home-snap {
+    scroll-snap-type: y mandatory;
+  }
+
+  html.home-snap [data-slot] {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
 /* Flèche « projet suivant » du repère mobile : elle frémit vers le bas tant
    qu'on n'a pas encore défilé. */
 @keyframes nudge-down {

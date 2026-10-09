@@ -42,12 +42,11 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
 
 /**
  * Logo blanc de l'en-tête. Au survol (ou au focus clavier), une scène three.js
- * le déploie en lignes : contours empilés en profondeur, au dégradé orange,
- * parcourus de lumière, qui pivotent vers la souris (cf. logo/logoScene.ts).
+ * le déploie en lignes : contours blancs empilés en profondeur, parcourus de
+ * lumière, qui pivotent vers la souris (cf. logo/logoScene.ts).
  *
  * Tant que la scène n'est pas chargée, et en mode calme (pause demandée ou
- * animations réduites par le système), le survol reste le simple passage du
- * blanc au dégradé.
+ * animations réduites par le système), le survol est un simple halo blanc.
  */
 function AnimatedLogoMark({ className }: { className?: string }) {
   const prefersReducedMotion = useReducedMotion();
@@ -118,30 +117,14 @@ function AnimatedLogoMark({ className }: { className?: string }) {
         className={cn(
           "transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)]",
           // Avec les lignes, le logo blanc s'efface vite au survol et revient
-          // pendant qu'elles se replient ; sinon, simple fondu vers le dégradé.
-          lines ? (playing ? "opacity-0 duration-150" : "opacity-100 duration-300") : "duration-[400ms] group-hover:opacity-0",
+          // pendant qu'elles se replient ; sinon, un halo blanc l'entoure.
+          lines
+            ? playing
+              ? "opacity-0 duration-150"
+              : "opacity-100 duration-300"
+            : "transition-[filter] duration-[400ms] group-hover:[filter:drop-shadow(0_0_6px_rgba(255,255,255,0.7))]",
         )}
         style={{ transitionTimingFunction: logoFillEase }}
-      />
-      <span
-        aria-hidden="true"
-        className={cn(
-          "absolute inset-0 opacity-0 transition-opacity duration-[400ms]",
-          !lines && "group-hover:opacity-100",
-        )}
-        style={{
-          transitionTimingFunction: logoFillEase,
-          WebkitMaskImage: "url(/assets/Logo-0-1.svg)",
-          maskImage: "url(/assets/Logo-0-1.svg)",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          WebkitMaskSize: "contain",
-          maskSize: "contain",
-          WebkitMaskPosition: "center",
-          maskPosition: "center",
-          background:
-            "radial-gradient(circle at 35% 68%, #FF9A00 0%, #FF4D00 42%, #E20E0E 78%, #C40000 100%)",
-        }}
       />
       {/* Scène des lignes : plus grande que le logo, pour qu'elles se déploient. */}
       <canvas
