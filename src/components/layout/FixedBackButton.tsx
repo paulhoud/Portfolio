@@ -8,6 +8,7 @@ import { getTileEdge } from "@/content/projectMedia";
 import { projects } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
 import { requestGalleryReturn, setNextTransition, showVeil } from "@/lib/immersion";
+import { playSfx } from "@/lib/sound/sound";
 
 /**
  * Bouton retour fixe, rendu hors de la zone animée (dans AppFrame) afin de
@@ -30,6 +31,7 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
     if (index < 0 || href !== "/") return;
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
+    playSfx("return");
     const project = projects[index];
     // La galerie reprendra devant ce projet : une tranche de défilement par
     // projet, 35 % de la hauteur d'écran sur ordinateur, 40 % sur mobile.

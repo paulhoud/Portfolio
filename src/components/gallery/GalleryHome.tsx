@@ -28,6 +28,7 @@ import {
   showVeil,
 } from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
+import { playSfx } from "@/lib/sound/sound";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
 import type { FrameRect, GalleryFailure, GalleryPieceInput, GalleryRenderer } from "./three/galleryRenderer";
@@ -36,6 +37,8 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 /** Mémoire de session : arrivée déjà jouée, 3D écartée (trop lente, indisponible). */
 const ARRIVED_KEY = "portfolio-gallery-arrived";
+/** Le visiteur a déjà fait défiler la galerie : plus d'invitation à le faire. */
+const SCROLLED_KEY = "portfolio-gallery-scrolled";
 const NO_3D_KEY = "portfolio-gallery-3d-off";
 
 function readSession(key: string) {
@@ -152,6 +155,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   // d'un projet, saut dans la liste) : la bascule est alors instantanée.
   const [jumped, setJumped] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
+  // Invitation à faire défiler : à l'arrivée, tant qu'on n'a pas bougé.
+  const [scrolled, setScrolled] = useState(() => typeof window !== "undefined" && readSession(SCROLLED_KEY));
   const count = projects.length;
 
   /** Hauteur d'une tranche, lue sur les ancres pour rester fidèle au CSS. */
@@ -182,6 +187,10 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
     const onScroll = () => {
       if (!trackRef.current) return;
+      if (window.scrollY > 24 && !readSession(SCROLLED_KEY)) {
+        writeSession(SCROLLED_KEY);
+        setScrolled(true);
+      }
       const index = Math.min(count - 1, Math.max(0, Math.round((window.scrollY - trackTop()) / slotHeight())));
       rendererRef.current?.setProgress(readProgress());
       if (index !== activeRef.current) {
@@ -263,8 +272,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
         revealWhenOn(href, 520);
       };
       const renderer = rendererRef.current;
-      if (renderer) renderer.enter(index, () => void go());
-      else void go();
+      const travel = renderer ? renderer.enter(index, () => void go()) : 0;
+      if (!renderer) void go();
+      // Un souffle accompagne le trajet, un scintillement l'entrée dans la plaque.
+      if (travel > 0) playSfx("travel", travel);
+      window.setTimeout(() => playSfx("enter"), travel * 1000);
     },
     [projects, router, slotHeight],
   );
@@ -492,7 +504,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               )}
             >
               {/* Colonne texte : identité, liste des projets, réglages. */}
-              <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center">
+              {/* Centrée en hauteur sur la plaque (qui se tient au-dessus du cartel),
+                  et non sur l'écran entier : elle paraissait trop basse. */}
+              <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center lg:pb-40">
                 <h1 className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-white lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
                   <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-white/60 lg:mt-3 lg:text-sm">
@@ -549,7 +563,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               {/* Scène : le cadre du projet, puis son cartel. */}
               <div className="mt-3 flex min-h-0 flex-1 flex-col lg:mt-0 lg:h-full [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:flex-row [@media(max-height:500px)]:items-center [@media(max-height:500px)]:gap-5">
                 {/* Le cadre prend la plus grande taille carrée que permet la place restante. */}
-                <div className="flex min-h-0 flex-1 items-center justify-center [container-type:size] [@media(max-height:500px)]:w-[min(40vw,calc(100svh-var(--header-height)-1.5rem))] [@media(max-height:500px)]:flex-none [@media(max-height:500px)]:self-stretch">
+                <div className="relative flex min-h-0 flex-1 items-center justify-center [container-type:size] [@media(max-height:500px)]:w-[min(40vw,calc(100svh-var(--header-height)-1.5rem))] [@media(max-height:500px)]:flex-none [@media(max-height:500px)]:self-stretch">
                   <div
                     ref={frameRef}
                     className={cn(
@@ -597,6 +611,24 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       ) : null}
                     </AnimatePresence>
                   </div>
+
+                  {/* Invitation à défiler : à l'arrivée seulement, jusqu'au premier défilement. */}
+                  <AnimatePresence>
+                    {synced && !scrolled && !immersed && active === 0 ? (
+                      <motion.div
+                        aria-hidden="true"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, transition: { delay: calm ? 0 : 1.6, duration: 0.6 } }}
+                        exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                        className="pointer-events-none absolute bottom-1 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 lg:bottom-3"
+                      >
+                        <span className="relative block h-7 w-px overflow-hidden bg-white/15">
+                          <span className={cn("absolute left-1/2 top-1 block h-2 w-[3px] -translate-x-1/2 rounded-full bg-white/85", !calm && "scroll-cue-dot")} />
+                        </span>
+                        <span className="text-[0.6rem] uppercase tracking-[0.24em] text-white/60">{t.site.gallery.scrollHint}</span>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
 
                 {/* Cartel : doublon visuel, la liste porte l'information accessible. */}
@@ -626,37 +658,44 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   </div>
                 </div>
 
-                {/* Mobile : bouton principal et pastilles des projets. */}
-                <div className="pointer-events-auto mx-auto mt-3 w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    onClick={onProjectClick(shown)}
-                    className="flex h-11 items-center justify-center rounded-full bg-white text-sm font-bold uppercase tracking-[0.12em] text-black"
-                  >
-                    {t.site.gallery.viewProject}
-                  </Link>
-                  <nav aria-label={t.site.gallery.listLabel} className="mt-3">
-                    <ol className={cn("-mx-5 flex gap-2 overflow-x-auto px-5", NO_SCROLLBAR)}>
+                {/* Mobile : on avance en faisant défiler ; en bas, un repère discret
+                    (un point par projet, l'actif allongé) et un bouton rond pour
+                    entrer, en plus d'un toucher sur la plaque. Les points restent des liens, pour le toucher et les
+                    lecteurs d'écran. */}
+                <div className="pointer-events-auto mx-auto mt-3 flex w-full max-w-xl shrink-0 items-center justify-between gap-3 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
+                  <nav aria-label={t.site.gallery.listLabel} className="min-w-0">
+                    <ol className="flex items-center">
                       {projects.map((item, index) => (
                         <li key={item.slug}>
                           <Link
                             href={`/projects/${item.slug}`}
                             onClick={onProjectClick(index)}
                             aria-label={`${pad(index + 1)}. ${item.title} — ${item.eyebrow}`}
-                            className={cn(
-                              "flex h-11 min-w-11 items-center justify-center rounded-full border px-3 text-xs tabular-nums transition-colors",
-                              index === shown ? "border-white bg-white text-black" : "border-white/25 text-white/75",
-                            )}
+                            aria-current={index === active ? "true" : undefined}
+                            className="flex h-11 w-6 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
                           >
-                            {pad(index + 1)}
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "block h-1.5 rounded-full transition-all duration-300",
+                                index === shown ? "w-4 bg-white" : "w-1.5 bg-white/30",
+                              )}
+                            />
                           </Link>
                         </li>
                       ))}
                     </ol>
                   </nav>
-                  <p className="mt-2 text-[0.55rem] uppercase tracking-[0.06em] text-white/35">
-                    {t.site.footer.copyright} {t.site.footer.rights}
-                  </p>
+                  <Link
+                    href={`/projects/${project.slug}`}
+                    onClick={onProjectClick(shown)}
+                    aria-label={`${t.site.gallery.viewProject} : ${project.title}`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-black"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </Link>
                 </div>
               </div>
 

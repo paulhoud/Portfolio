@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
+import { initSound, useSoundOn } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { cn } from "@/lib/utils";
 import { LanguageFlags } from "./LanguageFlags";
@@ -37,9 +38,11 @@ const ease = [0.22, 1, 0.36, 1] as const;
  * Header flottant du site, qui remplace l'ancienne barre latérale.
  *
  * Il se superpose au contenu au lieu de lui réserver une colonne : la grille de
- * l'accueil occupe ainsi tout l'écran. Il se masque quand on descend et revient
- * dès qu'on remonte, et reste visible en haut de page, menu ouvert, ou quand le
- * focus clavier y entre.
+ * l'accueil occupe ainsi tout l'écran. Sur les pages de lecture, il se masque
+ * quand on descend et revient dès qu'on remonte, et reste visible en haut de
+ * page, menu ouvert, ou quand le focus clavier y entre. Sur l'accueil, le
+ * défilement sert à voyager entre les projets, pas à lire : il reste affiché,
+ * sans aller-retour qui distrairait de la scène.
  *
  * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux et
  *   langues à droite.
@@ -151,7 +154,7 @@ export function SiteHeader() {
     setIsHidden(false);
   }
 
-  const visible = isOpen || !isHidden;
+  const visible = isOpen || !isHidden || pathname === "/";
   const barTransition = { duration: reduceMotion ? 0 : 0.28, ease };
 
   return (
@@ -191,6 +194,7 @@ export function SiteHeader() {
             <span aria-hidden="true" className="h-5 w-px bg-white/15" />
             <LanguageFlags />
             <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+            <SoundToggle />
             <MotionToggle />
           </div>
 
@@ -272,7 +276,11 @@ export function SiteHeader() {
               <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
                 <SocialLinks />
                 <LanguageFlags />
-                <MotionToggle labelled />
+                {/* Réglages côte à côte, sans l'espacement des blocs. */}
+                <div className="flex flex-col">
+                  <SoundToggle labelled />
+                  <MotionToggle labelled />
+                </div>
               </div>
             </motion.div>
           </>
@@ -321,6 +329,47 @@ function HeaderNavLink({
  * d'arrivée) et mémorise le choix. Icône seule dans le header, icône et
  * libellé dans le menu mobile.
  */
+/**
+ * Musique d'ambiance et effets sonores : actifs par défaut (ils ne démarrent
+ * qu'au premier clic, comme l'exigent les navigateurs), coupés d'un geste et
+ * mémorisés. Même principe que la pause : libellé fixe, état par aria-pressed.
+ */
+function SoundToggle({ labelled = false }: { labelled?: boolean }) {
+  const { t } = useTranslation();
+  const [on, toggle] = useSoundOn();
+  useEffect(() => initSound(), []);
+  const label = t.site.sound.mute;
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-pressed={!on}
+      aria-label={labelled ? undefined : label}
+      title={labelled ? undefined : on ? label : t.site.sound.unmute}
+      className={cn(
+        "flex items-center gap-3 transition-colors duration-300 hover:text-white",
+        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+        on ? "text-white/60" : "text-white",
+        labelled ? "min-h-11 text-sm" : "-mx-1.5 h-11 w-11 justify-center",
+      )}
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor" stroke="none" />
+        {on ? (
+          <>
+            <path d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+            <path d="M18 6.8a7.4 7.4 0 0 1 0 10.4" />
+          </>
+        ) : (
+          <path d="M16 9.5l5 5m0-5l-5 5" />
+        )}
+      </svg>
+      {labelled ? <span>{label}</span> : null}
+    </button>
+  );
+}
+
 function MotionToggle({ labelled = false }: { labelled?: boolean }) {
   const { t } = useTranslation();
   const [paused, toggle] = useMotionPaused();

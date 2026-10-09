@@ -43,11 +43,18 @@ export type SiteCopy = {
     pause: string;
     resume: string;
   };
+  /** Musique d'ambiance et effets sonores. */
+  sound: {
+    mute: string;
+    unmute: string;
+  };
   /** Accueil en galerie (branche nav-immersive). */
   gallery: {
     intro: string;
     listLabel: string;
     viewProject: string;
+    /** Invitation à faire défiler, à l'arrivée sur la galerie. */
+    scrollHint: string;
   };
   language: {
     switchTo: string;

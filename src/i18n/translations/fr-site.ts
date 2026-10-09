@@ -25,11 +25,16 @@ export const frSite: SiteCopy = {
     pause: "Mettre en pause les animations",
     resume: "Relancer les animations",
   },
+  sound: {
+    mute: "Couper le son",
+    unmute: "Activer le son",
+  },
   gallery: {
     intro:
       "Product Designer de bout en bout : vision produit, recherche utilisateur, UX/UI, design system et front-end, du cadrage à la mise en production.",
     listLabel: "Projets",
     viewProject: "Voir le projet",
+    scrollHint: "Faire défiler",
   },
   language: {
     switchTo: "Changer de langue",

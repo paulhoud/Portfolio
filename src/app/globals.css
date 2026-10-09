@@ -63,6 +63,37 @@ body {
   color: #ffffff;
 }
 
+/* Barres de défilement fines et sombres, accordées au site : Windows affichait
+   sinon de larges barres grises, avec leurs flèches. Chrome, Edge et Safari
+   prennent les règles -webkit- (barre arrondie, sans flèches) ; les réglages
+   standard ne servent qu'à Firefox, car Chrome les préférerait aux premières
+   et garderait ses flèches. */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    scrollbar-width: thin;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2) padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.36);
+}
+
 /* Le header flotte au-dessus du contenu : la grille de l'accueil occupe donc
    tout l'écran, en largeur comme en hauteur. */
 .portfolio-main {
@@ -130,3 +161,30 @@ body {
   text-wrap: balance;
 }
 
+
+/* Invitation à faire défiler (accueil) : un point qui descend le long d'un
+   trait, en boucle. Immobile quand les animations sont réduites. */
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+.scroll-cue-dot {
+  animation: scroll-cue 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-dot {
+    animation: none;
+    opacity: 1;
+  }
+}

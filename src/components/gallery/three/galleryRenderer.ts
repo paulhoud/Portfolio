@@ -90,9 +90,10 @@ export type GalleryRenderer = {
   /**
    * Entrer dans un projet : la caméra rejoint sa plaque, s'avance jusqu'à ce
    * qu'elle remplisse l'écran, les autres s'éteignent ; `onCovered` est appelé
-   * quand l'écran est presque couvert (moment de changer de page).
+   * quand l'écran est presque couvert (moment de changer de page). Renvoie la
+   * durée du trajet jusqu'à la plaque, en secondes (0 sans trajet).
    */
-  enter(index: number, onCovered: () => void): void;
+  enter(index: number, onCovered: () => void): number;
   setProgress(raw: number): void;
   setFrame(frame: FrameRect): void;
   setHighlight(index: number | null): void;
@@ -138,7 +139,6 @@ type Immersion = {
   onCovered: (() => void) | null;
 };
 
-const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 /** Durées (s) : avancée dans la plaque, sortie à reculons. */
 const DIVE = 0.8;
@@ -826,12 +826,19 @@ export function createGalleryRenderer(
 
     // Immersion : la caméra suit son propre trajet, plus le défilement.
     const diving = immersion;
+    // Grue : pendant un long trajet, la caméra prend du recul et de la hauteur
+    // pour montrer les plaques qui défilent, puis redescend devant la bonne.
+    let crane = 0;
     if (diving) {
       busy = true;
-      const t = diving.start < 0 ? 0 : (now - diving.start) / 1000;
+      // L'horloge des images peut précéder de peu l'instant du clic : jamais
+      // de temps négatif (sans trajet, cela divisait par zéro).
+      const t = diving.start < 0 ? 0 : Math.max(0, (now - diving.start) / 1000);
       if (diving.kind === "enter") {
-        if (t < diving.travel) {
-          station = diving.from + (diving.index - diving.from) * easeInOutCubic(t / diving.travel);
+        if (diving.travel > 0 && t < diving.travel) {
+          const progress = t / diving.travel;
+          station = diving.from + (diving.index - diving.from) * easeInOutSine(progress);
+          crane = Math.sin(Math.PI * progress) * Math.min(0.85, 0.1 * Math.abs(diving.index - diving.from));
           cover = 0;
         } else {
           station = diving.index;
@@ -876,7 +883,7 @@ export function createGalleryRenderer(
     }
     const dolly = full ? 1 - easeOutCubic(clamp01(introT / 2.3)) : 0;
 
-    const rest = baseDistance * (sizeAt(layouts, station) / PIECE_SIZE) * (1 + 0.12 * dolly);
+    const rest = baseDistance * (sizeAt(layouts, station) / PIECE_SIZE) * (1 + 0.12 * dolly + crane);
     // On avance en taille apparente (inverse de la distance) : la plaque grandit
     // régulièrement à l'écran au lieu de tout faire dans les derniers instants.
     const distance =
@@ -885,7 +892,7 @@ export function createGalleryRenderer(
     // En entrant, le regard se met bien en face : ni surplomb ni parallaxe.
     camera.position.set(
       pose.position[0] + pointer.x * 0.32 * room,
-      pose.position[1] + (pointer.y * 0.18 + dolly * 0.35) * room - EYE_LIFT * cover,
+      pose.position[1] + (pointer.y * 0.18 + dolly * 0.35) * room - EYE_LIFT * cover + crane * 1.6,
       pose.position[2],
     );
     camera.lookAt(pose.target[0], pose.target[1], pose.target[2]);
@@ -1016,9 +1023,9 @@ export function createGalleryRenderer(
     enter(index, onCovered) {
       if (calm || disposed) {
         onCovered();
-        return;
+        return 0;
       }
-      if (immersion) return;
+      if (immersion) return 0;
       skipIntro();
       setHovered(null);
       // La plaque visée reprend son image fixe : l'écran se remplit de sa couleur.
@@ -1029,13 +1036,15 @@ export function createGalleryRenderer(
         index,
         start: performance.now(),
         from: station,
-        travel: distanceToGo < 0.05 ? 0 : clamp(0.35 + 0.09 * distanceToGo, 0.4, 1.1),
+        // Plus le projet est loin, plus le trajet dure (de 0,7 s à 2,2 s).
+        travel: distanceToGo < 0.05 ? 0 : clamp(0.55 + 0.17 * distanceToGo, 0.7, 2.2),
         onCovered,
       };
       stationTarget = index;
       calmStation = index;
       updateScheduler();
       invalidate();
+      return immersion.travel;
     },
     setProgress(raw) {
       // Comme pour la liste : un défilement efface le survol, sinon le cartel

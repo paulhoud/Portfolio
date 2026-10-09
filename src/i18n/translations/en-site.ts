@@ -25,11 +25,16 @@ export const enSite: SiteCopy = {
     pause: "Pause animations",
     resume: "Resume animations",
   },
+  sound: {
+    mute: "Mute sound",
+    unmute: "Turn sound on",
+  },
   gallery: {
     intro:
       "End-to-end Product Designer: product vision, user research, UX/UI, design systems and front-end, from framing to production.",
     listLabel: "Projects",
     viewProject: "View project",
+    scrollHint: "Scroll",
   },
   language: {
     switchTo: "Change language",
