@@ -542,7 +542,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       <section
         ref={trackRef}
         className="relative [--slot:40svh] lg:[--slot:35svh]"
-        style={{ height: `calc(100svh + ${count - 1} * var(--slot) + 1px)` }}
+        style={{ height: `calc(100lvh + ${count - 1} * var(--slot) + 1px)` }}
       >
         {/* Ancres de chaque projet, à la hauteur de sa tranche. */}
         {projects.map((item, index) => (
@@ -556,7 +556,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           />
         ))}
 
-        <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden bg-[#08080b]">
+        {/* Téléphone : la scène prend la hauteur de l'écran barre d'adresse
+            masquée (100lvh), pour ne laisser aucun vide en bas quand elle se
+            cache au défilement ; le texte et les repères restent dans la
+            hauteur toujours visible (100svh), et ne sautent donc jamais. */}
+        <div ref={stageRef} className="sticky top-0 h-[100lvh] overflow-hidden bg-[#08080b]">
           {/* Lueur de la couleur du projet, derrière le cadre. */}
           <motion.div
             aria-hidden="true"
@@ -624,7 +628,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       }
               }
               className={cn(
-                "relative mx-auto flex h-full max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
+                "relative mx-auto flex h-[100svh] max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
                 // Avec la 3D, les clics traversent jusqu'aux plaques, sauf sur le texte et les boutons.
                 live && "pointer-events-none",
                 "lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-12 lg:pb-10 lg:pt-[calc(var(--header-height)+2.5rem)]",
