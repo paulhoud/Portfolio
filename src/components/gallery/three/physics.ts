@@ -10,7 +10,10 @@ export type Body = {
   /** Décalage de position et vitesse (m, m/s). */
   offset: Vector3;
   velocity: Vector3;
-  /** Décalage de rotation et vitesse de rotation (rad, rad/s). */
+  /**
+   * Décalage de rotation (vecteur rotation : axe dans la salle, longueur =
+   * angle en rad) et vitesse de rotation (rad/s).
+   */
   turn: Vector3;
   spin: Vector3;
   /** Tenu par le visiteur : le ressort ne s'applique pas. */
@@ -30,10 +33,12 @@ export function createBody(): Body {
   };
 }
 
-/** Raideur et amortissement : les plaques sont plus lourdes que les satellites. */
-export type Spring = { stiffness: number; damping: number };
-export const SLAB_SPRING: Spring = { stiffness: 22, damping: 5.2 };
-export const SATELLITE_SPRING: Spring = { stiffness: 30, damping: 4.4 };
+/** Raideur et amortissement, en position puis en rotation. */
+export type Spring = { stiffness: number; damping: number; turnStiffness: number; turnDamping: number };
+export const SLAB_SPRING: Spring = { stiffness: 22, damping: 5.2, turnStiffness: 17.6, turnDamping: 4.7 };
+// Les objets reprennent lentement leur orientation : on a le temps de voir la
+// face qu'on a tournée vers soi en les attrapant.
+export const SATELLITE_SPRING: Spring = { stiffness: 30, damping: 4.4, turnStiffness: 2.2, turnDamping: 2.4 };
 
 const scratch = new Vector3();
 
@@ -46,10 +51,11 @@ export function stepBody(body: Body, dt: number, spring: Spring): boolean {
     body.offset.addScaledVector(body.velocity, dt);
     // Jamais trop loin : un lancer violent ne perd pas l'objet hors du monde.
     if (body.offset.length() > 9) body.offset.setLength(9);
+    // Tenu, l'objet garde l'orientation qu'on lui donne ; lâché, il la reprend.
+    scratch.copy(body.turn).multiplyScalar(-spring.turnStiffness).addScaledVector(body.spin, -spring.turnDamping);
+    body.spin.addScaledVector(scratch, dt);
+    body.turn.addScaledVector(body.spin, dt);
   }
-  scratch.copy(body.turn).multiplyScalar(-spring.stiffness * 0.8).addScaledVector(body.spin, -spring.damping * 0.9);
-  body.spin.addScaledVector(scratch, dt);
-  body.turn.addScaledVector(body.spin, dt);
 
   const moving =
     body.held ||

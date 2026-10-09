@@ -203,10 +203,19 @@ export type SatelliteLayout = {
  * - une silhouette sombre au loin, que le brouillard estompe ;
  * - un plus gros au premier plan, coupé par le bord de l'écran, seulement si
  *   l'allée repart de l'autre côté (la caméra ne le traverse jamais).
- * Aucun ne recouvre la plaque qu'il accompagne ni la colonne de texte.
+ * Aucun ne recouvre la plaque qu'il accompagne ni la colonne de texte, et
+ * aucun n'en touche un autre ni ne traverse une plaque. Sur ordinateur, ils
+ * sont moins nombreux (pas de silhouette lointaine) et plus gros.
  */
 export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): SatelliteLayout[] {
   const satellites: SatelliteLayout[] = [];
+  const wide = !spacing.portrait;
+  const dist = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const placed: { position: Vec3; extent: number }[] = [];
+  /** Ni contre un autre objet, ni à travers une plaque (bercements et rotations compris). */
+  const roomy = (position: Vec3, extent: number) =>
+    placed.every((other) => dist(position, other.position) > other.extent + extent + 0.25) &&
+    pieces.every((other) => dist(position, other.position) > other.size * 0.75 + extent + 0.1);
   pieces.forEach((piece, owner) => {
     const [px, py, pz] = piece.position;
     const half = piece.size / 2;
@@ -218,10 +227,11 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
       const salt = owner * 7 + k * 31;
       const r = (n: number) => seeded(salt, n);
       if (k === 3 && !pathLeaves) continue;
+      if (k === 2 && wide) continue;
 
       // Assez grands pour qu'on reconnaisse l'objet : plus gros au loin (le
       // brouillard les estompe) et au premier plan.
-      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1)][k];
+      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1)][k] * (wide ? 1.35 : 1);
       const size: Vec3 = [s, s, s];
 
       let position: Vec3;
@@ -251,12 +261,14 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
       position[1] = Math.max(0.23 + extent, position[1]);
       // Ni sur le trajet de la caméra, ni devant une plaque qu'on regarde :
       // on l'écarte vers l'extérieur, ou on y renonce.
+      const fits = () => satelliteClear(pieces, spacing, owner, position, extent) && roomy(position, extent);
       let tries = 0;
-      while (!satelliteClear(pieces, spacing, owner, position, extent) && tries < 5) {
+      while (!fits() && tries < 6) {
         position[0] += out * 0.6;
         tries += 1;
       }
-      if (!satelliteClear(pieces, spacing, owner, position, extent)) continue;
+      if (!fits()) continue;
+      placed.push({ position, extent });
 
       satellites.push({
         owner,

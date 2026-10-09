@@ -9,6 +9,7 @@ import {
   Mesh,
   PerspectiveCamera,
   Plane,
+  Quaternion,
   PlaneGeometry,
   Raycaster,
   RGBAFormat,
@@ -546,8 +547,31 @@ export function createGalleryRenderer(
     lastAt: number;
     velocity: Vector3;
     pointerId: number;
+    /** Objet qui roule sous la main en le déplaçant (rayon en m), 0 pour une plaque. */
+    radius: number;
+    /** Vitesse de rotation lissée : elle prolonge le geste au lâcher. */
+    angular: Vector3;
   };
   let drag: Drag | null = null;
+  const rollAxis = new Vector3();
+  const turnAxis = new Vector3();
+  const rollTurn = new Quaternion();
+  const rollStep = new Quaternion();
+  const turnStep = new Quaternion();
+  /** Ajoute une rotation (axe unitaire, angle) à un vecteur rotation. */
+  const addRotation = (turn: Vector3, axis: Vector3, angle: number) => {
+    const current = turn.length();
+    rollTurn.identity();
+    if (current > 1e-6) rollTurn.setFromAxisAngle(turnAxis.copy(turn).divideScalar(current), current);
+    rollStep.setFromAxisAngle(axis, angle);
+    rollTurn.premultiply(rollStep).normalize();
+    // Retour en vecteur rotation (angle le plus court).
+    if (rollTurn.w < 0) rollTurn.set(-rollTurn.x, -rollTurn.y, -rollTurn.z, -rollTurn.w);
+    const half = Math.acos(Math.min(1, rollTurn.w));
+    const sine = Math.sin(half);
+    if (sine < 1e-6) turn.set(0, 0, 0);
+    else turn.set(rollTurn.x, rollTurn.y, rollTurn.z).multiplyScalar((2 * half) / sine);
+  };
 
   /** Trou noir en cours (fonction cachée). */
   type World = {
@@ -593,6 +617,7 @@ export function createGalleryRenderer(
       width = w;
       height = h;
       renderer.setSize(w, h, false);
+      blackHole?.setResolution(h * renderer.getPixelRatio());
       skipFrame = false;
     }
     const aspect = w / h;
@@ -927,8 +952,17 @@ export function createGalleryRenderer(
         const now = performance.now();
         planeHit.sub(drag.grab).sub(drag.body.rest);
         const dt = Math.max(0.001, (now - drag.lastAt) / 1000);
+        const moved = planeHit.clone().sub(drag.last);
         // Vitesse lissée : c'est elle qui donnera l'élan au lâcher.
-        drag.velocity.lerp(planeHit.clone().sub(drag.last).divideScalar(dt), 0.35);
+        drag.velocity.lerp(moved.clone().divideScalar(dt), 0.35);
+        // Un objet roule sous la main comme une balle : on l'oriente en le
+        // déplaçant, pour en voir chaque face.
+        if (drag.radius > 0 && moved.lengthSq() > 1e-10) {
+          const angle = Math.min(1.2, (moved.length() / drag.radius) * 0.9);
+          rollAxis.crossVectors(moved, viewDirection).normalize();
+          addRotation(drag.body.turn, rollAxis, angle);
+          drag.angular.lerp(rollAxis.clone().multiplyScalar(angle / dt), 0.35);
+        }
         drag.last.copy(planeHit);
         drag.lastAt = now;
         drag.body.offset.copy(planeHit);
@@ -968,7 +1002,10 @@ export function createGalleryRenderer(
           lastAt: performance.now(),
           velocity: new Vector3(),
           pointerId: event.pointerId,
+          radius: hit.kind === "satellite" ? (hit.object.userData.baseScale as number) * 0.45 : 0,
+          angular: new Vector3(),
         };
+        drag.body.spin.set(0, 0, 0);
         canvas.setPointerCapture(event.pointerId);
       }
     }
@@ -991,7 +1028,13 @@ export function createGalleryRenderer(
     current.body.held = false;
     current.body.velocity.copy(current.velocity);
     if (current.body.velocity.length() > 28) current.body.velocity.setLength(28);
-    current.body.spin.set(-current.velocity.y * 0.35, current.velocity.x * 0.35, -current.velocity.x * 0.15);
+    if (current.radius > 0) {
+      // L'objet continue de rouler un peu sur sa lancée.
+      current.body.spin.copy(current.angular);
+      if (current.body.spin.length() > 14) current.body.spin.setLength(14);
+    } else {
+      current.body.spin.set(-current.velocity.y * 0.35, current.velocity.x * 0.35, -current.velocity.x * 0.15);
+    }
     suppressClick = true;
     invalidate();
     return true;
@@ -1249,9 +1292,12 @@ export function createGalleryRenderer(
       body.rest.copy(mesh.position);
       if (stepBody(body, dt, spring)) busy = true;
       mesh.position.add(body.offset);
-      mesh.rotation.x += body.turn.x;
-      mesh.rotation.y += body.turn.y;
-      mesh.rotation.z += body.turn.z;
+      // Rotation ajoutée par la main ou le lancer, autour d'axes de la salle.
+      const turned = body.turn.length();
+      if (turned > 1e-6) {
+        turnStep.setFromAxisAngle(turnAxis.copy(body.turn).divideScalar(turned), turned);
+        mesh.quaternion.premultiply(turnStep);
+      }
       if (!doom) return 1;
       holeOffset.copy(mesh.position).sub(doom.center);
       const behind = holeOffset.clone().add(doom.center).sub(camera.position).dot(doom.axis) < 0.3;
@@ -1441,11 +1487,21 @@ export function createGalleryRenderer(
       blackHole.group.scale.setScalar(doom.scale);
       holeSize = Math.max(0, size);
       blackHole.update(camera, holeSize, Math.max(0, glow), wt < 5.0 ? flash : 0, wt);
-      // Le monde tremble pendant l'aspiration.
-      if (wt > 0.5 && wt < 4.2) {
-        const shake = 0.05 * clamp01((wt - 0.5) / 2.5);
-        camera.position.x += random(-shake, shake);
-        camera.position.y += random(-shake, shake);
+      // Le monde tremble : d'abord un frémissement, qui s'amplifie et
+      // s'accélère jusqu'à l'effondrement, puis une secousse franche qui
+      // s'éteint. Des ondes mêlées plutôt qu'un bruit au hasard : le
+      // mouvement reste fluide, avec un léger roulis de la caméra.
+      const build = easeInCubic(clamp01((wt - 0.5) / 3.5));
+      const kick = wt > 4.0 ? Math.exp(-(wt - 4.0) * 5) : 0;
+      const amplitude = wt > 0.5 && wt < 5.0 ? 0.006 + 0.055 * build + 0.12 * kick : 0;
+      if (amplitude > 0) {
+        const pace = 1 + 1.6 * build;
+        const t = now / 1000;
+        const wave = (speed: number, offset: number) =>
+          Math.sin(t * speed * pace + offset) * 0.6 + Math.sin(t * speed * 2.3 * pace + offset * 1.7) * 0.4;
+        camera.position.x += amplitude * wave(17, 0.3);
+        camera.position.y += amplitude * 0.8 * wave(13, 1.9);
+        camera.rotateZ(amplitude * 0.35 * wave(9, 4.1));
       }
     } else if (blackHole) {
       blackHole.update(camera, 0, 0, 0, 0);
@@ -1486,7 +1542,8 @@ export function createGalleryRenderer(
       setHovered(null);
       for (let i = 0; i < count; i += 1) if (pieces[i].mode !== null) stop(i);
       if (!blackHole) {
-        blackHole = createBlackHole();
+        blackHole = createBlackHole(coarse ? 1400 : 2600);
+        blackHole.setResolution(height * renderer.getPixelRatio());
         scene.add(blackHole.group);
       }
       if (!dimension) {
