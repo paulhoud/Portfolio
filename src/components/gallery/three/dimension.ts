@@ -86,8 +86,10 @@ export function createDimension(tiles: Texture[]): Dimension {
         float dist = length(vView);
         // S'efface au loin, et tout près (pour ne pas zébrer l'écran).
         float fade = exp(-dist / 16.0) * smoothstep(2.0, 6.0, dist);
-        // Des ondes de lumière courent le long des arêtes.
-        float pulse = 0.55 + 0.45 * sin(vLocal.z * 0.9 + vLocal.x * 0.6 - vLocal.y * 0.4 + uTime * 2.2);
+        // Des ondes de lumière courent le long des arêtes. Leur période en
+        // profondeur est exactement une maille : quand le treillis reboucle
+        // (il recule d'une maille), rien ne saute.
+        float pulse = 0.55 + 0.45 * sin(vLocal.z * 2.0944 + vLocal.x * 0.6 - vLocal.y * 0.4 + uTime * 2.2);
         vec3 color = mix(vec3(0.95, 0.66, 0.34), vec3(1.0, 0.93, 0.8), pulse);
         float a = fade * (0.35 + 0.65 * pulse) * uPresence * 0.85;
         gl_FragColor = vec4(color * a, a);

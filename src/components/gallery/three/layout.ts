@@ -205,7 +205,9 @@ export type SatelliteLayout = {
  *   l'allée repart de l'autre côté (la caméra ne le traverse jamais).
  * Aucun ne recouvre la plaque qu'il accompagne ni la colonne de texte, et
  * aucun n'en touche un autre ni ne traverse une plaque. Sur ordinateur, ils
- * sont moins nombreux (pas de silhouette lointaine) et plus gros.
+ * sont moins nombreux (pas de silhouette lointaine) et plus gros, et environ
+ * une plaque sur deux en a un de l'autre côté, un peu en retrait : il occupe
+ * la bande libre entre la colonne de texte et la plaque.
  */
 export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): SatelliteLayout[] {
   const satellites: SatelliteLayout[] = [];
@@ -223,15 +225,17 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
     const next = pieces[owner + 1];
     const pathLeaves = !next || Math.sign(next.position[0] - px) === -out;
 
-    for (let k = 0; k < 4; k += 1) {
+    for (let k = 0; k < 5; k += 1) {
       const salt = owner * 7 + k * 31;
       const r = (n: number) => seeded(salt, n);
       if (k === 3 && !pathLeaves) continue;
       if (k === 2 && wide) continue;
+      // Côté texte : ordinateur seulement, une plaque sur deux environ.
+      if (k === 4 && (!wide || r(0) > 0.55)) continue;
 
       // Assez grands pour qu'on reconnaisse l'objet : plus gros au loin (le
       // brouillard les estompe) et au premier plan.
-      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1)][k] * (wide ? 1.35 : 1);
+      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1), 0.4 + 0.15 * r(1)][k] * (wide ? 1.35 : 1);
       const size: Vec3 = [s, s, s];
 
       let position: Vec3;
@@ -252,8 +256,12 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
         // caméra passe dessous pour rejoindre la plaque suivante.
         const dx = spacing.rightOnly ? 0.5 + r(4) * 3 : (r(4) - 0.5) * 5;
         position = [px + dx * spacing.spread, py + 2.8 + r(5) * 0.8, pz - 2.5 - r(6) * 2.5];
-      } else {
+      } else if (k === 3) {
         position = [px + out * (half + 0.35 + 0.3 * r(7)), py + (r(8) - 0.5) * half, pz + 1.2 + 0.6 * r(9)];
+      } else {
+        // De l'autre côté de la plaque, juste derrière son plan : à l'écran,
+        // entre le texte et elle, sans jamais la masquer.
+        position = [px - out * (half + 0.75 + 0.25 * r(7)), py + (r(8) - 0.5) * half * 1.2, pz - 0.8 - 0.5 * r(9)];
       }
       // Les objets tiennent dans un cube de côté `s` mais ne le remplissent pas.
       const extent = 0.6 * s;

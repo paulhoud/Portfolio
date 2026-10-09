@@ -4,6 +4,8 @@ import {
   CanvasTexture,
   DataTexture,
   DoubleSide,
+  Frustum,
+  Matrix4,
   LinearFilter,
   LinearMipmapLinearFilter,
   Mesh,
@@ -119,7 +121,11 @@ export type GalleryRenderer = {
    * renaît. Renvoie faux si ce n'est pas possible maintenant (entrée dans un
    * projet en cours, mode calme…).
    */
-  destroyWorld(onPhase: (phase: WorldPhase) => void): boolean;
+  /**
+   * `dimension` : où l'on tombe après l'effondrement — le treillis 3D, ou
+   * une scène dessinée par la page (« flat » : la 3D s'efface).
+   */
+  destroyWorld(onPhase: (phase: WorldPhase) => void, dimension?: "lattice" | "flat"): boolean;
   /**
    * Photographie du texte de la page (cf. textSnapshot), que le trou noir
    * tord et avale à la place du texte lui-même ; `null` la retire.
@@ -582,6 +588,17 @@ export function createGalleryRenderer(
     scale: number;
     /** Instant du retour demandé depuis l'autre dimension (sinon on y reste). */
     returnAt: number | null;
+    /** Treillis 3D, ou scène dessinée par la page. */
+    lattice: boolean;
+    /** Prochaine chute d'objet dans le treillis (ms). */
+    nextFall: number;
+    /**
+     * Plaques et objets hors de l'écran (ou trop loin, ou sans leur image) au
+     * moment du déclenchement : ils restent cachés jusqu'à la renaissance,
+     * plutôt que de traverser la scène en silhouettes noires.
+     */
+    hiddenPieces: Set<number>;
+    hiddenSatellites: Set<number>;
     onPhase: (phase: WorldPhase) => void;
     reached: Set<WorldPhase>;
   };
@@ -830,6 +847,77 @@ export function createGalleryRenderer(
 
   // --- Animations automatiques, de temps en temps --------------------------
   const projected = new Vector3();
+
+  // --- Objets qui tombent dans le treillis de l'autre dimension -------------
+  type Faller = { mesh: Mesh<BufferGeometry, SatelliteMaterial>; velocity: Vector3; spin: Vector3; born: number; leaving: number };
+  let fallers: Faller[] = [];
+  const fallerStep = new Quaternion();
+  const fallerAxis = new Vector3();
+  const cameraForward = new Vector3();
+  const removeFaller = (faller: Faller) => {
+    scene.remove(faller.mesh);
+    forEachMaterial(faller.mesh.material, (material) => material.dispose());
+  };
+  /**
+   * Un objet du catalogue arrive de derrière nous : nous tombons aussi, mais
+   * lui plus vite. Il nous dépasse sur le côté, puis file au fond du vide.
+   */
+  const spawnFaller = (now: number) => {
+    const looks = [...identityLooks.values()];
+    if (looks.length === 0) return;
+    const look = looks[Math.floor(Math.random() * looks.length)];
+    const mesh = new Mesh<BufferGeometry, SatelliteMaterial>(emptyGeometry, slabMaterial(new Color(1, 1, 1), new Color(1, 1, 1), 1, true, 0));
+    mesh.userData.owner = 0;
+    dressSatellite(mesh, look);
+    // Pas de courbure de l'espace pour eux (elle vaut encore 1 dans le vide),
+    // et un brouillard lointain : on les suit jusqu'au fond.
+    forEachMaterial(mesh.material, (material) => {
+      material.uniforms.uWarp = { value: 0 };
+      material.uniforms.uFogNear = { value: 45 };
+      material.uniforms.uFogFar = { value: 88 };
+    });
+    mesh.scale.setScalar(0.45 + Math.random() * 0.45);
+    const side = Math.random() < 0.5 ? -1 : 1;
+    mesh.position.set(side * random(1.4, 3.2), random(-1.6, 1.8), random(1.5, 3.5)).applyMatrix4(camera.matrixWorld);
+    mesh.rotation.set(random(0, Math.PI * 2), random(0, Math.PI * 2), 0);
+    camera.getWorldDirection(cameraForward);
+    const velocity = cameraForward.clone().multiplyScalar(random(7, 11));
+    cameraRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    velocity.addScaledVector(cameraRight, side * random(0.1, 0.5));
+    velocity.y += random(-0.4, 0.4);
+    scene.add(mesh);
+    fallers.push({ mesh, velocity, spin: new Vector3(random(-2, 2), random(-2, 2), random(-2, 2)), born: now, leaving: 0 });
+  };
+  /** Chute : ils accélèrent vers le fond en tournant, s'éteignent au loin et disparaissent avant la limite de vue. */
+  const updateFallers = (dt: number, now: number, staying: boolean) => {
+    if (fallers.length === 0) return;
+    camera.getWorldDirection(cameraForward);
+    fallers = fallers.filter((faller) => {
+      if (!staying && faller.leaving === 0) faller.leaving = now;
+      const age = (now - faller.born) / 1000;
+      const shrink = faller.leaving ? 1 - clamp01((now - faller.leaving) / 400) : 1;
+      const distance = faller.mesh.position.distanceTo(camera.position);
+      if (age > 14 || shrink <= 0 || distance > 84) {
+        removeFaller(faller);
+        return false;
+      }
+      faller.velocity.addScaledVector(cameraForward, 2.5 * dt);
+      faller.mesh.position.addScaledVector(faller.velocity, dt);
+      const turn = faller.spin.length() * dt;
+      if (turn > 0) {
+        fallerStep.setFromAxisAngle(fallerAxis.copy(faller.spin).normalize(), turn);
+        faller.mesh.quaternion.premultiply(fallerStep);
+      }
+      // Ils s'éteignent doucement au fond du vide, et s'effacent au retour.
+      faller.mesh.scale.setScalar(Math.max(0.001, (faller.mesh.userData.size ??= faller.mesh.scale.x) * shrink));
+      const glow = 1 - clamp01((distance - 50) / 32);
+      forEachMaterial(faller.mesh.material, (material) => {
+        material.uniforms.uLit.value = glow;
+      });
+      return true;
+    });
+    invalidate();
+  };
 
   // --- Texte photographié, tordu par le trou noir ---------------------------
   type TextLayer = { mesh: Mesh<PlaneGeometry, ShaderMaterial>; texture: CanvasTexture };
@@ -1288,7 +1376,7 @@ export function createGalleryRenderer(
     };
     const holeOffset = new Vector3();
     /** Applique la physique, puis l'aspiration, à un objet déjà placé. */
-    const finish = (mesh: Mesh, body: Body, spring: typeof SLAB_SPRING) => {
+    const finish = (mesh: Mesh, body: Body, spring: typeof SLAB_SPRING, hidden = false) => {
       body.rest.copy(mesh.position);
       if (stepBody(body, dt, spring)) busy = true;
       mesh.position.add(body.offset);
@@ -1299,6 +1387,10 @@ export function createGalleryRenderer(
         mesh.quaternion.premultiply(turnStep);
       }
       if (!doom) return 1;
+      if (hidden && doom.returnAt === null) {
+        mesh.scale.setScalar(0.0001);
+        return 0;
+      }
       holeOffset.copy(mesh.position).sub(doom.center);
       const behind = holeOffset.clone().add(doom.center).sub(camera.position).dot(doom.axis) < 0.3;
       const amount = behind
@@ -1425,7 +1517,7 @@ export function createGalleryRenderer(
       const shrink = 1 - 0.2 * part;
       mesh.scale.set(scaleXY * shrink, scaleXY * shrink, scaleZ * shrink);
       if (mesh.geometry !== slabGeometry(layout.size)) mesh.geometry = slabGeometry(layout.size);
-      const present = finish(mesh, pieceBodies[index], SLAB_SPRING);
+      const present = finish(mesh, pieceBodies[index], SLAB_SPRING, doom?.hiddenPieces.has(index));
 
       uniforms.uLit.value = clamp01(arrive * 1.6) * (index === focus ? 1 : room);
       uniforms.uRim.value = 0.9 * piece.hover * room;
@@ -1469,7 +1561,7 @@ export function createGalleryRenderer(
       if (appear < 1) busy = true;
       mesh.scale.setScalar(Math.max(0.001, pop * appear) * (mesh.userData.baseScale as number));
       const body = satelliteBodies[index];
-      if (body) finish(mesh, body, SATELLITE_SPRING);
+      if (body) finish(mesh, body, SATELLITE_SPRING, doom?.hiddenSatellites.has(index));
       const lit = clamp01(arrive * 1.6) * room;
       forEachMaterial(mesh.material, (material) => {
         material.uniforms.uLit.value = lit;
@@ -1524,10 +1616,19 @@ export function createGalleryRenderer(
     }
     // L'autre dimension : elle apparaît dans l'éclair et s'efface au retour.
     if (doom && dimension) {
-      const presence =
-        doom.returnAt === null ? easeOutCubic(clamp01((raw - 4.4) / 1.2)) : 1 - clamp01((now - doom.returnAt) / 700);
+      const presence = !doom.lattice
+        ? 0
+        : doom.returnAt === null
+          ? easeOutCubic(clamp01((raw - 4.4) / 1.2))
+          : 1 - clamp01((now - doom.returnAt) / 700);
       dimension.update(camera, presence, now / 1000);
+      // De temps en temps, un objet tombe dans le vide, au fond de la perspective.
+      if (doom.lattice && doom.returnAt === null && raw > 5.0 && now >= doom.nextFall) {
+        spawnFaller(now);
+        doom.nextFall = now + random(900, 2200);
+      }
     }
+    updateFallers(dt, now, doom !== null && doom.returnAt === null);
 
     return busy;
   }
@@ -1536,7 +1637,17 @@ export function createGalleryRenderer(
   invalidate();
 
   return {
-    destroyWorld(onPhase) {
+    destroyWorld(onPhase, dimensionKind = "lattice") {
+      // Visible à l'écran, et assez près pour ne pas se fondre dans le brouillard.
+      camera.updateMatrixWorld();
+      const frustum = new Frustum().setFromProjectionMatrix(
+        new Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse),
+      );
+      const onScreen = (mesh: Mesh) => {
+        if (!mesh.geometry.boundingSphere) mesh.geometry.computeBoundingSphere();
+        const sphere = mesh.geometry.boundingSphere!.clone().applyMatrix4(mesh.matrixWorld);
+        return frustum.intersectsSphere(sphere) && sphere.center.distanceTo(camera.position) < fog.uFogFar.value * 0.8;
+      };
       if (calm || disposed || immersion || world) return false;
       skipIntro();
       setHovered(null);
@@ -1562,6 +1673,10 @@ export function createGalleryRenderer(
         // Plus petit sur un écran en hauteur (téléphone), où il remplirait la largeur.
         scale: ((1.15 * depth) / (depth - HOLE_BEHIND + 1.2)) * clamp(camera.aspect / 1.1, 0.65, 1),
         returnAt: null,
+        lattice: dimensionKind !== "flat",
+        nextFall: 0,
+        hiddenPieces: new Set(pieces.flatMap((piece, index) => (piece.loaded && onScreen(piece.mesh) ? [] : [index]))),
+        hiddenSatellites: new Set(satellites.flatMap((mesh, index) => (mesh.visible && onScreen(mesh) ? [] : [index]))),
         onPhase,
         reached: new Set(),
       };
@@ -1728,6 +1843,7 @@ export function createGalleryRenderer(
       emptyGeometry.dispose();
       dimension?.dispose();
       removeTextLayer();
+      for (const faller of fallers) removeFaller(faller);
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();
