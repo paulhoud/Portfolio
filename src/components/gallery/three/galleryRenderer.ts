@@ -435,7 +435,7 @@ export function createGalleryRenderer(
       if (identityLoading.has(index) || identityLooks.has(index)) continue;
       identityLoading.add(index);
       const entry = IDENTITY_CATALOG[index];
-      loadIdentityModel(entry.file!, entry.tints)
+      loadIdentityModel(entry.file!, entry)
         .catch(() => builtLook(index))
         .then((look) => {
           if (disposed || !look) return;
@@ -1552,11 +1552,20 @@ export function createGalleryRenderer(
           : 1;
       const pop = easeOutBack(arrive);
       const spin = float * time;
-      mesh.rotation.set(
-        layout.phase + layout.spin[0] * spin - pointer.y * 0.3,
-        layout.phase * 0.7 + layout.spin[1] * spin + pointer.x * 0.4,
-        layout.spin[2] * spin,
-      );
+      if (IDENTITY_CATALOG[mesh.userData.entry as number].front) {
+        // Toujours de face : un lent balancement plutôt qu’un tour complet.
+        mesh.rotation.set(
+          Math.sin(spin * 0.5 + layout.phase) * 0.12 - pointer.y * 0.3,
+          Math.sin(spin * 0.35 + layout.phase) * 0.5 + pointer.x * 0.4,
+          0,
+        );
+      } else {
+        mesh.rotation.set(
+          layout.phase + layout.spin[0] * spin - pointer.y * 0.3,
+          layout.phase * 0.7 + layout.spin[1] * spin + pointer.x * 0.4,
+          layout.spin[2] * spin,
+        );
+      }
       const restY = layout.position[1] + Math.sin(time * 0.8 + layout.phase) * 0.08 * float;
       if (ownedByLift && full) {
         // Les satellites de la plaque active jaillissent d'elle.

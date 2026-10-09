@@ -1019,8 +1019,10 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 </div>
               </div>
 
-              {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la scène. */}
-              <p data-pull className="pointer-events-auto absolute bottom-6 left-12 hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
+              {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la
+                  scène, à hauteur de la pastille des langues (cf. SiteHeader)
+                  et toujours à sa droite, même sur un écran étroit. */}
+              <p data-pull className="pointer-events-auto absolute bottom-[2.375rem] left-[max(3rem,calc(8.5rem-(100vw-80rem)/2))] hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
                 {t.site.footer.copyright} {t.site.footer.rights}
               </p>
             </div>

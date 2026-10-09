@@ -63,7 +63,10 @@ function AnimatedLogoMark({ className }: { className?: string }) {
   const lines = ready && !calm;
 
   // La scène se prépare quand le navigateur est libre, pour que le premier
-  // survol soit immédiat ; rien n'est chargé en mode calme.
+  // survol soit immédiat ; rien n'est chargé en mode calme. À la mise en
+  // pause, elle est détruite et rend son contexte graphique : la toile ne
+  // peut plus en ouvrir un autre, d'où une toile neuve à chaque reprise (sa
+  // clé, plus bas), et l'état remis à zéro pour que le logo reste visible.
   useEffect(() => {
     if (calm) return;
     let cancelled = false;
@@ -82,6 +85,8 @@ function AnimatedLogoMark({ className }: { className?: string }) {
       cancelIdle();
       sceneRef.current = null;
       scene?.dispose();
+      setReady(false);
+      setPlaying(false);
     };
   }, [calm]);
 
@@ -131,6 +136,7 @@ function AnimatedLogoMark({ className }: { className?: string }) {
       />
       {/* Scène des lignes : plus grande que le logo, pour qu'elles se déploient. */}
       <canvas
+        key={calm ? "calm" : "lines"}
         ref={canvasRef}
         aria-hidden="true"
         className="pointer-events-none absolute"
@@ -139,6 +145,9 @@ function AnimatedLogoMark({ className }: { className?: string }) {
           top: -LINES_PAD,
           width: 61 + LINES_PAD * 2,
           height: 70 + LINES_PAD * 2,
+          // Les lignes s'estompent avant le bord de la capsule du header, qui
+          // les contient : pas de coupure nette en haut ni en bas.
+          maskImage: "linear-gradient(to bottom, transparent 10%, #000 30%, #000 70%, transparent 90%)",
         }}
       />
     </Link>

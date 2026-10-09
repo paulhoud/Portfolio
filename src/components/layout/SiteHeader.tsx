@@ -34,6 +34,14 @@ const DESKTOP_QUERY = "(min-width: 1024px)";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+/** Pastille des réglages aux coins bas de l'écran : le verre de la capsule. */
+const DOCK_PILL = cn(
+  "pointer-events-auto flex h-11 items-center gap-1 rounded-full border px-1.5",
+  "bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150 transition-[border-color] duration-700",
+  "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)]",
+  "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
+);
+
 /**
  * Header flottant du site, qui remplace l'ancienne barre latérale.
  *
@@ -49,8 +57,9 @@ const ease = [0.22, 1, 0.36, 1] as const;
  * défilement sert à voyager entre les projets, pas à lire : il reste affiché,
  * sans aller-retour qui distrairait de la scène.
  *
- * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux et
- *   réglages (langue, son, pause) à droite. Le rang est une grille à trois
+ * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux à
+ *   droite ; la langue, le son et la pause sont aux coins bas de l'écran
+ *   (pastilles du même verre). Le rang est une grille à trois
  *   colonnes « 1fr auto 1fr » : les colonnes latérales sont égales tant qu'il
  *   y a la place (liens exactement au centre) et, quand la place manque, la
  *   colonne de droite garde sa largeur et les liens glissent vers le logo —
@@ -196,15 +205,14 @@ export function SiteHeader() {
         <div
           onPointerMove={onCapsulePointer}
           className={cn(
-            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 rounded-full lg:inset-x-6 lg:top-3",
+            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 overflow-hidden rounded-full lg:inset-x-6 lg:top-3",
             "border bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150",
             "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)] transition-[border-color] duration-700",
             "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
           )}
         >
-          {/* Halo de la souris, reflet du contour et lisière éclairée en bas,
-              rognés au contour de la capsule. Le contenu, lui, peut déborder :
-              les lignes du logo se déploient au survol au-delà de la capsule. */}
+          {/* Halo de la souris, reflet du contour et lisière éclairée en bas.
+              Tout reste dans la capsule, lignes du logo comprises. */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
             <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,rgba(255,255,255,0.08),transparent_70%)]" />
             {!motionPaused ? <span className="capsule-sweep" /> : null}
@@ -213,11 +221,12 @@ export function SiteHeader() {
 
           {/* Rang en grille « 1fr auto 1fr » dès la tablette (cf. doc du
               composant) ; en dessous, logo et bouton menu aux deux bouts. */}
-          <div className="relative flex h-full items-center justify-between pl-4 pr-2 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-x-6 lg:pl-5 lg:pr-3">
+          <div className="relative flex h-full items-center justify-between pl-5 pr-2 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-x-6 lg:pl-6 lg:pr-3">
             {/* Le logo garde sa taille de dessin (61 × 70) et son effet au
-                survol ; il est seulement réduit à l'affichage. */}
-            <div className="relative h-[36px] w-[32px] shrink-0 md:justify-self-start lg:h-[42px] lg:w-[37px]">
-              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.52] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 lg:scale-[0.6]" />
+                survol ; il est seulement réduit à l'affichage, assez pour
+                garder de l'air jusqu'aux bouts arrondis de la capsule. */}
+            <div className="relative h-[32px] w-[28px] shrink-0 md:justify-self-start lg:h-[36px] lg:w-[32px]">
+              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.46] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 lg:scale-[0.52]" />
             </div>
 
             <nav aria-label={t.site.nav.main} className="hidden items-center gap-1 md:flex md:justify-self-center">
@@ -231,16 +240,9 @@ export function SiteHeader() {
               ))}
             </nav>
 
-            {/* Réseaux d'un côté, langue et réglages de l'autre : deux groupes
-                au même rythme, chaque icône dans une zone de clic de 32 px. */}
-            <div className="hidden items-center lg:flex lg:justify-self-end">
+            {/* Les réseaux ; langue et réglages sont aux coins bas de l'écran. */}
+            <div className="hidden lg:flex lg:justify-self-end">
               <SocialLinks />
-              <span aria-hidden="true" className="mx-3 h-5 w-px bg-white/15" />
-              <LanguageFlags />
-              <div className="ml-2 flex items-center">
-                <SoundToggle />
-                <MotionToggle />
-              </div>
             </div>
 
             <button
@@ -273,6 +275,19 @@ export function SiteHeader() {
           </div>
         </div>
       </motion.header>
+
+      {/* Grand écran : les réglages quittent la capsule pour les coins bas de
+          l'écran, dans deux petites pastilles du même verre — la langue à
+          gauche, le son et la pause à droite. En dessous, ils sont dans le menu. */}
+      <div className="pointer-events-none fixed inset-x-6 bottom-6 z-40 hidden items-end justify-between text-white lg:flex">
+        <div className={cn(DOCK_PILL, "px-3")}>
+          <LanguageFlags />
+        </div>
+        <div className={DOCK_PILL}>
+          <SoundToggle />
+          <MotionToggle />
+        </div>
+      </div>
 
       <AnimatePresence>
         {isOpen ? (

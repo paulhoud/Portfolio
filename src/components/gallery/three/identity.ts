@@ -15,6 +15,7 @@ import {
 } from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import type { ModelDecal } from "./identityFiles";
 
 /**
  * Petits objets qui flottent autour des plaques : des choses qui racontent
@@ -41,6 +42,17 @@ export type IdentityEntry = {
   size?: number;
   /** Couleurs imposées à certaines pièces du fichier (nom du matériau ou de la pièce → couleur). */
   tints?: Record<string, string>;
+  /** Images posées sur certaines pièces (écran, dessous de planche). */
+  decals?: ModelDecal[];
+  /** Textures en pixels apparents (Minecraft). */
+  pixelated?: boolean;
+  /** Rotation de départ (radians) qui tourne la face de l’objet vers nous. */
+  turn?: [number, number, number];
+  /**
+   * Toujours de face : l’objet se balance doucement au lieu de tourner sur
+   * lui-même (un animal qu’on verrait sinon de dos).
+   */
+  front?: boolean;
 };
 
 type Place = {
@@ -252,7 +264,8 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     tints: { WhiteSuede: "#c8102e", WhiteSatin: "#1b1b1f", Insole: "#26262b", WhiteSole: "#f1efe8" },
   },
   { name: "burger", file: "burger.glb", build: burger },
-  { name: "shiba", file: "shiba.glb" },
+  // De face, la tête vers nous : de trois quarts, on le voyait de dos.
+  { name: "shiba", file: "shiba.glb", front: true },
   { name: "pokeball", file: "pokeball.glb", build: pokeball },
   { name: "smartphone", file: "smartphone.glb" },
   {
@@ -275,15 +288,37 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     },
   },
   { name: "sushi", file: "sushi.glb" },
+  // Un cube plein paraît plus gros que les autres objets : un peu réduit.
+  { name: "minecraftCube", file: "minecraft-cube.glb", pixelated: true, size: 0.8 },
   // Le fichier assombrit sa texture de 60 % : on rend au ballon son blanc.
   { name: "football", file: "football.glb", tints: { Baked: "#ffffff" } },
-  { name: "powerCube", file: "power-cube.glb", build: starDrop },
+  {
+    name: "tv",
+    file: "tv.glb",
+    // Une partie de Tony Hawk’s Underground à l’écran (image choisie par Paul).
+    // Plastique presque noir dans le fichier : éclairci pour se détacher du fond.
+    tints: { BlackPlastic: "#3a3a42" },
+    decals: [{ piece: "Screen", image: "/models/decals/tv-screen.webp", glow: 1.35 }],
+  },
+  // Couleurs franches du Power Cube (vert vif, éclair jaune), un peu réduit.
+  { name: "powerCube", file: "power-cube.glb", build: starDrop, size: 0.72, tints: { green: "#1fd34a", yellow: "#ffd400" } },
   { name: "cat", file: "cat.glb", build: cat },
   { name: "banana", file: "banana.glb", size: 1.25 },
-  { name: "earbuds", file: "earbuds.glb" },
-  { name: "skateboard", file: "skateboard.glb", build: skateboard, size: 1.35 },
+  { name: "kitsuneMask", file: "kitsune-mask.glb" },
+  { name: "earbuds", file: "earbuds.glb", size: 0.88 },
+  {
+    name: "skateboard",
+    file: "skateboard.glb",
+    build: skateboard,
+    size: 1.7,
+    // Une planche Deathwish dessous (image choisie par Paul).
+    decals: [{ piece: "skateboard", image: "/models/decals/deathwish-deck.webp", side: [0, -1, 0] }],
+  },
+  { name: "candy", file: "candy.glb" },
   { name: "jigglypuff", file: "jigglypuff.glb" },
+  { name: "minecraftSword", file: "minecraft-sword.glb", pixelated: true, size: 1.2 },
   { name: "sodaCan", file: "soda-can.glb" },
+  { name: "potatOS", file: "potatos.glb" },
   { name: "shuriken", file: "shuriken.glb" },
   { name: "teddy", file: "teddy.glb" },
 ];
