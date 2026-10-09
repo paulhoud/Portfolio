@@ -53,6 +53,8 @@ export type SiteCopy = {
     intro: string;
     listLabel: string;
     viewProject: string;
+    /** Mobile : flèche du repère vertical, vers le projet suivant. */
+    nextProject: string;
     /** Invitation à faire défiler, à l'arrivée sur la galerie. */
     scrollHint: string;
     /** Fonction cachée « destroy the world » : message pendant le vide. */

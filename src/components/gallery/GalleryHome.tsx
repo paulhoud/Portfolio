@@ -774,6 +774,59 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
+
+                  {/* Mobile : repère vertical au bord droit, qui montre qu'on avance
+                      en faisant défiler et où l'on en est (un point par projet,
+                      l'actif allongé). Toucher un point y mène ; la flèche du bas
+                      passe au projet suivant, et frémit tant qu'on n'a pas défilé. */}
+                  <nav
+                    aria-label={t.site.gallery.listLabel}
+                    className="pointer-events-auto absolute -right-4 top-1/2 flex -translate-y-1/2 flex-col items-center lg:hidden"
+                  >
+                    <ol className="flex flex-col items-center">
+                      {projects.map((item, index) => (
+                        <li key={item.slug}>
+                          <button
+                            type="button"
+                            onClick={() => scrollToPiece(index)}
+                            aria-label={`${pad(index + 1)}. ${item.title} — ${item.eyebrow}`}
+                            aria-current={index === active ? "true" : undefined}
+                            className="flex h-6 w-8 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "block w-1.5 rounded-full transition-all duration-300",
+                                index === shown ? "h-4 bg-white" : "h-1.5 bg-white/30",
+                              )}
+                            />
+                          </button>
+                        </li>
+                      ))}
+                    </ol>
+                    <button
+                      type="button"
+                      onClick={() => scrollToPiece(Math.min(count - 1, active + 1))}
+                      aria-label={t.site.gallery.nextProject}
+                      className={cn(
+                        "mt-1 flex h-8 w-8 items-center justify-center text-white/70 transition-opacity duration-300 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60",
+                        active >= count - 1 && "invisible opacity-0",
+                      )}
+                    >
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className={cn("h-4 w-4", synced && !scrolled && !calm && "nudge-down")}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </nav>
                 </div>
 
                 {/* Cartel : doublon visuel, la liste porte l'information accessible. */}
@@ -803,40 +856,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   </div>
                 </div>
 
-                {/* Mobile : on avance en faisant défiler ; en bas, un repère discret
-                    (un point par projet, l'actif allongé) et un bouton rond pour
-                    entrer, en plus d'un toucher sur la plaque. Les points restent des liens, pour le toucher et les
-                    lecteurs d'écran. */}
-                <div className="pointer-events-auto mx-auto mt-3 flex w-full max-w-xl shrink-0 items-center justify-between gap-3 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
-                  <nav aria-label={t.site.gallery.listLabel} className="min-w-0">
-                    <ol className="flex items-center">
-                      {projects.map((item, index) => (
-                        <li key={item.slug}>
-                          <Link
-                            href={`/projects/${item.slug}`}
-                            onClick={onProjectClick(index)}
-                            aria-label={`${pad(index + 1)}. ${item.title} — ${item.eyebrow}`}
-                            aria-current={index === active ? "true" : undefined}
-                            className="flex h-11 w-6 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className={cn(
-                                "block h-1.5 rounded-full transition-all duration-300",
-                                index === shown ? "w-4 bg-white" : "w-1.5 bg-white/30",
-                              )}
-                            />
-                          </Link>
-                        </li>
-                      ))}
-                    </ol>
-                  </nav>
+                {/* Mobile : un bouton qui dit ce qu'il fait, pour entrer dans le
+                    projet affiché (en plus d'un toucher sur la plaque). On passe
+                    d'un projet à l'autre en faisant défiler (cf. le repère vertical). */}
+                <div className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
                   <Link
                     href={`/projects/${project.slug}`}
                     onClick={onProjectClick(shown)}
                     aria-label={`${t.site.gallery.viewProject} : ${project.title}`}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-black"
+                    className="flex h-11 items-center gap-2.5 rounded-full bg-white pl-5 pr-4 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
                   >
+                    {t.site.gallery.viewProject}
                     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12h14M13 6l6 6-6 6" />
                     </svg>

@@ -34,6 +34,7 @@ export const frSite: SiteCopy = {
       "Product Designer de bout en bout : vision produit, recherche utilisateur, UX/UI, design system et front-end, du cadrage à la mise en production.",
     listLabel: "Projets",
     viewProject: "Voir le projet",
+    nextProject: "Projet suivant",
     scrollHint: "Faire défiler",
     worldGone: "Le monde a été aspiré par un trou noir.",
     worldBack: "Il se reforme…",

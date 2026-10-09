@@ -34,6 +34,7 @@ export const enSite: SiteCopy = {
       "End-to-end Product Designer: product vision, user research, UX/UI, design systems and front-end, from framing to production.",
     listLabel: "Projects",
     viewProject: "View project",
+    nextProject: "Next project",
     scrollHint: "Scroll",
     worldGone: "The world was swallowed by a black hole.",
     worldBack: "It is coming back…",

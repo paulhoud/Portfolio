@@ -189,6 +189,29 @@ body {
   }
 }
 
+/* Flèche « projet suivant » du repère mobile : elle frémit vers le bas tant
+   qu'on n'a pas encore défilé. */
+@keyframes nudge-down {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(4px);
+  }
+}
+
+.nudge-down {
+  animation: nudge-down 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge-down {
+    animation: none;
+  }
+}
+
 /* Drapeaux de langue : au survol (ou au focus clavier), le drapeau ondule
    comme au vent et un reflet le traverse. Simple agrandissement si les
    animations sont réduites. */
