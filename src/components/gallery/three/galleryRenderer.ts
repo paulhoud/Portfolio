@@ -1306,7 +1306,10 @@ export function createGalleryRenderer(
   let slowMs = 0;
   let lastMeasuredAt = 0;
   const monitor = (now: number, measured: boolean) => {
-    if (!measured || now - createdAt < 2500) {
+    // Rien à conclure d'une page masquée (le navigateur y ralentit les
+    // images exprès), ni des moments lourds mais passagers : trou noir,
+    // dimension, entrée dans un projet.
+    if (!measured || now - createdAt < 2500 || document.hidden || world || immersion) {
       lastMeasuredAt = 0;
       return;
     }
@@ -1333,7 +1336,7 @@ export function createGalleryRenderer(
       resize();
     } else if (fps < 24) {
       slowMs += 2000;
-      if (slowMs >= 4000) callbacks.onFail("slow");
+      if (slowMs >= 6000) callbacks.onFail("slow");
     } else {
       slowMs = 0;
     }

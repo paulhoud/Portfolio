@@ -484,6 +484,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     let cancelled = false;
     let renderer: GalleryRenderer | null = null;
     const fail = (reason: GalleryFailure) => {
+      // Échec en plein trou noir : le texte (photographié, masqué) et le
+      // sommaire reviennent, la musique de la dimension s'arrête.
+      if (doomRef.current) {
+        doomRef.current = false;
+        for (const animation of textPullRef.current) animation.cancel();
+        textPullRef.current = [];
+        leaveVoidRef.current = () => {};
+        stopThemes();
+        setDoom(null);
+        setTextAsImage(false);
+      }
       rendererRef.current = null;
       renderer?.dispose();
       renderer = null;
