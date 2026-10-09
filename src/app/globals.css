@@ -244,3 +244,148 @@ body {
     animation: none;
   }
 }
+
+/* Rideau d'ouverture de l'accueil (cf. Opening.tsx) : le contour du PH se
+   trace, le logo se remplit puis respire doucement ; un fin trait scintille
+   dessous en attendant. À la levée, le logo recule un peu et tout s'efface.
+   Sans script (ou s'il tarde trop), le rideau se lève de lui-même. */
+@keyframes opening-trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes opening-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes opening-vanish {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes opening-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes opening-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes opening-fallback {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.opening {
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.7s;
+  animation: opening-fallback 0.6s ease 9s forwards;
+}
+
+.opening-leave {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.opening-mark {
+  width: 60px;
+  height: auto;
+  overflow: visible;
+  color: #fff;
+  transition:
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease-out;
+}
+
+.opening-leave .opening-mark {
+  transform: scale(0.92);
+  opacity: 0;
+}
+
+.opening-trace {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    opening-trace 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards,
+    opening-vanish 0.4s ease-out 0.9s forwards;
+}
+
+.opening-fill {
+  opacity: 0;
+  animation:
+    opening-appear 0.5s ease-out 0.6s forwards,
+    opening-breathe 1.8s ease-in-out 1.3s infinite;
+}
+
+.opening-bar {
+  position: relative;
+  margin-top: 28px;
+  width: 72px;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  animation: opening-appear 0.5s ease-out 0.9s forwards;
+}
+
+.opening-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(-100%);
+  animation: opening-sweep 1.3s cubic-bezier(0.45, 0, 0.55, 1) 0.9s infinite;
+}
+
+/* Animations réduites (système ou bouton pause) : le logo est simplement là. */
+@media (prefers-reduced-motion: reduce) {
+  .opening-trace {
+    display: none;
+  }
+
+  .opening-fill,
+  .opening-bar {
+    opacity: 0.85;
+    animation: none;
+  }
+
+  .opening-bar::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.opening-still .opening-trace {
+  display: none;
+}
+
+.opening-still .opening-fill,
+.opening-still .opening-bar {
+  opacity: 0.85;
+  animation: none;
+}
+
+.opening-still .opening-bar::after {
+  animation: none;
+  opacity: 0;
+}

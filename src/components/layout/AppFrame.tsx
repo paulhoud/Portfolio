@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
 import { FixedBackButton } from "./FixedBackButton";
+import { Opening } from "./Opening";
 import { PageTransition } from "./PageTransition";
 import { ScrollToTop } from "./ScrollToTop";
 import { SiteFooter } from "./SiteFooter";
@@ -49,6 +50,9 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <ScrollToTop />
 
       <Veil />
+
+      {/* Rideau d'ouverture, hors de la zone animée pour couvrir aussi l'en-tête. */}
+      <Opening />
     </MotionConfig>
   );
 }

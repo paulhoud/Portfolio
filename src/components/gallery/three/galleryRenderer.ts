@@ -94,6 +94,8 @@ export type GalleryOptions = {
    * remplit l'écran, sous le voile) et recule jusqu'à sa place.
    */
   returning?: number | null;
+  /** L'arrivée attend `releaseIntro` (rideau d'ouverture encore baissé). */
+  holdIntro?: boolean;
 };
 
 export type GalleryRenderer = {
@@ -115,6 +117,8 @@ export type GalleryRenderer = {
   setHighlight(index: number | null): void;
   setCalm(calm: boolean): void;
   setRunning(running: boolean): void;
+  /** Lance l'arrivée retenue par `holdIntro` (dès que la scène est prête). */
+  releaseIntro(): void;
   dispose(): void;
 };
 
@@ -398,6 +402,13 @@ export function createGalleryRenderer(
   // contente de prendre du volume. Rien en mode calme.
   let introPending: "full" | "settle" | null =
     calm || options.returning != null ? null : options.arrival ? "full" : "settle";
+  // Sous le rideau d'ouverture, l'arrivée attend qu'il se lève pour être vue.
+  let introHeld = options.holdIntro ?? false;
+  const startIntro = (now: number) => {
+    if (!introPending) return;
+    intro = { start: now, full: introPending === "full", active: activeIndex() };
+    introPending = null;
+  };
   // Retour d'un projet : la caméra attend dans la plaque que la scène soit prête.
   let immersion: Immersion | null =
     options.returning != null && !calm
@@ -980,10 +991,7 @@ export function createGalleryRenderer(
       if (!ready && (pieces[activeIndex()].loaded || now - createdAt > 1800)) {
         ready = true;
         callbacks.onReady();
-        if (introPending) {
-          intro = { start: now, full: introPending === "full", active: activeIndex() };
-          introPending = null;
-        }
+        if (!introHeld) startIntro(now);
         if (immersion && immersion.start < 0) immersion.start = now;
         updateScheduler();
       }
@@ -1370,6 +1378,15 @@ export function createGalleryRenderer(
       if (calm) skipIntro();
       updateScheduler();
       invalidate();
+    },
+    releaseIntro() {
+      if (!introHeld) return;
+      introHeld = false;
+      if (ready && !disposed) {
+        startIntro(performance.now());
+        updateScheduler();
+        invalidate();
+      }
     },
     setRunning(next) {
       if (next === running) return;

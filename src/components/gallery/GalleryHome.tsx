@@ -28,6 +28,7 @@ import {
   showVeil,
 } from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
+import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx } from "@/lib/sound/sound";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
@@ -467,12 +468,14 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             progress: readProgress(),
             frame,
             returning: returning >= 0 ? returning : null,
+            holdIntro: isOpening(),
           },
         );
         rendererRef.current = renderer;
       });
     };
-    const cancelIdle = returning >= 0 ? (create(), () => {}) : requestIdle(create, 1500);
+    // Sous le rideau d'ouverture, rien d'autre n'est visible : on n'attend pas.
+    const cancelIdle = returning >= 0 || isOpening() ? (create(), () => {}) : requestIdle(create, 1500);
     return () => {
       cancelled = true;
       cancelIdle();
@@ -489,6 +492,16 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       hideVeil(400);
     }
   }, [synced, scene]);
+
+  // Rideau d'ouverture : il se lève quand la scène est prête (ou sans 3D),
+  // et l'arrivée des plaques démarre au moment où il s'efface.
+  const opening = useOpening();
+  useEffect(() => {
+    if (scene === "ready" || scene === "failed" || (synced && readSession(NO_3D_KEY))) endOpening();
+  }, [synced, scene]);
+  useEffect(() => {
+    if (opening !== "loading") rendererRef.current?.releaseIntro();
+  }, [opening, scene]);
 
   // Le cadre change de place ou de taille : la scène suit. Sa boîte et celle
   // qui le contient sont observées, et la fenêtre aussi : il peut se déplacer
