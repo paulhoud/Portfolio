@@ -60,12 +60,10 @@ export const PLAYBACK_RATE = 1.2;
  *   la marque (le logo plutôt que le fond quand le fond est blanc ou noir).
  * - `exposure` : luminosité du tableau. Les tuiles à fond clair éblouissent
  *   dans la salle sombre : elles sont baissées, sans changer leur teinte.
- * - `accent` : couleur des petits volumes autour de la plaque, si elle
- *   diffère de la lumière au sol (Archive : lumière blanche, volumes rouges).
  *
  * Réglé à l'œil le 9 oct. 2026, à revoir avec Paul sur son écran.
  */
-export type TileLight = { glow: string; exposure: number; accent?: string };
+export type TileLight = { glow: string; exposure: number };
 
 const tileLights: Partial<Record<MediaKey, TileLight>> = {
   UPIKAJOB: { glow: "#2f9bff", exposure: 0.8 },
@@ -78,8 +76,8 @@ const tileLights: Partial<Record<MediaKey, TileLight>> = {
   BAIO: { glow: "#7fe03a", exposure: 0.9 },
   SAEGUS: { glow: "#b9b9c8", exposure: 1 },
   LGM: { glow: "#d8603e", exposure: 0.85 },
-  // Lumière blanche au sol (demande de Paul, 9 oct. 2026), volumes rouge piment.
-  PERSO: { glow: "#eeeef2", exposure: 1, accent: "#ef5a4c" },
+  // Lumière blanche au sol (demande de Paul, 9 oct. 2026).
+  PERSO: { glow: "#eeeef2", exposure: 1 },
 };
 
 /** Lumière d'un tableau, avec un repli neutre. */

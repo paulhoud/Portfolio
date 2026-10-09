@@ -188,18 +188,16 @@ export function cameraPose(pieces: PieceLayout[], station: number, distance: num
 export type SatelliteLayout = {
   owner: number;
   position: Vec3;
-  /** Largeur, hauteur, profondeur. */
+  /** Largeur, hauteur, profondeur de la place qu'il occupe (un cube). */
   size: Vec3;
-  radius: number;
   /** Vitesse de rotation propre (rad/s). */
   spin: Vec3;
   phase: number;
-  /** Verre fumé plutôt que couleur pleine. */
-  dark: boolean;
 };
 
 /**
- * Jusqu'à quatre satellites par plaque, sur trois plans comme chez Spline :
+ * Jusqu'à quatre satellites par plaque (des objets qui racontent Paul, cf.
+ * identity.ts), sur trois plans comme chez Spline :
  * - un à l'extérieur de l'allée ;
  * - un au-dessus ou au-dessous (à côté sur téléphone, où le titre est en haut) ;
  * - une silhouette sombre au loin, que le brouillard estompe ;
@@ -221,12 +219,10 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
       const r = (n: number) => seeded(salt, n);
       if (k === 3 && !pathLeaves) continue;
 
-      let s = 0.16 + 0.62 * r(1) ** 2;
-      if (k === 3) s = 0.5 + 0.25 * r(1);
-      const shape = Math.floor(r(2) * 3);
-      const size: Vec3 =
-        shape === 0 ? [s, s, s] : shape === 1 ? [1.8 * s, 0.75 * s, 0.75 * s] : [1.25 * s, 1.25 * s, 0.4 * s];
-      const radius = Math.min(...size) * (shape === 1 ? 0.48 : 0.3);
+      // Assez grands pour qu'on reconnaisse l'objet : plus gros au loin (le
+      // brouillard les estompe) et au premier plan.
+      const s = [0.45 + 0.3 * r(1), 0.38 + 0.25 * r(1), 0.62 + 0.3 * r(1), 0.65 + 0.2 * r(1)][k];
+      const size: Vec3 = [s, s, s];
 
       let position: Vec3;
       if (k === 0) {
@@ -249,7 +245,8 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
       } else {
         position = [px + out * (half + 0.35 + 0.3 * r(7)), py + (r(8) - 0.5) * half, pz + 1.2 + 0.6 * r(9)];
       }
-      const extent = 0.5 * Math.hypot(...size);
+      // Les objets tiennent dans un cube de côté `s` mais ne le remplissent pas.
+      const extent = 0.6 * s;
       // Jamais à travers la grille, même en tournant sur lui-même.
       position[1] = Math.max(0.23 + extent, position[1]);
       // Ni sur le trajet de la caméra, ni devant une plaque qu'on regarde :
@@ -265,10 +262,8 @@ export function layoutSatellites(pieces: PieceLayout[], spacing: Spacing): Satel
         owner,
         position,
         size,
-        radius,
         spin: [(r(10) - 0.5) * 0.5, (r(11) - 0.5) * 0.7, (r(12) - 0.5) * 0.4],
         phase: r(13) * Math.PI * 2,
-        dark: k === 2 || r(14) < 0.25,
       });
     }
   });

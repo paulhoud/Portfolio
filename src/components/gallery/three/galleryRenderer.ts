@@ -1,4 +1,5 @@
 import {
+  BufferGeometry,
   Color,
   DataTexture,
   LinearFilter,
@@ -39,6 +40,7 @@ import {
 } from "./layout";
 import { createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
+import { buildIdentityModels } from "./identity";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
 import { floorFragment, floorVertex, slabFragment, slabVertex } from "./shaders";
 
@@ -54,8 +56,6 @@ export type GalleryPieceInput = {
   background: string;
   /** Couleur de la lumière projetée au sol. */
   glow: string;
-  /** Couleur des petits volumes autour de la plaque (par défaut, `glow`). */
-  accent?: string;
   exposure: number;
 };
 
@@ -187,14 +187,6 @@ const easeOutBack = (t: number) => {
   return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2;
 };
 
-/** Couleur « bonbon » des satellites : la teinte du projet, saturée. */
-function candyColor(glow: string): Color {
-  const color = new Color(glow);
-  const hsl = { h: 0, s: 0, l: 0 };
-  color.getHSL(hsl, SRGBColorSpace);
-  return color.setHSL(hsl.h, Math.max(hsl.s, 0.7), clamp(hsl.l, 0.45, 0.6), SRGBColorSpace);
-}
-
 /**
  * Crée la scène dans `host`, sur un canevas neuf : un canevas dont le
  * contexte a été libéré ne peut plus servir. Renvoie `null` (et appelle
@@ -260,6 +252,8 @@ export function createGalleryRenderer(
 
   const slabMaterial = (body: Color, glow: Color, exposure: number, solid: boolean, rim: number) =>
     new ShaderMaterial({
+      // Les objets qui flottent portent leurs couleurs sur leurs sommets.
+      vertexColors: solid,
       vertexShader: slabVertex,
       fragmentShader: slabFragment,
       uniforms: {
@@ -324,13 +318,14 @@ export function createGalleryRenderer(
 
   // --- Satellites : petits volumes décoratifs autour des plaques ------------
   let satelliteLayouts: SatelliteLayout[] = [];
-  let satellites: Mesh<RoundedBoxGeometry, ShaderMaterial>[] = [];
+  let satellites: Mesh<BufferGeometry, ShaderMaterial>[] = [];
+  /** Les treize objets, construits une fois et partagés (cf. identity.ts). */
+  let identityModels: BufferGeometry[] | null = null;
   let satelliteBodies: Body[] = [];
   let satelliteSignature = "";
   const disposeSatellites = () => {
     for (const mesh of satellites) {
       scene.remove(mesh);
-      mesh.geometry.dispose();
       mesh.material.dispose();
     }
     satellites = [];
@@ -338,17 +333,17 @@ export function createGalleryRenderer(
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
     satelliteLayouts = layoutSatellites(layouts, currentSpacing);
-    const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}:${layout.dark}`).join("|");
+    const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}`).join("|");
     if (signature === satelliteSignature) return;
     satelliteSignature = signature;
     disposeSatellites();
-    satellites = satelliteLayouts.map((layout) => {
-      const owner = inputs[layout.owner];
-      const glow = candyColor(owner.accent ?? owner.glow);
-      const body = layout.dark ? new Color("#16161c") : glow;
-      const material = slabMaterial(body, glow, 1, true, 0);
-      const [w, h, d] = layout.size;
-      const mesh = new Mesh(new RoundedBoxGeometry(w, h, d, 6, layout.radius), material);
+    identityModels ??= buildIdentityModels();
+    const models = identityModels;
+    satellites = satelliteLayouts.map((layout, index) => {
+      const material = slabMaterial(new Color("#ffffff"), new Color(inputs[layout.owner].glow), 1, true, 0);
+      // Les objets se suivent dans l'ordre : chaque plaque en a de différents.
+      const mesh = new Mesh(models[index % models.length], material);
+      mesh.userData.baseScale = Math.max(...layout.size);
       scene.add(mesh);
       return mesh;
     });
@@ -1292,7 +1287,7 @@ export function createGalleryRenderer(
       } else {
         mesh.position.set(layout.position[0], restY - (1 - pop) * 0.9, layout.position[2] - (1 - arrive) * 9);
       }
-      mesh.scale.setScalar(Math.max(0.001, pop));
+      mesh.scale.setScalar(Math.max(0.001, pop) * (mesh.userData.baseScale as number));
       const body = satelliteBodies[index];
       if (body) finish(mesh, body, SATELLITE_SPRING);
       mesh.material.uniforms.uLit.value = clamp01(arrive * 1.6) * room;
@@ -1484,6 +1479,7 @@ export function createGalleryRenderer(
       }
       disposeSatellites();
       blackHole?.dispose();
+      for (const geometry of identityModels ?? []) geometry.dispose();
       dimension?.dispose();
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();

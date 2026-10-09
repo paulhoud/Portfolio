@@ -102,7 +102,6 @@ function buildPieces(projects: Project[]): GalleryPieceInput[] {
       motionEnd: getMotionEnd(project.mediaKey),
       background: project.background,
       glow: light.glow,
-      accent: light.accent,
       exposure: light.exposure,
     };
   });

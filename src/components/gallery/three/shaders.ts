@@ -24,6 +24,7 @@ export const slabVertex = /* glsl */ `
   varying float vFront;
   varying float vDist;
   varying float vSink;
+  varying vec3 vTint;
 
   // Rotation d'angle a autour de l'axe unitaire k.
   vec3 turn(vec3 v, vec3 k, float a) {
@@ -33,6 +34,12 @@ export const slabVertex = /* glsl */ `
 
   void main() {
     vUv = uv;
+    // Couleur des sommets : les objets qui flottent sont peints pièce par pièce.
+    #ifdef USE_COLOR
+      vTint = color;
+    #else
+      vTint = vec3(1.0);
+    #endif
     // Normale propre à la plaque : 1 sur la face avant, décroît sur l'arrondi.
     vFront = normal.z;
     vec4 world = modelMatrix * vec4(position, 1.0);
@@ -80,6 +87,7 @@ export const slabFragment = /* glsl */ `
   varying float vFront;
   varying float vDist;
   varying float vSink;
+  varying vec3 vTint;
   uniform sampler2D uMap;
   uniform sampler2D uVideo;
   uniform float uHasMap;
@@ -132,7 +140,7 @@ export const slabFragment = /* glsl */ `
     // l'animation quand elle joue (Jive qui vire à l'orange, Fidesio qui
     // finit en noir…). Huit points près du bord, moyennés ; l'image fixe est
     // lue floutée (niveau de détail réduit) pour une couleur bien moyenne.
-    vec3 casing = uBody;
+    vec3 casing = uBody * vTint;
     if (uSolid < 0.5 && frontMix < 0.999) {
       vec2 edge[8] = vec2[8](
         vec2(0.04, 0.04), vec2(0.5, 0.03), vec2(0.96, 0.04), vec2(0.97, 0.5),
