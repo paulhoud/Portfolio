@@ -17,7 +17,7 @@ const MAX_RESTORE_FRAMES = 12;
  *
  * Sans cela, revenir au damier depuis une fiche projet ramenait tout en haut :
  * la navigation se fait par `<Link>`, qui empile une nouvelle entrée
- * d'historique et repositionne en haut — ce n'est pas un « retour » au sens du
+ * d'historique et repositionne en haut - ce n'est pas un « retour » au sens du
  * navigateur, donc la restauration native ne s'applique pas.
  *
  * Deux précautions rendent l'opération fiable :
@@ -25,7 +25,7 @@ const MAX_RESTORE_FRAMES = 12;
  * 1. La restauration est déclenchée par le **retour sur le chemin**, et non par
  *    le montage du composant : pendant la transition, la page sortante reste
  *    affichée le temps de l'animation, et un aller-retour rapide la réactive au
- *    lieu de la remonter — un déclenchement au montage serait alors ignoré.
+ *    lieu de la remonter - un déclenchement au montage serait alors ignoré.
  *
  * 2. Elle est **réessayée sur quelques frames**. Au moment du rendu, la hauteur
  *    du document n'est pas toujours définitive ; le navigateur tronque alors le

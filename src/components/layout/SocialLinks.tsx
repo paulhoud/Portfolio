@@ -11,7 +11,7 @@ import { brandIconPaths, type BrandIconId } from "./icons/brandIconPaths";
  * masqué visuellement : celui-ci sert d'ancre pour les moteurs de recherche et
  * de nom accessible pour les lecteurs d'écran, sans alourdir la barre latérale.
  *
- * Ces mêmes URLs alimentent le `sameAs` du schéma Person — d'où la source
+ * Ces mêmes URLs alimentent le `sameAs` du schéma Person - d'où la source
  * unique dans `profile.ts`.
  *
  * `rel="me"` déclare explicitement que ces profils appartiennent à la même

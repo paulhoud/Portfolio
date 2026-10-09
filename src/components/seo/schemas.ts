@@ -23,7 +23,7 @@ function brandImageSchema() {
     contentUrl: absoluteUrl(profile.brandImage),
     width: 1200,
     height: 1200,
-    caption: `${profile.name} — ${profile.jobTitle}`,
+    caption: `${profile.name} - ${profile.jobTitle}`,
   };
 }
 
@@ -89,7 +89,7 @@ export function webSiteSchema() {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: siteUrl,
-    name: `${profile.name} — ${profile.jobTitle}`,
+    name: `${profile.name} - ${profile.jobTitle}`,
     description: profile.description,
     inLanguage: "fr-FR",
     image: brandImageSchema(),
@@ -103,7 +103,7 @@ export function webSiteSchema() {
  *
  * `primaryImageOfPage` est le signal le plus direct dont dispose un moteur pour
  * choisir la vignette d'un résultat. Sans lui, il puise dans les images de la
- * page — ici, les miniatures de projets.
+ * page - ici, les miniatures de projets.
  */
 export function homePageSchema() {
   return {
@@ -111,7 +111,7 @@ export function homePageSchema() {
     "@type": "WebPage",
     "@id": `${siteUrl}/#webpage`,
     url: siteUrl,
-    name: `${profile.name} — ${profile.jobTitle}`,
+    name: `${profile.name} - ${profile.jobTitle}`,
     description: profile.description,
     inLanguage: "fr-FR",
     isPartOf: { "@id": WEBSITE_ID },
@@ -127,7 +127,7 @@ export function profilePageSchema() {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url: absoluteUrl("/about"),
-    name: `À propos — ${profile.name}`,
+    name: `À propos - ${profile.name}`,
     inLanguage: "fr-FR",
     isPartOf: { "@id": WEBSITE_ID },
     mainEntity: { "@id": PERSON_ID },
@@ -150,7 +150,7 @@ export function creativeWorkSchema(project: Project) {
     creator: { "@id": PERSON_ID },
     author: { "@id": PERSON_ID },
     // Pas de `keywords` : tirés des expertises du profil, ils prêtaient à
-    // chaque projet — un court métrage, des dessins — des compétences qu'il ne
+    // chaque projet - un court métrage, des dessins - des compétences qu'il ne
     // montre pas.
     isPartOf: { "@id": WEBSITE_ID },
   });

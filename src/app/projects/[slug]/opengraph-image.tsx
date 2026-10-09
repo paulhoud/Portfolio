@@ -94,7 +94,7 @@ export default async function ProjectOpengraphImage({
           <div style={{ display: "flex", flexDirection: "column", marginLeft: 24 }}>
             <div style={{ fontSize: 28 }}>{profile.name}</div>
             <div style={{ fontSize: 22, color: theme.subtle, marginTop: 6 }}>
-              {`${profile.jobTitle} — ${new URL(siteUrl).host}`}
+              {`${profile.jobTitle} - ${new URL(siteUrl).host}`}
             </div>
           </div>
         </div>

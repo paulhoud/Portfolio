@@ -61,7 +61,7 @@ export default async function OpengraphImage() {
             De la vision produit au front-end
           </div>
           <div style={{ fontSize: 24, color: theme.subtle, marginTop: 40 }}>
-            {`${profile.localities.join(" · ")} — paulhoudebine.com`}
+            {`${profile.localities.join(" · ")} - paulhoudebine.com`}
           </div>
         </div>
 

@@ -38,7 +38,7 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
   const isFileVideo = Boolean(current.video);
   const isEmbeddedVideo = Boolean(current.youtubeId);
   // Fichier vidéo ou lecteur embarqué : dans les deux cas, ni zoom ni
-  // déplacement — les commandes du lecteur doivent rester accessibles.
+  // déplacement - les commandes du lecteur doivent rester accessibles.
   const isVideo = isFileVideo || isEmbeddedVideo;
 
   /**

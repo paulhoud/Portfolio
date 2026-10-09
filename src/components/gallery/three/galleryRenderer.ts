@@ -127,7 +127,7 @@ export type GalleryRenderer = {
    * projet en cours, mode calme…).
    */
   /**
-   * `dimension` : où l'on tombe après l'effondrement — le treillis 3D, ou
+   * `dimension` : où l'on tombe après l'effondrement - le treillis 3D, ou
    * une image animée (cf. imageDimension.ts), chargée à ce moment-là.
    */
   destroyWorld(onPhase: (phase: WorldPhase) => void, dimension?: DimensionKind): boolean;

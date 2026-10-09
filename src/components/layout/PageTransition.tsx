@@ -13,7 +13,7 @@ import { FrozenRouter } from "./FrozenRouter";
  * calque « overlay » qui glisse depuis la droite (z-index haut, ombre portée) ;
  * le damier est le calque de base qui reste en place et recule légèrement quand
  * il est recouvert. À l'ouverture la page recouvre le damier ; au retour elle
- * glisse vers la droite et le damier réapparaît dessous — animation exactement
+ * glisse vers la droite et le damier réapparaît dessous - animation exactement
  * inverse.
  *
  * Les deux calques occupent la même cellule de grille (cf. `globals.css`), ce

@@ -3,8 +3,8 @@ import type { Project, ProjectMedia, ProjectStoryShot } from "@/content/projects
 /**
  * Identifiant stable d'un média, indépendant de sa légende.
  *
- * Un même visuel peut apparaître à plusieurs endroits d'une page — la mise en
- * avant reprend des écrans que le récit montre aussi — parfois sous des
+ * Un même visuel peut apparaître à plusieurs endroits d'une page - la mise en
+ * avant reprend des écrans que le récit montre aussi - parfois sous des
  * légendes différentes. Se repérer au fichier plutôt qu'au titre garantit qu'un
  * clic ouvre toujours la même diapositive, quel que soit l'endroit cliqué.
  */

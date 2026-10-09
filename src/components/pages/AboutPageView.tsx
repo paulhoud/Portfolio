@@ -10,8 +10,8 @@ import { useTranslation } from "@/i18n/context";
 /**
  * Page « À propos » : présentation, parcours, puis panorama des outils.
  *
- * La mise en page reprend le principe du portfolio d'origine — texte et
- * portrait côte à côte, suivis de grilles d'outils par catégorie — tout en
+ * La mise en page reprend le principe du portfolio d'origine - texte et
+ * portrait côte à côte, suivis de grilles d'outils par catégorie - tout en
  * conservant l'identité sombre du site actuel.
  */
 export function AboutPageView() {

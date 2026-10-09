@@ -1,5 +1,5 @@
 /**
- * Géométrie de la galerie 3D — fonctions pures, sans three.js.
+ * Géométrie de la galerie 3D - fonctions pures, sans three.js.
  *
  * Inspiration : l'accueil de spline.design. Les onze tuiles deviennent des
  * plaques arrondies et épaisses qui flottent dans le noir, au-dessus d'une

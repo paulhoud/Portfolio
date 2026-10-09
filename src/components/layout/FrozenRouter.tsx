@@ -10,7 +10,7 @@ import { useContext, useState, type ReactNode } from "react";
  * le DOM le temps de l'animation de sortie. Sans ce gel, Next.js remplacerait
  * immédiatement son contenu par celui de la nouvelle route (les deux calques
  * afficheraient la même page). En capturant le contexte au montage, le calque
- * sortant continue d'afficher la page qui était active — indispensable pour une
+ * sortant continue d'afficher la page qui était active - indispensable pour une
  * transition sans clignotement.
  */
 export function FrozenRouter({ children }: { children: ReactNode }) {

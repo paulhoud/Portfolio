@@ -130,7 +130,7 @@ function mergeStory(
     trackLabels: translated.trackLabels ?? base.trackLabels,
     beats: base.beats.map((beat, index) => {
       const copy = translated.beats?.[index];
-      // Un temps fort dont la traduction est absente — ou d'un autre type —
+      // Un temps fort dont la traduction est absente - ou d'un autre type -
       // garde sa version d'origine plutôt que de produire un contenu incohérent.
       if (!copy || copy.type !== beat.type) return beat;
 

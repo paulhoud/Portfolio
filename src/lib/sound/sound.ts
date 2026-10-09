@@ -174,7 +174,7 @@ export function setSoundOn(on: boolean) {
   apply();
 }
 
-/** `[son actif, basculer]` — coupé au rendu serveur. */
+/** `[son actif, basculer]` - coupé au rendu serveur. */
 export function useSoundOn(): [boolean, () => void] {
   const on = useSyncExternalStore(subscribe, getSnapshot, () => false);
   const toggle = useCallback(() => setSoundOn(!getSnapshot()), []);
@@ -191,7 +191,7 @@ export function playSfx(name: SoundEffect, duration?: number) {
  * Sons des objets de la galerie (fichiers de public/sounds/objects) : chargés
  * au premier toucher, gardés en mémoire. Ils viennent de sources variées, très
  * inégales en volume : chacun est ramené au même niveau moyen, modéré. Un seul
- * joue à la fois — le précédent s'efface vite — et les plus longs (générique,
+ * joue à la fois - le précédent s'efface vite - et les plus longs (générique,
  * chanson) s'estompent au bout de quelques secondes.
  */
 

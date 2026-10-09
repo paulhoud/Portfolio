@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: {
     default: siteTitle,
     // Les pages ne déclarent que leur propre titre : le nom est ajouté ici.
-    template: `%s — ${profile.name}`,
+    template: `%s - ${profile.name}`,
   },
   description: profile.description,
   applicationName: siteTitle,
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     icon: [
       // Icône principale, sans condition de thème : c'est celle que Google
       // retient pour les résultats de recherche. Ses exigences sont d'être
-      // carrée, d'au moins 48 px (multiple de 48) et déclarée sans ambiguïté —
+      // carrée, d'au moins 48 px (multiple de 48) et déclarée sans ambiguïté -
       // les variantes 16/32 px conditionnées par `prefers-color-scheme` ne les
       // satisfaisaient pas, d'où l'icône générique affichée jusqu'ici.
       { url: "/favicon/brand/icon-48.png", sizes: "48x48", type: "image/png" },

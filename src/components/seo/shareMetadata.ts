@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { profile } from "@/content/profile";
 
 /** Nom du site : titre par défaut, `og:site_name` et texte alternatif de l'image. */
-export const siteTitle = `${profile.name} — ${profile.jobTitle}`;
+export const siteTitle = `${profile.name} - ${profile.jobTitle}`;
 
 /**
  * Champs Open Graph communs à toutes les pages. Le layout les déclare, mais une

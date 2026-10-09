@@ -34,7 +34,7 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
     playSfx("return");
     const project = projects[index];
     // La galerie reprendra devant ce projet : une tranche de défilement par
-    // projet, 35 % de la hauteur d'écran sur ordinateur, un écran entier sur mobile —
+    // projet, 35 % de la hauteur d'écran sur ordinateur, un écran entier sur mobile -
     // la hauteur barre d'adresse affichée (100svh), comme dans la galerie.
     const slot = window.matchMedia("(min-width: 1024px)").matches ? 0.35 : 1;
     const probe = document.createElement("div");

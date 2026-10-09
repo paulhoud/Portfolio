@@ -252,7 +252,7 @@ function StoryShots({
 /**
  * Habillage d'écran : châssis vectoriel, net à toute résolution, qui donne aux
  * captures d'application l'allure d'un logiciel plutôt que d'une image collée.
- * Réservé aux captures d'interface — une planche d'identité ou une page web
+ * Réservé aux captures d'interface - une planche d'identité ou une page web
  * entière n'a rien à y gagner.
  */
 function ScreenChrome({ children }: { children: React.ReactNode }) {
@@ -308,7 +308,7 @@ function StoryShotFrame({
   /**
    * Doit couvrir la largeur réelle d'affichage. Une valeur sous-estimée fait
    * choisir au navigateur une variante plus petite que le cadre, qu'il étire
-   * ensuite — l'image paraît alors floue sur les écrans non retina.
+   * ensuite - l'image paraît alors floue sur les écrans non retina.
    */
   sizes?: string;
 }) {
@@ -325,7 +325,7 @@ function StoryShotFrame({
 
   if (shot.image) {
     // Page entière : trop haute pour être montrée en entier dans le fil. Elle
-    // est plafonnée et fondue en bas — un repère visuel que la suite se
+    // est plafonnée et fondue en bas - un repère visuel que la suite se
     // découvre dans la visionneuse, où elle se parcourt au défilement.
     const isTallPage = shot.image.height / shot.image.width > 1.6;
     const framed = shot.frame === "screen" && !isTallPage;

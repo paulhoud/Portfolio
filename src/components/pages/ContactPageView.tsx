@@ -10,7 +10,7 @@ import { useTranslation } from "@/i18n/context";
  * Page « Contact ».
  *
  * L'adresse e-mail est affichée en clair et constitue l'appel à l'action
- * principal — auparavant elle était masquée derrière une pastille « Email »,
+ * principal - auparavant elle était masquée derrière une pastille « Email »,
  * obligeant à cliquer pour la découvrir. Les profils externes et les villes
  * proviennent de `profile.ts`, source unique déjà utilisée par le SEO.
  */

@@ -20,7 +20,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Solution",
-        body: "I designed the app's new mockups and prototypes in Figma, and built then maintained an atomic design system so it could grow without losing consistency. Alongside, I produced motion design videos in After Effects and print materials — roll-up banners, posters, flyers — in InDesign.",
+        body: "I designed the app's new mockups and prototypes in Figma, and built then maintained an atomic design system so it could grow without losing consistency. Alongside, I produced motion design videos in After Effects and print materials - roll-up banners, posters, flyers - in InDesign.",
       },
       {
         title: "Outcome",
@@ -41,7 +41,7 @@ export const enProjectTranslations: ProjectTranslations = {
 
   "yves-delorme": {
     title: "Yves Delorme",
-    eyebrow: "L'Odyssée — redesigning the digital ecosystem",
+    eyebrow: "L'Odyssée - redesigning the digital ecosystem",
     description:
       "A full redesign of the customer experience for Maison Yves Delorme, from in-store research to high-fidelity prototyping.",
     context: "HETIC professional project · Client: Maison Yves Delorme · 2019–2020",
@@ -114,7 +114,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Outcome",
-        body: "The team was able to rely on concrete deliverables — journey maps, storyboards, and experience maps — to guide decisions and strengthen the coherence of its actions in the field.",
+        body: "The team was able to rely on concrete deliverables - journey maps, storyboards, and experience maps - to guide decisions and strengthen the coherence of its actions in the field.",
       },
     ],
     media: [
@@ -123,7 +123,7 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Supporting local teams to improve their services" },
       { title: "A collective, collaborative ideation process with the Sanofi Espoir Foundation teams" },
       { title: "Film storyboard" },
-      { title: "Accelerating Local Impact — wrap-up film" },
+      { title: "Accelerating Local Impact - wrap-up film" },
       { title: "Project presentation video" },
       { title: "A detailed analysis of the patient experience and pain points along the journey" },
     ],
@@ -177,8 +177,8 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [
-          { title: "Montaigne Capital — home page" },
-          { title: "Montaigne Capital — fund page" },
+          { title: "Montaigne Capital - home page" },
+          { title: "Montaigne Capital - fund page" },
         ],
       },
       {
@@ -193,8 +193,8 @@ export const enProjectTranslations: ProjectTranslations = {
       {
         type: "media",
         media: [
-          { title: "Newsletter — fashion offer" },
-          { title: "Newsletter — Impressionist selection" },
+          { title: "Newsletter - fashion offer" },
+          { title: "Newsletter - Impressionist selection" },
         ],
       },
     ],
@@ -213,7 +213,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
       {
         title: "Challenges",
-        body: "The brief called for four animated use cases — three are shown below — with many scenes and a heavy animation workload, on a tight deadline for a long-standing client.",
+        body: "The brief called for four animated use cases - three are shown below - with many scenes and a heavy animation workload, on a tight deadline for a long-standing client.",
       },
       {
         title: "Solution",
@@ -363,7 +363,7 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           {
             title: "Solution",
-            body: "We divided roles, structured the production stages — writing, preparation, filming, editing — and maintained continuous coordination on set.",
+            body: "We divided roles, structured the production stages - writing, preparation, filming, editing - and maintained continuous coordination on set.",
           },
           {
             title: "Outcome",
@@ -412,15 +412,15 @@ export const enProjectTranslations: ProjectTranslations = {
     sections: [
       {
         title: "Overview",
-        body: "UpikaJob is now an HRIS: a platform that equips HR teams and managers to follow their people — reviews, skills, objectives, steering indicators. It began as something quite different, a tool for training organisations supporting young talent into work. I have been its sole designer since January 2024, and I lived that transformation from the inside, from the first redesigns through to the product as it stands today.",
+        body: "UpikaJob is now an HRIS: a platform that equips HR teams and managers to follow their people - reviews, skills, objectives, steering indicators. It began as something quite different, a tool for training organisations supporting young talent into work. I have been its sole designer since January 2024, and I lived that transformation from the inside, from the first redesigns through to the product as it stands today.",
       },
       {
         title: "Challenge",
-        body: "The company realised its craft — structuring guidance, making progress measurable, equipping a mentor — reached far beyond apprenticeships. That meant speaking to a far more demanding audience, HR professionals, without disowning the expertise that made the product strong. A change of scale as much as of audience: more data, more roles, more business rules, and the usability expectations of a tool people live in all day.",
+        body: "The company realised its craft - structuring guidance, making progress measurable, equipping a mentor - reached far beyond apprenticeships. That meant speaking to a far more demanding audience, HR professionals, without disowning the expertise that made the product strong. A change of scale as much as of audience: more data, more roles, more business rules, and the usability expectations of a tool people live in all day.",
       },
       {
         title: "Solution",
-        body: "Several successive redesigns, each carrying a shift in vision rather than a simple refresh. A visual identity reworked in depth, then a design system shared with the developer — primitives, tokens, documented components — so that coherence would hold as the product grew. And features taken end to end: user interviews and tests, framing, trade-offs, specs, design, then front-end in pair through to release.",
+        body: "Several successive redesigns, each carrying a shift in vision rather than a simple refresh. A visual identity reworked in depth, then a design system shared with the developer - primitives, tokens, documented components - so that coherence would hold as the product grew. And features taken end to end: user interviews and tests, framing, trade-offs, specs, design, then front-end in pair through to release.",
       },
       {
         title: "Outcome",
@@ -492,7 +492,7 @@ export const enProjectTranslations: ProjectTranslations = {
           type: "pivot",
           label: "Change of course",
           statement:
-            "UpikaJob becomes an HRIS — a complete HR platform, without giving up what it does best.",
+            "UpikaJob becomes an HRIS - a complete HR platform, without giving up what it does best.",
         },
         {
           type: "stage",
@@ -534,10 +534,10 @@ export const enProjectTranslations: ProjectTranslations = {
           period: "Today",
           product: {
             title: "An HRIS in its own right",
-            body: "The platform serves HR teams and managers — and speaks to them right down to its public site: offering, pricing, documentation.",
+            body: "The platform serves HR teams and managers - and speaks to them right down to its public site: offering, pricing, documentation.",
           },
           role: {
-            title: "Product Designer — design & implementation",
+            title: "Product Designer - design & implementation",
             body: "I take charge of the product's front-end, paired with the developer. The marketing site, I designed then built on my own.",
           },
           shots: [

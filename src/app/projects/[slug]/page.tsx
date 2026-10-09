@@ -33,18 +33,18 @@ export async function generateMetadata({
 
   return {
     // Le nom est ajouté par le template défini dans le layout racine.
-    title: `${project.title} — ${project.eyebrow}`,
+    title: `${project.title} - ${project.eyebrow}`,
     description: project.description,
     alternates: { canonical: url },
     ...shareMetadata({
       type: "article",
-      title: `${project.title} — ${profile.name}`,
+      title: `${project.title} - ${profile.name}`,
       description: project.description,
       url,
       // Générée par `opengraph-image.tsx`, dans ce même dossier.
       image: {
         url: `${url}/opengraph-image`,
-        alt: `${project.title} — ${project.eyebrow}`,
+        alt: `${project.title} - ${project.eyebrow}`,
       },
     }),
   };

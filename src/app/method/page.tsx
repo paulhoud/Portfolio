@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre le besoin, aller sur le terrain, cadrer, concevoir, tester, livrer et suivre en production.`,
   alternates: { canonical: "/method" },
   ...shareMetadata({
-    title: `Ma méthode — ${profile.name}`,
+    title: `Ma méthode - ${profile.name}`,
     description: `De la compréhension du besoin à la livraison : la démarche de conception de ${profile.name}.`,
     url: "/method",
   }),

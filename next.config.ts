@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 /**
  * Domaine canonique du site (sans "www"), aligné sur `src/content/profile.ts`.
  * Pour basculer sur la version "www", inverser les deux constantes ci-dessous
- * ET mettre à jour `siteUrl` dans `profile.ts` — les deux doivent rester
+ * ET mettre à jour `siteUrl` dans `profile.ts` - les deux doivent rester
  * cohérents, sinon les balises canonical désignent une URL redirigée.
  */
 const CANONICAL_HOST = "paulhoudebine.com";

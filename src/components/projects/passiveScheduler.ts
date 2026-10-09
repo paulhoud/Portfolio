@@ -1,5 +1,5 @@
 /**
- * Planificateur d'animation passive — logique pure, sans dépendance au DOM ni à
+ * Planificateur d'animation passive - logique pure, sans dépendance au DOM ni à
  * React, afin d'être testable unitairement. Le provider n'en est qu'un mince
  * adaptateur qui lui fournit les accès au DOM (cartes visibles, lecture vidéo)
  * et les minuteurs.

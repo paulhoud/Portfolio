@@ -2,7 +2,7 @@ import type { SiteCopy } from "../types";
 
 export const enSite: SiteCopy = {
   meta: {
-    title: "Paul Houdebine — Product Designer",
+    title: "Paul Houdebine - Product Designer",
     description:
       "Portfolio of Paul Houdebine, end-to-end Product Designer: from product vision to front-end.",
   },
@@ -78,7 +78,7 @@ export const enSite: SiteCopy = {
     },
     {
       title: "Frame and prioritise",
-      body: "I turn what I learned into a clear direction — product vision, priorities, scope — and settle the trade-offs with the team.",
+      body: "I turn what I learned into a clear direction - product vision, priorities, scope - and settle the trade-offs with the team.",
     },
     {
       title: "Design, prototype and test",
@@ -103,7 +103,7 @@ export const enSite: SiteCopy = {
       },
       {
         title: "What I do",
-        body: "Product vision and framing, user research and testing, UX/UI design, AI features, design systems, specs and front-end — plus the brand: website, print, motion design and video.",
+        body: "Product vision and framing, user research and testing, UX/UI design, AI features, design systems, specs and front-end - plus the brand: website, print, motion design and video.",
       },
       {
         title: "Skills",

@@ -26,7 +26,7 @@ pnpm-debug.log*
 
 # Dépôts de fichiers bruts (exports Figma, captures pleine résolution, PDF).
 # Seules les versions optimisées, dérivées de ces sources et référencées par le
-# site, sont versionnées — les originaux pèsent plusieurs dizaines de Mo et ne
+# site, sont versionnées - les originaux pèsent plusieurs dizaines de Mo et ne
 # sont jamais servis.
 /assets/upika/
 

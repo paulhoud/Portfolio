@@ -90,7 +90,7 @@ export const profile = {
   /**
    * Portrait utilisé par le schéma Person et par l'image de partage social.
    * (L'image Open Graph 1200×630 est générée automatiquement à partir de ces
-   * données — voir `src/app/opengraph-image.tsx`.)
+   * données - voir `src/app/opengraph-image.tsx`.)
    */
   photo: "/assets/paul-houdebine.jpg",
 
@@ -100,7 +100,7 @@ export const profile = {
    * Les vignettes affichées dans les résultats de recherche sont choisies par le
    * moteur parmi les images de la page : la page d'accueil n'étant qu'une grille
    * de miniatures de projets, l'une d'elles était retenue. Ce visuel donne un
-   * candidat explicite, au format carré attendu par ces vignettes — le format
+   * candidat explicite, au format carré attendu par ces vignettes - le format
    * paysage de l'image Open Graph s'y recadrant mal.
    */
   brandImage: "/assets/brand-square.png",

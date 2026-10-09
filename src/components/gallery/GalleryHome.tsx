@@ -845,7 +845,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                               >
                                 {item.title}
                               </span>
-                              <span className="sr-only"> — {item.eyebrow}</span>
+                              <span className="sr-only"> - {item.eyebrow}</span>
                             </Link>
                           </li>
                         );
@@ -939,7 +939,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                           <button
                             type="button"
                             onClick={() => scrollToPiece(index)}
-                            aria-label={`${pad(index + 1)}. ${item.title} — ${item.eyebrow}`}
+                            aria-label={`${pad(index + 1)}. ${item.title} - ${item.eyebrow}`}
                             aria-current={index === active ? "true" : undefined}
                             className="flex h-6 w-8 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
                           >

@@ -2,8 +2,8 @@
  * Tracés officiels des marques (viewBox 24×24), inlinés pour éviter toute
  * dépendance d'exécution et toute requête réseau supplémentaire.
  *
- * Source : projet simple-icons (CC0), sauf LinkedIn — retiré de simple-icons
- * pour des raisons de marque — dont le tracé officiel est repris ici.
+ * Source : projet simple-icons (CC0), sauf LinkedIn - retiré de simple-icons
+ * pour des raisons de marque - dont le tracé officiel est repris ici.
  * Les logos restent la propriété de leurs détenteurs respectifs et ne sont
  * utilisés que pour pointer vers les profils correspondants.
  */

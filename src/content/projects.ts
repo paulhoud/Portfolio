@@ -144,7 +144,7 @@ export type ProjectStoryShot = {
    * Par défaut, un PNG est diffusé intact : ce format compresse les aplats et
    * le texte d'interface mieux que tout encodage avec perte, si bien que
    * l'optimiser abîmerait le texte *et*, mesure à l'appui, alourdirait souvent
-   * le fichier. Les JPEG, eux, sont toujours réencodés — ils sont
+   * le fichier. Les JPEG, eux, sont toujours réencodés - ils sont
    * photographiques, l'AVIF y gagne massivement.
    *
    * L'exception : les grandes planches (identité, bibliothèque de composants).
@@ -396,7 +396,7 @@ export const projects: Project[] = [
           type: "pivot",
           label: "Changement de cap",
           statement:
-            "UpikaJob devient un SIRH — une plateforme RH complète, sans renoncer à ce qu'elle sait faire de mieux.",
+            "UpikaJob devient un SIRH - une plateforme RH complète, sans renoncer à ce qu'elle sait faire de mieux.",
         },
         {
           type: "stage",
@@ -440,10 +440,10 @@ export const projects: Project[] = [
           period: "Aujourd'hui",
           product: {
             title: "Un SIRH assumé",
-            body: "La plateforme sert les équipes RH et les managers — et s'adresse à elles jusque dans sa vitrine : offre, tarifs, documentation.",
+            body: "La plateforme sert les équipes RH et les managers - et s'adresse à elles jusque dans sa vitrine : offre, tarifs, documentation.",
           },
           role: {
-            title: "Product Designer — conception & implémentation",
+            title: "Product Designer - conception & implémentation",
             body: "Je prends en charge le front-end du produit en binôme avec le développeur. Le site vitrine, je l'ai conçu puis développé seul.",
           },
           shots: [
@@ -464,15 +464,15 @@ export const projects: Project[] = [
     sections: [
       {
         title: "Vue d'ensemble",
-        body: "UpikaJob est aujourd'hui un SIRH : une plateforme qui outille les équipes RH et les managers dans le suivi de leurs collaborateurs — entretiens, compétences, objectifs, indicateurs de pilotage. Elle est née tout autrement, comme un outil destiné aux organismes de formation pour accompagner l'insertion des jeunes talents. J'en suis le seul designer depuis janvier 2024 et j'ai vécu cette transformation de l'intérieur, des premières refontes jusqu'au produit actuel.",
+        body: "UpikaJob est aujourd'hui un SIRH : une plateforme qui outille les équipes RH et les managers dans le suivi de leurs collaborateurs - entretiens, compétences, objectifs, indicateurs de pilotage. Elle est née tout autrement, comme un outil destiné aux organismes de formation pour accompagner l'insertion des jeunes talents. J'en suis le seul designer depuis janvier 2024 et j'ai vécu cette transformation de l'intérieur, des premières refontes jusqu'au produit actuel.",
       },
       {
         title: "Enjeu",
-        body: "L'entreprise a compris que son savoir-faire — structurer un accompagnement, objectiver une progression, outiller un référent — dépassait largement le cadre de l'alternance. Il fallait donc s'adresser à une population bien plus exigeante, celle des professionnels RH, sans renier l'expertise qui faisait la force du produit. Un changement d'échelle autant que de public : plus de données, plus de rôles, plus de règles métier, et des attentes d'ergonomie propres à un outil utilisé toute la journée.",
+        body: "L'entreprise a compris que son savoir-faire - structurer un accompagnement, objectiver une progression, outiller un référent - dépassait largement le cadre de l'alternance. Il fallait donc s'adresser à une population bien plus exigeante, celle des professionnels RH, sans renier l'expertise qui faisait la force du produit. Un changement d'échelle autant que de public : plus de données, plus de rôles, plus de règles métier, et des attentes d'ergonomie propres à un outil utilisé toute la journée.",
       },
       {
         title: "Solution",
-        body: "Plusieurs refontes successives, chacune accompagnant un changement de vision plutôt qu'un simple rafraîchissement. Une identité graphique reprise en profondeur, puis un design system partagé avec le développeur — primitives, tokens, composants documentés — pour que la cohérence tienne à mesure que le produit grossit. Et des fonctionnalités menées de bout en bout : interviews et tests utilisateurs, cadrage, arbitrages, specs, conception, puis front-end en binôme jusqu'à la mise en production.",
+        body: "Plusieurs refontes successives, chacune accompagnant un changement de vision plutôt qu'un simple rafraîchissement. Une identité graphique reprise en profondeur, puis un design system partagé avec le développeur - primitives, tokens, composants documentés - pour que la cohérence tienne à mesure que le produit grossit. Et des fonctionnalités menées de bout en bout : interviews et tests utilisateurs, cadrage, arbitrages, specs, conception, puis front-end en binôme jusqu'à la mise en production.",
       },
       {
         title: "Résultat",
@@ -528,7 +528,7 @@ export const projects: Project[] = [
       },
       {
         title: "Solution",
-        body: "J'ai conçu dans Figma les nouvelles maquettes et les prototypes de l'application, et créé puis maintenu un design system en design atomique pour qu'elle puisse grandir sans perdre en cohérence. En parallèle, j'ai réalisé les vidéos en motion design sous After Effects et les supports print — kakémonos, affiches, flyers — sous InDesign.",
+        body: "J'ai conçu dans Figma les nouvelles maquettes et les prototypes de l'application, et créé puis maintenu un design system en design atomique pour qu'elle puisse grandir sans perdre en cohérence. En parallèle, j'ai réalisé les vidéos en motion design sous After Effects et les supports print - kakémonos, affiches, flyers - sous InDesign.",
       },
       {
         // Source : profil LinkedIn (« La vidéo de présentation a accompagné une
@@ -587,10 +587,10 @@ export const projects: Project[] = [
     companySite: { label: "Yves Delorme", href: "https://france.yvesdelorme.com/" },
     mediaKey: "YDL",
     title: "Yves Delorme",
-    eyebrow: "L'Odyssée — refonte de l'écosystème digital",
+    eyebrow: "L'Odyssée - refonte de l'écosystème digital",
     description:
       "Refonte globale de l'expérience client pour la Maison Yves Delorme, de la recherche en boutique au prototypage haute fidélité.",
-    // Période : CV (« Yves Delorme — Ld. Designer, 2019-2020 »). Cadre : projet
+    // Période : CV (« Yves Delorme - Ld. Designer, 2019-2020 »). Cadre : projet
     // professionnalisant de HETIC, mené avec l'entreprise (Paul, 8 oct. 2026).
     context: "Projet professionnalisant HETIC · Client : Maison Yves Delorme · 2019–2020",
     logo: "/assets/Logo-2-2.svg",
@@ -757,7 +757,7 @@ export const projects: Project[] = [
       },
       {
         title: "Résultat",
-        body: "L'équipe a pu s'appuyer sur des livrables concrets — cartographies, storyboards et experience maps — pour orienter ses décisions et renforcer la cohérence de ses actions sur le terrain.",
+        body: "L'équipe a pu s'appuyer sur des livrables concrets - cartographies, storyboards et experience maps - pour orienter ses décisions et renforcer la cohérence de ses actions sur le terrain.",
       },
     ],
     gallery: [],
@@ -788,7 +788,7 @@ export const projects: Project[] = [
         size: "wide",
       },
       {
-        title: "Accelerating Local Impact — film de restitution",
+        title: "Accelerating Local Impact - film de restitution",
         image: videoSanofiImpact,
         size: "wide",
         youtubeId: "M0JuT4dlrGg",
@@ -816,7 +816,7 @@ export const projects: Project[] = [
     detailSubtitle: "Missions UX/UI et branding en agence web",
     description:
       "Stage UX/UI à l'agence web Fidesio : maquettes du site de Montaigne Capital, outil interne de suivi des projets et bannières de newsletters pour une boutique de musée.",
-    // Sources : profil LinkedIn (« Fidesio — Stagiaire UX/UI, juillet - septembre
+    // Sources : profil LinkedIn (« Fidesio - Stagiaire UX/UI, juillet - septembre
     // 2018 ») et précisions de Paul du 8 oct. 2026 : missions UX/UI et branding
     // pour Montaigne Capital, une boutique de musée et l'agence elle-même.
     // Sanofi Espoir, longtemps attribué à cette page, était une mission SÆGUS.
@@ -888,13 +888,13 @@ export const projects: Project[] = [
         type: "media",
         media: [
           {
-            title: "Montaigne Capital — page d'accueil",
+            title: "Montaigne Capital - page d'accueil",
             image: fidesioWebsite,
             size: "wide",
             variant: "light",
           },
           {
-            title: "Montaigne Capital — fiche d'un fonds",
+            title: "Montaigne Capital - fiche d'un fonds",
             image: fidesioDashboard,
             size: "wide",
             variant: "light",
@@ -915,12 +915,12 @@ export const projects: Project[] = [
         layout: "row",
         media: [
           {
-            title: "Newsletter — offre mode",
+            title: "Newsletter - offre mode",
             image: fidesioBannerTeal,
             size: "wide",
           },
           {
-            title: "Newsletter — sélection impressionniste",
+            title: "Newsletter - sélection impressionniste",
             image: fidesioBannerRed,
             size: "wide",
           },
@@ -964,7 +964,7 @@ export const projects: Project[] = [
       },
       {
         title: "Enjeux",
-        body: "Il fallait produire quatre cas d'usage animés — trois sont présentés ci-dessous —, avec de nombreuses scènes et une charge d'animation importante, dans un délai court pour un client de longue date.",
+        body: "Il fallait produire quatre cas d'usage animés - trois sont présentés ci-dessous -, avec de nombreuses scènes et une charge d'animation importante, dans un délai court pour un client de longue date.",
       },
       {
         title: "Solution",
@@ -1238,7 +1238,7 @@ export const projects: Project[] = [
           },
           {
             title: "Solution",
-            body: "Nous avons réparti les rôles, structuré les étapes de production — écriture, préparation, tournage, montage — et maintenu une coordination continue sur le plateau.",
+            body: "Nous avons réparti les rôles, structuré les étapes de production - écriture, préparation, tournage, montage - et maintenu une coordination continue sur le plateau.",
           },
           {
             title: "Résultat",

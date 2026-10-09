@@ -62,7 +62,7 @@ const DOCK_PILL = cn(
  *   (pastilles du même verre). Le rang est une grille à trois
  *   colonnes « 1fr auto 1fr » : les colonnes latérales sont égales tant qu'il
  *   y a la place (liens exactement au centre) et, quand la place manque, la
- *   colonne de droite garde sa largeur et les liens glissent vers le logo —
+ *   colonne de droite garde sa largeur et les liens glissent vers le logo -
  *   jamais de chevauchement, sans point de rupture supplémentaire.
  * - Tablette (≥ 768 px) : logo, liens au centre, bouton menu pour le reste.
  * - Téléphone : logo et bouton menu ; le menu déroule les liens (accueil
@@ -277,7 +277,7 @@ export function SiteHeader() {
       </motion.header>
 
       {/* Grand écran : les réglages quittent la capsule pour les coins bas de
-          l'écran, dans deux petites pastilles du même verre — la langue à
+          l'écran, dans deux petites pastilles du même verre - la langue à
           gauche, le son et la pause à droite. En dessous, ils sont dans le menu. */}
       <div className="pointer-events-none fixed inset-x-6 bottom-6 z-40 hidden items-end justify-between text-white lg:flex">
         <div className={cn(DOCK_PILL, "px-3")}>
@@ -369,7 +369,7 @@ export function SiteHeader() {
 
 /**
  * Lien du header grand écran : une pastille de verre s'allume au survol ; la
- * page active garde la sienne, en gras, avec un trait de lumière dessous —
+ * page active garde la sienne, en gras, avec un trait de lumière dessous -
  * réservé à elle, pour qu'un lien survolé ne se confonde pas avec elle.
  */
 function HeaderNavLink({

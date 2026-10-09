@@ -52,7 +52,7 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
             {/* Le nom du projet est porté par le h1 (lu par les moteurs et les
                 lecteurs d'écran) sans modifier le rendu visuel existant. */}
             <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
-              <span className="sr-only">{project.title} — </span>
+              <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
             <div
@@ -110,7 +110,7 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
           <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
             {/* Idem : h1 sémantique, rendu visuel inchangé. */}
             <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
-              <span className="sr-only">{project.title} — </span>
+              <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
             {project.detailSubtitle ? (
@@ -255,7 +255,7 @@ function CaseStudySection({
         <span className="font-bold uppercase tracking-[0.04em] text-white">
           {section.title}
         </span>
-        <span className="text-white/45"> — </span>
+        <span className="text-white/45"> - </span>
         {section.body}
       </p>
     );
@@ -406,7 +406,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
             <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
-              <span className="sr-only">{project.title} — </span>
+              <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
             <div
@@ -517,7 +517,7 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
           {/* Cette variante n'affiche pas de titre : le h1 reste accessible
               aux moteurs sans altérer la mise en page éditoriale. */}
           <h1 className="sr-only">
-            {project.title} — {project.eyebrow}
+            {project.title} - {project.eyebrow}
           </h1>
           <ScrollRevealItem className="relative mb-10 flex flex-col items-center md:mb-14">
             <span

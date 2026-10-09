@@ -2,7 +2,7 @@ import type { SiteCopy } from "../types";
 
 export const frSite: SiteCopy = {
   meta: {
-    title: "Paul Houdebine — Product Designer",
+    title: "Paul Houdebine - Product Designer",
     description:
       "Portfolio de Paul Houdebine, Product Designer de bout en bout : de la vision produit au front-end.",
   },
@@ -79,7 +79,7 @@ export const frSite: SiteCopy = {
     },
     {
       title: "Cadrer et arbitrer",
-      body: "Je synthétise ce que j'ai appris en une direction claire — vision produit, priorités, périmètre — que j'arbitre avec l'équipe.",
+      body: "Je synthétise ce que j'ai appris en une direction claire - vision produit, priorités, périmètre - que j'arbitre avec l'équipe.",
     },
     {
       title: "Concevoir, prototyper et tester",
@@ -104,7 +104,7 @@ export const frSite: SiteCopy = {
       },
       {
         title: "Ce que je fais",
-        body: "Vision produit et cadrage, recherche et tests utilisateurs, conception UX/UI, fonctionnalités d'IA, design system, specs et front-end — puis l'identité de la marque : site, print, motion design et vidéo.",
+        body: "Vision produit et cadrage, recherche et tests utilisateurs, conception UX/UI, fonctionnalités d'IA, design system, specs et front-end - puis l'identité de la marque : site, print, motion design et vidéo.",
       },
       {
         title: "Compétences",

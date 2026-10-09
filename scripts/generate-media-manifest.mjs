@@ -104,7 +104,7 @@ for (const [key, entry] of [...entries].sort(([a], [b]) => a.localeCompare(b))) 
   } else {
     console.warn(
       `[media-manifest] paire incomplète pour "${key}" ` +
-        `(placeholder=${entry.placeholder ?? "∅"}, video=${entry.video ?? "∅"}) — ignorée.`,
+        `(placeholder=${entry.placeholder ?? "∅"}, video=${entry.video ?? "∅"}) - ignorée.`,
     );
   }
 }
@@ -119,7 +119,7 @@ const body = keys
   )
   .join("\n");
 
-const file = `// AUTO-GÉNÉRÉ par scripts/generate-media-manifest.mjs — ne pas éditer à la main.
+const file = `// AUTO-GÉNÉRÉ par scripts/generate-media-manifest.mjs - ne pas éditer à la main.
 // Régénéré automatiquement via les scripts npm \`predev\` / \`prebuild\`.
 
 export type MediaEntry = {

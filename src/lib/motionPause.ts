@@ -50,7 +50,7 @@ function getSnapshot() {
   }
 }
 
-/** `[pause, basculer]` — faux au rendu serveur. */
+/** `[pause, basculer]` - faux au rendu serveur. */
 export function useMotionPaused(): [boolean, () => void] {
   const paused = useSyncExternalStore(subscribe, getSnapshot, () => false);
   const toggle = useCallback(() => setMotionPaused(!getSnapshot()), []);

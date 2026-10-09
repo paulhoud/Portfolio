@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
   ...shareMetadata({
     type: "profile",
-    title: `À propos — ${profile.name}`,
+    title: `À propos - ${profile.name}`,
     description: `Le parcours, les compétences et la façon de travailler de ${profile.name}, ${profile.jobTitle}.`,
     url: "/about",
   }),

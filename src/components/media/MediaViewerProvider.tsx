@@ -40,7 +40,7 @@ export function useMediaViewer() {
  *
  * L'overlay est rendu via un portail dans `document.body` : il échappe ainsi au
  * contexte d'empilement du calque de transition (qui porte un `transform`), et
- * son `z-index` s'applique au niveau racine — au-dessus de toute la navigation
+ * son `z-index` s'applique au niveau racine - au-dessus de toute la navigation
  * (header, menu mobile, bouton retour-en-haut). C'est une vraie modale.
  */
 export function MediaViewerProvider({
@@ -68,7 +68,7 @@ export function MediaViewerProvider({
     (item: ProjectMedia) => {
       // Les captures du récit sont converties en médias au moment de la
       // collecte : l'objet transmis n'est donc pas celui de la liste. On se
-      // repère au fichier plutôt qu'au titre — un même visuel peut être montré
+      // repère au fichier plutôt qu'au titre - un même visuel peut être montré
       // à deux endroits sous des légendes différentes, et deux légendes
       // identiques peuvent désigner des visuels distincts.
       const key = mediaKeyOf(item);
