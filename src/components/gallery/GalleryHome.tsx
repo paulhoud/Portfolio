@@ -670,7 +670,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1, transition: { delay: calm ? 0 : 0.6, duration: 0.8 } }}
                 exit={{ opacity: 0, transition: { duration: 0.4 } }}
-                className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-end gap-3 px-6 pb-[20svh] text-center"
+                className={cn(
+                  "pointer-events-none absolute inset-0 z-10 flex flex-col items-center gap-3 px-6 text-center",
+                  // South Park : le message monte dans le ciel, pour ne pas cacher les enfants.
+                  landed === "southpark" ? "justify-start pt-[calc(var(--header-height)+5svh)]" : "justify-end pb-[20svh]",
+                )}
               >
                 {/* Sur une image claire, le message se pose sur un voile sombre. */}
                 <div
@@ -703,8 +707,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 </div>
                 {/* Mention de non-affiliation, en petit en bas de l'image. */}
                 {landed !== "lattice" ? (
-                  <p className="absolute inset-x-0 bottom-3 px-6 text-center text-[0.6rem] leading-snug text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.65)]">
-                    {landed === "dofus" ? t.site.gallery.disclaimerDofus : t.site.gallery.disclaimerSouthPark}
+                  <p className="absolute inset-x-0 bottom-3 flex justify-center px-4">
+                    {/* Pastille sombre : lisible sur la neige comme sur l'herbe dorée. */}
+                    <span className="rounded-full bg-[#0b0b10]/60 px-3 py-1 text-center text-[0.6rem] leading-snug text-white/85 backdrop-blur-sm">
+                      {landed === "dofus" ? t.site.gallery.disclaimerDofus : t.site.gallery.disclaimerSouthPark}
+                    </span>
                   </p>
                 ) : null}
               </motion.div>
@@ -973,10 +980,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 }
 
 /**
- * Les dimensions où l'on peut tomber. South Park s'ajoutera quand son image
- * sans les personnages sera prête (public/dimensions/south-park.webp).
+ * Les dimensions où l'on peut tomber (images dans public/dimensions).
  */
-const DIMENSIONS: DimensionKind[] = ["lattice", "dofus"];
+const DIMENSIONS: DimensionKind[] = ["lattice", "dofus", "southpark"];
 const DIMENSION_KEY = "portfolio-dimension";
 function readDimension(): DimensionKind | null {
   try {

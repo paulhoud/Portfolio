@@ -59,7 +59,7 @@ const RECIPES: Record<ImageDimensionKind, Recipe> = {
     mist: 0.4,
     rays: 1,
   },
-  // South Park (© Comedy Central) : la route enneigée, sans les enfants.
+  // South Park (© Comedy Central) : les quatre enfants à l'arrêt de bus, sous la neige.
   southpark: {
     image: "/dimensions/south-park.webp",
     focus: [0.5, 0.5],
