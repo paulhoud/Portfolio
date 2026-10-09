@@ -60,77 +60,110 @@ function apply() {
   // Son coupé ou onglet masqué : le son d'objet en cours s'arrête aussi.
   if (context && !on) stopClip(context);
   // Thème d'une dimension : arrêté si l'on coupe le son, en pause si l'onglet
-  // est masqué ; la nappe d'ambiance se tait tant qu'il joue.
+  // est masqué.
   if (theme) {
     if (!getSnapshot()) haltTheme();
     else if (document.hidden) theme.pause();
     else void theme.play().catch(() => {});
   }
-  const ambient = on && !theme;
+  // Dans une dimension, la nappe d'ambiance se tait jusqu'au retour, même
+  // une fois ses musiques terminées : elles ont la place pour elles seules.
+  const ambient = on && !inDimension;
   if (!context || (!ambient && !engine)) return;
   void ensureEngine().then((ready) => ready?.setOn(ambient));
 }
 
 /*
  * Musiques des dimensions (public/sounds/dimensions) : jouées l'une après
- * l'autre à l'arrivée, une seule fois, puis le silence (la nappe reprend).
- * Lues en flux (élément audio) : les décoder en entier pèserait lourd.
+ * l'autre à l'arrivée, une seule fois, avec un fondu enchaîné entre deux
+ * pistes. Lues en flux (élément audio) : les décoder en entier pèserait lourd.
  */
 const THEME_VOLUME = 0.4;
+/** Durée du fondu enchaîné entre deux musiques qui se suivent (secondes). */
+const THEME_CROSSFADE = 1.5;
 let theme: HTMLAudioElement | null = null;
 let themeQueue: string[] = [];
+/** Le visiteur est dans une dimension (de l'arrivée au retour). */
+let inDimension = false;
 
-function nextTheme() {
-  const url = themeQueue.shift();
-  if (!url) {
-    theme = null;
-    apply();
-    return;
-  }
-  const audio = new Audio(url);
-  audio.volume = THEME_VOLUME;
-  audio.addEventListener("ended", () => {
-    if (theme === audio) nextTheme();
-  });
-  theme = audio;
-  apply();
-  void audio.play().catch(() => {
-    if (theme !== audio) return;
-    theme = null;
-    themeQueue = [];
-    apply();
-  });
-}
-
-/** Coupe le thème en cours en un court fondu, sans relancer la nappe. */
-function haltTheme() {
-  themeQueue = [];
-  const audio = theme;
-  theme = null;
-  if (!audio) return;
-  const start = audio.volume;
+/** Amène le volume d'une piste à `to` en `seconds`, puis appelle `done`. */
+function fadeAudio(audio: HTMLAudioElement, to: number, seconds: number, done?: () => void) {
+  const from = audio.volume;
+  const steps = Math.max(1, Math.round((seconds * 1000) / 50));
   let step = 0;
-  const fade = window.setInterval(() => {
+  const timer = window.setInterval(() => {
     step += 1;
-    audio.volume = Math.max(0, start * (1 - step / 12));
-    if (step >= 12) {
-      window.clearInterval(fade);
-      audio.pause();
+    audio.volume = Math.min(1, Math.max(0, from + ((to - from) * step) / steps));
+    if (step >= steps) {
+      window.clearInterval(timer);
+      done?.();
     }
   }, 50);
 }
 
-/** Joue les musiques d'une dimension à la suite, si le son du site est actif. */
-export function playThemes(urls: string[]) {
-  haltTheme();
-  if (!getSnapshot()) return;
-  themeQueue = [...urls];
-  nextTheme();
+function nextTheme(crossfade = false) {
+  const url = themeQueue.shift();
+  if (!url) {
+    theme = null;
+    return;
+  }
+  const audio = new Audio(url);
+  audio.volume = crossfade ? 0 : THEME_VOLUME;
+  // Juste avant la fin, la piste suivante entre pendant que celle-ci s'efface.
+  let handedOver = false;
+  const handOver = () => {
+    if (handedOver || theme !== audio) return;
+    handedOver = true;
+    fadeAudio(audio, 0, THEME_CROSSFADE, () => audio.pause());
+    nextTheme(true);
+  };
+  audio.addEventListener("timeupdate", () => {
+    if (themeQueue.length > 0 && audio.duration - audio.currentTime <= THEME_CROSSFADE) handOver();
+  });
+  audio.addEventListener("ended", () => {
+    if (theme !== audio || handedOver) return;
+    if (themeQueue.length > 0) nextTheme();
+    else theme = null;
+  });
+  theme = audio;
+  void audio
+    .play()
+    .then(() => {
+      if (crossfade) fadeAudio(audio, THEME_VOLUME, THEME_CROSSFADE);
+    })
+    .catch(() => {
+      if (theme !== audio) return;
+      theme = null;
+      themeQueue = [];
+    });
 }
 
-/** Arrête la musique d'une dimension (retour, départ de la page). */
+/** Coupe le thème en cours en un court fondu. */
+function haltTheme() {
+  themeQueue = [];
+  const audio = theme;
+  theme = null;
+  if (audio) fadeAudio(audio, 0, 0.6, () => audio.pause());
+}
+
+/**
+ * Arrivée dans une dimension : la nappe se tait et ses musiques se jouent à
+ * la suite, si le son du site est actif.
+ */
+export function playThemes(urls: string[]) {
+  haltTheme();
+  inDimension = true;
+  if (getSnapshot()) {
+    themeQueue = [...urls];
+    nextTheme();
+  }
+  apply();
+}
+
+/** Retour d'une dimension (ou départ de la page) : sa musique s'arrête, la nappe revient. */
 export function stopThemes() {
-  if (!theme && themeQueue.length === 0) return;
+  if (!inDimension && !theme) return;
+  inDimension = false;
   haltTheme();
   apply();
 }

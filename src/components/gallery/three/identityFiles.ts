@@ -186,9 +186,10 @@ function cutDecal(geometry: BufferGeometry, decal: ModelDecal, portrait: boolean
     let mode = 0;
     let best = -1;
     for (const [bin, area] of bins) if (area > best) [mode, best] = [bin, area];
-    const limit = mode * step - reach * 0.015;
+    // (Plus loin dans le sens visé = en retrait : roues, axes.)
+    const limit = mode * step + reach * 0.015;
     faces.forEach((face, i) => {
-      if (keep[i] && face.center.dot(facing) < limit) keep[i] = false;
+      if (keep[i] && face.center.dot(facing) > limit) keep[i] = false;
     });
   }
   if (!keep.some(Boolean)) return null;
