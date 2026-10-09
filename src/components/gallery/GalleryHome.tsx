@@ -39,6 +39,7 @@ import type {
   GalleryPieceInput,
   GalleryRenderer,
   WorldPhase,
+  DimensionKind,
 } from "./three/galleryRenderer";
 
 const pad = (value: number) => String(value).padStart(2, "0");
@@ -344,11 +345,19 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const [textAsImage, setTextAsImage] = useState(false);
   /** Sortie de l'autre dimension (bouton « Retour », touche Échap). */
   const leaveVoidRef = useRef<() => void>(() => {});
+  /** Dimension où l'on a atterri (le treillis, ou une image animée). */
+  const [landed, setLanded] = useState<DimensionKind>("lattice");
   const destroyWorld = useCallback(() => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
     const renderer = rendererRef.current;
     const stage = stageRef.current?.getBoundingClientRect();
+    // Jamais deux fois de suite la même dimension.
+    const previous = readDimension();
+    const choices = DIMENSIONS.filter((kind) => kind !== previous);
+    const next = choices[Math.floor(Math.random() * choices.length)];
+    writeDimension(next);
+    setLanded("lattice");
     playSfx("blackhole");
     let started = false;
     const finish = () => {
@@ -370,10 +379,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           animation.play();
         }
       }
+      if (phase === "lost") setLanded(renderer?.shownDimension() ?? "lattice");
       if (phase === "done") finish();
       else setDoom(phase);
     };
-    started = renderer?.destroyWorld(onPhase) ?? false;
+    started = renderer?.destroyWorld(onPhase, next) ?? false;
     if (started && renderer) {
       leaveVoidRef.current = () => {
         renderer.returnFromVoid();
@@ -662,21 +672,41 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 exit={{ opacity: 0, transition: { duration: 0.4 } }}
                 className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-end gap-3 px-6 pb-[20svh] text-center"
               >
-                <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85">
-                  {t.site.gallery.lostTitle}
-                </p>
-                <p className="text-[0.65rem] uppercase tracking-[0.24em] text-white/50">{t.site.gallery.lostHint}</p>
-                <button
-                  ref={backFromVoidRef}
-                  type="button"
-                  onClick={() => leaveVoidRef.current()}
-                  className="pointer-events-auto mt-5 flex h-11 items-center gap-2.5 rounded-full bg-white pl-4 pr-5 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                {/* Sur une image claire, le message se pose sur un voile sombre. */}
+                <div
+                  className={cn(
+                    "flex flex-col items-center gap-3",
+                    landed !== "lattice" && "rounded-2xl bg-[#0b0b10]/60 px-7 py-5 backdrop-blur-md",
+                  )}
                 >
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5M11 6l-6 6 6 6" />
-                  </svg>
-                  {t.site.gallery.lostBack}
-                </button>
+                  <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85">
+                    {t.site.gallery.lostTitle}
+                  </p>
+                  <p className={cn("text-[0.65rem] uppercase tracking-[0.24em]", landed === "lattice" ? "text-white/50" : "text-white/65")}>
+                    {landed === "dofus"
+                      ? t.site.gallery.lostHintDofus
+                      : landed === "southpark"
+                        ? t.site.gallery.lostHintSouthPark
+                        : t.site.gallery.lostHint}
+                  </p>
+                  <button
+                    ref={backFromVoidRef}
+                    type="button"
+                    onClick={() => leaveVoidRef.current()}
+                    className="pointer-events-auto mt-5 flex h-11 items-center gap-2.5 rounded-full bg-white pl-4 pr-5 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M11 6l-6 6 6 6" />
+                    </svg>
+                    {t.site.gallery.lostBack}
+                  </button>
+                </div>
+                {/* Mention de non-affiliation, en petit en bas de l'image. */}
+                {landed !== "lattice" ? (
+                  <p className="absolute inset-x-0 bottom-3 px-6 text-center text-[0.6rem] leading-snug text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.65)]">
+                    {landed === "dofus" ? t.site.gallery.disclaimerDofus : t.site.gallery.disclaimerSouthPark}
+                  </p>
+                ) : null}
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -940,6 +970,28 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       </section>
     </>
   );
+}
+
+/**
+ * Les dimensions où l'on peut tomber. South Park s'ajoutera quand son image
+ * sans les personnages sera prête (public/dimensions/south-park.webp).
+ */
+const DIMENSIONS: DimensionKind[] = ["lattice", "dofus"];
+const DIMENSION_KEY = "portfolio-dimension";
+function readDimension(): DimensionKind | null {
+  try {
+    const value = window.sessionStorage.getItem(DIMENSION_KEY);
+    return DIMENSIONS.find((kind) => kind === value) ?? null;
+  } catch {
+    return null;
+  }
+}
+function writeDimension(value: DimensionKind) {
+  try {
+    window.sessionStorage.setItem(DIMENSION_KEY, value);
+  } catch {
+    /* stockage indisponible : le tirage reste au hasard */
+  }
 }
 
 /**

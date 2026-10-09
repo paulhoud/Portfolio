@@ -40,6 +40,11 @@ export const frSite: SiteCopy = {
     scrollHint: "Faire défiler",
     lostTitle: "Vous dérivez dans une autre dimension.",
     lostHint: "Les projets flottent quelque part par ici…",
+    lostHintDofus: "Un marais doré, quelque part dans le monde des Douze…",
+    lostHintSouthPark: "Il neige sur une petite ville du Colorado…",
+    disclaimerDofus: "Clin d'œil non officiel à Dofus (© Ankama). Sans usage commercial, sans affiliation.",
+    disclaimerSouthPark:
+      "Clin d'œil non officiel à South Park (© Comedy Central). Sans usage commercial, sans affiliation.",
     lostBack: "Retour",
     secretHint: "Psst… tapez « destroy » sur l'accueil.",
   },

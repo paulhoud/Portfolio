@@ -63,6 +63,11 @@ export type SiteCopy = {
     /** Fonction cachée « destroy the world » : perdu dans une autre dimension. */
     lostTitle: string;
     lostHint: string;
+    /** Dimensions en image : indice, et mention de non-affiliation en bas. */
+    lostHintDofus: string;
+    lostHintSouthPark: string;
+    disclaimerDofus: string;
+    disclaimerSouthPark: string;
     /** Bouton qui fait renaître le monde (retour à l'accueil et aux projets). */
     lostBack: string;
     /** Indice glissé dans la console du navigateur. */

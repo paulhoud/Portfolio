@@ -45,6 +45,7 @@ import {
 } from "./layout";
 import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
+import { createImageDimension, type ImageDimension, type ImageDimensionKind } from "./imageDimension";
 import { IDENTITY_CATALOG } from "./identity";
 import { loadIdentityModel, type LoadedModel } from "./identityFiles";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
@@ -91,6 +92,8 @@ export type GalleryCallbacks = {
  * perdu dans une autre dimension jusqu'à `returnFromVoid` ; renaissance, fin.
  */
 export type WorldPhase = "suck" | "collapse" | "lost" | "rebirth" | "done";
+/** Où l'on tombe après l'effondrement : le treillis, ou une image animée. */
+export type DimensionKind = "lattice" | ImageDimensionKind;
 
 export type GalleryOptions = {
   calm: boolean;
@@ -123,9 +126,14 @@ export type GalleryRenderer = {
    */
   /**
    * `dimension` : où l'on tombe après l'effondrement — le treillis 3D, ou
-   * une scène dessinée par la page (« flat » : la 3D s'efface).
+   * une image animée (cf. imageDimension.ts), chargée à ce moment-là.
    */
-  destroyWorld(onPhase: (phase: WorldPhase) => void, dimension?: "lattice" | "flat"): boolean;
+  destroyWorld(onPhase: (phase: WorldPhase) => void, dimension?: DimensionKind): boolean;
+  /**
+   * La dimension réellement affichée (le treillis si l'image n'a pas pu se
+   * charger à temps), connue dès l'étape « lost ».
+   */
+  shownDimension(): DimensionKind | null;
   /**
    * Photographie du texte de la page (cf. textSnapshot), que le trou noir
    * tord et avale à la place du texte lui-même ; `null` la retire.
@@ -588,8 +596,9 @@ export function createGalleryRenderer(
     scale: number;
     /** Instant du retour demandé depuis l'autre dimension (sinon on y reste). */
     returnAt: number | null;
-    /** Treillis 3D, ou scène dessinée par la page. */
-    lattice: boolean;
+    /** Dimension demandée, et celle qu'on voit vraiment (fixée à l'arrivée). */
+    kind: DimensionKind;
+    shown: DimensionKind | null;
     /** Prochaine chute d'objet dans le treillis (ms). */
     nextFall: number;
     /**
@@ -605,6 +614,7 @@ export function createGalleryRenderer(
   let world: World | null = null;
   let blackHole: BlackHole | null = null;
   let dimension: Dimension | null = null;
+  let scenery: ImageDimension | null = null;
   let ready = false;
   const createdAt = performance.now();
 
@@ -1334,6 +1344,9 @@ export function createGalleryRenderer(
     const wt = !doom ? -1 : doom.returnAt === null ? Math.min(raw, LOST_HOLD) : 6.0 + Math.max(0, now - doom.returnAt) / 1000;
     if (doom) {
       busy = true;
+      if (wt >= 4.4 && doom.shown === null) {
+        doom.shown = doom.kind !== "lattice" && scenery?.kind === doom.kind && scenery.ready ? doom.kind : "lattice";
+      }
       const reach = (phase: WorldPhase, at: number) => {
         if (wt >= at && !doom.reached.has(phase)) {
           doom.reached.add(phase);
@@ -1363,6 +1376,7 @@ export function createGalleryRenderer(
         floorUniforms.uDim.value = 0;
         warp.uWarp.value = 0;
         dimension?.update(camera, 0, 0);
+        scenery?.update(0, 0, width, height, 1, pointer);
         doom.onPhase("done");
         updateScheduler();
       }
@@ -1616,14 +1630,13 @@ export function createGalleryRenderer(
     }
     // L'autre dimension : elle apparaît dans l'éclair et s'efface au retour.
     if (doom && dimension) {
-      const presence = !doom.lattice
-        ? 0
-        : doom.returnAt === null
-          ? easeOutCubic(clamp01((raw - 4.4) / 1.2))
-          : 1 - clamp01((now - doom.returnAt) / 700);
-      dimension.update(camera, presence, now / 1000);
+      const presence =
+        doom.returnAt === null ? easeOutCubic(clamp01((raw - 4.4) / 1.2)) : 1 - clamp01((now - doom.returnAt) / 700);
+      const lattice = doom.shown === null || doom.shown === "lattice";
+      dimension.update(camera, lattice ? presence : 0, now / 1000);
+      scenery?.update(lattice ? 0 : presence, now / 1000, width, height, renderer.getPixelRatio(), pointer);
       // De temps en temps, un objet tombe dans le vide, au fond de la perspective.
-      if (doom.lattice && doom.returnAt === null && raw > 5.0 && now >= doom.nextFall) {
+      if (lattice && doom.returnAt === null && raw > 5.0 && now >= doom.nextFall) {
         spawnFaller(now);
         doom.nextFall = now + random(900, 2200);
       }
@@ -1661,6 +1674,15 @@ export function createGalleryRenderer(
         dimension = createDimension(pieces.filter((piece) => piece.loaded).map((piece) => piece.mesh.material.uniforms.uMap.value));
         scene.add(dimension.group);
       }
+      // L'image se charge pendant l'aspiration (plus de quatre secondes).
+      if (dimensionKind !== "lattice" && scenery?.kind !== dimensionKind) {
+        if (scenery) {
+          scene.remove(scenery.group);
+          scenery.dispose();
+        }
+        scenery = createImageDimension(dimensionKind, invalidate, coarse);
+        scene.add(scenery.group);
+      }
       // Le trou s'ouvre au milieu de l'écran (et non du cadre), au loin
       // derrière le projet qu'on regarde.
       const pose = cameraPose(layouts, station, 1);
@@ -1673,7 +1695,8 @@ export function createGalleryRenderer(
         // Plus petit sur un écran en hauteur (téléphone), où il remplirait la largeur.
         scale: ((1.15 * depth) / (depth - HOLE_BEHIND + 1.2)) * clamp(camera.aspect / 1.1, 0.65, 1),
         returnAt: null,
-        lattice: dimensionKind !== "flat",
+        kind: dimensionKind,
+        shown: null,
         nextFall: 0,
         hiddenPieces: new Set(pieces.flatMap((piece, index) => (piece.loaded && onScreen(piece.mesh) ? [] : [index]))),
         hiddenSatellites: new Set(satellites.flatMap((mesh, index) => (mesh.visible && onScreen(mesh) ? [] : [index]))),
@@ -1712,6 +1735,9 @@ export function createGalleryRenderer(
       scene.add(mesh);
       textLayer = { mesh, texture };
       invalidate();
+    },
+    shownDimension() {
+      return world?.shown ?? null;
     },
     returnFromVoid() {
       const doom = world;
@@ -1842,6 +1868,7 @@ export function createGalleryRenderer(
       }
       emptyGeometry.dispose();
       dimension?.dispose();
+      scenery?.dispose();
       removeTextLayer();
       for (const faller of fallers) removeFaller(faller);
       for (const geometry of geometries.values()) geometry.dispose();
