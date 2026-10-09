@@ -30,11 +30,6 @@ export const frSite: SiteCopy = {
       "Product Designer de bout en bout : vision produit, recherche utilisateur, UX/UI, design system et front-end, du cadrage à la mise en production.",
     listLabel: "Projets",
     viewProject: "Voir le projet",
-    overview: "Vue d'ensemble",
-    close: "Fermer",
-    viewSwitch: "Affichage de l'accueil",
-    showGrid: "Grille",
-    showGallery: "Galerie",
   },
   language: {
     switchTo: "Changer de langue",
@@ -43,7 +38,6 @@ export const frSite: SiteCopy = {
   },
   common: {
     back: "Retour",
-    projectGallery: "Projets",
     viewOnFigma: "Voir sur Figma",
     watchVideo: "Voir la vidéo",
     seeSite: "Voir le site",

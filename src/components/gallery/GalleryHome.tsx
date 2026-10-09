@@ -10,12 +10,10 @@ import { getMotionEnd, getMotionStart, getProjectMedia, getTileLight } from "@/c
 import type { Project } from "@/content/projects";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
-import { setHomeView } from "@/lib/homeView";
 import { requestIdle } from "@/lib/idle";
 import { useMotionPaused } from "@/lib/motionPause";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
-import { OverviewSheet } from "./OverviewSheet";
 import type { FrameRect, GalleryFailure, GalleryPieceInput, GalleryRenderer } from "./three/galleryRenderer";
 
 const pad = (value: number) => String(value).padStart(2, "0");
@@ -134,7 +132,6 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   // d'un projet, saut dans la liste) : la bascule est alors instantanée.
   const [jumped, setJumped] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
-  const [overviewOpen, setOverviewOpen] = useState(false);
   const count = projects.length;
 
   /** Hauteur d'une tranche, lue sur les ancres pour rester fidèle au CSS. */
@@ -322,20 +319,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     };
   }, [scene, measureFrame]);
 
-  // Pas de rendu quand la scène est hors de l'écran, cachée par la vue
-  // d'ensemble ou l'onglet masqué.
-  const overviewOpenRef = useRef(overviewOpen);
-  const applyRunningRef = useRef<() => void>(() => {});
-  useEffect(() => {
-    overviewOpenRef.current = overviewOpen;
-    applyRunningRef.current();
-  }, [overviewOpen]);
+  // Pas de rendu quand la scène est hors de l'écran ou l'onglet masqué.
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage || scene !== "ready") return;
     let onScreen = true;
-    const apply = () => rendererRef.current?.setRunning(onScreen && !document.hidden && !overviewOpenRef.current);
-    applyRunningRef.current = apply;
+    const apply = () => rendererRef.current?.setRunning(onScreen && !document.hidden);
     const observer = new IntersectionObserver(([entry]) => {
       onScreen = entry.isIntersecting;
       apply();
@@ -343,7 +332,6 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     observer.observe(stage);
     document.addEventListener("visibilitychange", apply);
     return () => {
-      applyRunningRef.current = () => {};
       observer.disconnect();
       document.removeEventListener("visibilitychange", apply);
     };
@@ -352,12 +340,6 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   useEffect(() => rendererRef.current?.setCalm(calm), [calm, scene]);
   useEffect(() => rendererRef.current?.setHighlight(preview), [preview, scene]);
   const live = scene === "ready";
-
-  const closeOverview = useCallback(() => setOverviewOpen(false), []);
-  const switchToGrid = () => {
-    setHomeView("grid");
-    window.scrollTo({ top: 0 });
-  };
 
   const shown = preview ?? (live ? hovered3d : null) ?? active;
   const project = projects[shown];
@@ -474,12 +456,6 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     })}
                   </ol>
                 </nav>
-
-                <GalleryControls
-                  className="mt-6 hidden shrink-0 lg:flex"
-                  onOverview={() => setOverviewOpen(true)}
-                  onGrid={switchToGrid}
-                />
               </div>
 
               {/* Scène : le cadre du projet, puis son cartel. */}
@@ -561,7 +537,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   </div>
                 </div>
 
-                {/* Mobile : bouton principal, pastilles des projets, réglages. */}
+                {/* Mobile : bouton principal et pastilles des projets. */}
                 <div className="pointer-events-auto mx-auto mt-3 w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:min-w-0 [@media(max-height:500px)]:flex-1">
                   <Link
                     href={`/projects/${project.slug}`}
@@ -587,19 +563,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       ))}
                     </ol>
                   </nav>
-                  <GalleryControls
-                    className="mt-2 flex"
-                    onOverview={() => setOverviewOpen(true)}
-                    onGrid={switchToGrid}
-                  />
                 </div>
               </div>
             </div>
           </PassiveAnimationProvider>
         </div>
       </section>
-
-      <OverviewSheet open={overviewOpen} onClose={closeOverview} projects={projects} />
     </>
   );
 }
@@ -619,40 +588,5 @@ function CartelContent({ project, index, count }: { project: Project; index: num
         </p>
       ) : null}
     </>
-  );
-}
-
-/** « Vue d'ensemble » et choix de l'affichage de l'accueil (galerie ou grille). */
-function GalleryControls({
-  className,
-  onOverview,
-  onGrid,
-}: {
-  className?: string;
-  onOverview: () => void;
-  onGrid: () => void;
-}) {
-  const { t } = useTranslation();
-  const label =
-    "flex items-center rounded-full px-3 text-[0.65rem] uppercase tracking-[0.12em] transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60 lg:px-4 lg:text-[0.68rem] lg:tracking-[0.14em]";
-
-  return (
-    <div className={cn("flex-wrap items-center gap-2 lg:gap-3", className)}>
-      <button
-        type="button"
-        onClick={onOverview}
-        className={cn(label, "h-11 border border-white/25 text-white/85 hover:border-white/45 hover:text-white lg:h-9")}
-      >
-        {t.site.gallery.overview}
-      </button>
-      <div role="group" aria-label={t.site.gallery.viewSwitch} className="flex rounded-full border border-white/25 p-0.5">
-        <button type="button" aria-pressed="true" className={cn(label, "h-10 bg-white/90 text-black lg:h-8")}>
-          {t.site.gallery.showGallery}
-        </button>
-        <button type="button" aria-pressed="false" onClick={onGrid} className={cn(label, "h-10 text-white/75 hover:text-white lg:h-8")}>
-          {t.site.gallery.showGrid}
-        </button>
-      </div>
-    </div>
   );
 }

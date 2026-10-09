@@ -67,9 +67,29 @@ export const slabFragment = /* glsl */ `
     // Dégradé de studio sur la face, dans le sens de la lumière.
     float grad = clamp(0.5 + dot(vUv - 0.5, vec2(-0.5, 0.75)), 0.0, 1.0);
     vec3 face = mix(still, moving, uMix) * uExposure * mix(0.84, 1.03, grad);
-    vec3 body = uBody * uExposure * (0.16 + 0.9 * wrap * wrap);
     // Les satellites (uSolid) n'ont pas de face imprimée : volume uniforme.
-    vec3 color = mix(body, face, smoothstep(0.8, 0.985, vFront) * (1.0 - uSolid));
+    float frontMix = smoothstep(0.8, 0.985, vFront) * (1.0 - uSolid);
+
+    // Le boîtier prend la couleur du pourtour de la tuile, et suit celle de
+    // l'animation quand elle joue (Jive qui vire à l'orange, Fidesio qui
+    // finit en noir…). Huit points près du bord, moyennés ; l'image fixe est
+    // lue floutée (niveau de détail réduit) pour une couleur bien moyenne.
+    vec3 casing = uBody;
+    if (uSolid < 0.5 && frontMix < 0.999) {
+      vec2 edge[8] = vec2[8](
+        vec2(0.04, 0.04), vec2(0.5, 0.03), vec2(0.96, 0.04), vec2(0.97, 0.5),
+        vec2(0.96, 0.96), vec2(0.5, 0.97), vec2(0.04, 0.96), vec2(0.03, 0.5)
+      );
+      vec3 edgeStill = vec3(0.0);
+      vec3 edgeMoving = vec3(0.0);
+      for (int i = 0; i < 8; i++) {
+        edgeStill += textureLod(uMap, edge[i], 3.0).rgb;
+        edgeMoving += sRGBTransferEOTF(textureLod(uVideo, edge[i], 0.0)).rgb;
+      }
+      casing = mix(uHasMap > 0.5 ? edgeStill / 8.0 : uBody, edgeMoving / 8.0, uMix);
+    }
+    vec3 body = casing * uExposure * (0.16 + 0.9 * wrap * wrap);
+    vec3 color = mix(body, face, frontMix);
 
     // Reflet large qui glisse sur la face quand la plaque pivote.
     vec3 r = reflect(-v, n);

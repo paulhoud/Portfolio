@@ -107,18 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // L'attribut posé par le script ci-dessous n'existe pas au rendu serveur.
-    <html lang="fr" className={lato.variable} suppressHydrationWarning>
-      <head>
-        {/* Avant le premier affichage : si le visiteur a choisi la galerie,
-            la grille de l'accueil reste cachée (pas de flash). Sans
-            JavaScript, rien ne change et la grille s'affiche. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var q=new URLSearchParams(location.search),v=q.has("galerie")?"gallery":q.has("grille")?"grid":localStorage.getItem("portfolio-home-view");if(v==="gallery"&&location.pathname==="/")document.documentElement.setAttribute("data-home-view","gallery")}catch(e){}`,
-          }}
-        />
-      </head>
+    <html lang="fr" className={lato.variable}>
       <body>
         <JsonLd schema={personSchema()} />
         <JsonLd schema={webSiteSchema()} />

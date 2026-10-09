@@ -48,11 +48,6 @@ export type SiteCopy = {
     intro: string;
     listLabel: string;
     viewProject: string;
-    overview: string;
-    close: string;
-    viewSwitch: string;
-    showGrid: string;
-    showGallery: string;
   };
   language: {
     switchTo: string;
@@ -61,7 +56,6 @@ export type SiteCopy = {
   };
   common: {
     back: string;
-    projectGallery: string;
     viewOnFigma: string;
     watchVideo: string;
     seeSite: string;

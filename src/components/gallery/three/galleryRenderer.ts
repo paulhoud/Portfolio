@@ -103,9 +103,6 @@ type VideoSlot = {
 
 type PieceState = {
   mesh: Mesh<RoundedBoxGeometry, ShaderMaterial>;
-  /** Fond de la tuile et couleur du boîtier : la plaque passe de l'un à l'autre en prenant du volume. */
-  tileColor: Color;
-  casing: Color;
   hover: number;
   mix: number;
   mixTarget: number;
@@ -128,23 +125,6 @@ const easeOutBack = (t: number) => {
   const c = 1.5;
   return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2;
 };
-
-/**
- * Couleur des tranches. Une tuile pâle (fond blanc ou grège) donnerait une
- * plaque de plastique blanc : elle reçoit plutôt un boîtier à la couleur de
- * sa marque, comme une icône d'application. Les tuiles franches ou sombres
- * gardent leur fond.
- */
-function casingColor(background: string, glow: string): Color {
-  const base = new Color(background);
-  const hsl = { h: 0, s: 0, l: 0 };
-  base.getHSL(hsl, SRGBColorSpace);
-  const luminance = 0.2126 * base.r + 0.7152 * base.g + 0.0722 * base.b;
-  if (luminance <= 0.45 || hsl.s >= 0.45) return base;
-  const brand = new Color(glow);
-  brand.getHSL(hsl, SRGBColorSpace);
-  return brand.setHSL(hsl.h, Math.max(hsl.s, 0.6), Math.min(hsl.l, 0.42), SRGBColorSpace);
-}
 
 /** Couleur « bonbon » des satellites : la teinte du projet, saturée. */
 function candyColor(glow: string): Color {
@@ -253,15 +233,14 @@ export function createGalleryRenderer(
   let currentSpacing = spacingFor(5, 1.6);
   let layouts: PieceLayout[] = layoutPieces(count, currentSpacing);
   const pieces: PieceState[] = inputs.map((input, index) => {
-    const casing = casingColor(input.background, input.glow);
-    const material = slabMaterial(casing.clone(), new Color(input.glow), input.exposure, false, 0);
+    // Le boîtier prend la couleur du pourtour de la tuile (calculée dans le
+    // shader) ; le fond déclaré sert tant que l'image n'est pas chargée.
+    const material = slabMaterial(new Color(input.background), new Color(input.glow), input.exposure, false, 0);
     const mesh = new Mesh(slabGeometry(layouts[index].size), material);
     mesh.userData.index = index;
     scene.add(mesh);
     return {
       mesh,
-      tileColor: new Color(input.background),
-      casing,
       hover: 0,
       mix: 0,
       mixTarget: 0,
@@ -852,25 +831,23 @@ export function createGalleryRenderer(
       const pitch = Math.sin(time * 0.31 + layout.phase * 1.3) * 0.045 * idleTurn;
       const lean = 1 - 0.5 * piece.hover;
 
-      let scaleXY = (1 + 0.05 * piece.hover) * (0.5 + 0.5 * pop);
+      let scaleXY = (1 + 0.04 * piece.hover) * (0.5 + 0.5 * pop);
       let scaleZ = scaleXY;
       let swing = 0;
       // Mouvement propre (souris, pivot lent) : nul au premier instant du relais.
       let motion = 1;
       if (lifting) {
-        // Au départ, la plaque est à plat, son image exactement à la taille
-        // de la tuile HTML et de sa couleur ; elle prend ensuite du volume.
+        // Au départ, la plaque est à plat, exactement à la place et à la
+        // taille de la tuile HTML ; elle prend ensuite du volume.
         const liftT = clamp01(introT / (current.full ? 1.1 : 0.45));
         const lift = easeOutCubic(liftT);
-        const start = ((1 + 0.12 * dolly) * layout.size) / (fill * (layout.size - SLAB_RADIUS));
+        const start = (1 + 0.12 * dolly) / fill;
         scaleXY *= start + (1 - start) * lift;
         scaleZ *= 0.06 + 0.94 * lift;
         swing = current.full ? 0.4 * Math.sin(Math.PI * liftT) : 0;
         motion = lift;
-        uniforms.uBody.value.lerpColors(piece.tileColor, piece.casing, lift);
         uniforms.uExposure.value = 1 + (inputs[index].exposure - 1) * lift;
       } else {
-        uniforms.uBody.value.copy(piece.casing);
         uniforms.uExposure.value = inputs[index].exposure;
       }
 
@@ -889,7 +866,7 @@ export function createGalleryRenderer(
       mesh.position.set(
         layout.position[0] + away * 1.1 * part,
         layout.position[1] + bob * motion - (1 - pop) * 0.9 + 0.25 * part,
-        layout.position[2] + 0.35 * piece.hover - (1 - arrive) * 9,
+        layout.position[2] + 0.22 * piece.hover - (1 - arrive) * 9,
       );
       const shrink = 1 - 0.2 * part;
       mesh.scale.set(scaleXY * shrink, scaleXY * shrink, scaleZ * shrink);

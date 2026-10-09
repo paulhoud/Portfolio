@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/i18n/context";
-import { useHomeView } from "@/lib/homeView";
 
 const SCROLL_THRESHOLD_PX = 240;
 
@@ -31,11 +30,10 @@ export function ScrollToTop() {
 
   const label = locale === "en" ? "Back to top" : "Remonter en haut";
 
-  // Sur l’accueil en galerie, la liste des projets mène déjà au premier : le
-  // bouton y ferait doublon et masquerait les réglages du bas d’écran.
+  // Sur l’accueil, la liste des projets mène déjà au premier : le bouton y
+  // ferait doublon.
   const pathname = usePathname();
-  const homeView = useHomeView();
-  const hidden = pathname === "/" && homeView === "gallery";
+  const hidden = pathname === "/";
 
   return (
     <AnimatePresence>

@@ -30,11 +30,6 @@ export const enSite: SiteCopy = {
       "End-to-end Product Designer: product vision, user research, UX/UI, design systems and front-end, from framing to production.",
     listLabel: "Projects",
     viewProject: "View project",
-    overview: "Overview",
-    close: "Close",
-    viewSwitch: "Home layout",
-    showGrid: "Grid",
-    showGallery: "Gallery",
   },
   language: {
     switchTo: "Change language",
@@ -43,7 +38,6 @@ export const enSite: SiteCopy = {
   },
   common: {
     back: "Back",
-    projectGallery: "Projects",
     viewOnFigma: "View on Figma",
     watchVideo: "Watch video",
     seeSite: "View website",

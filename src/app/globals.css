@@ -92,13 +92,6 @@ body {
   min-height: 100vh;
 }
 
-/* Accueil mémorisé en galerie : la grille, rendue par le serveur, reste
-   cachée jusqu'à ce que la page prenne la main (cf. script dans layout.tsx),
-   au lieu d'apparaître un instant avant la galerie. */
-html[data-home-view="gallery"] .home-grid {
-  visibility: hidden;
-}
-
 .page-transition-layer {
   grid-area: 1 / 1;
   /* Un élément de grille ne rétrécit pas, par défaut, sous la largeur de son
