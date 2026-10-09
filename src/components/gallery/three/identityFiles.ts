@@ -82,9 +82,10 @@ function bakeMesh(mesh: Mesh): BufferGeometry {
   return geometry.index ? geometry.toNonIndexed() : geometry;
 }
 
-function partOf(material: Material, tints: Record<string, string>): ModelPart {
+function partOf(material: Material, tints: Record<string, string>, pieceName: string): ModelPart {
   const painted = material as Material & { color?: Color; map?: Texture | null; alphaTest?: number };
-  const tint = tints[material.name];
+  // Par matériau, ou par pièce quand une seule matière habille tout l'objet.
+  const tint = tints[material.name] ?? tints[pieceName];
   return {
     color: tint ? new Color(tint) : painted.color ? painted.color.clone() : new Color(1, 1, 1),
     map: painted.map ?? null,
@@ -95,7 +96,8 @@ function partOf(material: Material, tints: Record<string, string>): ModelPart {
 
 /**
  * Charge un objet de public/models et le prépare pour la scène ; `tints`
- * repeint certaines pièces (nom du matériau → couleur), texture conservée.
+ * repeint certaines pièces (nom du matériau ou de la pièce → couleur),
+ * texture conservée.
  */
 export async function loadIdentityModel(file: string, tints: Record<string, string> = {}): Promise<LoadedModel> {
   if (!loader) {
@@ -121,12 +123,12 @@ export async function loadIdentityModel(file: string, tints: Record<string, stri
           piece.setAttribute(name, new Float32BufferAttribute(attribute.array.slice(group.start * size, (group.start + group.count) * size), size));
         }
         geometries.push(piece);
-        parts.push(partOf(materials[group.materialIndex ?? 0], tints));
+        parts.push(partOf(materials[group.materialIndex ?? 0], tints, mesh.name));
       }
       baked.dispose();
     } else {
       geometries.push(baked);
-      parts.push(partOf(materials[0], tints));
+      parts.push(partOf(materials[0], tints, mesh.name));
     }
   });
   const merged = mergeGeometries(geometries, true);

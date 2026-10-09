@@ -39,7 +39,7 @@ export type IdentityEntry = {
   build?: () => BufferGeometry;
   /** Agrandissement, pour les objets longs et fins qui paraîtraient petits. */
   size?: number;
-  /** Couleurs imposées à certaines pièces du fichier (nom du matériau → couleur). */
+  /** Couleurs imposées à certaines pièces du fichier (nom du matériau ou de la pièce → couleur). */
   tints?: Record<string, string>;
 };
 
@@ -234,8 +234,10 @@ function cat() {
 
 /**
  * Ordre de passage : les objets se suivent d'un satellite au suivant, si bien
- * que chaque plaque en a de différents (les quatre premiers accompagnent le
- * premier projet).
+ * que chaque plaque en a de différents et qu'un objet ne revient qu'après
+ * tous les autres (dix-sept plus loin, soit trois à quatre projets). Les
+ * familles (à manger, animaux, Pokémon, écrans…) sont espacées pour que deux
+ * voisins ne se ressemblent pas.
  */
 // Retirés à la demande de Paul (9 oct. 2026) : BD, manette, barre chocolatée,
 // sushi et maki construits en code, cartes Yu-Gi-Oh!, sneaker Adidas, Lapras,
@@ -252,10 +254,36 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
   { name: "burger", file: "burger.glb", build: burger },
   { name: "shiba", file: "shiba.glb" },
   { name: "pokeball", file: "pokeball.glb", build: pokeball },
+  { name: "smartphone", file: "smartphone.glb" },
+  {
+    name: "lego",
+    file: "lego.glb",
+    size: 1.2,
+    // Le personnage Lego classique (demande de Paul) : tête et mains jaunes,
+    // buste et bras rouges, hanches et jambes bleues (les jambes « Cube.001 » et
+    // « Cube.002 » perdent leur point au chargement).
+    tints: {
+      Head_Bunny_0: "#f2c81a",
+      Hand1_Bunny_0: "#f2c81a",
+      Hand2_Bunny_0: "#f2c81a",
+      Torso_Bunny_0: "#c4281c",
+      Arm1_Bunny_0: "#c4281c",
+      Arm2_Bunny_0: "#c4281c",
+      Waist_Bunny_0: "#0d4fb3",
+      Cube001_Bunny_0: "#0d4fb3",
+      Cube002_Bunny_0: "#0d4fb3",
+    },
+  },
   { name: "sushi", file: "sushi.glb" },
+  // Le fichier assombrit sa texture de 60 % : on rend au ballon son blanc.
+  { name: "football", file: "football.glb", tints: { Baked: "#ffffff" } },
   { name: "powerCube", file: "power-cube.glb", build: starDrop },
-  { name: "skateboard", file: "skateboard.glb", build: skateboard, size: 1.35 },
   { name: "cat", file: "cat.glb", build: cat },
+  { name: "banana", file: "banana.glb", size: 1.25 },
+  { name: "earbuds", file: "earbuds.glb" },
+  { name: "skateboard", file: "skateboard.glb", build: skateboard, size: 1.35 },
   { name: "jigglypuff", file: "jigglypuff.glb" },
+  { name: "sodaCan", file: "soda-can.glb" },
+  { name: "shuriken", file: "shuriken.glb" },
   { name: "teddy", file: "teddy.glb" },
 ];
