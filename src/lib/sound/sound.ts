@@ -17,6 +17,23 @@ const listeners = new Set<() => void>();
 let memory = false;
 
 let context: AudioContext | null = null;
+
+/*
+ * En développement, le rechargement à chaud réévalue ce module : l'ancien
+ * contexte audio (sa nappe) et l'ancien thème continueraient de jouer, hors
+ * de portée du bouton. On les retrouve sur la fenêtre et on les coupe.
+ */
+type LiveSound = { context: AudioContext | null; theme: HTMLAudioElement | null };
+const live: LiveSound = { context: null, theme: null };
+if (typeof window !== "undefined") {
+  const host = window as unknown as { __portfolioSound?: LiveSound };
+  const previous = host.__portfolioSound;
+  if (previous) {
+    void previous.context?.close().catch(() => {});
+    previous.theme?.pause();
+  }
+  host.__portfolioSound = live;
+}
 let engine: SoundEngine | null = null;
 let loading: Promise<SoundEngine | null> | null = null;
 let initialised = false;
@@ -126,6 +143,7 @@ function nextTheme(crossfade = false) {
     else theme = null;
   });
   theme = audio;
+  live.theme = audio;
   void audio
     .play()
     .then(() => {
@@ -184,6 +202,7 @@ export function initSound() {
     for (const type of ["pointerup", "keydown", "touchend"] as const) window.removeEventListener(type, unlock, true);
     try {
       context = new AudioCtx({ latencyHint: "playback" });
+      live.context = context;
       void context.resume();
     } catch {
       context = null;
