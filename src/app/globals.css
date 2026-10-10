@@ -6,8 +6,42 @@
   --panel-soft: #23222b;
   --foreground: #f5f2f4;
   --muted: #a7a3ad;
+  /* Couleurs qui suivent le thème (cf. src/lib/theme.ts). `--ink` sert au
+     texte, aux traits et aux voiles, décliné en opacités (`text-ink/60`,
+     `border-ink/10`) : la même hiérarchie se lit ainsi sur les deux fonds.
+     `--page` est le fond des pages de lecture, `--glass` celui des capsules
+     de verre (header, réglages, boutons flottants). */
+  --ink: #f5f2f4;
+  --page: #121212;
+  --glass: #121118;
+  /* Fond de la zone de lecture des pages texte (À propos, Méthode, Contact). */
+  --reading-surface: linear-gradient(120deg, #172237 0%, #191820 46%, #17161d 100%);
   /* Hauteur du header flottant (cf. SiteHeader). */
   --header-height: 56px;
+}
+
+/* Thème clair : posé sur <html> en dehors de l'accueil, qui reste sombre.
+   Fond « papier » plutôt que blanc pur, encre presque noire : un registre
+   d'édition imprimée, calme, à l'opposé de la scène 3D. */
+:root[data-theme="light"] {
+  --background: #f4f2ee;
+  --panel: #ffffff;
+  --panel-soft: #ece9e3;
+  --foreground: #18171c;
+  --muted: #5c5a55;
+  --ink: #18171c;
+  --page: #f4f2ee;
+  --glass: #fbfaf7;
+  --reading-surface: #f4f2ee;
+  color-scheme: light;
+}
+
+/* Utilitaires Tailwind branchés sur ces variables : `text-ink`, `bg-page`,
+   `bg-glass`… (« inline » : la classe lit la variable, donc suit le thème). */
+@theme inline {
+  --color-ink: var(--ink);
+  --color-page: var(--page);
+  --color-glass: var(--glass);
 }
 
 @media (min-width: 1024px) {
@@ -44,6 +78,10 @@ body {
   letter-spacing: 0.01em;
 }
 
+:root[data-theme="light"] body {
+  background: var(--page);
+}
+
 /* Dans la couche « base » de Tailwind : hors couche, ces règles passaient
    devant les classes utilitaires, et un lien ne pouvait plus recevoir de
    couleur propre (« text-black » sur un bouton-lien restait blanc). */
@@ -61,6 +99,11 @@ body {
 ::selection {
   background: rgba(70, 235, 181, 0.28);
   color: #ffffff;
+}
+
+:root[data-theme="light"] ::selection {
+  background: rgba(70, 235, 181, 0.4);
+  color: var(--ink);
 }
 
 /* Barres de défilement fines et sombres, accordées au site : Windows affichait
@@ -92,6 +135,18 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.36);
+}
+
+:root[data-theme="light"] {
+  scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.34);
 }
 
 /* Le header flotte au-dessus du contenu : la grille de l'accueil occupe donc
@@ -140,7 +195,7 @@ body {
  * Le contraste est relevé pour la même raison.
  */
 .copy {
-  color: rgba(245, 242, 244, 0.8);
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
   font-size: 0.9375rem; /* 15 px */
   line-height: 1.7;
 }
@@ -549,7 +604,7 @@ body {
 
 .cursor-spin {
   transform-origin: 50% 50%;
-  animation: cursor-spin 18s linear infinite;
+  animation: cursor-spin 8s linear infinite;
 }
 
 @keyframes cursor-scroll {

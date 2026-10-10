@@ -66,8 +66,6 @@ export type SiteCopy = {
     nextProject: string;
     /** Invitation à faire défiler, à l'arrivée sur la galerie. */
     scrollHint: string;
-    /** Curseur au survol d'un projet. */
-    discover: string;
     /** Message bref après le rideau d'ouverture. */
     headphones: string;
     /** Fonction cachée « destroy the world » : perdu dans une autre dimension. */
