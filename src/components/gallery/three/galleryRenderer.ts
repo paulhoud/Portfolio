@@ -266,6 +266,29 @@ const easeOutBack = (t: number) => {
  * contexte a été libéré ne peut plus servir. Renvoie `null` (et appelle
  * `onFail`) si le navigateur ne peut pas l'afficher correctement.
  */
+/** Cartes graphiques intégrées, mobiles ou logicielles (nom donné par WebGL). */
+const MODEST_GPU =
+  /intel|iris|uhd graphics|hd graphics|radeon\(tm\) graphics|radeon graphics|vega \d+ graphics|mali|adreno|powervr|swiftshader|llvmpipe|basic render/i;
+/** Pixels dessinés au plus à pleine définition (≈ 2560 × 1440), et sur carte modeste (≈ 1920 × 1080). */
+const PIXEL_BUDGET = 3.7e6;
+const MODEST_PIXEL_BUDGET = 2.1e6;
+/** Intervalle minimal entre deux images (≈ 75 par seconde). */
+const MIN_FRAME_MS = 1000 / 75;
+
+/** Nom de la carte graphique, lu sur un contexte jetable (vide si indisponible). */
+function probeGpu(): string {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl2");
+    if (!gl) return "";
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const name = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return name;
+  } catch {
+    return "";
+  }
+}
+
 export function createGalleryRenderer(
   host: HTMLElement,
   inputs: GalleryPieceInput[],
@@ -278,13 +301,25 @@ export function createGalleryRenderer(
   canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom";
   host.appendChild(canvas);
 
+  // Qualité de départ selon la machine. Carte graphique intégrée (ou rendu
+  // logiciel) : un budget de pixels plus serré. Écran très dense : pas de
+  // lissage des bords (invisible à cette densité, et coûteux), et un budget
+  // de pixels qui évite de dessiner un écran 4K en entier.
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const gpu = probeGpu();
+  const modest = MODEST_GPU.test(gpu);
+  const area = Math.max(1, window.innerWidth * window.innerHeight);
+  const budget = Math.sqrt((modest ? MODEST_PIXEL_BUDGET : PIXEL_BUDGET) / area);
+  const topDpr = Math.max(1, Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 1.75, budget));
+  const antialias = topDpr < 1.5;
+
   // D'abord sans compromis de performance ; certains Chrome refusent pourtant
   // alors que leur carte graphique est accélérée : on réessaie sans cette
   // exigence, la mesure de fluidité écartant ensuite un rendu trop lent.
   const attempt = (strict: boolean) =>
     new WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias,
       alpha: false,
       stencil: false,
       // Les portables gardent leur carte graphique économe.
@@ -307,14 +342,18 @@ export function createGalleryRenderer(
   {
     const gl = renderer.getContext();
     const info = gl.getExtension("WEBGL_debug_renderer_info");
-    console.info("[galerie] 3D active, carte graphique :", info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+    console.info(
+      "[galerie] 3D active, carte graphique :",
+      info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER),
+      `| départ : densité ${topDpr.toFixed(2)}${antialias ? ", bords lissés" : ""}${modest ? ", carte modeste" : ""}`,
+    );
   }
 
   const count = inputs.length;
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
-  const dprSteps = [Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 1.75), 1.25, 1].filter(
-    (value, index, all) => index === 0 || value < all[0],
-  );
+  // Paliers de définition : la scène descend d'un cran tant qu'elle rame ;
+  // sous 1, l'image est un peu plus douce, mais la 3D reste (version allégée)
+  // plutôt que de passer à plat.
+  const dprSteps = [topDpr, 1.25, 1, 0.85, 0.7].filter((value, index, all) => index === 0 || value < all[0]);
   let dprStep = 0;
 
   const background = new Color(BACKGROUND);
@@ -1375,6 +1414,12 @@ export function createGalleryRenderer(
   function frameLoop(now: number) {
     raf = 0;
     if (!running || disposed) return;
+    // Écrans à 120 ou 144 Hz : au plus ~75 images par seconde, la différence
+    // ne se voit guère et la carte graphique travaille deux fois moins.
+    if (lastTime && now - lastTime < MIN_FRAME_MS) {
+      invalidate();
+      return;
+    }
     const dt = Math.min(0.05, lastTime ? (now - lastTime) / 1000 : 1 / 60);
     lastTime = now;
     const busy = update(dt, now);
