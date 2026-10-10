@@ -166,6 +166,8 @@ export type GalleryRenderer = {
   releaseIntro(): void;
   /** Au toucher : les objets du projet affiché sautillent, pour montrer qu'ils réagissent. */
   nudgeObjects(): void;
+  /** Clic sur le logo : retour immédiat au premier projet, l'arrivée se rejoue. */
+  replayArrival(): void;
   dispose(): void;
 };
 
@@ -2129,6 +2131,23 @@ export function createGalleryRenderer(
       calmStation = Math.round(clampRaw(lastRaw));
       station = calm ? calmStation : station;
       if (calm) skipIntro();
+      updateScheduler();
+      invalidate();
+    },
+    replayArrival() {
+      if (disposed || world || immersion) return;
+      lastRaw = 0;
+      stationTarget = scrollToStation(0, count);
+      calmStation = 0;
+      station = calm ? calmStation : stationTarget;
+      setHovered(null);
+      if (!calm) {
+        introPending = "full";
+        startIntro(performance.now());
+        removeIntroListeners();
+        for (const type of introEvents) window.addEventListener(type, skipIntro, { passive: true });
+      }
+      activity();
       updateScheduler();
       invalidate();
     },

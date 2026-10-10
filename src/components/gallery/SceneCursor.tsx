@@ -11,18 +11,7 @@ type Mode = Exclude<SceneCursorState, null> | "link";
  * Taille du cercle selon ce qu'on survole (son plus grand diamètre : 112 px).
  * Sur un projet, il grandit jusqu'à l'arc ouvert qui prend sa place.
  */
-const RING_SCALE: Record<Mode, number> = { scene: 0.3, object: 0.42, grab: 0.24, link: 0.36, project: 0.69 };
-
-/** Couleur claire (jaune, vert vif, blanc) : la flèche passe en sombre. */
-function isLight(color: string) {
-  const hex = /^#([0-9a-f]{6})$/i.exec(color.trim())?.[1];
-  if (!hex) return false;
-  const [r, g, b] = [0, 2, 4].map((i) => {
-    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.5;
-}
+const RING_SCALE: Record<Mode, number> = { scene: 0.3, object: 0.42, grab: 0.24, link: 0.36, project: 0.47 };
 
 /** Ombre très douce : le blanc reste lisible sur une plaque claire. */
 const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_rgba(0,0,0,0.5))]";
@@ -32,8 +21,9 @@ const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_rgba(0,0,0,0.5))]";
  * l'expérience, il remplace celui du système et dit ce qu'on peut faire :
  * - dans le vide : un petit cercle où un point descend, comme l'invitation
  *   à faire défiler ;
- * - sur un projet : un arc blanc ouvert qui tourne, et au centre la flèche
- *   dans une pastille à la couleur du projet (choix de Paul, variante B) ;
+ * - sur un projet : un petit arc blanc ouvert qui tourne, un point à la
+ *   couleur du projet à son extrémité, la flèche au centre (variante B
+ *   choisie par Paul, allégée) ;
  * - sur un objet : un cercle à la couleur du projet, une note de musique (le
  *   son est actif) ou une main (on peut l'attraper) ; objet tenu : il se
  *   resserre ;
@@ -45,17 +35,6 @@ const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_rgba(0,0,0,0.5))]";
  */
 export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: boolean }) {
   const [soundOn] = useSoundOn();
-  // La pastille prend la couleur du projet affiché (--accent-glow, posée par
-  // GalleryHome) ; on suit ses changements pour choisir la couleur de la flèche.
-  const [lightAccent, setLightAccent] = useState(false);
-  useEffect(() => {
-    const root = document.documentElement;
-    const sync = () => setLightAccent(isLight(getComputedStyle(root).getPropertyValue("--accent-glow")));
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(root, { attributes: true, attributeFilter: ["style"] });
-    return () => observer.disconnect();
-  }, []);
   const [enabled, setEnabled] = useState(false);
   const [target, setTarget] = useState<{ inZone: boolean; overScene: boolean; dom: Mode | null }>({
     inZone: false,
@@ -171,8 +150,8 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
           </svg>
         </div>
 
-        {/* Sur un projet : un arc blanc ouvert qui tourne, la flèche dans
-            une pastille à la couleur du projet. */}
+        {/* Sur un projet : un arc blanc ouvert qui tourne, emmené par un point
+            à la couleur du projet (--accent-glow) ; la flèche au centre. */}
         <div
           className={cn(
             "absolute -left-14 -top-14 h-28 w-28 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
@@ -180,15 +159,12 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
           )}
         >
           <svg viewBox="0 0 112 112" className={cn("absolute inset-0 h-full w-full overflow-visible", LEGIBLE, !calm && "cursor-spin")}>
-            <circle cx="56" cy="56" r="38" fill="none" stroke="white" strokeWidth="1" strokeDasharray="190 48.8" strokeLinecap="round" />
+            <circle cx="56" cy="56" r="26" fill="none" stroke="white" strokeWidth="1" strokeDasharray="130 33.4" strokeLinecap="round" />
+            <circle cx="63.4" cy="31.1" r="3.2" className="transition-[fill] duration-500 [fill:var(--accent-glow,#ffffff)]" />
           </svg>
-          <span className="absolute left-1/2 top-1/2 h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 rounded-full transition-[background-color] duration-500 [background-color:var(--accent-glow,#ffffff)]" />
           <svg
             viewBox="0 0 24 24"
-            className={cn(
-              "absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 transition-colors duration-500",
-              lightAccent ? "text-[#08080b]" : "text-white",
-            )}
+            className={cn("absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-white", LEGIBLE)}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"

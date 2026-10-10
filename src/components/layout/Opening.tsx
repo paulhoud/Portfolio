@@ -2,6 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+// Chargé sur toutes les pages avec le rideau : la remise à zéro de l'accueil
+// (clic sur le logo, actualisation) doit être prête partout.
+import "@/lib/homeReset";
 import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, useOpening } from "@/lib/opening";
 import { cn } from "@/lib/utils";

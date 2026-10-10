@@ -31,6 +31,7 @@ import {
 import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
+import { onHomeReset } from "@/lib/homeReset";
 import { HeadphonesHint } from "./HeadphonesHint";
 import { SceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
@@ -377,6 +378,20 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const [textAsImage, setTextAsImage] = useState(false);
   /** Sortie de l'autre dimension (bouton « Retour », touche Échap). */
   const leaveVoidRef = useRef<() => void>(() => {});
+  // Clic sur le logo depuis l'accueil : retour au premier projet, l'arrivée
+  // se rejoue et l'invitation à défiler revient (cf. homeReset). Depuis une
+  // autre dimension, on en revient d'abord.
+  useEffect(
+    () =>
+      onHomeReset(() => {
+        if (doomRef.current) leaveVoidRef.current();
+        setPreview(null);
+        setScrolled(false);
+        window.scrollTo({ top: 0, behavior: "instant" });
+        rendererRef.current?.replayArrival();
+      }),
+    [],
+  );
   /** Dimension où l'on a atterri (le treillis, ou une image animée). */
   const [landed, setLanded] = useState<DimensionKind>("lattice");
   // En quittant l’accueil, la musique d’une dimension s’arrête.
