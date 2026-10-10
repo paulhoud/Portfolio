@@ -746,6 +746,56 @@ export function createGalleryRenderer(
   /** Objet le plus bas parmi ceux qu'on bouge (cf. update). */
   const lowest = { bottom: Infinity, x: 0, z: 0, radius: 0 };
 
+  /*
+   * Les objets se bousculent au lieu de se traverser : un objet tenu ou lancé
+   * pousse ceux qu'il touche (leur ressort les ramène ensuite à leur place).
+   * Les plaques, elles, ne sont jamais touchées (demande de Paul) : les objets
+   * flottent sur d'autres plans. Tout au repos, rien à calculer ; sinon, une
+   * centaine de distances par image : rien au regard du dessin.
+   */
+  const pushDir = new Vector3();
+  const isMoving = (body: Body) => body.held || body.offset.lengthSq() > 1e-4 || body.velocity.lengthSq() > 1e-4;
+  /** Écarte deux corps qui se chevauchent de `overlap` le long de `dir` (de a vers b). */
+  const separate = (a: Mesh, bodyA: Body, weightA: number, b: Mesh, bodyB: Body, weightB: number, dir: Vector3, overlap: number) => {
+    const total = weightA + weightB;
+    if (total <= 0) return false;
+    const shareA = (overlap * weightA) / total;
+    const shareB = (overlap * weightB) / total;
+    a.position.addScaledVector(dir, -shareA);
+    bodyA.offset.addScaledVector(dir, -shareA);
+    bodyA.velocity.addScaledVector(dir, -shareA * 12);
+    b.position.addScaledVector(dir, shareB);
+    bodyB.offset.addScaledVector(dir, shareB);
+    bodyB.velocity.addScaledVector(dir, shareB * 12);
+    return true;
+  };
+  /** Une passe de collisions ; vrai si quelque chose a bougé. */
+  const collide = () => {
+    let pushed = false;
+    const n = satellites.length;
+    for (let i = 0; i < n; i += 1) {
+      const a = satellites[i];
+      const bodyA = satelliteBodies[i];
+      if (!a.visible || !bodyA) continue;
+      const radiusA = a.scale.x * 0.45;
+      const movingA = isMoving(bodyA);
+      const weightA = bodyA.held ? 0 : 1;
+      for (let j = i + 1; j < n; j += 1) {
+        const b = satellites[j];
+        const bodyB = satelliteBodies[j];
+        if (!b.visible || !bodyB || (!movingA && !isMoving(bodyB))) continue;
+        pushDir.subVectors(b.position, a.position);
+        const dist = pushDir.length();
+        const overlap = radiusA + b.scale.x * 0.45 - dist;
+        if (overlap <= 0) continue;
+        if (dist < 1e-5) pushDir.set(0, 1, 0);
+        else pushDir.divideScalar(dist);
+        if (separate(a, bodyA, weightA, b, bodyB, bodyB.held ? 0 : 1, pushDir, overlap)) pushed = true;
+      }
+    }
+    return pushed;
+  };
+
   // --- État ----------------------------------------------------------------
   let disposed = false;
   let running = true;
@@ -1976,6 +2026,8 @@ export function createGalleryRenderer(
         material.uniforms.uLit.value = lit;
       });
     }
+
+    if (!world && !immersion && collide()) busy = true;
 
     // Le sol se creuse sous l'objet le plus bas qu'on bouge, à l'approche
     // (avant même le contact), puis se relâche quand il repart.
