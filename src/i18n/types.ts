@@ -50,6 +50,12 @@ export type SiteCopy = {
   sound: {
     mute: string;
     unmute: string;
+    /** Interrupteur du son : son nom, et ses deux états. */
+    label: string;
+    /** « Activer le son » en un mot (petits écrans). */
+    unmuteShort: string;
+    on: string;
+    off: string;
   };
   /** Accueil en galerie (branche nav-immersive). */
   gallery: {
@@ -60,6 +66,10 @@ export type SiteCopy = {
     nextProject: string;
     /** Invitation à faire défiler, à l'arrivée sur la galerie. */
     scrollHint: string;
+    /** Curseur au survol d'un projet. */
+    discover: string;
+    /** Message bref après le rideau d'ouverture. */
+    headphones: string;
     /** Fonction cachée « destroy the world » : perdu dans une autre dimension. */
     lostTitle: string;
     lostHint: string;

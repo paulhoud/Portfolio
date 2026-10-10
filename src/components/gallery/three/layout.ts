@@ -223,8 +223,32 @@ export function layoutSatellites(
   spacing: Spacing,
   /** Réglage propre à l'objet qui prendra la place n° `index` (cf. identity.ts). */
   hint?: (index: number) => SatelliteHint | undefined,
+  /** Nombre d'objets différents : jamais plus de places, pour qu'aucun ne se répète. */
+  limit = Infinity,
 ): SatelliteLayout[] {
+  let placed = placeSatellites(pieces, spacing, hint, new Set());
+  const extra = placed.layouts.length - limit;
+  if (extra > 0) {
+    // Plus de places que d'objets (téléphone) : on renonce à quelques
+    // silhouettes lointaines, réparties le long de l'allée, plutôt que de
+    // laisser la dernière plaque sans rien.
+    const far = placed.keys.filter((key) => key.endsWith(":2"));
+    const drop = Math.min(extra, far.length);
+    const skip = new Set(Array.from({ length: drop }, (_, i) => far[Math.floor(((i + 0.5) * far.length) / drop)]));
+    if (skip.size > 0) placed = placeSatellites(pieces, spacing, hint, skip);
+  }
+  return placed.layouts.slice(0, limit);
+}
+
+/** Les places, chacune avec sa clé « plaque:rang » (cf. layoutSatellites). */
+function placeSatellites(
+  pieces: PieceLayout[],
+  spacing: Spacing,
+  hint: ((index: number) => SatelliteHint | undefined) | undefined,
+  skip: Set<string>,
+): { layouts: SatelliteLayout[]; keys: string[] } {
   const satellites: SatelliteLayout[] = [];
+  const keys: string[] = [];
   const wide = !spacing.portrait;
   const dist = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
   const placed: { position: Vec3; extent: number }[] = [];
@@ -243,6 +267,7 @@ export function layoutSatellites(
       const salt = owner * 7 + k * 31;
       const r = (n: number) => seeded(salt, n);
       if (k === 3 && !pathLeaves) continue;
+      if (skip.has(`${owner}:${k}`)) continue;
       if (k === 2 && wide) continue;
       // Côté texte : ordinateur seulement, une plaque sur deux environ.
       if (k === 4 && (!wide || r(0) > 0.55)) continue;
@@ -308,6 +333,7 @@ export function layoutSatellites(
       }
       if (!fits()) continue;
       placed.push({ position, extent });
+      keys.push(`${owner}:${k}`);
 
       satellites.push({
         owner,
@@ -318,7 +344,7 @@ export function layoutSatellites(
       });
     }
   });
-  return satellites;
+  return { layouts: satellites, keys };
 }
 
 /** Position de la caméra à une station (au repos ou en chemin), sans la parallaxe. */

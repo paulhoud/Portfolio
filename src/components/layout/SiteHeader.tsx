@@ -245,33 +245,37 @@ export function SiteHeader() {
               <SocialLinks />
             </div>
 
-            <button
-              ref={burgerRef}
-              type="button"
-              aria-label={isOpen ? t.site.nav.closeMenu : t.site.nav.openMenu}
-              aria-expanded={isOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setIsOpen((current) => !current)}
-              className="relative flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70 md:justify-self-end lg:hidden"
-            >
-              {/* Les deux barres extrêmes convergent vers le centre en pivotant,
-                  la barre médiane s'efface : le burger devient une croix. */}
-              <motion.span
-                className="h-0.5 w-7 origin-center rounded-full bg-current"
-                animate={isOpen ? { rotate: 45, y: BAR_OFFSET } : { rotate: 0, y: 0 }}
-                transition={barTransition}
-              />
-              <motion.span
-                className="h-0.5 w-7 origin-center rounded-full bg-current"
-                animate={isOpen ? { opacity: 0, scaleX: 0.4 } : { opacity: 1, scaleX: 1 }}
-                transition={barTransition}
-              />
-              <motion.span
-                className="h-0.5 w-7 origin-center rounded-full bg-current"
-                animate={isOpen ? { rotate: -45, y: -BAR_OFFSET } : { rotate: 0, y: 0 }}
-                transition={barTransition}
-              />
-            </button>
+            {/* Téléphone et tablette : le son reste à portée de pouce, à côté du menu. */}
+            <div className="flex items-center gap-1 md:justify-self-end lg:hidden">
+              <SoundToggle variant="capsule" />
+              <button
+                ref={burgerRef}
+                type="button"
+                aria-label={isOpen ? t.site.nav.closeMenu : t.site.nav.openMenu}
+                aria-expanded={isOpen}
+                aria-controls="mobile-menu"
+                onClick={() => setIsOpen((current) => !current)}
+                className="relative flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70"
+              >
+                {/* Les deux barres extrêmes convergent vers le centre en pivotant,
+                    la barre médiane s'efface : le burger devient une croix. */}
+                <motion.span
+                  className="h-0.5 w-7 origin-center rounded-full bg-current"
+                  animate={isOpen ? { rotate: 45, y: BAR_OFFSET } : { rotate: 0, y: 0 }}
+                  transition={barTransition}
+                />
+                <motion.span
+                  className="h-0.5 w-7 origin-center rounded-full bg-current"
+                  animate={isOpen ? { opacity: 0, scaleX: 0.4 } : { opacity: 1, scaleX: 1 }}
+                  transition={barTransition}
+                />
+                <motion.span
+                  className="h-0.5 w-7 origin-center rounded-full bg-current"
+                  animate={isOpen ? { rotate: -45, y: -BAR_OFFSET } : { rotate: 0, y: 0 }}
+                  transition={barTransition}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -355,7 +359,7 @@ export function SiteHeader() {
                     <SocialLinks />
                     <LanguageFlags />
                   </div>
-                  <SoundToggle labelled />
+                  <SoundToggle variant="labelled" />
                   <MotionToggle labelled />
                 </div>
               </div>
@@ -424,26 +428,38 @@ function toggleClasses(labelled: boolean, pressed: boolean) {
 }
 
 /**
- * Musique d'ambiance et effets sonores : actifs par défaut (ils ne démarrent
- * qu'au premier clic, comme l'exigent les navigateurs), coupés d'un geste et
- * mémorisés. Même principe que la pause : libellé fixe, état par aria-pressed.
+ * Musique d'ambiance et effets sonores : coupés par défaut, activés d'un
+ * geste et mémorisés. Un interrupteur (« Son », activé ou coupé) : l'icône
+ * le dit (ondes ou croix), le menu l'écrit en toutes lettres.
+ * - `icon` : pastille du bas de l'écran (ordinateur) ;
+ * - `capsule` : dans la capsule, à côté du menu (téléphone, tablette) ;
+ * - `labelled` : ligne du menu, avec son état écrit.
  */
-function SoundToggle({ labelled = false }: { labelled?: boolean }) {
+function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "labelled" }) {
   const { t } = useTranslation();
   const [on, toggle] = useSoundOn();
   useEffect(() => initSound(), []);
-  const label = t.site.sound.mute;
+  const labelled = variant === "labelled";
 
   return (
     <button
       type="button"
+      role="switch"
       onClick={toggle}
-      aria-pressed={!on}
-      aria-label={labelled ? undefined : label}
-      title={labelled ? undefined : on ? label : t.site.sound.unmute}
-      className={toggleClasses(labelled, !on)}
+      aria-checked={on}
+      aria-label={labelled ? undefined : t.site.sound.label}
+      title={labelled ? undefined : on ? t.site.sound.mute : t.site.sound.unmute}
+      className={
+        variant === "capsule"
+          ? cn(
+              "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-colors duration-300",
+              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70",
+              on ? "text-white" : "text-white/55",
+            )
+          : cn(toggleClasses(labelled, on), labelled && "w-full")
+      }
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" viewBox="0 0 24 24" className={cn("shrink-0", variant === "capsule" ? "h-5 w-5" : "h-4 w-4")} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor" stroke="none" />
         {on ? (
           <>
@@ -454,7 +470,29 @@ function SoundToggle({ labelled = false }: { labelled?: boolean }) {
           <path d="M16 9.5l5 5m0-5l-5 5" />
         )}
       </svg>
-      {labelled ? <span>{label}</span> : null}
+      {labelled ? (
+        <>
+          <span>{t.site.sound.label}</span>
+          {/* L'état en toutes lettres, et un petit interrupteur. */}
+          <span className="ml-auto flex items-center gap-2 text-xs text-white/60">
+            {on ? t.site.sound.on : t.site.sound.off}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "relative h-5 w-9 rounded-full transition-colors duration-300",
+                on ? "[background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)]" : "bg-white/15",
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left] duration-300",
+                  on ? "left-[18px]" : "left-0.5",
+                )}
+              />
+            </span>
+          </span>
+        </>
+      ) : null}
     </button>
   );
 }

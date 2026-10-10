@@ -54,8 +54,14 @@ export type IdentityEntry = {
    * lui-même (un animal qu’on verrait sinon de dos).
    */
   front?: boolean;
+  /** Amplitude du balancement d’un objet de face (1 par défaut), pour une image à garder lisible. */
+  sway?: number;
   /** Écran allumé : la pièce devient blanche et lumineuse, avec un halo. */
   screen?: { piece: string; glow?: number };
+  /** Pièces en verre : translucides (nom du matériau ou de la pièce). */
+  glass?: string[];
+  /** Lueur douce autour de l’objet (couleur), toujours tournée vers nous. */
+  aura?: string;
   /** Placement : plus près de sa plaque (cf. SatelliteHint). */
   place?: SatelliteHint;
   /**
@@ -63,6 +69,8 @@ export type IdentityEntry = {
    * de public/sounds/objects, sans extension), si le son du site est actif.
    */
   sounds?: string[];
+  /** Un morceau plutôt qu'un bruitage (cf. playClip) : joué en entier, la nappe se tait. */
+  music?: boolean;
 };
 
 type Place = {
@@ -265,10 +273,10 @@ function cat() {
 // sushi et maki construits en code, cartes Yu-Gi-Oh!, sneaker Adidas, Lapras,
 // 3DS et kebab.
 export const IDENTITY_CATALOG: IdentityEntry[] = [
-  // Le chiot remplace le shiba (licence plus libre). Premier du catalogue :
-  // il prend la place la plus en vue près d’UpikaJob, à droite de la plaque
-  // (hors du voile du texte), et reste de face. Remplacer le modèle : changer
-  // `file` (un loup Minecraft est prévu).
+  // Le chiot (« Cartoon Dog », fourni par Paul le 10 oct. 2026, texture
+  // propre : il ne scintille plus). Premier du catalogue : il prend la place
+  // la plus en vue près d’UpikaJob, à droite de la plaque (hors du voile du
+  // texte), et reste de face.
   {
     name: "dog",
     file: "dog.glb",
@@ -371,4 +379,33 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
   { name: "potatOS", file: "potatos.glb", sounds: ["portal-1", "portal-2", "portal-3"] },
   { name: "shuriken", file: "shuriken.glb", sounds: ["shuriken-1", "shuriken-2"] },
   { name: "teddy", file: "teddy.glb", sounds: ["teddybear"] },
+  // Nouveaux objets (10 oct. 2026), rangés pour que chacun ait une place à
+  // sa mesure sur ordinateur : le CD à droite du projet 10, bien en vue ;
+  // fromage et pion n’ont de place que sur téléphone (30 places, 32 objets).
+  { name: "crowbar", file: "crowbar.glb", size: 1.3, sounds: ["crowbar"] },
+  // Boîtier fermé, tout noir (le fichier a perdu son plateau et son disque,
+  // rangés dedans, et gagné un compartiment derrière le couvercle), la
+  // pochette de « La Banquise » (Guizmo) sur le dessus, un quart de tour vers
+  // la droite (choix de Paul), tournée vers nous ; il se balance à peine,
+  // pour rester lisible. Au clic, 45 s du morceau (la nappe se tait).
+  {
+    name: "cd",
+    file: "cd.glb",
+    front: true,
+    sway: 0.35,
+    turn: [0, Math.PI / 2, 0.576],
+    decals: [{ piece: "Object_2", image: "/models/decals/cd-cover.webp", side: [-0.839, 0.545, 0] }],
+    sounds: ["cd-music"],
+    music: true,
+  },
+  { name: "pikachu", file: "pikachu.glb", front: true, sounds: ["pikachu-1", "pikachu-2", "pikachu-3"] },
+  // Des morceaux d’une dizaine de secondes (dont le générique de GTA San
+  // Andreas) : joués en entier, la nappe se tait le temps de les écouter.
+  { name: "speaker", file: "speaker.glb", front: true, sounds: ["speaker-1", "speaker-2", "speaker-3"], music: true },
+  // L’étoile argentée de Mario Galaxy, repeinte en jaune vif, avec une lueur.
+  { name: "marioStar", file: "mario-star.glb", front: true, tints: { FooMat: "#ffd21a" }, aura: "#ffc61a", sounds: ["mario-star"] },
+  { name: "wineGlass", file: "wine-glass.glb", glass: ["Glass"], sounds: ["wine"] },
+  { name: "flower", file: "flower.glb", sounds: ["flower-1", "flower-2"] },
+  { name: "cheese", file: "cheese.glb", tints: { Cheese: "#f6c445" }, sounds: ["cheese-1", "cheese-2"] },
+  { name: "chessPawn", file: "chess-pawn.glb", sounds: ["chess-1", "chess-2"] },
 ];

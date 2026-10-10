@@ -12,8 +12,12 @@
 export type SoundEffect = "travel" | "enter" | "return" | "blackhole" | "collapse" | "rebirth";
 
 export type SoundEngine = {
-  /** Joue (fondu d'entrée) ou se tait (fondu de sortie, puis veille). */
-  setOn(on: boolean): void;
+  /**
+   * Joue (fondu d'entrée) ou se tait (fondu de sortie, puis veille du
+   * contexte audio). `keepAwake` : se taire sans mettre le contexte en
+   * veille, car un autre son y joue encore (le morceau du CD).
+   */
+  setOn(on: boolean, options?: { keepAwake?: boolean }): void;
   /** Effet ponctuel ; `duration` en secondes pour le souffle du trajet. */
   sfx(name: SoundEffect, duration?: number): void;
   dispose(): void;
@@ -377,8 +381,13 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
   };
 
   return {
-    setOn(next) {
-      if (disposed || next === on) return;
+    setOn(next, { keepAwake = false } = {}) {
+      if (disposed) return;
+      // Déjà muette : seule la veille prévue peut changer (un morceau commence).
+      if (next === on) {
+        if (!on && keepAwake) window.clearTimeout(suspendTimer);
+        return;
+      }
       on = next;
       window.clearTimeout(suspendTimer);
       const now = ctx.currentTime;
@@ -393,7 +402,7 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
         master.gain.linearRampToValueAtTime(0, now + 0.5);
         window.clearTimeout(chordTimer);
         window.clearTimeout(bellTimer);
-        suspendTimer = window.setTimeout(() => void ctx.suspend(), 700);
+        if (!keepAwake) suspendTimer = window.setTimeout(() => void ctx.suspend(), 700);
       }
     },
     sfx(name, duration = 1) {

@@ -38,6 +38,8 @@ export type ModelPart = {
   doubleSided: boolean;
   /** Seuil de transparence (feuille de salade…), 0 si la pièce est opaque. */
   alphaCut: number;
+  /** Verre : la pièce laisse voir à travers elle (1 ou absent : opaque). */
+  opacity?: number;
 };
 
 /** Écran allumé : où poser le halo, dans le repère de l'objet (cube de côté 1). */
@@ -82,6 +84,8 @@ export type ModelOptions = {
    * blanc lumineux, et un halo s'en échappe (cf. galleryRenderer).
    */
   screen?: { piece: string; glow?: number };
+  /** Pièces en verre (nom du matériau ou de la pièce) : translucides, vues des deux côtés. */
+  glass?: string[];
 };
 
 let textureLoader: TextureLoader | null = null;
@@ -131,8 +135,13 @@ function bakeMesh(mesh: Mesh): BufferGeometry {
   return geometry.index ? geometry.toNonIndexed() : geometry;
 }
 
-function partOf(material: Material, tints: Record<string, string>, pieceName: string, pixelated = false): ModelPart {
+function partOf(material: Material, tints: Record<string, string>, pieceName: string, pixelated = false, glass: string[] = []): ModelPart {
   const painted = material as Material & { color?: Color; map?: Texture | null; alphaTest?: number };
+  // Le verre du fichier est presque invisible (quart d'opacité) : un peu
+  // plus présent ici, pour qu'on le devine sur le fond sombre.
+  if (glass.includes(material.name) || glass.includes(pieceName)) {
+    return { color: painted.color?.clone() ?? new Color(1, 1, 1), map: null, doubleSided: true, alphaCut: 0, opacity: Math.max(0.3, material.opacity) };
+  }
   // Par matériau, ou par pièce quand une seule matière habille tout l'objet.
   const tint = tints[material.name] ?? tints[pieceName];
   if (pixelated && painted.map) painted.map.magFilter = NearestFilter;
@@ -244,7 +253,7 @@ function cutDecal(geometry: BufferGeometry, decal: ModelDecal, portrait: boolean
  * texture conservée ; `decals` y pose des images (cf. ModelDecal).
  */
 export async function loadIdentityModel(file: string, options: ModelOptions = {}): Promise<LoadedModel> {
-  const { tints = {}, decals = [], pixelated = false, turn, screen } = options;
+  const { tints = {}, decals = [], pixelated = false, turn, screen, glass = [] } = options;
   if (!loader) {
     loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
@@ -279,13 +288,13 @@ export async function loadIdentityModel(file: string, options: ModelOptions = {}
           piece.setAttribute(name, new Float32BufferAttribute(attribute.array.slice(group.start * size, (group.start + group.count) * size), size));
         }
         geometries.push(piece);
-        parts.push(partOf(materials[group.materialIndex ?? 0], tints, mesh.name, pixelated));
+        parts.push(partOf(materials[group.materialIndex ?? 0], tints, mesh.name, pixelated, glass));
         names.push([materials[group.materialIndex ?? 0].name, mesh.name]);
       }
       baked.dispose();
     } else {
       geometries.push(baked);
-      parts.push(partOf(materials[0], tints, mesh.name, pixelated));
+      parts.push(partOf(materials[0], tints, mesh.name, pixelated, glass));
       names.push([materials[0].name, mesh.name]);
     }
   });

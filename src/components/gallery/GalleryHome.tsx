@@ -30,7 +30,9 @@ import {
 } from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
-import { playSfx, playThemes, stopThemes } from "@/lib/sound/sound";
+import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
+import { HeadphonesHint } from "./HeadphonesHint";
+import { SceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
@@ -39,6 +41,7 @@ import type {
   GalleryFailure,
   GalleryPieceInput,
   GalleryRenderer,
+  SceneCursorState,
   WorldPhase,
   DimensionKind,
 } from "./three/galleryRenderer";
@@ -173,6 +176,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   // « ready » : la scène 3D est affichée ; sinon le cadre HTML montre la tuile.
   const [scene, setScene] = useState<"off" | "ready" | "failed">("off");
   const [hovered3d, setHovered3d] = useState<number | null>(null);
+  // Ce que la souris survole dans la scène, pour le curseur (cf. SceneCursor).
+  const [cursor3d, setCursor3d] = useState<SceneCursorState>(null);
   // Un aperçu venu du clavier survit au défilement qu'il provoque, jusqu'à
   // l'arrivée sur son projet ; un défilement suivant l'efface comme un survol.
   const previewFromFocusRef = useRef(false);
@@ -321,6 +326,15 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     if (!isPlainClick(event)) return;
     event.preventDefault();
     enterProject(index);
+  };
+  // Sommaire : une entrée mène au projet (la caméra le rejoint), sans l'ouvrir ;
+  // l'ouvrir reste un geste à part (clic sur la plaque). Au clavier, le focus
+  // y a déjà mené : Entrée l'ouvre. Clic molette ou Ctrl : nouvel onglet.
+  const onListClick = (index: number) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!isPlainClick(event)) return;
+    event.preventDefault();
+    if (event.detail === 0) enterProject(index);
+    else scrollToPiece(index);
   };
 
   // --- Scène 3D ------------------------------------------------------------
@@ -517,6 +531,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       renderer?.dispose();
       renderer = null;
       setHovered3d(null);
+      setCursor3d(null);
       if (reason === "context-lost" && attempt < MAX_SCENE_RETRIES) {
         // Perte passagère (onglet en arrière-plan, pilote graphique) : le
         // cadre HTML reprend le temps de recréer la scène.
@@ -542,6 +557,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           buildPieces(projectsRef.current),
           {
             onHover: setHovered3d,
+            onCursor: setCursor3d,
             onActivate: (index, newTab) => {
               const href = `/projects/${projectsRef.current[index].slug}`;
               if (newTab) window.open(href, "_blank", "noopener");
@@ -685,7 +701,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             masquée (100lvh), pour ne laisser aucun vide en bas quand elle se
             cache au défilement ; le texte et les repères restent dans la
             hauteur toujours visible (100svh), et ne sautent donc jamais. */}
-        <div ref={stageRef} className="sticky top-0 h-[100lvh] overflow-hidden bg-[#08080b]">
+        <div ref={stageRef} data-cursor-zone className="sticky top-0 h-[100lvh] overflow-hidden bg-[#08080b]">
           {/* Lueur de la couleur du projet, derrière le cadre. */}
           <motion.div
             aria-hidden="true"
@@ -699,6 +715,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           {/* Scène 3D : purement visuelle, la liste porte les liens. */}
           <div
             ref={sceneHostRef}
+            data-scene-host
             aria-hidden="true"
             className={cn("absolute inset-0 touch-pan-y touch-pinch-zoom", live ? "opacity-100" : "pointer-events-none opacity-0")}
           />
@@ -848,7 +865,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                             ) : null}
                             <Link
                               href={`/projects/${item.slug}`}
-                              onClick={onProjectClick(index)}
+                              onClick={onListClick(index)}
                               onMouseEnter={() => setPreview(index)}
                               onMouseLeave={clearPreview}
                               onFocus={onLinkFocus(index)}
@@ -921,6 +938,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                             onClick={onProjectClick(shown)}
                             tabIndex={-1}
                             aria-hidden="true"
+                            data-cursor="discover"
                             className="relative block h-full w-full"
                             style={{ backgroundColor: project.background }}
                           >
@@ -1067,6 +1085,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
           </PassiveAnimationProvider>
         </div>
       </section>
+
+      <SceneCursor scene={live ? cursor3d : null} calm={calm} />
+      {/* Au toucher, pas de curseur : quand le message s'efface, les objets du
+          projet affiché sautillent, pour montrer qu'on peut les toucher. */}
+      <HeadphonesHint
+        ready={synced && opening !== "loading"}
+        calm={calm}
+        onDone={() => {
+          if (window.matchMedia("(pointer: coarse)").matches) rendererRef.current?.nudgeObjects();
+        }}
+      />
     </>
   );
 }
@@ -1075,9 +1104,19 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
  * Les dimensions où l'on peut tomber (images dans public/dimensions).
  */
 /** Musiques jouées à l’arrivée dans une dimension, l’une après l’autre. */
-const DIMENSION_THEMES: Record<Exclude<DimensionKind, "lattice">, string[]> = {
-  southpark: ["/sounds/dimensions/south-park-start.mp3", "/sounds/dimensions/south-park-theme.mp3"],
-  dofus: ["/sounds/dimensions/dofus-theme.mp3"],
+/*
+ * Volumes mesurés en LUFS (volume perçu, et non en crête) : la nappe du site
+ * sort vers -38 LUFS ; les fichiers sont bien plus forts (-14 à -17 LUFS).
+ * Chaque musique est ramenée à son niveau : le générique de South Park un
+ * rien au-dessus (-37), son thème et celui de Dofus un peu en dessous (-38,5
+ * et -39). Le caractère des morceaux ne change pas, seule leur présence.
+ */
+const DIMENSION_THEMES: Record<Exclude<DimensionKind, "lattice">, Theme[]> = {
+  southpark: [
+    { src: "/sounds/dimensions/south-park-start.mp3", volume: 0.077 },
+    { src: "/sounds/dimensions/south-park-theme.mp3", volume: 0.057 },
+  ],
+  dofus: [{ src: "/sounds/dimensions/dofus-theme.mp3", volume: 0.079 }],
 };
 
 const DIMENSIONS: DimensionKind[] = ["lattice", "dofus", "southpark"];

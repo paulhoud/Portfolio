@@ -99,6 +99,7 @@ export const slabFragment = /* glsl */ `
   uniform float uLit;
   uniform float uSolid;
   uniform float uAlphaCut;
+  uniform float uAlpha;
   uniform vec3 uLightDir;
   uniform vec3 uFogColor;
   uniform float uFogNear;
@@ -179,7 +180,8 @@ export const slabFragment = /* glsl */ `
     color += vec3(0.9) * pow(1.0 - ndv, 3.0) * 0.35 * uRim;
     color *= uLit * vSink;
     color = mix(color, uFogColor, smoothstep(uFogNear, uFogFar, vDist));
-    gl_FragColor = vec4(color, 1.0);
+    // Verre : translucide, plus présent sur les bords (Fresnel).
+    gl_FragColor = vec4(color, uAlpha < 1.0 ? mix(uAlpha, 1.0, fresnel * 0.6) : 1.0);
     #include <colorspace_fragment>
   }
 `;

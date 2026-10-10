@@ -47,7 +47,7 @@ import {
 import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
 import { createImageDimension, type ImageDimension, type ImageDimensionKind } from "./imageDimension";
-import { playClip } from "@/lib/sound/sound";
+import { playClip, preloadClip } from "@/lib/sound/sound";
 import { IDENTITY_CATALOG } from "./identity";
 import { loadIdentityModel, type LoadedModel } from "./identityFiles";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
@@ -90,7 +90,16 @@ export type GalleryCallbacks = {
   onFail: (reason: GalleryFailure, detail?: string) => void;
   /** Clic dans le vide de la scène (ni plaque ni satellite). */
   onEmptyClick?: () => void;
+  /** Ce qu'il y a sous la souris, pour le curseur (cf. SceneCursor). */
+  onCursor?: (state: SceneCursorState) => void;
 };
+
+/**
+ * Sous la souris : le vide de la scène, une plaque (on peut l'ouvrir), un
+ * objet (on peut le toucher, l'attraper), un objet tenu ; `null` hors de la
+ * scène ou quand elle ne répond pas (entrée dans un projet, autre dimension).
+ */
+export type SceneCursorState = "scene" | "project" | "object" | "grab" | null;
 
 /**
  * Étapes de « destroy the world » : aspiration, effondrement, puis on reste
@@ -155,6 +164,8 @@ export type GalleryRenderer = {
   setRunning(running: boolean): void;
   /** Lance l'arrivée retenue par `holdIntro` (dès que la scène est prête). */
   releaseIntro(): void;
+  /** Au toucher : les objets du projet affiché sautillent, pour montrer qu'ils réagissent. */
+  nudgeObjects(): void;
   dispose(): void;
 };
 
@@ -391,6 +402,7 @@ export function createGalleryRenderer(
         uVideo: { value: blank },
         uHasMap: { value: map ? 1 : 0 },
         uAlphaCut: { value: 0 },
+        uAlpha: { value: 1 },
         uMix: { value: 0 },
         uBody: { value: body },
         uGlow: { value: glow },
@@ -516,6 +528,48 @@ export function createGalleryRenderer(
     `,
   });
   const haloFront = new Vector3(0, 0, 1);
+  /*
+   * Lueur d'un objet (l'étoile de Mario) : un disque doux, toujours tourné
+   * vers la caméra, qui s'additionne à la scène et s'estompe dans le brouillard.
+   */
+  const auraMaterials = new Map<string, ShaderMaterial>();
+  const auraMaterial = (color: string) => {
+    const cached = auraMaterials.get(color);
+    if (cached) return cached;
+    const material = new ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: AdditiveBlending,
+      uniforms: { ...fog, uColor: { value: new Color(color) }, uStrength: { value: 0.55 } },
+      vertexShader: /* glsl */ `
+        varying vec2 vUv;
+        varying float vDist;
+        void main() {
+          vUv = uv;
+          vec4 mv = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+          mv.xy += position.xy * length(modelMatrix[0].xyz);
+          vDist = -mv.z;
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform vec3 uColor;
+        uniform float uStrength;
+        uniform float uFogNear;
+        uniform float uFogFar;
+        varying vec2 vUv;
+        varying float vDist;
+        void main() {
+          float d = length((vUv - 0.5) * 2.0);
+          float a = pow(max(1.0 - d, 0.0), 2.2) * uStrength;
+          a *= 1.0 - smoothstep(uFogNear, uFogFar, vDist);
+          gl_FragColor = vec4(uColor, a);
+        }
+      `,
+    });
+    auraMaterials.set(color, material);
+    return material;
+  };
   // L’écran lui-même : un blanc franc, qui ne dépend pas de l’éclairage.
   const screenMaterial = new ShaderMaterial({
     side: DoubleSide,
@@ -552,11 +606,24 @@ export function createGalleryRenderer(
       halo.renderOrder = 2;
       mesh.add(halo, new Mesh(look.glow.surface, screenMaterial));
     }
+    const aura = IDENTITY_CATALOG[mesh.userData.entry as number].aura;
+    if (aura) {
+      const glowDisc = new Mesh(haloGeometry, auraMaterial(aura));
+      glowDisc.scale.setScalar(1.9);
+      glowDisc.renderOrder = 2;
+      mesh.add(glowDisc);
+    }
     const glow = new Color(inputs[mesh.userData.owner as number].glow);
     const materials = look.parts.map((part) => {
       const material = slabMaterial(part.color, glow, 1, true, 0, part.map);
       material.uniforms.uAlphaCut.value = part.alphaCut;
       if (part.doubleSided) material.side = DoubleSide;
+      if (part.opacity !== undefined && part.opacity < 1) {
+        // Verre : dessiné après les pièces opaques, sans masquer ce qu'il contient.
+        material.transparent = true;
+        material.depthWrite = false;
+        material.uniforms.uAlpha.value = part.opacity;
+      }
       return material;
     });
     mesh.material = materials.length === 1 ? materials[0] : materials;
@@ -585,7 +652,7 @@ export function createGalleryRenderer(
   };
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
-    satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index % IDENTITY_CATALOG.length].place);
+    satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index]?.place, IDENTITY_CATALOG.length);
     const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}`).join("|");
     if (signature === satelliteSignature) return;
     satelliteSignature = signature;
@@ -1164,13 +1231,62 @@ export function createGalleryRenderer(
     invalidate();
   }
 
+  // Curseur : ce qu'il y a sous la souris, signalé seulement quand ça change.
+  let cursorState: SceneCursorState = null;
+  const pointerAt = { x: 0, y: 0, inside: false };
+  let objectHovered = false;
+  let lastHoverCheck = 0;
+  const emitCursor = () => {
+    const next: SceneCursorState =
+      !pointerAt.inside || immersion || world
+        ? null
+        : drag?.moved
+          ? "grab"
+          : hovered !== null
+            ? "project"
+            : objectHovered
+              ? "object"
+              : "scene";
+    if (next === cursorState) return;
+    cursorState = next;
+    callbacks.onCursor?.(next);
+  };
+  /** Plaque ou objet sous la souris, au point où elle se trouve. */
+  const hoverAt = (clientX: number, clientY: number) => {
+    const index = pick(clientX, clientY);
+    setHovered(index);
+    const hit = index === null ? pickAny(clientX, clientY) : null;
+    objectHovered = hit?.kind === "satellite";
+    if (hit?.kind === "satellite") warmVoice(hit.index);
+    if (index === null && !calm) canvas.style.cursor = objectHovered ? "grab" : "";
+    emitCursor();
+  };
+  /*
+   * La scène bouge sous une souris immobile (molette, clic dans le sommaire) :
+   * on regarde de nouveau ce qu'elle survole, sans attendre qu'elle bouge.
+   */
+  const recheckHover = (now: number) => {
+    if (!pointerAt.inside || drag || immersion || world || lastPointerType !== "mouse") return;
+    if (now - lastHoverCheck < 120) return;
+    lastHoverCheck = now;
+    hoverAt(pointerAt.x, pointerAt.y);
+  };
+
   let lastPointerType = "mouse";
   let touchStart: { x: number; y: number } | null = null;
   let suppressClick = false;
 
   const onPointerMove = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
-    if (immersion || world) return;
+    if (event.pointerType === "mouse") {
+      pointerAt.x = event.clientX;
+      pointerAt.y = event.clientY;
+      pointerAt.inside = true;
+    }
+    if (immersion || world) {
+      emitCursor();
+      return;
+    }
     if (drag) {
       // Au-delà de quelques pixels, l'appui devient une prise : l'objet suit
       // le pointeur dans un plan face à la caméra.
@@ -1179,6 +1295,7 @@ export function createGalleryRenderer(
         drag.body.held = true;
         canvas.style.cursor = "grabbing";
         setHovered(null);
+        emitCursor();
       }
       if (drag.moved && pointerRay(event.clientX, event.clientY).intersectPlane(drag.plane, planeHit)) {
         const now = performance.now();
@@ -1203,29 +1320,47 @@ export function createGalleryRenderer(
       activity();
       return;
     }
-    if (event.pointerType === "mouse") {
-      const index = pick(event.clientX, event.clientY);
-      setHovered(index);
-      if (index === null && !calm) canvas.style.cursor = pickAny(event.clientX, event.clientY) ? "grab" : "";
-    }
+    if (event.pointerType === "mouse") hoverAt(event.clientX, event.clientY);
     activity();
   };
-  const onPointerLeave = () => setHovered(null);
+  const onPointerLeave = () => {
+    pointerAt.inside = false;
+    objectHovered = false;
+    setHovered(null);
+    emitCursor();
+  };
   // Son d'objet : chaque objet a les siens, joués à tour de rôle ; un double
   // déclenchement rapproché (appui puis clic) n'en joue qu'un.
   const soundTurns = new Map<number, number>();
   let lastVoice = { index: -1, at: 0 };
+  /** Le prochain son d'un objet, prêt avant qu'on le touche. */
+  const warmVoice = (index: number) => {
+    const entry = satellites[index]?.userData.entry as number | undefined;
+    const sounds = entry === undefined ? undefined : IDENTITY_CATALOG[entry].sounds;
+    if (!sounds?.length) return;
+    preloadClip(`/sounds/objects/${sounds[(soundTurns.get(entry!) ?? 0) % sounds.length]}.mp3`);
+  };
+  /** Ceux des objets du projet affiché, dès qu'on y arrive (au doigt, pas de survol). */
+  let warmedFor = -1;
+  const warmActive = () => {
+    const active = activeIndex();
+    if (active === warmedFor) return;
+    warmedFor = active;
+    satellites.forEach((mesh, index) => {
+      if (mesh.userData.owner === active) warmVoice(index);
+    });
+  };
   const voice = (index: number) => {
     const now = performance.now();
     if (lastVoice.index === index && now - lastVoice.at < 400) return;
     lastVoice = { index, at: now };
     const entry = satellites[index]?.userData.entry as number | undefined;
     if (entry === undefined) return;
-    const sounds = IDENTITY_CATALOG[entry].sounds;
+    const { sounds, music } = IDENTITY_CATALOG[entry];
     if (!sounds?.length) return;
     const turn = soundTurns.get(entry) ?? 0;
     soundTurns.set(entry, turn + 1);
-    playClip(`/sounds/objects/${sounds[turn % sounds.length]}.mp3`);
+    playClip(`/sounds/objects/${sounds[turn % sounds.length]}.mp3`, { music });
   };
   const onPointerDown = (event: PointerEvent) => {
     lastPointerType = event.pointerType;
@@ -1272,6 +1407,7 @@ export function createGalleryRenderer(
     drag = null;
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
     canvas.style.cursor = "";
+    if (event.pointerType === "mouse") hoverAt(event.clientX, event.clientY);
     if (!current.moved) return false;
     // Lâché avec son élan, il file puis revient à sa place (cf. physics).
     current.body.held = false;
@@ -1423,6 +1559,8 @@ export function createGalleryRenderer(
     const dt = Math.min(0.05, lastTime ? (now - lastTime) / 1000 : 1 / 60);
     lastTime = now;
     const busy = update(dt, now);
+    recheckHover(now);
+    warmActive();
     // Au repos, seul le flottement continue : une image sur deux suffit.
     const idle = !calm && !busy && now - lastActivity > 2500;
     skipFrame = idle ? !skipFrame : false;
@@ -1717,11 +1855,13 @@ export function createGalleryRenderer(
           : 1;
       const pop = easeOutBack(arrive);
       const spin = float * time;
-      if (IDENTITY_CATALOG[mesh.userData.entry as number].front) {
+      const entry = IDENTITY_CATALOG[mesh.userData.entry as number];
+      if (entry.front) {
         // Toujours de face : un lent balancement plutôt qu’un tour complet.
+        const sway = entry.sway ?? 1;
         mesh.rotation.set(
-          Math.sin(spin * 0.5 + layout.phase) * 0.12 - pointer.y * 0.3,
-          Math.sin(spin * 0.35 + layout.phase) * 0.5 + pointer.x * 0.4,
+          (Math.sin(spin * 0.5 + layout.phase) * 0.12 - pointer.y * 0.3) * sway,
+          (Math.sin(spin * 0.35 + layout.phase) * 0.5 + pointer.x * 0.4) * sway,
           0,
         );
       } else {
@@ -1981,6 +2121,23 @@ export function createGalleryRenderer(
       updateScheduler();
       invalidate();
     },
+    nudgeObjects() {
+      if (calm || immersion || world || disposed) return;
+      const active = activeIndex();
+      let delay = 0;
+      satellites.forEach((mesh, index) => {
+        const body = satelliteBodies[index];
+        if (mesh.userData.owner !== active || !mesh.visible || !body) return;
+        window.setTimeout(() => {
+          if (disposed) return;
+          body.velocity.add(new Vector3(0, 3, 0));
+          body.spin.add(new Vector3(0, random(-5, 5), 0));
+          activity();
+          invalidate();
+        }, delay);
+        delay += 180;
+      });
+    },
     releaseIntro() {
       if (!introHeld) return;
       introHeld = false;
@@ -2044,6 +2201,7 @@ export function createGalleryRenderer(
       haloGeometry.dispose();
       haloMaterial.dispose();
       screenMaterial.dispose();
+      for (const material of auraMaterials.values()) material.dispose();
       dimension?.dispose();
       scenery?.dispose();
       removeTextLayer();

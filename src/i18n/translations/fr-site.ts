@@ -30,6 +30,10 @@ export const frSite: SiteCopy = {
   sound: {
     mute: "Couper le son",
     unmute: "Activer le son",
+    label: "Son",
+    unmuteShort: "Activer",
+    on: "Activé",
+    off: "Coupé",
   },
   gallery: {
     intro:
@@ -38,6 +42,8 @@ export const frSite: SiteCopy = {
     viewProject: "Voir le projet",
     nextProject: "Projet suivant",
     scrollHint: "Faire défiler",
+    discover: "Découvrir",
+    headphones: "Meilleure expérience avec un casque",
     lostTitle: "Vous dérivez dans une autre dimension.",
     lostHint: "Les projets flottent quelque part par ici…",
     lostHintDofus: "Un marais doré, quelque part dans le monde des Douze…",

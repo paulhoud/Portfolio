@@ -536,3 +536,48 @@ body {
     display: none;
   }
 }
+
+/* Curseur de la galerie (cf. SceneCursor) : « Découvrir » tourne lentement,
+   un point descend comme pour faire défiler. Le curseur du système s'efface
+   dans toute la zone de l'expérience, seulement quand celui-ci y est actif
+   (sinon, il reste en secours). */
+@keyframes cursor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cursor-spin {
+  transform-origin: 50% 50%;
+  animation: cursor-spin 18s linear infinite;
+}
+
+@keyframes cursor-scroll {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+
+.cursor-scroll-dot {
+  animation: cursor-scroll 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+html[data-scene-cursor] [data-cursor-zone],
+html[data-scene-cursor] [data-cursor-zone] * {
+  cursor: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-spin,
+  .cursor-scroll-dot {
+    animation: none;
+  }
+}

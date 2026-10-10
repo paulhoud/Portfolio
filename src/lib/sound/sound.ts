@@ -85,9 +85,13 @@ function apply() {
   }
   // Dans une dimension, la nappe d'ambiance se tait jusqu'au retour, même
   // une fois ses musiques terminées : elles ont la place pour elles seules.
-  const ambient = on && !inDimension;
+  // De même le temps d'un morceau (le CD).
+  const ambient = on && !inDimension && !clipPlaying?.music;
   if (!context || (!ambient && !engine)) return;
-  void ensureEngine().then((ready) => ready?.setOn(ambient));
+  // Pendant un morceau, la nappe se tait sans mettre le son en veille : la
+  // veille couperait aussi le morceau.
+  const keepAwake = Boolean(clipPlaying?.music);
+  void ensureEngine().then((ready) => ready?.setOn(ambient, { keepAwake }));
 }
 
 /*
@@ -95,11 +99,15 @@ function apply() {
  * l'autre à l'arrivée, une seule fois, avec un fondu enchaîné entre deux
  * pistes. Lues en flux (élément audio) : les décoder en entier pèserait lourd.
  */
-const THEME_VOLUME = 0.4;
+/**
+ * Une musique de dimension et son volume (0 à 1) : chacune est réglée pour
+ * sonner au niveau de la nappe d'ambiance du site, ou un peu en dessous.
+ */
+export type Theme = { src: string; volume: number };
 /** Durée du fondu enchaîné entre deux musiques qui se suivent (secondes). */
 const THEME_CROSSFADE = 1.5;
 let theme: HTMLAudioElement | null = null;
-let themeQueue: string[] = [];
+let themeQueue: Theme[] = [];
 /** Le visiteur est dans une dimension (de l'arrivée au retour). */
 let inDimension = false;
 
@@ -119,13 +127,13 @@ function fadeAudio(audio: HTMLAudioElement, to: number, seconds: number, done?: 
 }
 
 function nextTheme(crossfade = false) {
-  const url = themeQueue.shift();
-  if (!url) {
+  const next = themeQueue.shift();
+  if (!next) {
     theme = null;
     return;
   }
-  const audio = new Audio(url);
-  audio.volume = crossfade ? 0 : THEME_VOLUME;
+  const audio = new Audio(next.src);
+  audio.volume = crossfade ? 0 : next.volume;
   // Juste avant la fin, la piste suivante entre pendant que celle-ci s'efface.
   let handedOver = false;
   const handOver = () => {
@@ -147,7 +155,7 @@ function nextTheme(crossfade = false) {
   void audio
     .play()
     .then(() => {
-      if (crossfade) fadeAudio(audio, THEME_VOLUME, THEME_CROSSFADE);
+      if (crossfade) fadeAudio(audio, next.volume, THEME_CROSSFADE);
     })
     .catch(() => {
       if (theme !== audio) return;
@@ -168,11 +176,12 @@ function haltTheme() {
  * Arrivée dans une dimension : la nappe se tait et ses musiques se jouent à
  * la suite, si le son du site est actif.
  */
-export function playThemes(urls: string[]) {
+export function playThemes(themes: Theme[]) {
   haltTheme();
+  if (context) stopClip(context);
   inDimension = true;
   if (getSnapshot()) {
-    themeQueue = [...urls];
+    themeQueue = [...themes];
     nextTheme();
   }
   apply();
@@ -226,6 +235,11 @@ export function setSoundOn(on: boolean) {
   apply();
 }
 
+/** Son actif (lecture ponctuelle, hors React). */
+export function isSoundOn() {
+  return getSnapshot();
+}
+
 /** `[son actif, basculer]` - coupé au rendu serveur. */
 export function useSoundOn(): [boolean, () => void] {
   const on = useSyncExternalStore(subscribe, getSnapshot, () => false);
@@ -277,7 +291,7 @@ function loudness(buffer: AudioBuffer) {
 const CLIP_LONGEST = 8;
 
 const clips = new Map<string, Promise<Clip | null>>();
-let clipPlaying: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
+let clipPlaying: { source: AudioBufferSourceNode; gain: GainNode; url: string; music: boolean } | null = null;
 
 function loadClip(ctx: AudioContext, url: string): Promise<Clip | null> {
   let clip = clips.get(url);
@@ -292,21 +306,48 @@ function loadClip(ctx: AudioContext, url: string): Promise<Clip | null> {
   return clip;
 }
 
+const warmed = new Set<string>();
+/**
+ * Prépare un son d'objet (survol, projet affiché) pour que le clic le joue
+ * sans attendre son chargement : décodé si le son est déjà débloqué, sinon
+ * seulement téléchargé. Rien si le son du site est coupé.
+ */
+export function preloadClip(url: string) {
+  if (!getSnapshot()) return;
+  if (context) void loadClip(context, url);
+  else if (!warmed.has(url)) {
+    warmed.add(url);
+    void fetch(url).catch(() => {});
+  }
+}
+
 function stopClip(ctx: AudioContext) {
   if (!clipPlaying) return;
-  const { source, gain } = clipPlaying;
+  const { source, gain, music } = clipPlaying;
   clipPlaying = null;
   const now = ctx.currentTime;
   gain.gain.cancelScheduledValues(now);
   gain.gain.setValueAtTime(gain.gain.value, now);
-  gain.gain.linearRampToValueAtTime(0, now + 0.08);
-  source.stop(now + 0.1);
+  // Un morceau s'efface un peu plus doucement qu'un bruitage.
+  const fade = music ? 0.4 : 0.08;
+  gain.gain.linearRampToValueAtTime(0, now + fade);
+  source.stop(now + fade + 0.02);
+  // La nappe revient après un morceau.
+  if (music) apply();
 }
 
-/** Joue le son d'un objet, si le son du site est actif et débloqué. */
-export function playClip(url: string) {
+/**
+ * Joue le son d'un objet, si le son du site est actif et débloqué.
+ * `music` : un morceau (l'extrait du CD), joué en entier pendant que la
+ * nappe se tait ; le relancer pendant qu'il joue l'arrête.
+ */
+export function playClip(url: string, { music = false }: { music?: boolean } = {}) {
   if (!context || !getSnapshot() || document.hidden) return;
   const ctx = context;
+  if (music && clipPlaying?.url === url) {
+    stopClip(ctx);
+    return;
+  }
   if (ctx.state === "suspended") void ctx.resume();
   void loadClip(ctx, url).then((clip) => {
     if (!clip || !getSnapshot()) return;
@@ -319,15 +360,18 @@ export function playClip(url: string) {
     source.connect(gain).connect(ctx.destination);
     // Lancé avant tout arrêt programmé : le navigateur refuse l'inverse.
     source.start(now);
-    if (clip.buffer.duration > CLIP_LONGEST) {
+    if (!music && clip.buffer.duration > CLIP_LONGEST) {
       gain.gain.setValueAtTime(clip.gain, now + CLIP_LONGEST - 1.5);
       gain.gain.linearRampToValueAtTime(0, now + CLIP_LONGEST);
       source.stop(now + CLIP_LONGEST + 0.05);
     }
-    const playing = { source, gain };
+    const playing = { source, gain, url, music };
     clipPlaying = playing;
+    if (music) apply();
     source.onended = () => {
-      if (clipPlaying === playing) clipPlaying = null;
+      if (clipPlaying !== playing) return;
+      clipPlaying = null;
+      if (music) apply();
     };
   });
 }
