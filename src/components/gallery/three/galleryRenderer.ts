@@ -37,6 +37,7 @@ import {
   framingFor,
   layoutPieces,
   layoutSatellites,
+  type ScreenFrame,
   scrollToStation,
   sizeAt,
   spacingFor,
@@ -435,6 +436,11 @@ export function createGalleryRenderer(
   };
 
   let currentSpacing = spacingFor(5, 1.6);
+  /**
+   * Ordinateur : ce que montre l'écran, pour que les objets y tiennent
+   * entiers, à portée de souris (cf. placeOnScreen) ; ailleurs, `null`.
+   */
+  let screenFrame: ScreenFrame | null = null;
   let layouts: PieceLayout[] = layoutPieces(count, currentSpacing);
   const pieces: PieceState[] = inputs.map((input, index) => {
     // Le boîtier prend la couleur du pourtour de la tuile (calculée dans le
@@ -654,7 +660,9 @@ export function createGalleryRenderer(
   };
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
-    satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index]?.place, IDENTITY_CATALOG.length);
+    // Sur ordinateur, Paul garde 30 objets (le fromage et le pion n'y sont pas).
+    const limit = screenFrame ? Math.min(30, IDENTITY_CATALOG.length) : IDENTITY_CATALOG.length;
+    satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index]?.place, limit, screenFrame ?? undefined);
     const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}`).join("|");
     if (signature === satelliteSignature) return;
     satelliteSignature = signature;
@@ -858,6 +866,21 @@ export function createGalleryRenderer(
     applyView();
     baseDistance = viewDistance(framing.fov, h, frame.size * framing.fill);
     currentSpacing = spacingFor(baseDistance, aspect);
+    // La colonne de texte occupe la gauche (jusqu'à ~40 % de la largeur),
+    // l'en-tête le haut, le cartel le dessous du cadre.
+    screenFrame = currentSpacing.rightOnly
+      ? {
+          width: w,
+          height: h,
+          fov: framing.fov,
+          cx: frame.cx,
+          cy: frame.cy,
+          left: Math.max(w * 0.42, frame.cx - frame.size * 0.85),
+          top: 84,
+          right: w - 16,
+          bottom: Math.min(h - 16, frame.cy + frame.size / 2),
+        }
+      : null;
     layouts = layoutPieces(count, currentSpacing);
     buildSatellites();
     fog.uFogNear.value = baseDistance + 3;

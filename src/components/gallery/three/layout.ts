@@ -190,8 +190,9 @@ export function cameraPose(pieces: PieceLayout[], station: number, distance: num
  * `textSide` le pose, sur ordinateur, entre la colonne de texte et la plaque,
  * tout près d'elle et un peu en retrait : de l'autre côté, la place est le
  * passage de la caméra vers le projet suivant, qui repousserait l'objet loin.
+ * `top` : au-dessus de sa plaque, sur ordinateur (cf. placeOnScreen).
  */
-export type SatelliteHint = { near?: number; textSide?: boolean };
+export type SatelliteHint = { near?: number; textSide?: boolean; top?: boolean };
 
 /** Petit objet décoratif qui flotte autour d'une plaque, à la manière de Spline. */
 export type SatelliteLayout = {
@@ -225,7 +226,10 @@ export function layoutSatellites(
   hint?: (index: number) => SatelliteHint | undefined,
   /** Nombre d'objets différents : jamais plus de places, pour qu'aucun ne se répète. */
   limit = Infinity,
+  /** Ordinateur : ce que montre l'écran (les objets s'y posent, cf. placeOnScreen). */
+  screen?: ScreenFrame,
 ): SatelliteLayout[] {
+  if (screen && !spacing.portrait && spacing.rightOnly) return placeOnScreen(pieces, spacing, hint, screen, limit);
   let placed = placeSatellites(pieces, spacing, hint, new Set());
   const extra = placed.layouts.length - limit;
   if (extra > 0) {
@@ -345,6 +349,164 @@ function placeSatellites(
     }
   });
   return { layouts: satellites, keys };
+}
+
+/**
+ * Ce que montre l'écran, pour poser les objets là où on les voit et où on
+ * peut les attraper (ordinateur) : taille du canevas, ouverture de la
+ * caméra, centre du cadre où se pose la plaque active, et zone où un objet
+ * doit tenir entier (à droite de la colonne de texte, sous l'en-tête, au-dessus
+ * du cartel).
+ */
+export type ScreenFrame = {
+  width: number;
+  height: number;
+  fov: number;
+  cx: number;
+  cy: number;
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+/**
+ * Ordinateur : trois places par plaque, choisies à l'écran puis ramenées dans
+ * la scène (demande de Paul, 10 oct. 2026 : des objets trop au bord, hors de
+ * portée, et de la place libre à gauche des projets) :
+ * - « left » : la bande libre entre la colonne de texte et la plaque ;
+ * - « right » : la bande entre la plaque et le bord droit ;
+ * - « edge » : au-dessus de la plaque (sous l'en-tête), sinon au-dessous.
+ * Chaque objet y tient entier quand on est arrêté devant sa plaque, un peu
+ * en retrait de son plan, à des profondeurs variées. Un objet `textSide`
+ * prend la place de gauche, un objet `top` celle du dessus. Les vérifications
+ * de la scène restent les mêmes : ni sur le trajet de la caméra, ni caché
+ * derrière une plaque, ni contre un autre objet.
+ */
+function placeOnScreen(
+  pieces: PieceLayout[],
+  spacing: Spacing,
+  hint: ((index: number) => SatelliteHint | undefined) | undefined,
+  screen: ScreenFrame,
+  limit: number,
+): SatelliteLayout[] {
+  const satellites: SatelliteLayout[] = [];
+  const placed: { position: Vec3; extent: number }[] = [];
+  const dist = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const unit = (a: Vec3): Vec3 => {
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    return [a[0] / l, a[1] / l, a[2] / l];
+  };
+  const cross = (a: Vec3, b: Vec3): Vec3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const focal = screen.height / 2 / Math.tan((screen.fov * Math.PI) / 360);
+  // Rayon d'un objet à l'écran (px) : assez grand pour le reconnaître et l'attraper.
+  const MIN_R = 30;
+  const MAX_R = 58;
+  // Trois places par plaque, mais `limit` objets en tout : quelques plaques,
+  // réparties le long de l'allée, n'ont pas d'objet au-dessus.
+  const extra = Math.max(0, pieces.length * 3 - limit);
+  const noEdge = new Set(Array.from({ length: Math.min(extra, pieces.length) }, (_, i) => Math.round(((i + 0.5) * pieces.length) / extra)));
+
+  pieces.forEach((piece, owner) => {
+    if (satellites.length >= limit) return;
+    const distance = (spacing.view * piece.size) / PIECE_SIZE;
+    const pose = cameraPose(pieces, owner, distance);
+    const forward = unit(sub(pose.target, pose.position));
+    const right = unit(cross(forward, [0, 1, 0]));
+    const up = cross(right, forward);
+    // Silhouette de la plaque à l'écran (px), et ce qui reste libre autour.
+    const half = ((piece.size / 2) * focal) / distance;
+    const slab = { left: screen.cx - half, right: screen.cx + half, top: screen.cy - half, bottom: screen.cy + half };
+    const gap = 14;
+    const above = slab.top - gap - screen.top;
+    const below = screen.bottom - (slab.bottom + gap);
+    const spots: { kind: string; x0: number; x1: number; y0: number; y1: number }[] = [
+      { kind: "right", x0: slab.right + gap, x1: screen.right, y0: screen.top, y1: screen.bottom },
+      { kind: "left", x0: screen.left, x1: slab.left - gap, y0: screen.top, y1: screen.bottom },
+      above >= below
+        ? { kind: "edge", x0: slab.left, x1: slab.right, y0: screen.top, y1: slab.top - gap }
+        : { kind: "edge", x0: slab.left, x1: slab.right, y0: slab.bottom + gap, y1: screen.bottom },
+    ].filter((spot) => spot.kind !== "edge" || !noEdge.has(owner) || Array.from({ length: 3 }, (_, j) => hint?.(satellites.length + j)?.top).some(Boolean));
+
+    // D'abord les places possibles : plusieurs hauteurs et reculs, jusqu'à
+    // en trouver un hors du trajet de la caméra et loin des autres objets.
+    const found: { kind: string; position: Vec3; s: number }[] = [];
+    // Hauteurs essayées, dans un ordre propre à chaque plaque : d'un projet
+    // à l'autre, les objets ne reviennent pas aux mêmes endroits.
+    const rows = [0.5, 0.2, 0.8, 0.35, 0.65, 0.08, 0.92];
+    const shift = Math.floor(seeded(owner, 21) * rows.length);
+    const order = (k: number) => rows.map((_, i) => rows[(i + shift + k * 3) % rows.length]);
+    const depths = [0.4, 1, -0.35, 1.6, 0.15, -0.7, 2.2, 0.7];
+    spots.forEach((spot, spotIndex) => {
+      const r = Math.min(MAX_R, (spot.x1 - spot.x0) / 2 - 4, (spot.y1 - spot.y0) / 2 - 4);
+      if (r < MIN_R) return;
+      search: for (const row of order(spotIndex)) {
+        for (const lift of depths) {
+          const along = spot.kind === "edge" ? row : 0.5;
+          const across = spot.kind === "edge" ? 0.5 : row;
+          const x = spot.x0 + r + (spot.x1 - spot.x0 - 2 * r) * along;
+          const y = spot.y0 + r + (spot.y1 - spot.y0 - 2 * r) * across;
+          const depth = distance + lift;
+          const position: Vec3 = [0, 1, 2].map(
+            (k) =>
+              pose.position[k] +
+              forward[k] * depth +
+              right[k] * (((x - screen.cx) * depth) / focal) +
+              up[k] * (((screen.cy - y) * depth) / focal),
+          ) as Vec3;
+          // Les objets tiennent dans un cube de côté `s` mais ne le remplissent pas.
+          const s = (r * depth) / (0.45 * focal);
+          const extent = 0.45 * s;
+          if (position[1] < 0.23 + extent) continue;
+          // Contre sa plaque : à côté d'elle, ou franchement derrière.
+          const rel = sub(position, piece.position);
+          const beside = Math.abs(rel[0]) > piece.size / 2 + extent * 0.8 || Math.abs(rel[1]) > piece.size / 2 + extent * 0.8;
+          const behind = rel[2] < -(SLAB_DEPTH / 2 + extent + 0.05);
+          if (!beside && !behind) continue;
+          const roomy =
+            placed.every((other) => dist(position, other.position) > other.extent + extent + 0.2) &&
+            pieces.every((other, k) => k === owner || dist(position, other.position) > other.size * 0.75 + extent + 0.1);
+          if (!roomy || !satelliteClear(pieces, spacing, owner, position, extent)) continue;
+          placed.push({ position, extent });
+          found.push({ kind: spot.kind, position, s });
+          break search;
+        }
+      }
+    });
+
+    // Puis les objets, dans l'ordre du catalogue : ceux qui ont une place
+    // attitrée (côté texte, au-dessus) d'abord servis, les autres ensuite.
+    const count = Math.min(found.length, limit - satellites.length);
+    const wishes = Array.from({ length: count }, (_, j) => hint?.(satellites.length + j));
+    const taken = new Set<number>();
+    const choice: number[] = [];
+    wishes.forEach((wish, j) => {
+      const kind = wish?.textSide ? "left" : wish?.top ? "edge" : null;
+      const k = kind ? found.findIndex((spot, i) => spot.kind === kind && !taken.has(i)) : -1;
+      if (k < 0) return;
+      taken.add(k);
+      choice[j] = k;
+    });
+    wishes.forEach((_, j) => {
+      if (choice[j] !== undefined) return;
+      const k = found.findIndex((__, i) => !taken.has(i));
+      taken.add(k);
+      choice[j] = k;
+    });
+    for (const k of choice) {
+      const { position, s } = found[k];
+      const spin = (n: number) => seeded(owner * 7 + satellites.length * 3, n);
+      satellites.push({
+        owner,
+        position,
+        size: [s, s, s],
+        spin: [(spin(10) - 0.5) * 0.5, (spin(11) - 0.5) * 0.7, (spin(12) - 0.5) * 0.4],
+        phase: spin(13) * Math.PI * 2,
+      });
+    }
+  });
+  return satellites;
 }
 
 /** Position de la caméra à une station (au repos ou en chemin), sans la parallaxe. */

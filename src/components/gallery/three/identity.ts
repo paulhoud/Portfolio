@@ -361,8 +361,8 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     sounds: ["brawlstars"],
   },
   { name: "cat", file: "cat.glb", build: cat, sounds: ["cat-1", "cat-2", "cat-3"] },
-  // Au-dessus de sa plaque : visible pendant les trajets de la caméra.
-  { name: "kitsuneMask", file: "kitsune-mask.glb", sounds: ["sushi-koto"] },
+  // Au-dessus de sa plaque (Sanofi Espoir) : visible pendant les trajets de la caméra.
+  { name: "kitsuneMask", file: "kitsune-mask.glb", place: { top: true }, sounds: ["sushi-koto"] },
   { name: "banana", file: "banana.glb", size: 1.25, sounds: ["banana"] },
   { name: "earbuds", file: "earbuds.glb", size: 0.88, sounds: ["earbuds-1", "earbuds-2", "earbuds-3"] },
   {
