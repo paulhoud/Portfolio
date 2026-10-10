@@ -13,6 +13,7 @@ export const frSite: SiteCopy = {
     home: "Accueil",
     main: "Navigation principale",
     mobile: "Navigation mobile",
+    footer: "Liens du pied de page",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
     skipToContent: "Aller au contenu",

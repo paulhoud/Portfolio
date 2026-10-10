@@ -18,6 +18,9 @@
      couleur du projet affiché sur l'accueil (`--accent-glow`, posée sur <html>). */
   --glass-border: color-mix(in srgb, var(--accent-glow, #ffffff) 16%, rgba(255, 255, 255, 0.08));
   --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 40px -18px rgba(0, 0, 0, 0.8);
+  /* Liseré du curseur de la scène 3D : sombre sur fond sombre, blanc en thème
+     clair, pour que le curseur (à l'encre du thème) se détache de tout. */
+  --cursor-halo: rgba(0, 0, 0, 0.5);
   /* Fond de la zone de lecture des pages texte (À propos, Méthode, Contact). */
   --reading-surface: linear-gradient(120deg, #172237 0%, #191820 46%, #17161d 100%);
   /* Fond de la scène 3D de l'accueil et du voile qui porte son texte : la même
@@ -44,6 +47,7 @@
   --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 32px -18px rgba(24, 23, 28, 0.3);
   --reading-surface: #e8e6e1;
   --stage: #d9d6cf;
+  --cursor-halo: rgba(255, 255, 255, 0.95);
   color-scheme: light;
 }
 

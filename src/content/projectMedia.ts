@@ -109,6 +109,18 @@ const tileEdges: Partial<Record<MediaKey, string>> = {
 };
 
 /** Couleur du pourtour d'une tuile, ou `fallback` si elle n'est pas mesurée. */
+/**
+ * Tuiles sombres en leur centre, là où se pose le curseur (luminance moyenne de
+ * leur animation sous 0,2, mesurée le 10 oct. 2026 : Memento 0,04, SÆGUS 0,07,
+ * Le Grand Ménage 0,08, Archive 0,12). En thème clair, le curseur de la scène,
+ * foncé par défaut, y passe en blanc pour rester visible.
+ */
+const darkTiles = new Set<MediaKey>(["MEMENTO", "SAEGUS", "LGM", "PERSO"]);
+
+export function isTileDark(key: string | undefined | null): boolean {
+  return Boolean(key) && darkTiles.has(String(key).toUpperCase() as MediaKey);
+}
+
 export function getTileEdge(key: string | undefined | null, fallback: string): string {
   if (!key) return fallback;
   return tileEdges[key.toUpperCase() as MediaKey] ?? fallback;

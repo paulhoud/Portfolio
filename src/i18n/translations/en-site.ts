@@ -13,6 +13,7 @@ export const enSite: SiteCopy = {
     home: "Home",
     main: "Main navigation",
     mobile: "Mobile navigation",
+    footer: "Footer links",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     skipToContent: "Skip to content",

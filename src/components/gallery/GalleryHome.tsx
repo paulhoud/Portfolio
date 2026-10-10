@@ -15,7 +15,7 @@ import {
 } from "react";
 import { PassiveAnimationProvider } from "@/components/projects/PassiveAnimationProvider";
 import { ProjectThumbnail } from "@/components/projects/ProjectThumbnail";
-import { getMotionEnd, getMotionStart, getProjectMedia, getTileEdge, getTileLight } from "@/content/projectMedia";
+import { getMotionEnd, getMotionStart, getProjectMedia, getTileEdge, getTileLight, isTileDark } from "@/content/projectMedia";
 import type { Project } from "@/content/projects";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
@@ -769,17 +769,18 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   landed === "southpark" ? "justify-start pt-[calc(var(--header-height)+5svh)]" : "justify-end pb-[20svh]",
                 )}
               >
-                {/* Sur une image claire, le message se pose sur un voile sombre. */}
+                {/* Sur une image, le message se pose sur un voile : sombre en thème
+                    sombre, de verre clair en thème clair. */}
                 <div
                   className={cn(
                     "flex flex-col items-center gap-3",
-                    landed !== "lattice" && "rounded-2xl bg-[#0b0b10]/60 px-7 py-5 backdrop-blur-md",
+                    landed !== "lattice" && "rounded-2xl bg-[#0b0b10]/60 px-7 py-5 backdrop-blur-md light:bg-glass/80",
                   )}
                 >
-                  <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85">
+                  <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85 light:text-ink/85">
                     {t.site.gallery.lostTitle}
                   </p>
-                  <p className={cn("text-[0.65rem] uppercase tracking-[0.24em]", landed === "lattice" ? "text-white/50" : "text-white/65")}>
+                  <p className={cn("text-[0.65rem] uppercase tracking-[0.24em]", landed === "lattice" ? "text-white/50" : "text-white/65", "light:text-ink/65")}>
                     {landed === "dofus"
                       ? t.site.gallery.lostHintDofus
                       : landed === "southpark"
@@ -790,7 +791,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     ref={backFromVoidRef}
                     type="button"
                     onClick={() => leaveVoidRef.current()}
-                    className="pointer-events-auto mt-5 flex h-11 items-center gap-2.5 rounded-full bg-white pl-4 pr-5 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                    className="pointer-events-auto mt-5 flex h-11 items-center gap-2.5 rounded-full bg-white pl-4 pr-5 text-sm font-medium text-black light:bg-ink light:text-page focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
                   >
                     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 12H5M11 6l-6 6 6 6" />
@@ -802,7 +803,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 {landed !== "lattice" ? (
                   <p className="absolute inset-x-0 bottom-3 flex justify-center px-4">
                     {/* Pastille sombre : lisible sur la neige comme sur l'herbe dorée. */}
-                    <span className="rounded-full bg-[#0b0b10]/60 px-3 py-1 text-center text-[0.6rem] leading-snug text-white/85 backdrop-blur-sm">
+                    <span className="rounded-full bg-[#0b0b10]/60 px-3 py-1 text-center text-[0.6rem] leading-snug text-white/85 backdrop-blur-sm light:bg-glass/80 light:text-ink/80">
                       {landed === "dofus" ? t.site.gallery.disclaimerDofus : t.site.gallery.disclaimerSouthPark}
                     </span>
                   </p>
@@ -1111,7 +1112,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
         </div>
       </section>
 
-      <SceneCursor scene={live ? cursor3d : null} calm={calm} />
+      <SceneCursor
+        scene={live ? cursor3d : null}
+        calm={calm}
+        // Sur une tuile sombre, le curseur passe en blanc (utile en thème clair).
+        onDark={live && hovered3d !== null && isTileDark(projects[hovered3d]?.mediaKey)}
+      />
       {/* Au toucher, pas de curseur : quand le message s'efface, les objets du
           projet affiché sautillent, pour montrer qu'on peut les toucher. */}
       <HeadphonesHint

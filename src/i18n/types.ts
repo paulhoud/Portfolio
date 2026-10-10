@@ -30,6 +30,8 @@ export type SiteCopy = {
     home: string;
     main: string;
     mobile: string;
+    /** Nom de la navigation du pied de page (lecteurs d'écran). */
+    footer: string;
     openMenu: string;
     closeMenu: string;
     skipToContent: string;

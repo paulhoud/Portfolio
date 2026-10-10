@@ -98,7 +98,9 @@ function TechLink({ tech }: { tech: Tech }) {
           aria-hidden="true"
           viewBox="0 0 24 24"
           className="h-[1.35rem] w-[1.35rem] opacity-80 transition-opacity duration-300 group-hover/tech:opacity-100"
-          fill={icon.color}
+          // Logo blanc (Cursor, ChatGPT, macOS…) : à l'encre du thème, sinon il
+          // disparaît sur le fond clair.
+          fill={/^#f{3}(f{3})?$/i.test(icon.color) ? "var(--ink)" : icon.color}
         >
           <path d={icon.d} />
         </svg>

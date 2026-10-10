@@ -6,6 +6,7 @@ import {
   Group,
   LineSegments,
   Mesh,
+  NormalBlending,
   PlaneGeometry,
   ShaderMaterial,
   type Camera,
@@ -25,6 +26,8 @@ export type Dimension = {
   group: Group;
   /** `presence` : 0 (absente) à 1 (pleinement là) ; `time` : secondes. */
   update(camera: Camera, presence: number, time: number): void;
+  /** Thème clair : treillis ocre foncé, dessiné normalement (cf. src/lib/theme.ts). */
+  setTheme(light: boolean): void;
   dispose(): void;
 };
 
@@ -66,7 +69,7 @@ export function createDimension(tiles: Texture[]): Dimension {
     depthTest: false,
     depthWrite: false,
     blending: AdditiveBlending,
-    uniforms: { uPresence: { value: 0 }, uTime: { value: 0 } },
+    uniforms: { uPresence: { value: 0 }, uTime: { value: 0 }, uLight: { value: 0 } },
     vertexShader: /* glsl */ `
       varying vec3 vView;
       varying vec3 vLocal;
@@ -82,6 +85,7 @@ export function createDimension(tiles: Texture[]): Dimension {
       varying vec3 vLocal;
       uniform float uPresence;
       uniform float uTime;
+      uniform float uLight;
       void main() {
         float dist = length(vView);
         // S'efface au loin, et tout près (pour ne pas zébrer l'écran).
@@ -92,7 +96,10 @@ export function createDimension(tiles: Texture[]): Dimension {
         float pulse = 0.55 + 0.45 * sin(vLocal.z * 2.0944 + vLocal.x * 0.6 - vLocal.y * 0.4 + uTime * 2.2);
         vec3 color = mix(vec3(0.95, 0.66, 0.34), vec3(1.0, 0.93, 0.8), pulse);
         float a = fade * (0.35 + 0.65 * pulse) * uPresence * 0.85;
-        gl_FragColor = vec4(color * a, a);
+        // Thème clair : une lumière ajoutée ne se voit pas sur un fond clair ;
+        // les arêtes y sont d'un ocre foncé, dessinées normalement.
+        vec3 ink = mix(vec3(0.42, 0.27, 0.12), vec3(0.62, 0.42, 0.2), pulse);
+        gl_FragColor = uLight > 0.5 ? vec4(ink, min(1.0, a * 1.6)) : vec4(color * a, a);
         #include <colorspace_fragment>
       }
     `,
@@ -201,6 +208,11 @@ export function createDimension(tiles: Texture[]): Dimension {
         ghost.mesh.rotation.set(Math.sin(time * ghost.spin) * 0.4, time * ghost.spin, 0);
         ghost.material.uniforms.uOpacity.value = presence;
       }
+    },
+    setTheme(light) {
+      latticeMaterial.uniforms.uLight.value = light ? 1 : 0;
+      latticeMaterial.blending = light ? NormalBlending : AdditiveBlending;
+      latticeMaterial.needsUpdate = true;
     },
     dispose() {
       latticeGeometry.dispose();

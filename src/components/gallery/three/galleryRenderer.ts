@@ -185,6 +185,12 @@ const BACKGROUND = "#08080b";
  */
 const LIGHT_THEME = { background: "#d9d6cf", floorBase: "#d9d6cf", floorGrid: "#bab5ac" };
 const DARK_THEME = { background: BACKGROUND, floorBase: "#09090c", floorGrid: "#24242c" };
+/**
+ * Force des lueurs additives selon le thème. Sur un fond clair, une lumière
+ * ajoutée fait une tache blanche : un écran allumé se voit à peine en plein jour.
+ */
+const HALO_STRENGTH = { dark: 0.7, light: 0.2 };
+const AURA_STRENGTH = { dark: 0.55, light: 0.35 };
 /** Le sol se creuse au plus de tant sous un objet poussé vers lui (m)… */
 const WELL_MAX = 1.6;
 /** … et commence à céder quand l'objet passe sous cette hauteur (m). */
@@ -387,6 +393,8 @@ export function createGalleryRenderer(
   let dprStep = 0;
 
   const background = new Color(BACKGROUND);
+  /** Thème clair en cours (cf. `setTheme`) : repris par les lueurs et l'autre dimension à leur création. */
+  let lightTheme = false;
   renderer.setClearColor(background, 1);
   renderer.setPixelRatio(dprSteps[0]);
 
@@ -521,7 +529,7 @@ export function createGalleryRenderer(
     transparent: true,
     depthWrite: false,
     blending: AdditiveBlending,
-    uniforms: { ...fog, uColor: { value: new Color(1, 0.98, 0.95) }, uStrength: { value: 0.7 } },
+    uniforms: { ...fog, uColor: { value: new Color(1, 0.98, 0.95) }, uStrength: { value: HALO_STRENGTH.dark } },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
       varying float vFacing;
@@ -564,7 +572,7 @@ export function createGalleryRenderer(
       transparent: true,
       depthWrite: false,
       blending: AdditiveBlending,
-      uniforms: { ...fog, uColor: { value: new Color(color) }, uStrength: { value: 0.55 } },
+      uniforms: { ...fog, uColor: { value: new Color(color) }, uStrength: { value: lightTheme ? AURA_STRENGTH.light : AURA_STRENGTH.dark } },
       vertexShader: /* glsl */ `
         varying vec2 vUv;
         varying float vDist;
@@ -1187,11 +1195,16 @@ export function createGalleryRenderer(
    * lui plus vite. Il nous dépasse sur le côté, puis file au fond du vide.
    */
   const spawnFaller = (now: number) => {
-    const looks = [...identityLooks.values()];
-    if (looks.length === 0) return;
-    const look = looks[Math.floor(Math.random() * looks.length)];
+    // On tire une entrée du catalogue (et non un modèle seul) : l'habillage lit
+    // ses options (lueur, transparence…) par ce numéro, faute de quoi il plantait.
+    const entries = [...identityLooks.keys()];
+    if (entries.length === 0) return;
+    const entry = entries[Math.floor(Math.random() * entries.length)];
+    const look = identityLooks.get(entry);
+    if (!look) return;
     const mesh = new Mesh<BufferGeometry, SatelliteMaterial>(emptyGeometry, slabMaterial(new Color(1, 1, 1), new Color(1, 1, 1), 1, true, 0));
     mesh.userData.owner = 0;
+    mesh.userData.entry = entry;
     dressSatellite(mesh, look);
     // Pas de courbure de l'espace pour eux (elle vaut encore 1 dans le vide),
     // et un brouillard lointain : on les suit jusqu'au fond.
@@ -2154,6 +2167,7 @@ export function createGalleryRenderer(
       }
       if (!dimension) {
         dimension = createDimension(pieces.filter((piece) => piece.loaded).map((piece) => piece.mesh.material.uniforms.uMap.value));
+        dimension.setTheme(lightTheme);
         scene.add(dimension.group);
       }
       // L'image se charge pendant l'aspiration (plus de quatre secondes).
@@ -2307,6 +2321,12 @@ export function createGalleryRenderer(
       invalidate();
     },
     setTheme(light) {
+      lightTheme = light;
+      dimension?.setTheme(light);
+      // Lueurs additives (écran du téléphone, étoile) : elles blanchissent un
+      // fond clair au lieu de l'éclairer ; atténuées en thème clair.
+      haloMaterial.uniforms.uStrength.value = light ? HALO_STRENGTH.light : HALO_STRENGTH.dark;
+      for (const material of auraMaterials.values()) material.uniforms.uStrength.value = light ? AURA_STRENGTH.light : AURA_STRENGTH.dark;
       const palette = light ? LIGHT_THEME : DARK_THEME;
       // Le brouillard partage cette couleur : les lointains se fondent dans le fond.
       background.set(palette.background);

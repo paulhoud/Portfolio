@@ -14,7 +14,10 @@ type Mode = Exclude<SceneCursorState, null> | "link";
 const RING_SCALE: Record<Mode, number> = { scene: 0.3, object: 0.42, grab: 0.24, link: 0.36, project: 0.47 };
 
 /** Ombre très douce : le blanc reste lisible sur une plaque claire. */
-const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_rgba(0,0,0,0.5))]";
+// Liseré qui détache le curseur de ce qu'il survole : sombre en thème sombre,
+// blanc en thème clair (`--cursor-halo`, globals.css), doublé pour tenir aussi
+// sur un objet sombre.
+const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_var(--cursor-halo))_drop-shadow(0_0_0.5px_var(--cursor-halo))]";
 
 /**
  * Curseur de la galerie (souris seulement). Dans toute la zone de
@@ -33,7 +36,16 @@ const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_rgba(0,0,0,0.5))]";
  * curseur ne capte jamais les clics. Au toucher, il n'existe pas : le bouton
  * « Voir le projet » et les objets qui sautillent à l'arrivée en tiennent lieu.
  */
-export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: boolean }) {
+export function SceneCursor({
+  scene,
+  calm,
+  onDark = false,
+}: {
+  scene: SceneCursorState;
+  calm: boolean;
+  /** Survole une tuile sombre : curseur blanc à liseré sombre, quel que soit le thème. */
+  onDark?: boolean;
+}) {
   const [soundOn] = useSoundOn();
   const [enabled, setEnabled] = useState(false);
   const [target, setTarget] = useState<{ inZone: boolean; overScene: boolean; dom: Mode | null }>({
@@ -121,6 +133,9 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
       aria-hidden="true"
       data-mode={mode ?? undefined}
       className={cn("pointer-events-none fixed inset-0 z-[70] transition-opacity duration-200", mode ? "opacity-100" : "opacity-0")}
+      // Les couleurs du curseur suivent `--ink` et `--cursor-halo` : on les
+      // redéfinit ici, pour lui seul, au-dessus d'une tuile sombre.
+      style={onDark ? ({ "--ink": "#f5f2f4", "--cursor-halo": "rgba(0, 0, 0, 0.55)" } as React.CSSProperties) : undefined}
     >
       <div ref={ringRef} className="absolute left-0 top-0 will-change-transform">
         <div
@@ -136,7 +151,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
           {/* Sur un projet, il s'efface en grandissant : l'arc ouvert prend le relais. */}
           <svg
             viewBox="0 0 112 112"
-            className={cn("absolute inset-0 h-full w-full overflow-visible transition-opacity duration-300", shown === "project" ? "opacity-0" : "opacity-100")}
+            className={cn("absolute inset-0 h-full w-full overflow-visible transition-opacity duration-300", LEGIBLE, shown === "project" ? "opacity-0" : "opacity-100")}
           >
             <circle
               cx="56"
@@ -145,7 +160,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
               fill="none"
               strokeWidth="1.25"
               vectorEffect="non-scaling-stroke"
-              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/60")}
+              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/60 light:stroke-ink/85")}
             />
           </svg>
         </div>
@@ -200,7 +215,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
       {/* Le centre, exactement sous la souris : dans le vide, un point descend le
           long d'un trait (on fait défiler) ; sur un lien ou un objet tenu, un
           simple point. */}
-      <div ref={dotRef} className="absolute left-0 top-0">
+      <div ref={dotRef} className={cn("absolute left-0 top-0", LEGIBLE)}>
         <span
           className={cn(
             "absolute -left-[2px] -top-[2px] h-1 w-1 rounded-full bg-ink transition-opacity duration-200",
@@ -209,7 +224,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
         />
         <span
           className={cn(
-            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-ink/15 transition-opacity duration-200",
+            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-ink/15 light:bg-ink/30 transition-opacity duration-200",
             shown === "scene" ? "opacity-100" : "opacity-0",
           )}
         >

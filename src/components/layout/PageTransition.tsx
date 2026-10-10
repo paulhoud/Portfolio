@@ -10,7 +10,8 @@ import { FrozenRouter } from "./FrozenRouter";
  * Transition immersive entre le damier et les sous-pages.
  *
  * Modèle : les sous-pages (projets, méthode, à propos, contact) forment un
- * calque « overlay » qui glisse depuis la droite (z-index haut, ombre portée) ;
+ * calque « overlay » qui glisse depuis la droite (z-index haut, ombre portée le
+ * temps du glissement) ;
  * le damier est le calque de base qui reste en place et recule légèrement quand
  * il est recouvert. À l'ouverture la page recouvre le damier ; au retour elle
  * glisse vers la droite et le damier réapparaît dessous - animation exactement
@@ -27,10 +28,18 @@ import { FrozenRouter } from "./FrozenRouter";
 
 const instant = { duration: 0 };
 
+// Ombre portée du calque qui glisse : seulement pendant le mouvement. Laissée
+// en place, elle débordait sous la page et marquait la limite avec le pied de
+// page (bien visible en thème clair).
+const SLIDE_SHADOW = "-24px 0px 60px rgba(0, 0, 0, 0.45)";
+const NO_SHADOW = "0px 0px 0px rgba(0, 0, 0, 0)";
+
 const overlayVariants: Variants = {
-  initial: (kind: TransitionKind) => (kind === "cut" ? { x: 0 } : { x: "100%" }),
-  animate: { x: 0 },
-  exit: (kind: TransitionKind) => (kind === "cut" ? { opacity: 0, transition: instant } : { x: "100%" }),
+  initial: (kind: TransitionKind) =>
+    kind === "cut" ? { x: 0, boxShadow: NO_SHADOW } : { x: "100%", boxShadow: SLIDE_SHADOW },
+  animate: { x: 0, boxShadow: NO_SHADOW },
+  exit: (kind: TransitionKind) =>
+    kind === "cut" ? { opacity: 0, transition: instant } : { x: "100%", boxShadow: SLIDE_SHADOW },
 };
 
 const baseVariants: Variants = {
@@ -112,10 +121,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
           custom={kind}
           data-page-path={pathname}
           className="page-transition-layer"
-          style={{
-            zIndex: isBase ? 1 : 2,
-            boxShadow: isBase ? undefined : "-24px 0 60px rgba(0, 0, 0, 0.45)",
-          }}
+          style={{ zIndex: isBase ? 1 : 2 }}
           variants={reduceMotion ? undefined : variants}
           initial={reduceMotion ? false : "initial"}
           animate={reduceMotion ? undefined : "animate"}
