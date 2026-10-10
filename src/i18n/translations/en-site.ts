@@ -143,5 +143,9 @@ export const enSite: SiteCopy = {
     socialLabel: "Find me elsewhere",
     locationLabel: "Based between",
     cvLabel: "Download my resume",
+    write: "Write",
+    copy: "Copy address",
+    copied: "Address copied",
+    localTime: "local time",
   },
 };

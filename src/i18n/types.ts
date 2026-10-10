@@ -136,6 +136,13 @@ export type SiteCopy = {
     locationLabel: string;
     /** Libellé du lien de téléchargement du CV. */
     cvLabel: string;
+    /** Bouton qui ouvre la messagerie. */
+    write: string;
+    /** Bouton qui copie l'adresse, et sa confirmation. */
+    copy: string;
+    copied: string;
+    /** Suit l'heure de Bordeaux et Paris (« 14:32, heure locale »). */
+    localTime: string;
   };
 };
 

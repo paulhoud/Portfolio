@@ -66,7 +66,7 @@ export function HeadphonesHint({ ready, calm, onDone }: { ready: boolean; calm: 
           onFocus={() => setHeld(true)}
           onBlur={() => setHeld(false)}
           className={cn(
-            "pointer-events-auto fixed left-1/2 top-[calc(var(--header-height)+0.75rem)] z-40 flex min-h-10 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 rounded-full border py-1 pl-3.5 text-[0.7rem] text-ink/85 sm:gap-2.5 sm:text-xs",
+            "pointer-events-auto fixed left-1/2 top-[calc(var(--header-height)+0.75rem)] z-40 flex min-h-10 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 rounded-full border py-1 pl-3.5 text-[0.6875rem] text-ink/85 sm:gap-2.5 sm:text-xs",
             offered ? "pr-1" : "pr-4",
             "bg-glass/60 backdrop-blur-xl backdrop-saturate-150",
             "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)]",
@@ -85,7 +85,7 @@ export function HeadphonesHint({ ready, calm, onDone }: { ready: boolean; calm: 
               onClick={soundOn ? undefined : toggleSound}
               disabled={soundOn}
               className={cn(
-                "ml-0.5 flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[0.7rem] font-medium transition-colors duration-300 sm:text-xs",
+                "ml-0.5 flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[0.6875rem] font-medium transition-colors duration-300 sm:text-xs",
                 "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-ink/60",
                 soundOn ? "bg-ink/10 text-ink/70" : "cursor-pointer bg-ink text-page hover:bg-ink/85",
               )}

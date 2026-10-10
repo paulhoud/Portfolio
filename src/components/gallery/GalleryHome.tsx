@@ -780,7 +780,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                   <p role="status" className="text-sm uppercase tracking-[0.24em] text-white/85 light:text-ink/85">
                     {t.site.gallery.lostTitle}
                   </p>
-                  <p className={cn("text-[0.65rem] uppercase tracking-[0.24em]", landed === "lattice" ? "text-white/50" : "text-white/65", "light:text-ink/65")}>
+                  <p className={cn("text-[0.625rem] uppercase tracking-[0.24em]", landed === "lattice" ? "text-white/50" : "text-white/65", "light:text-ink/65")}>
                     {landed === "dofus"
                       ? t.site.gallery.lostHintDofus
                       : landed === "southpark"
@@ -803,7 +803,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 {landed !== "lattice" ? (
                   <p className="absolute inset-x-0 bottom-3 flex justify-center px-4">
                     {/* Pastille sombre : lisible sur la neige comme sur l'herbe dorée. */}
-                    <span className="rounded-full bg-[#0b0b10]/60 px-3 py-1 text-center text-[0.6rem] leading-snug text-white/85 backdrop-blur-sm light:bg-glass/80 light:text-ink/80">
+                    <span className="rounded-full bg-[#0b0b10]/60 px-3 py-1 text-center text-[0.625rem] leading-snug text-white/85 backdrop-blur-sm light:bg-glass/80 light:text-ink/80">
                       {landed === "dofus" ? t.site.gallery.disclaimerDofus : t.site.gallery.disclaimerSouthPark}
                     </span>
                   </p>
@@ -840,7 +840,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center lg:pb-40">
                 <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-ink lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
-                  <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-ink/60 light:text-ink/75 lg:mt-3 lg:text-sm">
+                  <span className="mt-0.5 block text-[0.625rem] font-bold uppercase tracking-[0.24em] text-ink/60 light:text-ink/75 lg:mt-3 lg:text-sm">
                     {profile.jobTitle}
                   </span>
                 </h1>
@@ -994,7 +994,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                         <span className="relative block h-7 w-px overflow-hidden bg-ink/15">
                           <span className={cn("absolute left-1/2 top-1 block h-2 w-[3px] -translate-x-1/2 rounded-full bg-ink/85", !calm && "scroll-cue-dot")} />
                         </span>
-                        <span className="text-[0.6rem] uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">{t.site.gallery.scrollHint}</span>
+                        <span className="text-[0.625rem] uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">{t.site.gallery.scrollHint}</span>
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
@@ -1104,7 +1104,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la
                   scène, à hauteur de la pastille des langues (cf. SiteHeader)
                   et toujours à sa droite, même sur un écran étroit. */}
-              <p data-pull className="pointer-events-auto absolute bottom-[2.375rem] left-[max(3rem,calc(8.5rem-(100vw-80rem)/2))] hidden text-[0.6rem] uppercase tracking-[0.06em] text-ink/55 light:text-ink/70 lg:block">
+              <p data-pull className="pointer-events-auto absolute bottom-[2.375rem] left-[max(3rem,calc(8.5rem-(100vw-80rem)/2))] hidden text-[0.625rem] uppercase tracking-[0.06em] text-ink/55 light:text-ink/70 lg:block">
                 {t.site.footer.copyright} {t.site.footer.rights}
               </p>
             </div>
@@ -1209,13 +1209,13 @@ function pullText(container: HTMLElement | null, cx: number, cy: number, span: [
 function CartelContent({ project, index, count }: { project: Project; index: number; count: number }) {
   return (
     <>
-      <p className="text-[0.65rem] tabular-nums uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">
+      <p className="text-[0.625rem] tabular-nums uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">
         {pad(index + 1)} / {pad(count)}
       </p>
       <p className="mt-1 text-xl font-medium text-ink lg:mt-2 lg:text-3xl">{project.title}</p>
       <p className="mt-0.5 truncate text-sm text-ink/75 light:text-ink/85 lg:mt-1 lg:whitespace-normal">{project.eyebrow}</p>
       {project.context ? (
-        <p className="mt-2 text-[0.62rem] uppercase tracking-[0.18em] text-ink/60 light:text-ink/75 lg:mt-3">
+        <p className="mt-2 text-[0.625rem] uppercase tracking-[0.18em] text-ink/60 light:text-ink/75 lg:mt-3">
           {project.context.replace(/ ([:·])/g, " $1")}
         </p>
       ) : null}

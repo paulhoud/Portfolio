@@ -360,7 +360,9 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     tints: { green: "#1fd34a", yellow: "#ffd400" },
     sounds: ["brawlstars"],
   },
-  { name: "cat", file: "cat.glb", build: cat, sounds: ["cat-1", "cat-2", "cat-3"] },
+  // Le petit chat se tourne vers nous quand on arrive devant : de dos ou de
+  // profil, on ne comprenait pas ce que c’était (demande de Paul).
+  { name: "cat", file: "cat.glb", build: cat, front: true, faceCamera: true, sway: 0.6, sounds: ["cat-1", "cat-2", "cat-3"] },
   // Au-dessus de sa plaque (Sanofi Espoir) : visible pendant les trajets de la caméra.
   { name: "kitsuneMask", file: "kitsune-mask.glb", place: { top: true }, sounds: ["sushi-koto"] },
   { name: "banana", file: "banana.glb", size: 1.25, sounds: ["banana"] },
@@ -403,6 +405,8 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     sounds: ["cd-music"],
     music: true,
   },
+  // Textures ravivées dans le fichier (10 oct. 2026) : jaune moutarde et joues
+  // brique d’origine, ternes sous l’éclairage de la scène.
   { name: "pikachu", file: "pikachu.glb", front: true, sounds: ["pikachu-1", "pikachu-2", "pikachu-3"] },
   // Des morceaux d’une dizaine de secondes (dont le générique de GTA San
   // Andreas) : joués en entier, la nappe se tait le temps de les écouter.

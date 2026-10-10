@@ -393,7 +393,7 @@ function HeaderNavLink({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative rounded-full px-4 py-1.5 text-[0.8rem] uppercase tracking-[0.06em] transition-[color,background-color,box-shadow] duration-300",
+        "group relative rounded-full px-4 py-1.5 text-[0.8125rem] uppercase tracking-[0.06em] transition-[color,background-color,box-shadow] duration-300",
         "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50",
         isActive
           ? "bg-ink/[0.08] font-bold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]"

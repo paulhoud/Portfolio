@@ -139,10 +139,14 @@ export const frSite: SiteCopy = {
   contact: {
     title: "Contact",
     intro:
-      "Un produit à faire grandir ? Parlons de votre équipe, de vos utilisateurs et de ce que vous voulez livrer.",
+      "Un produit à faire grandir ? Parlons de votre équipe, de vos utilisateurs et de ce que vous voulez livrer.",
     emailLabel: "Écrire un e-mail",
     socialLabel: "Me retrouver ailleurs",
     locationLabel: "Basé entre",
     cvLabel: "Télécharger mon CV",
+    write: "Écrire",
+    copy: "Copier l'adresse",
+    copied: "Adresse copiée",
+    localTime: "heure locale",
   },
 };
