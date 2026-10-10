@@ -70,6 +70,12 @@ export type ModelDecal = {
   side?: [number, number, number];
   /** Luminosité de l'image (> 1 : un écran allumé). */
   glow?: number;
+  /**
+   * Direction du haut de l'image (repère du fichier). Sans elle, il suit le
+   * grand côté de la zone (image en hauteur) ou le petit : sur une zone
+   * carrée, ce serait au hasard (une pochette couchée).
+   */
+  up?: [number, number, number];
 };
 
 export type ModelOptions = {
@@ -221,7 +227,7 @@ function cutDecal(geometry: BufferGeometry, decal: ModelDecal, portrait: boolean
   };
   const [first, second] = axes.filter((_, index) => index !== main);
   const long = span(first).size >= span(second).size ? first : second;
-  const up = portrait ? long : long === first ? second : first;
+  const up = decal.up ? new Vector3(...decal.up).normalize() : portrait ? long : long === first ? second : first;
   const right = new Vector3().crossVectors(up, normal);
   const across = span(right);
   const along = span(up);

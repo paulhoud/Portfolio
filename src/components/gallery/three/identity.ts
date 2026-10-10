@@ -56,6 +56,8 @@ export type IdentityEntry = {
   front?: boolean;
   /** Amplitude du balancement d’un objet de face (1 par défaut), pour une image à garder lisible. */
   sway?: number;
+  /** Objet de face qui se tourne vers la caméra : vu bien droit quand on arrive devant. */
+  faceCamera?: boolean;
   /** Écran allumé : la pièce devient blanche et lumineuse, avec un halo. */
   screen?: { piece: string; glow?: number };
   /** Pièces en verre : translucides (nom du matériau ou de la pièce). */
@@ -367,7 +369,7 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
     name: "skateboard",
     file: "skateboard.glb",
     build: skateboard,
-    size: 1.7,
+    size: 2,
     // Le logo Deathwish dessous, sur fond rose (image choisie par Paul).
     decals: [{ piece: "skateboard", image: "/models/decals/deathwish-deck.webp", side: [0, -1, 0] }],
     sounds: ["skateboard-1", "skateboard-2"],
@@ -383,18 +385,21 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
   // sa mesure sur ordinateur : le CD à droite du projet 10, bien en vue ;
   // fromage et pion n’ont de place que sur téléphone (30 places, 32 objets).
   { name: "crowbar", file: "crowbar.glb", size: 1.3, sounds: ["crowbar"] },
-  // Boîtier fermé, tout noir (le fichier a perdu son plateau et son disque,
-  // rangés dedans, et gagné un compartiment derrière le couvercle), la
-  // pochette de « La Banquise » (Guizmo) sur le dessus, un quart de tour vers
-  // la droite (choix de Paul), tournée vers nous ; il se balance à peine,
-  // pour rester lisible. Au clic, 45 s du morceau (la nappe se tait).
+  // Boîtier de CD comme celui de Paul (photo du 10 oct. 2026), construit
+  // par script : la pochette de « La Banquise » (Guizmo) à l'endroit, la
+  // charnière à gauche avec sa tranche, un faux fond noir peu profond
+  // derrière. Il se tourne vers la caméra et se balance à peine : on voit
+  // Guizmo bien droit en arrivant. Au clic, 45 s du morceau (la nappe se tait).
   {
     name: "cd",
     file: "cd.glb",
     front: true,
-    sway: 0.35,
-    turn: [0, Math.PI / 2, 0.576],
-    decals: [{ piece: "Object_2", image: "/models/decals/cd-cover.webp", side: [-0.839, 0.545, 0] }],
+    faceCamera: true,
+    sway: 0.3,
+    decals: [
+      { piece: "Cover", image: "/models/decals/cd-cover.webp", side: [0, 0, 1], up: [0, 1, 0] },
+      { piece: "Hinge", image: "/models/decals/cd-spine.webp", side: [0, 0, 1], up: [0, 1, 0] },
+    ],
     sounds: ["cd-music"],
     music: true,
   },

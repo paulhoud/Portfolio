@@ -1858,10 +1858,21 @@ export function createGalleryRenderer(
       const entry = IDENTITY_CATALOG[mesh.userData.entry as number];
       if (entry.front) {
         // Toujours de face : un lent balancement plutôt qu’un tour complet.
+        // Certains se tournent en plus vers la caméra (cap, puis inclinaison).
         const sway = entry.sway ?? 1;
+        let yaw = 0;
+        let pitch = 0;
+        if (entry.faceCamera) {
+          const dx = camera.position.x - layout.position[0];
+          const dy = camera.position.y - layout.position[1];
+          const dz = camera.position.z - layout.position[2];
+          yaw = Math.atan2(dx, dz);
+          pitch = -Math.atan2(dy, Math.hypot(dx, dz));
+          mesh.rotation.order = "YXZ";
+        }
         mesh.rotation.set(
-          (Math.sin(spin * 0.5 + layout.phase) * 0.12 - pointer.y * 0.3) * sway,
-          (Math.sin(spin * 0.35 + layout.phase) * 0.5 + pointer.x * 0.4) * sway,
+          pitch + (Math.sin(spin * 0.5 + layout.phase) * 0.12 - pointer.y * 0.3) * sway,
+          yaw + (Math.sin(spin * 0.35 + layout.phase) * 0.5 + pointer.x * 0.4) * sway,
           0,
         );
       } else {
