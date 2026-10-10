@@ -204,8 +204,36 @@ export const floorVertex = /* glsl */ `
  * Sol : grille fine en perspective qui s'efface dans le noir, et flaque de
  * lumière colorée sous chaque plaque.
  */
+/*
+ * Creux du sol sous un objet qu'on y pousse (cf. galleryRenderer) : une
+ * pièce de grille fine, carrée de côté 2, posée sur le puits et étirée à son
+ * rayon ; chaque point s'enfonce selon un entonnoir, comme une grille
+ * d'espace-temps sous une planète. Le grand sol plat s'efface à cet endroit.
+ */
+export const wellVertex = /* glsl */ `
+  uniform vec4 uWell;
+  uniform float uWellCore;
+  varying vec3 vWorld;
+  varying vec2 vLocal;
+  void main() {
+    vLocal = position.xz;
+    float r = length(position.xz) * uWell.w;
+    // Entonnoir : profond au centre, nul au bord (rayon uWell.w).
+    float a = uWellCore;
+    float edge = 1.0 / (1.0 + (uWell.w * uWell.w) / (a * a));
+    float funnel = max((1.0 / (1.0 + (r * r) / (a * a)) - edge) / (1.0 - edge), 0.0);
+    vec3 world = vec3(uWell.x + position.x * uWell.w, -uWell.z * funnel, uWell.y + position.z * uWell.w);
+    vWorld = world;
+    gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
+  }
+`;
+
 export const floorFragment = /* glsl */ `
   varying vec3 vWorld;
+  uniform vec4 uWell;
+  #ifdef WELL_PATCH
+  varying vec2 vLocal;
+  #endif
   uniform vec3 uBase;
   uniform vec3 uGrid;
   uniform float uDim;
@@ -224,6 +252,12 @@ export const floorFragment = /* glsl */ `
   }
 
   void main() {
+    // Le creux et le sol plat se partagent le terrain, sans se chevaucher.
+    #ifdef WELL_PATCH
+    if (length(vLocal) > 1.0) discard;
+    #else
+    if (uWell.z > 0.001 && length(vWorld.xz - uWell.xy) < uWell.w * 0.995) discard;
+    #endif
     float vDist = length(vWorld - cameraPosition);
     // Trou noir : la grille s'enroule et s'étire vers lui.
     vec2 p = vWorld.xz;
@@ -244,9 +278,12 @@ export const floorFragment = /* glsl */ `
       light += uPieceGlow[i] * exp(-dot(d, d) / 1.8);
     }
     float line = gridLine(p, 1.25);
+    // Au fond du creux, la surface s'assombrit et les lignes ressortent.
+    float sink = clamp(-vWorld.y / 1.6, 0.0, 1.0);
+    line *= 1.0 + sink * 1.4;
     // La grille s'estompe au loin avant le brouillard, comme un projecteur au sol.
     float reach = 1.0 - smoothstep(uFogNear * 0.5, uFogFar * 0.6, vDist);
-    vec3 color = (uBase + light + uGrid * line * reach * (1.0 + 1.2 * length(light))) * pit;
+    vec3 color = (uBase * (1.0 - 0.5 * sink) + light + uGrid * line * reach * (1.0 + 1.2 * length(light))) * pit;
     color = mix(color, uFogColor, max(smoothstep(uFogNear, uFogFar, vDist), uDim));
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>

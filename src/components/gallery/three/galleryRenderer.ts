@@ -22,6 +22,7 @@ import {
   Texture,
   Vector2,
   Vector3,
+  Vector4,
   VideoTexture,
   WebGLRenderer,
 } from "three";
@@ -52,7 +53,7 @@ import { playClip, preloadClip } from "@/lib/sound/sound";
 import { IDENTITY_CATALOG } from "./identity";
 import { loadIdentityModel, type LoadedModel } from "./identityFiles";
 import { SATELLITE_SPRING, SLAB_SPRING, createBody, stepBody, type Body } from "./physics";
-import { floorFragment, floorVertex, slabFragment, slabVertex } from "./shaders";
+import { floorFragment, floorVertex, slabFragment, slabVertex, wellVertex } from "./shaders";
 
 /** Une plaque de la galerie, telle que la page la décrit. */
 export type GalleryPieceInput = {
@@ -173,6 +174,10 @@ export type GalleryRenderer = {
 };
 
 const BACKGROUND = "#08080b";
+/** Le sol se creuse au plus de tant sous un objet poussé vers lui (m)… */
+const WELL_MAX = 1.6;
+/** … et commence à céder quand l'objet passe sous cette hauteur (m). */
+const WELL_REACH = 0.9;
 const MAX_VIDEOS = 3;
 
 type PlayMode = "hover" | "held" | "passive";
@@ -709,6 +714,9 @@ export function createGalleryRenderer(
       uDim: { value: 0 },
       uHole: { value: new Vector3() },
       uSwirl: { value: 0 },
+      // Creux sous un objet poussé vers le sol : centre (x, z), profondeur, rayon.
+      uWell: { value: new Vector4(0, 0, 0, 3) },
+      uWellCore: { value: 0.5 },
     },
   });
   const floorGeometry = new PlaneGeometry(260, 260);
@@ -718,6 +726,25 @@ export function createGalleryRenderer(
   // par-dessus le trou noir.
   floor.renderOrder = -3;
   scene.add(floor);
+  /*
+   * Le creux : une grille fine qui n'existe que sous l'objet qui s'enfonce
+   * (le grand sol reste deux triangles). Même dessin que le sol, mêmes réglages.
+   */
+  const wellGeometry = new PlaneGeometry(2, 2, 96, 96);
+  wellGeometry.rotateX(-Math.PI / 2);
+  const wellMaterial = new ShaderMaterial({
+    vertexShader: wellVertex,
+    fragmentShader: floorFragment,
+    defines: { PIECES: count, WELL_PATCH: 1 },
+    uniforms: floorMaterial.uniforms,
+  });
+  const wellMesh = new Mesh(wellGeometry, wellMaterial);
+  wellMesh.frustumCulled = false;
+  wellMesh.renderOrder = -3;
+  wellMesh.visible = false;
+  scene.add(wellMesh);
+  /** Objet le plus bas parmi ceux qu'on bouge (cf. update). */
+  const lowest = { bottom: Infinity, x: 0, z: 0, radius: 0 };
 
   // --- État ----------------------------------------------------------------
   let disposed = false;
@@ -1718,10 +1745,28 @@ export function createGalleryRenderer(
     };
     const holeOffset = new Vector3();
     /** Applique la physique, puis l'aspiration, à un objet déjà placé. */
-    const finish = (mesh: Mesh, body: Body, spring: typeof SLAB_SPRING, hidden = false) => {
+    const finish = (mesh: Mesh, body: Body, spring: typeof SLAB_SPRING, hidden = false, radius = 0) => {
       body.rest.copy(mesh.position);
       if (stepBody(body, dt, spring)) busy = true;
       mesh.position.add(body.offset);
+      // Le sol cède jusqu'à une certaine profondeur, pas au-delà : un objet
+      // poussé ou lancé plus bas rebondit au lieu de le traverser.
+      if (radius > 0 && !world) {
+        const lowestY = radius - WELL_MAX * 0.92;
+        if (mesh.position.y < lowestY) {
+          body.offset.y += lowestY - mesh.position.y;
+          mesh.position.y = lowestY;
+          if (body.velocity.y < 0) body.velocity.y *= -0.45;
+        }
+        // Seuls comptent les objets qu'on bouge (tenus ou lancés).
+        const moved = body.held || body.offset.lengthSq() > 1e-4;
+        if (moved && mesh.position.y - radius < lowest.bottom) {
+          lowest.bottom = mesh.position.y - radius;
+          lowest.x = mesh.position.x;
+          lowest.z = mesh.position.z;
+          lowest.radius = radius;
+        }
+      }
       // Rotation ajoutée par la main ou le lancer, autour d'axes de la salle.
       const turned = body.turn.length();
       if (turned > 1e-6) {
@@ -1859,7 +1904,7 @@ export function createGalleryRenderer(
       const shrink = 1 - 0.2 * part;
       mesh.scale.set(scaleXY * shrink, scaleXY * shrink, scaleZ * shrink);
       if (mesh.geometry !== slabGeometry(layout.size)) mesh.geometry = slabGeometry(layout.size);
-      const present = finish(mesh, pieceBodies[index], SLAB_SPRING, doom?.hiddenPieces.has(index));
+      const present = finish(mesh, pieceBodies[index], SLAB_SPRING, doom?.hiddenPieces.has(index), layout.size * 0.62);
 
       uniforms.uLit.value = clamp01(arrive * 1.6) * (index === focus ? 1 : room);
       uniforms.uRim.value = 0.9 * piece.hover * room;
@@ -1925,11 +1970,35 @@ export function createGalleryRenderer(
       if (appear < 1) busy = true;
       mesh.scale.setScalar(Math.max(0.001, pop * appear) * (mesh.userData.baseScale as number));
       const body = satelliteBodies[index];
-      if (body) finish(mesh, body, SATELLITE_SPRING, doom?.hiddenSatellites.has(index));
+      if (body) finish(mesh, body, SATELLITE_SPRING, doom?.hiddenSatellites.has(index), (mesh.userData.baseScale as number) * 0.45);
       const lit = clamp01(arrive * 1.6) * room;
       forEachMaterial(mesh.material, (material) => {
         material.uniforms.uLit.value = lit;
       });
+    }
+
+    // Le sol se creuse sous l'objet le plus bas qu'on bouge, à l'approche
+    // (avant même le contact), puis se relâche quand il repart.
+    {
+      const well = floorMaterial.uniforms.uWell.value as Vector4;
+      const target = lowest.radius > 0 ? clamp(WELL_REACH - lowest.bottom, 0, WELL_MAX) : 0;
+      const ease = 1 - Math.exp(-dt * 9);
+      if (lowest.radius > 0) {
+        const fresh = well.z < 0.002;
+        well.x = fresh ? lowest.x : well.x + (lowest.x - well.x) * ease;
+        well.y = fresh ? lowest.z : well.y + (lowest.z - well.y) * ease;
+        // Large : vu d'en face, le sol sous la plaque est au bas de l'écran ;
+        // c'est l'arrière du creux, plus haut à l'image, qui montre la courbure.
+        const reach = clamp(lowest.radius * 9, 3.2, 7.5);
+        well.w = fresh ? reach : well.w + (reach - well.w) * ease;
+        floorMaterial.uniforms.uWellCore.value = Math.max(0.5, lowest.radius * 1.3);
+      }
+      well.z += (target - well.z) * ease;
+      if (well.z < 0.002 && target === 0) well.z = 0;
+      wellMesh.visible = well.z > 0;
+      if (well.z > 0) busy = true;
+      lowest.bottom = Infinity;
+      lowest.radius = 0;
     }
 
     // Le trou noir lui-même : il grossit, tourbillonne, se referme dans un éclair.
@@ -2262,6 +2331,8 @@ export function createGalleryRenderer(
       for (const geometry of geometries.values()) geometry.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();
+      wellGeometry.dispose();
+      wellMaterial.dispose();
       blank.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
