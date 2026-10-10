@@ -83,8 +83,11 @@ export type GalleryCallbacks = {
   onSelect: (index: number) => void;
   /** Première image prête : le canevas peut apparaître. */
   onReady: () => void;
-  /** 3D indisponible, perdue ou trop lente : on revient au cadre HTML. */
-  onFail: (reason: GalleryFailure) => void;
+  /**
+   * 3D indisponible, perdue ou trop lente : on revient au cadre HTML.
+   * `detail` explique pourquoi (console du navigateur, pour diagnostiquer).
+   */
+  onFail: (reason: GalleryFailure, detail?: string) => void;
   /** Clic dans le vide de la scène (ni plaque ni satellite). */
   onEmptyClick?: () => void;
 };
@@ -111,6 +114,8 @@ export type GalleryOptions = {
   returning?: number | null;
   /** L'arrivée attend `releaseIntro` (rideau d'ouverture encore baissé). */
   holdIntro?: boolean;
+  /** 3D forcée (adresse « ?3d ») : pas de bascule pour lenteur. */
+  forced?: boolean;
 };
 
 export type GalleryRenderer = {
@@ -273,22 +278,36 @@ export function createGalleryRenderer(
   canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom";
   host.appendChild(canvas);
 
-  let renderer: WebGLRenderer;
-  try {
-    renderer = new WebGLRenderer({
+  // D'abord sans compromis de performance ; certains Chrome refusent pourtant
+  // alors que leur carte graphique est accélérée : on réessaie sans cette
+  // exigence, la mesure de fluidité écartant ensuite un rendu trop lent.
+  const attempt = (strict: boolean) =>
+    new WebGLRenderer({
       canvas,
       antialias: true,
       alpha: false,
       stencil: false,
       // Les portables gardent leur carte graphique économe.
       powerPreference: "default",
-      // Pas de 3D au rabais (rendu logiciel) : on garde alors le cadre HTML.
-      failIfMajorPerformanceCaveat: true,
+      failIfMajorPerformanceCaveat: strict,
     });
+  let renderer: WebGLRenderer;
+  try {
+    renderer = attempt(true);
   } catch {
-    canvas.remove();
-    callbacks.onFail("webgl");
-    return null;
+    try {
+      renderer = attempt(false);
+      console.info("[galerie] 3D : contexte obtenu sans l'exigence de performance (refusée par le navigateur)");
+    } catch (error) {
+      canvas.remove();
+      callbacks.onFail("webgl", error instanceof Error ? error.message : String(error));
+      return null;
+    }
+  }
+  {
+    const gl = renderer.getContext();
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    console.info("[galerie] 3D active, carte graphique :", info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
   }
 
   const count = inputs.length;
@@ -1285,7 +1304,7 @@ export function createGalleryRenderer(
   };
   const onContextLost = (event: Event) => {
     event.preventDefault();
-    callbacks.onFail("context-lost");
+    callbacks.onFail("context-lost", "contexte graphique perdu");
   };
 
   canvas.addEventListener("pointermove", onPointerMove);
@@ -1336,7 +1355,9 @@ export function createGalleryRenderer(
       resize();
     } else if (fps < 24) {
       slowMs += 2000;
-      if (slowMs >= 6000) callbacks.onFail("slow");
+      if (slowMs >= 6000 && !options.forced) {
+        callbacks.onFail("slow", `${Math.round(fps)} images/s, ${width}×${height} px, densité ${renderer.getPixelRatio()}`);
+      }
     } else {
       slowMs = 0;
     }

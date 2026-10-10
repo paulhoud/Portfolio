@@ -63,6 +63,23 @@ function readSession(key: string) {
   }
 }
 
+/**
+ * Adresse « ?3d » : 3D forcée pour diagnostiquer (la marque « 3D coupée » de
+ * la session est effacée, la lenteur ne coupe plus la scène).
+ */
+function forced3d() {
+  try {
+    if (!new URLSearchParams(window.location.search).has("3d")) return false;
+    window.sessionStorage.removeItem(NO_3D_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Effacée dès le chargement : avant que la page ne lise la marque.
+if (typeof window !== "undefined") forced3d();
+
 function writeSession(key: string) {
   try {
     window.sessionStorage.setItem(key, "1");
@@ -483,7 +500,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     if (!synced || readSession(NO_3D_KEY)) return;
     let cancelled = false;
     let renderer: GalleryRenderer | null = null;
-    const fail = (reason: GalleryFailure) => {
+    const fail = (reason: GalleryFailure, detail?: string) => {
+      console.info(`[galerie] 3D coupée (${reason})`, detail ?? "");
       // Échec en plein trou noir : le texte (photographié, masqué) et le
       // sommaire reviennent, la musique de la dimension s'arrête.
       if (doomRef.current) {
@@ -541,7 +559,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               }
               setScene("ready");
             },
-            onFail: (reason) => window.setTimeout(() => fail(reason), 0),
+            onFail: (reason, detail) => window.setTimeout(() => fail(reason, detail), 0),
           },
           {
             calm: calmRef.current,
@@ -550,6 +568,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             frame,
             returning: returning >= 0 ? returning : null,
             holdIntro: isOpening(),
+            forced: forced3d(),
           },
         );
         rendererRef.current = renderer;
