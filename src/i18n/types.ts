@@ -46,6 +46,13 @@ export type SiteCopy = {
     pause: string;
     resume: string;
   };
+  /** Thème clair ou sombre des pages de lecture (l'accueil reste sombre). */
+  theme: {
+    /** Nom de l'interrupteur (« Thème clair »). */
+    label: string;
+    toLight: string;
+    toDark: string;
+  };
   /** Musique d'ambiance et effets sonores. */
   sound: {
     mute: string;

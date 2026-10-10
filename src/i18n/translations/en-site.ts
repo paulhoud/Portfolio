@@ -27,6 +27,11 @@ export const enSite: SiteCopy = {
     pause: "Pause animations",
     resume: "Resume animations",
   },
+  theme: {
+    label: "Light theme",
+    toLight: "Switch to light theme",
+    toDark: "Switch to dark theme",
+  },
   sound: {
     mute: "Mute sound",
     unmute: "Turn sound on",

@@ -17,6 +17,7 @@ import type {
   ProjectMedia,
   ProjectSection,
 } from "@/content/projects";
+import { cn } from "@/lib/utils";
 import { AnimatedLogo } from "./AnimatedLogo";
 import { ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
 
@@ -45,13 +46,13 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
   const hasTextSections = project.sections.length > 0;
 
   return (
-    <article className="min-h-screen bg-[#1a1921] page-top px-6 pb-8 md:px-20 md:pb-12">
+    <article className="min-h-screen bg-page page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
             {/* Le nom du projet est porté par le h1 (lu par les moteurs et les
                 lecteurs d'écran) sans modifier le rendu visuel existant. */}
-            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
+            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-ink/65 md:text-2xl">
               <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
@@ -70,6 +71,7 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
                 logoVideoZoom={project.logoVideoZoom}
                 logoFallback={project.logoFallback}
                 logoLoop={project.logoLoop}
+                logoOnLight={project.logoOnLight}
                 priority
               />
             </div>
@@ -81,13 +83,10 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
         </ScrollReveal>
 
         {hasTextSections ? (
-          <ScrollRevealGroup className="mx-auto grid max-w-4xl gap-8 pb-20 md:gap-10">
+          <ScrollRevealGroup className="mx-auto max-w-3xl space-y-8 pb-20 md:space-y-10">
             {project.sections.map((section) => (
-              <ScrollRevealItem key={section.title} className="copy">
-                <h2 className="mb-2 text-sm font-bold uppercase tracking-[0.04em] text-white">
-                  {section.title}
-                </h2>
-                <p>{section.body}</p>
+              <ScrollRevealItem key={section.title}>
+                <CaseStudySection section={section} />
               </ScrollRevealItem>
             ))}
           </ScrollRevealGroup>
@@ -100,21 +99,20 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
 }
 
 function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
-  const inlineSections = project.sectionStyle === "inline";
   const hasBlocks = Boolean(project.blocks?.length);
 
   return (
-    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
+    <article className="min-h-screen bg-page page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-12 pt-6 text-center md:pb-16 md:pt-10">
           <ScrollRevealItem className="mb-10 max-w-2xl md:mb-14">
             {/* Idem : h1 sémantique, rendu visuel inchangé. */}
-            <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/55 md:text-sm">
+            <h1 className="text-balance text-xs font-medium uppercase tracking-[0.14em] text-ink/55 md:text-sm">
               <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
             {project.detailSubtitle ? (
-              <p className="mt-3 text-balance text-xs font-medium uppercase tracking-[0.14em] text-white/45 md:text-sm">
+              <p className="mt-3 text-balance text-xs font-medium uppercase tracking-[0.14em] text-ink/55 md:text-sm">
                 {project.detailSubtitle}
               </p>
             ) : null}
@@ -137,20 +135,16 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
         {hasBlocks ? (
           <div className="mx-auto max-w-3xl space-y-12 pb-24 md:space-y-16">
             {project.blocks?.map((block, index) => (
-              <CaseStudyBlock
-                key={`${block.type}-${index}`}
-                block={block}
-                inlineSections={inlineSections}
-              />
+              <CaseStudyBlock key={`${block.type}-${index}`} block={block} />
             ))}
           </div>
         ) : (
           <>
             {project.sections.length ? (
-              <ScrollRevealGroup className="mx-auto mb-16 max-w-3xl space-y-6 md:mb-20 md:space-y-8">
+              <ScrollRevealGroup className="mx-auto mb-16 max-w-3xl space-y-8 md:mb-20 md:space-y-10">
                 {project.sections.map((section) => (
                   <ScrollRevealItem key={section.title}>
-                    <CaseStudySection section={section} inline={inlineSections} />
+                    <CaseStudySection section={section} />
                   </ScrollRevealItem>
                 ))}
               </ScrollRevealGroup>
@@ -164,19 +158,13 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
   );
 }
 
-function CaseStudyBlock({
-  block,
-  inlineSections,
-}: {
-  block: ProjectBlock;
-  inlineSections: boolean;
-}) {
+function CaseStudyBlock({ block }: { block: ProjectBlock }) {
   if (block.type === "sections") {
     return (
-      <ScrollRevealGroup className="space-y-6 md:space-y-8">
+      <ScrollRevealGroup className="space-y-8 md:space-y-10">
         {block.sections.map((section) => (
           <ScrollRevealItem key={section.title}>
-            <CaseStudySection section={section} inline={inlineSections} />
+            <CaseStudySection section={section} />
           </ScrollRevealItem>
         ))}
       </ScrollRevealGroup>
@@ -202,7 +190,7 @@ function CaseStudyBlock({
                   src={media.image}
                   alt={media.title}
                   sizes="(max-width: 768px) 45vw, 180px"
-                  className="h-auto w-full rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+                  className="h-auto w-full rounded-[0.35rem] border border-ink/10"
                 />
               </MediaButton>
             </ScrollRevealItem>
@@ -210,9 +198,7 @@ function CaseStudyBlock({
         </div>
         {block.caption ? (
           <ScrollRevealItem>
-            <p className="text-center text-xs uppercase tracking-[0.18em] text-white/55">
-              {block.caption}
-            </p>
+            <p className={CAPTION}>{block.caption}</p>
           </ScrollRevealItem>
         ) : null}
       </ScrollRevealGroup>
@@ -224,7 +210,7 @@ function CaseStudyBlock({
       <ScrollRevealGroup className="grid gap-8 md:grid-cols-2 md:gap-6">
         {block.media.map((media) => (
           <ScrollRevealItem key={media.title}>
-            <ProjectMediaBlock media={media} priority={false} editorial />
+            <ProjectMediaBlock media={media} priority={false} />
           </ScrollRevealItem>
         ))}
       </ScrollRevealGroup>
@@ -235,38 +221,33 @@ function CaseStudyBlock({
     <div className="space-y-16 md:space-y-20">
       {block.media.map((media, index) => (
         <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
-          <ProjectMediaBlock media={media} priority={index < 2} editorial />
+          <ProjectMediaBlock media={media} priority={index < 2} />
         </ScrollReveal>
       ))}
     </div>
   );
 }
 
-function CaseStudySection({
-  section,
-  inline,
-}: {
-  section: ProjectSection;
-  inline: boolean;
-}) {
-  if (inline) {
-    return (
-      <p className="copy text-left text-white/80">
-        <span className="font-bold uppercase tracking-[0.04em] text-white">
-          {section.title}
-        </span>
-        <span className="text-white/45"> - </span>
-        {section.body}
-      </p>
-    );
-  }
+/**
+ * Légende sous un visuel : en minuscules et à 13 px, alignée sur le bord de
+ * l'image. Les capitales espacées ne servent plus qu'aux étiquettes de
+ * quelques mots ; sur une phrase entière, elles ralentissaient la lecture.
+ */
+const CAPTION = "mt-3 text-left text-[0.8125rem] leading-snug text-ink/65";
 
+/**
+ * Partie d'un texte de projet (« Vue d'ensemble », « Enjeux »…). Sur grand
+ * écran, l'intitulé occupe une colonne étroite à gauche et le texte la colonne
+ * de lecture : la page se parcourt d'un coup d'œil en descendant la marge,
+ * comme un rapport imprimé. Sur téléphone, l'intitulé passe au-dessus du texte.
+ */
+function CaseStudySection({ section }: { section: ProjectSection }) {
   return (
-    <div className="copy text-left text-white/80">
-      <h2 className="mb-2 text-sm font-bold uppercase tracking-[0.04em] text-white">
+    <div className="grid gap-2 text-left md:grid-cols-[9.5rem_1fr] md:gap-10">
+      <h2 className="text-[0.6875rem] font-bold uppercase leading-7 tracking-[0.14em] text-ink/65">
         {section.title}
       </h2>
-      <p>{section.body}</p>
+      <p className="copy">{section.body}</p>
     </div>
   );
 }
@@ -275,17 +256,18 @@ function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) 
   if (headerLogo.kind === "jive-orange") {
     return (
       <div className="flex items-center justify-center gap-4 md:gap-5">
-        <Image
+        <ThemedImage
           src="/assets/Logo-3.svg"
+          srcOnLight="/assets/Logo-3-ink.svg"
           alt="Jive"
           width={120}
           height={48}
-          priority
           className="h-10 w-auto md:h-12"
         />
-        <span aria-hidden="true" className="text-lg text-white/45 md:text-xl">
+        <span aria-hidden="true" className="text-lg text-ink/55 md:text-xl">
           ×
         </span>
+        {/* Le logo d'Orange : texte blanc sur carré orange, quel que soit le thème. */}
         <span className="inline-flex h-10 items-end overflow-hidden rounded-sm bg-[#FF7900] px-2.5 pb-1.5 md:h-12 md:px-3 md:pb-2">
           <span className="text-sm font-bold lowercase tracking-tight text-white md:text-base">
             orange
@@ -296,20 +278,48 @@ function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) 
   }
 
   return (
-    <div className="relative flex items-center justify-center">
-      <span
-        aria-hidden="true"
-        className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl md:h-52 md:w-52"
-      />
-      <Image
+    <div className="flex items-center justify-center">
+      <ThemedImage
         src={headerLogo.src}
+        srcOnLight={headerLogo.srcOnLight}
         alt={headerLogo.alt}
         width={headerLogo.width}
         height={headerLogo.height ?? 80}
-        priority
-        className={`relative ${headerLogo.className ?? "h-auto w-48"}`}
+        className={headerLogo.className ?? "h-auto w-48"}
       />
     </div>
+  );
+}
+
+/**
+ * Logo d'en-tête, avec sa version foncée en thème clair quand l'original est
+ * blanc. Les deux sont rendus et le CSS n'affiche que celle du thème courant
+ * (`theme-dark-only`, `theme-light-only` dans globals.css).
+ */
+function ThemedImage({
+  src,
+  srcOnLight,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  src: string;
+  srcOnLight?: string;
+  alt: string;
+  width: number;
+  height: number;
+  className: string;
+}) {
+  if (!srcOnLight) {
+    return <Image src={src} alt={alt} width={width} height={height} priority className={className} />;
+  }
+
+  return (
+    <>
+      <Image src={src} alt={alt} width={width} height={height} priority className={cn(className, "theme-dark-only")} />
+      <Image src={srcOnLight} alt={alt} width={width} height={height} priority className={cn(className, "theme-light-only")} />
+    </>
   );
 }
 
@@ -333,7 +343,7 @@ function ProjectContext({ context }: { context?: string }) {
   if (!context) return null;
 
   return (
-    <p className="text-balance text-[0.62rem] uppercase tracking-[0.18em] text-white/55">
+    <p className="text-balance text-[0.6875rem] uppercase tracking-[0.16em] text-ink/55">
       {/* Espace insécable avant « : » et « · » : sur mobile, une ligne ne doit
           jamais commencer par un deux-points ou un séparateur. */}
       {context.replace(/ ([:·])/g, " $1")}
@@ -353,7 +363,7 @@ function CompanySiteLink({ site }: { site?: ProjectLink }) {
       href={site.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.18em] text-white/60 transition-colors hover:text-white/90 focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50"
+      className="group inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.16em] text-ink/60 transition-colors hover:text-ink/90 focus-visible:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50"
     >
       {site.label}
       <svg
@@ -380,7 +390,7 @@ function ProjectLinks({ links }: { links: ProjectLink[] }) {
           key={link.label}
           href={link.href}
           {...externalLinkProps(link.href)}
-          className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
+          className="text-xs uppercase tracking-[0.18em] text-ink/55 underline decoration-ink/25 underline-offset-4 transition hover:text-ink/80"
         >
           {link.label}
         </a>
@@ -399,13 +409,13 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
   if (!story) return <DefaultProjectDetail project={project} />;
 
   return (
-    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
+    <article className="min-h-screen bg-page page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-6xl">
         {/* En-tête commun aux pages projet : accroche puis logo flottant.
             C'est le repère qui rattache visuellement cette page aux autres. */}
         <ScrollReveal>
           <header className="flex min-h-[360px] flex-col items-center justify-center text-center md:min-h-[420px]">
-            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-white/65 md:text-2xl">
+            <h1 className="mb-6 max-w-[42rem] text-balance text-xl font-medium uppercase tracking-[0.06em] text-ink/65 md:text-2xl">
               <span className="sr-only">{project.title} - </span>
               {project.eyebrow}
             </h1>
@@ -424,6 +434,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
                 logoVideoZoom={project.logoVideoZoom}
                 logoFallback={project.logoFallback}
                 logoLoop={project.logoLoop}
+                logoOnLight={project.logoOnLight}
                 priority
               />
             </div>
@@ -436,7 +447,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
 
         {/* L'arc du récit posé en une phrase, juste sous l'en-tête. */}
         <ScrollReveal>
-          <p className="mx-auto max-w-3xl text-balance pb-14 text-center text-xl font-medium leading-snug text-white md:pb-20 md:text-3xl">
+          <p className="mx-auto max-w-3xl text-balance pb-14 text-center text-xl font-medium leading-snug text-ink md:pb-20 md:text-3xl">
             {story.lead}
           </p>
         </ScrollReveal>
@@ -459,7 +470,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
           <ScrollRevealGroup className="mx-auto max-w-3xl space-y-6 pb-16 md:space-y-8 md:pb-24">
             {project.sections.map((section) => (
               <ScrollRevealItem key={section.title}>
-                <CaseStudySection section={section} inline={project.sectionStyle === "inline"} />
+                <CaseStudySection section={section} />
               </ScrollRevealItem>
             ))}
           </ScrollRevealGroup>
@@ -468,7 +479,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
         {/* Bascule vers le récit : elle justifie le retour en arrière. */}
         {story.bridge ? (
           <ScrollReveal>
-            <p className="mx-auto max-w-2xl text-balance pb-14 text-center text-lg font-medium text-white/70 md:pb-20 md:text-xl">
+            <p className="mx-auto max-w-2xl text-balance pb-14 text-center text-lg font-medium text-ink/70 md:pb-20 md:text-xl">
               {story.bridge}
             </p>
           </ScrollReveal>
@@ -476,10 +487,10 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
 
         <ProjectStorySection beats={story.beats} trackLabels={story.trackLabels} />
 
-        <section className="mt-24 border-t border-white/10 pt-16 md:mt-32 md:pt-20">
+        <section className="mt-24 border-t border-ink/10 pt-16 md:mt-32 md:pt-20">
           <ScrollReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+              <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55">
                 {story.closing.title}
               </h2>
               <p className="copy mt-5">{story.closing.body}</p>
@@ -490,7 +501,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
             <ScrollRevealGroup className="mx-auto mt-12 grid max-w-4xl gap-8 md:mt-16 md:grid-cols-2">
               {project.media.map((media) => (
                 <ScrollRevealItem key={media.title}>
-                  <ProjectMediaBlock media={media} priority={false} editorial />
+                  <ProjectMediaBlock media={media} priority={false} />
                 </ScrollRevealItem>
               ))}
             </ScrollRevealGroup>
@@ -511,7 +522,7 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
 
 function EditorialProjectDetail({ project }: ProjectDetailProps) {
   return (
-    <article className="min-h-screen bg-[#121212] page-top px-6 pb-8 md:px-20 md:pb-12">
+    <article className="min-h-screen bg-page page-top px-6 pb-8 md:px-20 md:pb-12">
       <div className="mx-auto max-w-5xl">
         <ScrollRevealGroup className="mx-auto flex max-w-3xl flex-col items-center pb-16 pt-8 text-center md:pb-24 md:pt-12">
           {/* Cette variante n'affiche pas de titre : le h1 reste accessible
@@ -519,18 +530,14 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
           <h1 className="sr-only">
             {project.title} - {project.eyebrow}
           </h1>
-          <ScrollRevealItem className="relative mb-10 flex flex-col items-center md:mb-14">
-            <span
-              aria-hidden="true"
-              className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl md:h-52 md:w-52"
-            />
-            <Image
+          <ScrollRevealItem className="mb-10 flex flex-col items-center md:mb-14">
+            <ThemedImage
               src={project.logo}
+              srcOnLight={project.logoOnLight}
               alt={project.logoAlt}
               width={220}
               height={120}
-              priority
-              className="relative h-auto w-44 md:w-52"
+              className="h-auto w-44 md:w-52"
             />
           </ScrollRevealItem>
 
@@ -542,7 +549,7 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
           ) : null}
 
           {project.introParagraphs?.map((paragraph) => (
-            <ScrollRevealItem key={paragraph} className="copy mb-6 max-w-2xl text-white/80">
+            <ScrollRevealItem key={paragraph} className="copy mb-6 max-w-2xl text-ink/80">
               <p>{paragraph}</p>
             </ScrollRevealItem>
           ))}
@@ -569,7 +576,7 @@ function ProjectMediaGallery({
       {project.media?.length ? (
         project.media.map((media, index) => (
           <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
-            <ProjectMediaBlock media={media} priority={index < 2} editorial={editorial} />
+            <ProjectMediaBlock media={media} priority={index < 2} />
           </ScrollReveal>
         ))
       ) : (
@@ -577,13 +584,13 @@ function ProjectMediaGallery({
           {project.gallery.map((item, index) => (
             <ScrollRevealItem
               key={item}
-              className="flex aspect-[4/3] items-end overflow-hidden rounded-[1.5rem] border border-white/8 bg-white/[0.04] p-5"
+              className="flex aspect-[4/3] items-end overflow-hidden rounded-[1.5rem] border border-ink/8 bg-ink/[0.04] p-5"
             >
               <div>
-                <span className="text-xs uppercase tracking-[0.18em] text-white/35">
+                <span className="text-xs uppercase tracking-[0.18em] text-ink/55">
                   0{index + 1}
                 </span>
-                <p className="mt-2 text-lg font-semibold text-white">{item}</p>
+                <p className="mt-2 text-lg font-semibold text-ink">{item}</p>
               </div>
             </ScrollRevealItem>
           ))}
@@ -593,30 +600,24 @@ function ProjectMediaGallery({
   );
 }
 
-function ProjectMediaBlock({
-  media,
-  priority,
-  editorial = false,
-}: {
-  media: ProjectMedia;
-  priority: boolean;
-  editorial?: boolean;
-}) {
-  const widthClass = {
-    narrow: "max-w-[480px]",
-    regular: "max-w-[720px]",
-    wide: "max-w-5xl",
-  }[media.size ?? "regular"];
+/** Largeur maximale d'un visuel selon sa taille déclarée dans le catalogue. */
+const MEDIA_MAX_WIDTH = { narrow: 480, regular: 720, wide: 1024 } as const;
 
+function ProjectMediaBlock({ media, priority }: { media: ProjectMedia; priority: boolean }) {
   const isLightVariant = media.variant === "light";
 
+  // Jamais plus large que l'image elle-même : les visuels des anciens projets
+  // ne font que 732 px, et les étirer sur toute la colonne les rendait flous.
+  // Montrés à leur taille, ils restent nets sur un écran standard.
+  const maxWidth = Math.min(MEDIA_MAX_WIDTH[media.size ?? "regular"], media.image.width);
+
   return (
-    <figure className={`mx-auto ${widthClass}`}>
+    <figure className="mx-auto" style={{ maxWidth }}>
       <MediaButton media={media}>
         <div
           className={
             isLightVariant
-              ? "overflow-hidden rounded-[0.35rem] bg-white px-4 py-6 md:px-8 md:py-8"
+              ? "overflow-hidden rounded-[0.35rem] border border-ink/10 bg-white px-4 py-6 md:px-8 md:py-8"
               : undefined
           }
         >
@@ -628,25 +629,17 @@ function ProjectMediaBlock({
             // Visuels de projet : la qualité par défaut (75) marque trop les
             // captures d'interface et les aplats.
             quality={92}
-            className={`h-auto w-full ${
-              isLightVariant ? "" : "rounded-[0.35rem] shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-            }`}
+            className={cn("h-auto w-full", !isLightVariant && "rounded-[0.35rem] border border-ink/10")}
           />
         </div>
       </MediaButton>
-      <figcaption
-        className={`mt-4 text-center text-xs uppercase tracking-[0.18em] ${
-          editorial ? "text-white/55" : "text-white/35"
-        }`}
-      >
-        {media.title}
-      </figcaption>
+      <figcaption className={CAPTION}>{media.title}</figcaption>
       {media.link ? (
         <p className="mt-3 text-center">
           <a
             href={media.link.href}
             {...externalLinkProps(media.link.href)}
-            className="text-xs uppercase tracking-[0.18em] text-white/55 underline decoration-white/25 underline-offset-4 transition hover:text-white/80"
+            className="text-xs uppercase tracking-[0.18em] text-ink/55 underline decoration-ink/25 underline-offset-4 transition hover:text-ink/80"
           >
             {media.link.label}
           </a>

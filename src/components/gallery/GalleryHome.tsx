@@ -29,6 +29,7 @@ import {
   showVeil,
 } from "@/lib/immersion";
 import { useMotionPaused } from "@/lib/motionPause";
+import { useTheme } from "@/lib/theme";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
 import { onHomeReset } from "@/lib/homeReset";
@@ -174,6 +175,14 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const sceneHostRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<GalleryRenderer | null>(null);
+  // Thème clair ou sombre de la scène (cf. src/lib/theme.ts) : appliqué au
+  // moteur dès sa création, puis à chaque changement.
+  const [siteTheme] = useTheme();
+  const lightThemeRef = useRef(false);
+  useEffect(() => {
+    lightThemeRef.current = siteTheme === "light";
+    rendererRef.current?.setTheme(lightThemeRef.current);
+  }, [siteTheme]);
   // « ready » : la scène 3D est affichée ; sinon le cadre HTML montre la tuile.
   const [scene, setScene] = useState<"off" | "ready" | "failed">("off");
   const [hovered3d, setHovered3d] = useState<number | null>(null);
@@ -602,6 +611,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             forced: forced3d(),
           },
         );
+        renderer?.setTheme(lightThemeRef.current);
         rendererRef.current = renderer;
       });
     };
@@ -716,7 +726,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             masquée (100lvh), pour ne laisser aucun vide en bas quand elle se
             cache au défilement ; le texte et les repères restent dans la
             hauteur toujours visible (100svh), et ne sautent donc jamais. */}
-        <div ref={stageRef} data-cursor-zone className="sticky top-0 h-[100lvh] overflow-hidden bg-[#08080b]">
+        <div ref={stageRef} data-cursor-zone className="sticky top-0 h-[100lvh] overflow-hidden bg-[var(--stage)]">
           {/* Lueur de la couleur du projet, derrière le cadre. */}
           <motion.div
             aria-hidden="true"
@@ -739,9 +749,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             aria-hidden="true"
             className={cn(
               "pointer-events-none absolute inset-0 transition-opacity duration-700",
-              "bg-[linear-gradient(0deg,#08080b_0%,rgba(8,8,11,0.9)_32%,transparent_44%),linear-gradient(180deg,rgba(8,8,11,0.85)_0%,transparent_20%)]",
-              "lg:bg-[linear-gradient(90deg,#08080b_0%,rgba(8,8,11,0.9)_30%,rgba(8,8,11,0.45)_38%,transparent_44%),linear-gradient(0deg,rgba(8,8,11,0.85)_0%,rgba(8,8,11,0.55)_20%,transparent_34%)]",
-              "[@media(max-height:500px)]:bg-[linear-gradient(90deg,transparent_0%,transparent_44%,rgba(8,8,11,0.88)_58%,#08080b_100%)]",
+              "bg-[linear-gradient(0deg,var(--stage)_0%,color-mix(in_srgb,var(--stage)_90%,transparent)_32%,transparent_44%),linear-gradient(180deg,color-mix(in_srgb,var(--stage)_85%,transparent)_0%,transparent_20%)]",
+              "lg:bg-[linear-gradient(90deg,var(--stage)_0%,color-mix(in_srgb,var(--stage)_90%,transparent)_30%,color-mix(in_srgb,var(--stage)_45%,transparent)_38%,transparent_44%),linear-gradient(0deg,color-mix(in_srgb,var(--stage)_85%,transparent)_0%,color-mix(in_srgb,var(--stage)_55%,transparent)_20%,transparent_34%)]",
+              "[@media(max-height:500px)]:bg-[linear-gradient(90deg,transparent_0%,transparent_44%,color-mix(in_srgb,var(--stage)_88%,transparent)_58%,var(--stage)_100%)]",
               // Effacé pendant l'entrée dans un projet et pendant le trou noir.
               live && !immersed && doom === null ? "opacity-100" : "opacity-0",
             )}
@@ -827,9 +837,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               {/* Centrée en hauteur sur la plaque (qui se tient au-dessus du cartel),
                   et non sur l'écran entier : elle paraissait trop basse. */}
               <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center lg:pb-40">
-                <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-white lg:text-5xl [@media(max-height:500px)]:sr-only">
+                <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-ink lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
-                  <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-white/60 lg:mt-3 lg:text-sm">
+                  <span className="mt-0.5 block text-[0.65rem] font-bold uppercase tracking-[0.24em] text-ink/60 light:text-ink/75 lg:mt-3 lg:text-sm">
                     {profile.jobTitle}
                   </span>
                 </h1>
@@ -887,17 +897,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                               onBlur={clearPreview}
                               className={cn(
                                 "relative flex items-baseline gap-3 py-1 text-sm uppercase tracking-[0.06em] transition-colors duration-300 [@media(max-height:780px)]:py-0.5",
-                                "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+                                "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50",
                                 isActive
-                                  ? "font-bold text-white [text-shadow:0_0_18px_color-mix(in_srgb,var(--accent-glow,#ffffff)_40%,transparent)]"
-                                  : "text-white/60 hover:text-white",
+                                  ? "font-bold text-ink [text-shadow:0_0_18px_color-mix(in_srgb,var(--accent-glow,#ffffff)_40%,transparent)]"
+                                  : "text-ink/60 light:text-ink/80 hover:text-ink",
                               )}
                             >
                               <span
                                 aria-hidden="true"
                                 className={cn(
                                   "w-6 font-normal tabular-nums transition-colors duration-500",
-                                  isActive ? "[color:color-mix(in_srgb,var(--accent-glow,#ffffff)_60%,white)]" : "text-white/45",
+                                  isActive ? "[color:color-mix(in_srgb,var(--accent-glow,var(--ink))_60%,var(--ink))]" : "text-ink/45 light:text-ink/65",
                                 )}
                               >
                                 {pad(index + 1)}
@@ -980,10 +990,10 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                         exit={{ opacity: 0, transition: { duration: 0.3 } }}
                         className="pointer-events-none absolute bottom-1 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 lg:bottom-3"
                       >
-                        <span className="relative block h-7 w-px overflow-hidden bg-white/15">
-                          <span className={cn("absolute left-1/2 top-1 block h-2 w-[3px] -translate-x-1/2 rounded-full bg-white/85", !calm && "scroll-cue-dot")} />
+                        <span className="relative block h-7 w-px overflow-hidden bg-ink/15">
+                          <span className={cn("absolute left-1/2 top-1 block h-2 w-[3px] -translate-x-1/2 rounded-full bg-ink/85", !calm && "scroll-cue-dot")} />
                         </span>
-                        <span className="text-[0.6rem] uppercase tracking-[0.24em] text-white/60">{t.site.gallery.scrollHint}</span>
+                        <span className="text-[0.6rem] uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">{t.site.gallery.scrollHint}</span>
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
@@ -1004,7 +1014,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                             onClick={() => scrollToPiece(index)}
                             aria-label={`${pad(index + 1)}. ${item.title} - ${item.eyebrow}`}
                             aria-current={index === active ? "true" : undefined}
-                            className="flex h-6 w-8 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60"
+                            className="flex h-6 w-8 items-center justify-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink/60"
                           >
                             <span
                               aria-hidden="true"
@@ -1012,7 +1022,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                                 "block w-1.5 rounded-full transition-all duration-300",
                                 index === shown
                                   ? "h-4 [background-color:var(--accent-glow,#ffffff)] [box-shadow:0_0_8px_var(--accent-glow,#ffffff)]"
-                                  : "h-1.5 bg-white/30",
+                                  : "h-1.5 bg-ink/30",
                               )}
                             />
                           </button>
@@ -1025,7 +1035,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       onClick={() => scrollToPiece(Math.min(count - 1, active + 1))}
                       aria-label={t.site.gallery.nextProject}
                       className={cn(
-                        "mt-1 flex h-8 w-8 items-center justify-center text-white/70 transition-opacity duration-300 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/60",
+                        "mt-1 flex h-8 w-8 items-center justify-center text-ink/70 transition-opacity duration-300 focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink/60",
                         active >= count - 1 && "invisible opacity-0",
                       )}
                     >
@@ -1080,7 +1090,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     href={`/projects/${project.slug}`}
                     onClick={onProjectClick(shown)}
                     aria-label={`${t.site.gallery.viewProject} : ${project.title}`}
-                    className="flex h-11 items-center gap-2.5 rounded-full bg-white pl-5 pr-4 text-sm font-medium text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+                    className="flex h-11 items-center gap-2.5 rounded-full bg-ink pl-5 pr-4 text-sm font-medium text-page focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/70"
                   >
                     {t.site.gallery.viewProject}
                     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1093,7 +1103,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
               {/* Ordinateur : la mention de droits flotte en bas à gauche, sur la
                   scène, à hauteur de la pastille des langues (cf. SiteHeader)
                   et toujours à sa droite, même sur un écran étroit. */}
-              <p data-pull className="pointer-events-auto absolute bottom-[2.375rem] left-[max(3rem,calc(8.5rem-(100vw-80rem)/2))] hidden text-[0.6rem] uppercase tracking-[0.06em] text-white/40 lg:block">
+              <p data-pull className="pointer-events-auto absolute bottom-[2.375rem] left-[max(3rem,calc(8.5rem-(100vw-80rem)/2))] hidden text-[0.6rem] uppercase tracking-[0.06em] text-ink/55 light:text-ink/70 lg:block">
                 {t.site.footer.copyright} {t.site.footer.rights}
               </p>
             </div>
@@ -1193,13 +1203,13 @@ function pullText(container: HTMLElement | null, cx: number, cy: number, span: [
 function CartelContent({ project, index, count }: { project: Project; index: number; count: number }) {
   return (
     <>
-      <p className="text-[0.65rem] tabular-nums uppercase tracking-[0.24em] text-white/60">
+      <p className="text-[0.65rem] tabular-nums uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">
         {pad(index + 1)} / {pad(count)}
       </p>
-      <p className="mt-1 text-xl font-medium text-white lg:mt-2 lg:text-3xl">{project.title}</p>
-      <p className="mt-0.5 truncate text-sm text-white/75 lg:mt-1 lg:whitespace-normal">{project.eyebrow}</p>
+      <p className="mt-1 text-xl font-medium text-ink lg:mt-2 lg:text-3xl">{project.title}</p>
+      <p className="mt-0.5 truncate text-sm text-ink/75 light:text-ink/85 lg:mt-1 lg:whitespace-normal">{project.eyebrow}</p>
       {project.context ? (
-        <p className="mt-2 text-[0.62rem] uppercase tracking-[0.18em] text-white/60 lg:mt-3">
+        <p className="mt-2 text-[0.62rem] uppercase tracking-[0.18em] text-ink/60 light:text-ink/75 lg:mt-3">
           {project.context.replace(/ ([:·])/g, " $1")}
         </p>
       ) : null}

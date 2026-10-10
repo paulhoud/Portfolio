@@ -8,19 +8,24 @@ import videoUpikajobPitch from "../../assets/video-upikajob-pitch.jpg";
 // plateforme actuelle, puis le site vitrine.
 import upikaOldDashboard from "../../assets/upika-old-dashboard.png";
 import upikaOldTalents from "../../assets/upika-old-talents.png";
-import upikaOldSuivi from "../../assets/upika-old-suivi.png";
-import upikaOldCompetences from "../../assets/upika-old-competences.png";
 import upikaLogotype from "../../assets/upika-logotype.png";
 import upikaTypescale from "../../assets/upika-typescale.png";
 import upikaFigmaComponents from "../../assets/upika-figma-components.png";
 import upikaFigmaTokens from "../../assets/upika-figma-tokens.png";
-import upikaNewDashboard from "../../assets/upika-new-dashboard.png";
 import upikaNewLogin from "../../assets/upika-new-login.jpg";
-import upikaNewPilotage from "../../assets/upika-new-pilotage.png";
-import upikaNewEntretiens from "../../assets/upika-new-entretiens.png";
-import upikaNewCompetences from "../../assets/upika-new-competences.png";
-import upikaNewIndicateurs from "../../assets/upika-new-indicateurs.png";
-import upikaNewProfil from "../../assets/upika-new-profil.png";
+// Captures de l'application actuelle (10 oct. 2026), en 2880 px. Données de
+// démonstration : noms, adresses et campagnes de test remplacés à l'affichage
+// par des données fictives avant la capture ; l'interface est intacte.
+import upikaDemoDashboard from "../../assets/upika-demo-dashboard.png";
+import upikaManagerDashboard from "../../assets/upika-manager-dashboard.png";
+import upikaTeamScores from "../../assets/upika-team-scores.png";
+import upikaHrIndicators from "../../assets/upika-hr-indicators.png";
+import upikaAiSynthesis from "../../assets/upika-ai-synthesis.png";
+import upikaAiCategories from "../../assets/upika-ai-categories.png";
+import upikaOnboardingWelcome from "../../assets/upika-onboarding-welcome.png";
+import upikaOnboardingTemplate from "../../assets/upika-onboarding-template.png";
+import upikaOnboardingRecap from "../../assets/upika-onboarding-recap.png";
+import upikaFormEditor from "../../assets/upika-form-editor.png";
 import upikaSiteHome from "../../assets/upika-site-home.png";
 import upikaSiteSolution from "../../assets/upika-site-solution.png";
 import upikaSiteTarifs from "../../assets/upika-site-tarifs.jpg";
@@ -30,32 +35,32 @@ import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
 import videoSanofiProject from "../../assets/video-sanofi-project.jpg";
 import videoBaio from "../../assets/video-baio.jpg";
 import videoOrangeAgile from "../../assets/video-orange-agile.jpg";
-import mementoEvent from "../../assets/img-63.png";
+import mementoEvent from "../../assets/projects/memento-event.jpg";
 import mementoLanding from "../../assets/img-64.png";
-import mementoStoryboard from "../../assets/img-65.png";
+import mementoStoryboard from "../../assets/projects/memento-storyboards.jpg";
 import mementoStats from "../../assets/img-66.png";
-import mementoPoster from "../../assets/img-67.png";
-import mementoFlyer from "../../assets/img-68.png";
-import mementoFaq from "../../assets/img-69.png";
-import yvesDelormeWorkshop from "../../assets/img-57.png";
-import yvesDelormeNeeds from "../../assets/img-58.png";
-import yvesDelormeStrategy from "../../assets/img-59.png";
+import mementoPoster from "../../assets/projects/memento-poster.jpg";
+import mementoFlyer from "../../assets/projects/memento-flyer.jpg";
+import mementoFaq from "../../assets/projects/memento-offer-faq.png";
+import yvesDelormeWorkshop from "../../assets/projects/ydl-workshop.jpg";
+import yvesDelormeNeeds from "../../assets/projects/ydl-needs.jpg";
+import yvesDelormeStrategy from "../../assets/projects/ydl-strategy.jpg";
 import yvesDelormeDesignSystem from "../../assets/img-60.png";
-import yvesDelormePrototype from "../../assets/img-61.png";
-import yvesDelormeTablet from "../../assets/img-62.png";
-import jiveDesignSystem from "../../assets/img-54.png";
-import jivePrototype from "../../assets/img-55.png";
-import jiveMiro from "../../assets/img-56.png";
-import sanofiField from "../../assets/img-48.png";
+import yvesDelormePrototype from "../../assets/projects/ydl-prototype.jpg";
+import yvesDelormeTablet from "../../assets/projects/ydl-tablet.jpg";
+import jiveDesignSystem from "../../assets/projects/jive-design-system.png";
+import jivePrototype from "../../assets/projects/jive-prototype.png";
+import jiveMiro from "../../assets/projects/jive-miro.png";
+import sanofiField from "../../assets/projects/sanofi-field.jpg";
 import sanofiCenters from "../../assets/img-49.png";
-import sanofiSupport from "../../assets/img-50.png";
-import sanofiWorkshop from "../../assets/img-51.png";
-import sanofiStoryboard from "../../assets/img-52.png";
-import sanofiExperienceMap from "../../assets/img-53.png";
-import fidesioAppCalendar from "../../assets/img-42.png";
-import fidesioAppWeek from "../../assets/img-43.png";
-import fidesioWebsite from "../../assets/img-44.png";
-import fidesioDashboard from "../../assets/img-45.png";
+import sanofiSupport from "../../assets/projects/sanofi-support.jpg";
+import sanofiWorkshop from "../../assets/projects/sanofi-workshop.jpg";
+import sanofiStoryboard from "../../assets/projects/sanofi-storyboard.png";
+import sanofiExperienceMap from "../../assets/projects/sanofi-experience-map.jpg";
+import fidesioAppCalendar from "../../assets/projects/fidesio-app-calendar.png";
+import fidesioAppWeek from "../../assets/projects/fidesio-app-week.png";
+import fidesioWebsite from "../../assets/projects/fidesio-website.jpg";
+import fidesioDashboard from "../../assets/projects/fidesio-fund.jpg";
 import fidesioBannerTeal from "../../assets/img-46.png";
 import fidesioBannerRed from "../../assets/img-47.png";
 import capgeminiOutlook from "../../assets/img-39.png";
@@ -63,15 +68,15 @@ import capgeminiOnedrive from "../../assets/img-40.png";
 import capgeminiOfficeOnline from "../../assets/img-41.png";
 import baioEcoCourses from "../../assets/img-32.png";
 import baioCommunity from "../../assets/img-33.png";
-import baioShoppingList from "../../assets/img-34.png";
-import baioScanTicket from "../../assets/img-35.png";
+import baioShoppingList from "../../assets/projects/baio-shopping-list.png";
+import baioScanTicket from "../../assets/projects/baio-scan-ticket.jpg";
 import baioOffers from "../../assets/img-36.png";
 import baioOnboarding from "../../assets/img-37.png";
 import baioFigma from "../../assets/img-38.png";
-import saegusVoeux from "../../assets/img-23.png";
+import saegusVoeux from "../../assets/projects/saegus-greetings.jpg";
 import saegusWishes from "../../assets/img-25.png";
 import saegusFigma from "../../assets/img-26.png";
-import saegusRexSteps from "../../assets/img-30.png";
+import saegusRexSteps from "../../assets/projects/saegus-rex-steps.png";
 import saegusRexThanks from "../../assets/img-31.png";
 import grandMenagePoster from "../../assets/img-19.png";
 import grandMenageFilming from "../../assets/img-20.png";
@@ -132,7 +137,7 @@ export type ProjectStoryShot = {
   caption: string;
   image?: StaticImageData;
   /**
-   * `screen` habille la capture d'un châssis d'écran, qui lui donne l'allure
+   * `screen` pose la capture dans un cadre d'écran sobre, qui lui donne l'allure
    * d'un logiciel plutôt que d'une image collée. Réservé aux captures
    * d'interface : une planche d'identité ou une page web entière n'y gagne rien.
    */
@@ -218,7 +223,16 @@ export type ProjectStory = {
 };
 
 export type ProjectHeaderLogo =
-  | { kind: "image"; src: string; alt: string; width: number; height?: number; className?: string }
+  | {
+      kind: "image";
+      src: string;
+      /** Version foncée du logo pour le thème clair, quand l'original est blanc. */
+      srcOnLight?: string;
+      alt: string;
+      width: number;
+      height?: number;
+      className?: string;
+    }
   | { kind: "jive-orange" };
 
 export type Project = {
@@ -227,6 +241,11 @@ export type Project = {
   eyebrow: string;
   description: string;
   logo: string;
+  /**
+   * Version foncée du logo, affichée en thème clair à la place d'un logo blanc
+   * qui disparaîtrait sur le fond « papier » (cf. src/lib/theme.ts).
+   */
+  logoOnLight?: string;
   logoKind?: "image" | "video";
   logoAlt: string;
   background: string;
@@ -273,7 +292,6 @@ export type Project = {
   detailSubtitle?: string;
   headerLogo?: ProjectHeaderLogo;
   introParagraphs?: string[];
-  sectionStyle?: "stacked" | "inline";
   blocks?: ProjectBlock[];
   animation: "orbit" | "float" | "sweep" | "pulse" | "tilt";
   /** Clé du média de la carte : image placeholder + animation .webm (cf. media-manifest). */
@@ -332,11 +350,17 @@ export const projects: Project[] = [
       highlight: {
         label: "Le produit aujourd'hui",
         title: "Un SIRH qui outille les équipes RH et les managers au quotidien",
-        body: "Pilotage des collaborateurs, campagnes d'entretiens, cartographie des compétences, indicateurs de suivi : conçus écran par écran, puis livrés en binôme avec le développeur.",
+        // Écrans d'IA : conçus et construits par Paul (fait confirmé, cf. À propos).
+        body: "Pilotage des collaborateurs, campagnes d'entretiens, synthèses générées par l'IA, indicateurs de suivi : conçus écran par écran, puis livrés en binôme avec le développeur.",
         shots: [
-          { caption: "Le tableau de bord", image: upikaNewDashboard, frame: "screen" },
-          { caption: "Pilotage RH et managérial", image: upikaNewPilotage, frame: "screen" },
-          { caption: "Cartographie des compétences", image: upikaNewCompetences, frame: "screen" },
+          { caption: "Le tableau de bord", image: upikaDemoDashboard, frame: "screen", optimize: true },
+          {
+            caption: "La synthèse d'un entretien, générée par l'IA",
+            image: upikaAiSynthesis,
+            frame: "screen",
+            optimize: true,
+          },
+          { caption: "Le périmètre d'un manager", image: upikaTeamScores, frame: "screen", optimize: true },
         ],
       },
       bridge: "Le produit n'a pas toujours eu ce visage.",
@@ -356,8 +380,9 @@ export const projects: Project[] = [
           shots: [
             { caption: "Le tableau de bord à mon arrivée", image: upikaOldDashboard, frame: "screen" },
             { caption: "Les jeunes talents en chiffres", image: upikaOldTalents, frame: "screen" },
-            { caption: "Fiche de suivi d'un alternant", image: upikaOldSuivi, frame: "screen" },
-            { caption: "Validation des compétences", image: upikaOldCompetences, frame: "screen" },
+            // Fiche de suivi et validation des compétences retirées : elles
+            // affichaient le nom d'une personne, et l'ancienne application ne
+            // peut plus être recapturée.
           ],
           shotLayout: "stage",
         },
@@ -410,9 +435,13 @@ export const projects: Project[] = [
             body: "Je cadre la vision produit et les choix UX, puis je conçois l'interface du nouveau produit, écran après écran, pour des professionnels des RH.",
           },
           shots: [
-            { caption: "Le tableau de bord de la nouvelle plateforme", image: upikaNewDashboard },
+            {
+              caption: "Le tableau de bord d'un manager",
+              image: upikaManagerDashboard,
+              frame: "screen",
+              optimize: true,
+            },
             { caption: "Nouvelle identité, nouvelle interface", image: upikaNewLogin, frame: "screen" },
-            { caption: "Pilotage RH et managérial", image: upikaNewPilotage },
           ],
           shotLayout: "stage",
         },
@@ -428,12 +457,15 @@ export const projects: Project[] = [
             body: "Interviews et tests utilisateurs, retours clients recueillis en direct, specs, sprints : chaque fonctionnalité, écrans d'IA compris, va du cadrage à la mise en production, en binôme quotidien avec le développeur.",
           },
           shots: [
-            { caption: "Campagnes d'entretiens annuels", image: upikaNewEntretiens, frame: "screen" },
-            { caption: "Cartographie des compétences", image: upikaNewCompetences },
-            { caption: "Indicateurs et filtres globaux", image: upikaNewIndicateurs, frame: "screen" },
-            { caption: "Profil collaborateur", image: upikaNewProfil, frame: "screen" },
+            {
+              caption: "Notes estimées par l'IA, catégorie par catégorie",
+              image: upikaAiCategories,
+              frame: "screen",
+              optimize: true,
+            },
+            { caption: "Les indicateurs du pilotage RH", image: upikaHrIndicators, frame: "screen", optimize: true },
           ],
-          shotLayout: "grid",
+          shotLayout: "row",
         },
         {
           type: "stage",
@@ -453,6 +485,39 @@ export const projects: Project[] = [
           ],
           shotLayout: "stage",
         },
+        {
+          // Sources : Paul (10 oct. 2026 : « l'offre sur étagère que je mets en
+          // place ») et les écrans eux-mêmes (assistant en six étapes, modèles,
+          // éditeur de formulaire en cartes, Upikat). Captures faites sur un
+          // compte d'essai, purgé ensuite ; campagne jamais lancée.
+          type: "stage",
+          period: "En ce moment",
+          product: {
+            title: "Une offre prête à l'emploi",
+            body: "Une offre en ligne qu'une entreprise prend en main seule : un assistant de démarrage en six étapes, des modèles d'entretien prêts à l'emploi et un éditeur de formulaire en cartes.",
+          },
+          role: {
+            title: "Concevoir la prise en main",
+            body: "Je mets en place l'offre à étagère : le démarrage guidé par Upikat, l'assistant de l'application, les modèles d'entretien et l'éditeur de formulaire.",
+          },
+          shots: [
+            { caption: "L'éditeur de formulaire en cartes", image: upikaFormEditor, frame: "screen", optimize: true },
+            {
+              caption: "Upikat accueille et guide la prise en main",
+              image: upikaOnboardingWelcome,
+              frame: "screen",
+              optimize: true,
+            },
+            {
+              caption: "Choisir un modèle et voir son déroulé",
+              image: upikaOnboardingTemplate,
+              frame: "screen",
+              optimize: true,
+            },
+            { caption: "Le récapitulatif avant lancement", image: upikaOnboardingRecap, frame: "screen", optimize: true },
+          ],
+          shotLayout: "stage",
+        },
       ],
       closing: {
         title: "Ce que ça donne",
@@ -460,7 +525,6 @@ export const projects: Project[] = [
         link: { label: "Voir le site", href: "https://www.upikajob.com/" },
       },
     },
-    sectionStyle: "inline",
     sections: [
       {
         title: "Vue d'ensemble",
@@ -512,6 +576,7 @@ export const projects: Project[] = [
       "Un an d'alternance comme premier designer de Memento, SaaS de redistribution de photos pour événements : interfaces, design system, vidéos et supports.",
     context: "Alternance · janvier 2021 – janvier 2022",
     logo: "/assets/Logo-1-1.svg",
+    logoOnLight: "/assets/Logo-1-1-ink.svg",
     logoAlt: "Logo Memento",
     background: "#1a1921",
     foreground: "#ffffff",
@@ -665,7 +730,6 @@ export const projects: Project[] = [
     animation: "sweep",
     detailVariant: "case-study",
     headerLogo: { kind: "jive-orange" },
-    sectionStyle: "inline",
     sections: [
       {
         title: "Vue d'ensemble",
@@ -741,7 +805,6 @@ export const projects: Project[] = [
       height: 57,
       className: "h-auto w-52 md:w-64",
     },
-    sectionStyle: "inline",
     sections: [
       {
         title: "Vue d'ensemble",
@@ -836,7 +899,6 @@ export const projects: Project[] = [
       height: 252,
       className: "h-auto w-24 md:w-28",
     },
-    sectionStyle: "inline",
     blocks: [
       {
         type: "sections",
@@ -956,7 +1018,6 @@ export const projects: Project[] = [
       height: 80,
       className: "h-auto w-44 md:w-52",
     },
-    sectionStyle: "inline",
     sections: [
       {
         title: "Vue d'ensemble",
@@ -1022,7 +1083,6 @@ export const projects: Project[] = [
       height: 120,
       className: "h-auto w-24 md:w-28",
     },
-    sectionStyle: "inline",
     blocks: [
       {
         type: "sections",
@@ -1121,12 +1181,12 @@ export const projects: Project[] = [
     headerLogo: {
       kind: "image",
       src: "/assets/Logo-8-1.svg",
+      srcOnLight: "/assets/Logo-8-1-ink.svg",
       alt: "Logo SÆGUS",
       width: 120,
       height: 120,
       className: "h-auto w-24 md:w-28",
     },
-    sectionStyle: "inline",
     blocks: [
       {
         type: "sections",
@@ -1223,7 +1283,6 @@ export const projects: Project[] = [
       height: 180,
       className: "h-auto w-56 md:w-72",
     },
-    sectionStyle: "inline",
     blocks: [
       {
         type: "sections",
@@ -1300,7 +1359,6 @@ export const projects: Project[] = [
     titleColor: "#BE1E2D",
     animation: "pulse",
     detailVariant: "case-study",
-    sectionStyle: "inline",
     sections: [],
     gallery: [],
     media: [

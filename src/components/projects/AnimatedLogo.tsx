@@ -57,6 +57,7 @@ type AnimatedLogoProps = Pick<
   | "animation"
   | "foreground"
   | "logo"
+  | "logoOnLight"
   | "logoAlt"
   | "logoKind"
   | "logoSize"
@@ -72,6 +73,7 @@ export function AnimatedLogo({
   animation,
   foreground,
   logo,
+  logoOnLight,
   logoAlt,
   logoKind,
   logoSize,
@@ -196,14 +198,30 @@ export function AnimatedLogo({
             />
           </div>
         ) : (
-          <Image
-            src={logo}
-            alt={logoAlt}
-            width={260}
-            height={180}
-            priority={priority}
-            className="h-auto w-full object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
-          />
+          <>
+            <Image
+              src={logo}
+              alt={logoAlt}
+              width={260}
+              height={180}
+              priority={priority}
+              className={cn(
+                "h-auto w-full object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]",
+                logoOnLight && "theme-dark-only",
+              )}
+            />
+            {/* Thème clair : version foncée d'un logo blanc (cf. globals.css). */}
+            {logoOnLight ? (
+              <Image
+                src={logoOnLight}
+                alt={logoAlt}
+                width={260}
+                height={180}
+                priority={priority}
+                className="theme-light-only h-auto w-full object-contain"
+              />
+            ) : null}
+          </>
         )}
       </motion.div>    </motion.div>
   );

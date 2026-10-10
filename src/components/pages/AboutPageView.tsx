@@ -31,7 +31,7 @@ export function AboutPageView() {
           <div className="relative mx-auto md:mx-0">
             <span
               aria-hidden="true"
-              className="absolute -inset-4 rounded-full bg-white/5 blur-2xl"
+              className="absolute -inset-4 rounded-full bg-ink/5 blur-2xl"
             />
             <Image
               src={profile.photo}
@@ -40,7 +40,7 @@ export function AboutPageView() {
               height={260}
               priority
               sizes="(min-width: 768px) 260px, 200px"
-              className="relative h-[200px] w-[200px] rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/15 md:h-[260px] md:w-[260px]"
+              className="relative h-[200px] w-[200px] rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-ink/15 md:h-[260px] md:w-[260px]"
             />
           </div>
         </div>
@@ -49,7 +49,7 @@ export function AboutPageView() {
       <ScrollRevealGroup className="mt-16 grid gap-8 md:mt-20 md:grid-cols-2 md:gap-x-12 md:gap-y-10">
         {about.sections.map((section) => (
           <ScrollRevealItem key={section.title} className="space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-[0.04em] text-white">
+            <h2 className="text-sm font-bold uppercase tracking-[0.04em] text-ink">
               {section.title}
             </h2>
             <p className="copy">{section.body}</p>

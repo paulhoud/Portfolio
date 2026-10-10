@@ -130,7 +130,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
           <span
             className={cn(
               "absolute inset-0 rounded-full transition-[background-color] duration-300",
-              shown === "grab" ? "bg-white/15" : shown === "link" ? "bg-white/10" : "bg-transparent",
+              shown === "grab" ? "bg-ink/15" : shown === "link" ? "bg-ink/10" : "bg-transparent",
             )}
           />
           {/* Sur un projet, il s'efface en grandissant : l'arc ouvert prend le relais. */}
@@ -145,7 +145,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
               fill="none"
               strokeWidth="1.25"
               vectorEffect="non-scaling-stroke"
-              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-white/60")}
+              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/60")}
             />
           </svg>
         </div>
@@ -158,13 +158,13 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
             shown === "project" ? "scale-100 opacity-100" : "scale-50 opacity-0",
           )}
         >
-          <svg viewBox="0 0 112 112" className={cn("absolute inset-0 h-full w-full overflow-visible", LEGIBLE, !calm && "cursor-spin")}>
-            <circle cx="56" cy="56" r="26" fill="none" stroke="white" strokeWidth="1" strokeDasharray="130 33.4" strokeLinecap="round" />
+          <svg viewBox="0 0 112 112" className={cn("absolute inset-0 h-full w-full overflow-visible text-ink", LEGIBLE, !calm && "cursor-spin")}>
+            <circle cx="56" cy="56" r="26" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="130 33.4" strokeLinecap="round" />
             <circle cx="63.4" cy="31.1" r="3.2" className="transition-[fill] duration-500 [fill:var(--accent-glow,#ffffff)]" />
           </svg>
           <svg
             viewBox="0 0 24 24"
-            className={cn("absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-white", LEGIBLE)}
+            className={cn("absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-ink", LEGIBLE)}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -178,7 +178,7 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
         {/* Sur un objet : on peut le toucher (une note si le son est actif) ou l'attraper. */}
         <div
           className={cn(
-            "absolute -left-2.5 -top-2.5 h-5 w-5 text-white transition-[opacity,transform] duration-300",
+            "absolute -left-2.5 -top-2.5 h-5 w-5 text-ink transition-[opacity,transform] duration-300",
             LEGIBLE,
             shown === "object" ? "scale-100 opacity-100" : "scale-50 opacity-0",
           )}
@@ -203,17 +203,17 @@ export function SceneCursor({ scene, calm }: { scene: SceneCursorState; calm: bo
       <div ref={dotRef} className="absolute left-0 top-0">
         <span
           className={cn(
-            "absolute -left-[2px] -top-[2px] h-1 w-1 rounded-full bg-white transition-opacity duration-200",
+            "absolute -left-[2px] -top-[2px] h-1 w-1 rounded-full bg-ink transition-opacity duration-200",
             shown === "grab" || shown === "link" ? "opacity-100" : "opacity-0",
           )}
         />
         <span
           className={cn(
-            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-white/15 transition-opacity duration-200",
+            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-ink/15 transition-opacity duration-200",
             shown === "scene" ? "opacity-100" : "opacity-0",
           )}
         >
-          <span className={cn("absolute left-0 top-0 block h-1 w-[2px] rounded-full bg-white/80", !calm && "cursor-scroll-dot")} />
+          <span className={cn("absolute left-0 top-0 block h-1 w-[2px] rounded-full bg-ink/80", !calm && "cursor-scroll-dot")} />
         </span>
       </div>
     </div>

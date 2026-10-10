@@ -21,7 +21,7 @@ export function TechStack() {
       <ScrollReveal>
         <h2
           id="stack-heading"
-          className="mb-10 text-center text-xs font-semibold uppercase tracking-[0.28em] text-white/35 md:mb-14"
+          className="mb-10 text-center text-xs font-semibold uppercase tracking-[0.28em] text-ink/55 md:mb-14"
         >
           {copy.heading}
         </h2>
@@ -31,7 +31,7 @@ export function TechStack() {
         {techCategories.map((category) => (
           <ScrollRevealGroup key={category.id} className="space-y-4">
             <ScrollRevealItem>
-              <h3 className="text-sm font-bold text-white">{copy[category.id]}</h3>
+              <h3 className="text-sm font-bold text-ink">{copy[category.id]}</h3>
             </ScrollRevealItem>
             <ScrollRevealItem>
               <ul className="flex flex-wrap gap-2.5">
@@ -58,7 +58,7 @@ function TechLink({ tech }: { tech: Tech }) {
       target="_blank"
       rel="noopener noreferrer"
       title={tech.label}
-      className="group/tech relative flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 transition duration-300 hover:-translate-y-0.5 hover:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+      className="group/tech relative flex h-12 w-12 items-center justify-center rounded-xl border border-ink/10 transition duration-300 hover:-translate-y-0.5 hover:border-ink/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/60"
       style={{
         backgroundColor: icon.kind === "mono" ? icon.background : "rgba(255,255,255,0.04)",
       }}

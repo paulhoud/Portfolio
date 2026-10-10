@@ -47,11 +47,11 @@ export function SocialLinks({
                 title={`${profile.name} sur ${link.label}`}
                 className={cn(
                   "flex items-center transition duration-200",
-                  "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+                  "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50",
                   labelled
-                    ? "gap-2.5 rounded-full border border-white/12 px-4 py-2.5 text-white/70 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/5 hover:text-white"
+                    ? "gap-2.5 rounded-full border border-ink/12 px-4 py-2.5 text-ink/70 hover:-translate-y-0.5 hover:border-ink/30 hover:bg-ink/5 hover:text-ink"
                     : // Zone de clic ronde de 32 px, même survol que les autres icônes du header.
-                      "h-8 w-8 justify-center rounded-full text-white/50 hover:bg-white/[0.06] hover:text-white focus-visible:text-white",
+                      "h-8 w-8 justify-center rounded-full text-ink/50 hover:bg-ink/[0.06] hover:text-ink focus-visible:text-ink",
                 )}
               >
                 {path ? (

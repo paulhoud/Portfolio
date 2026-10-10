@@ -21,7 +21,7 @@ export function MethodPageView() {
     <TextPage title={method.title} revealChildren={false}>
       <ScrollReveal>
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+          <h2 className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-ink/55">
             {method.introTitle}
           </h2>
           <p className="copy mt-5">{method.introOne}</p>

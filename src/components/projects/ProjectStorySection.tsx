@@ -65,7 +65,7 @@ function StageBeat({
           translucide le laissait apparaître au travers. */}
       <span
         aria-hidden="true"
-        className="absolute left-[var(--axis)] top-3 bottom-0 w-px -translate-x-1/2 bg-white/12"
+        className="absolute left-[var(--axis)] top-3 bottom-0 w-px -translate-x-1/2 bg-ink/12"
       />
       {/* Le point reste hors de `ScrollReveal` : l'animation y applique un
           `transform`, qui ferait de ce bloc le référent des positions absolues.
@@ -73,11 +73,11 @@ function StageBeat({
           l'animation, puis sauterait sur l'axe une fois celle-ci terminée. */}
       <span
         aria-hidden="true"
-        className="absolute left-[var(--axis)] top-2 h-2 w-2 -translate-x-1/2 rounded-full bg-white/70 ring-4 ring-[#121212]"
+        className="absolute left-[var(--axis)] top-2 h-2 w-2 -translate-x-1/2 rounded-full bg-ink/70 ring-4 ring-page"
       />
 
       <ScrollReveal>
-        <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/30">
+        <span className="block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55">
           {beat.period}
         </span>
 
@@ -110,16 +110,16 @@ function Track({
   accent?: boolean;
 }) {
   return (
-    <div className={cn("border-t pt-4", accent ? "border-white/25" : "border-white/10")}>
+    <div className={cn("border-t pt-4", accent ? "border-ink/25" : "border-ink/10")}>
       <span
         className={cn(
-          "block text-[0.55rem] font-semibold uppercase tracking-[0.24em]",
-          accent ? "text-white/55" : "text-white/30",
+          "block text-[0.6875rem] font-semibold uppercase tracking-[0.16em]",
+          accent ? "text-ink/55" : "text-ink/55",
         )}
       >
         {label}
       </span>
-      <h3 className="mt-2 text-base font-bold text-white md:text-lg">{title}</h3>
+      <h3 className="mt-2 text-base font-bold text-ink md:text-lg">{title}</h3>
       <p className="copy mt-2">{body}</p>
     </div>
   );
@@ -130,15 +130,11 @@ function PivotBeat({ beat }: { beat: { type: "pivot" } & ProjectStoryPivot }) {
   return (
     <li className="relative pb-16 md:pb-24">
       <ScrollReveal>
-        <div className="relative overflow-hidden rounded-[0.75rem] border border-white/10 bg-white/[0.03] px-6 py-10 text-center md:px-12 md:py-14">
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
-          />
-          <span className="block text-[0.55rem] font-semibold uppercase tracking-[0.28em] text-white/40">
+        <div className="rounded-[0.75rem] border border-ink/10 bg-ink/[0.03] px-6 py-10 text-center md:px-12 md:py-14">
+          <span className="block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55">
             {beat.label}
           </span>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-lg font-medium leading-snug text-white md:text-2xl">
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-lg font-medium leading-snug text-ink md:text-2xl">
             {beat.statement}
           </p>
         </div>
@@ -169,10 +165,10 @@ export function ProjectStoryHighlight({
     <section aria-label={title} className="pb-20 md:pb-28">
       <ScrollReveal>
         <div className="mx-auto mb-9 max-w-2xl text-center md:mb-12">
-          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+          <span className="block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55">
             {label}
           </span>
-          <h2 className="mt-4 text-balance text-xl font-medium leading-snug text-white md:text-2xl">
+          <h2 className="mt-4 text-balance text-xl font-medium leading-snug text-ink md:text-2xl">
             {title}
           </h2>
           <p className="copy mt-4">{body}</p>
@@ -229,17 +225,21 @@ function StoryShots({
     );
   }
 
-  // « stage » : une capture dominante, la seconde en incrustation.
+  // « stage » : une capture dominante, la seconde en incrustation, les
+  // suivantes en grille dessous. L'incrustation est rattachée à la capture
+  // dominante seule : rattachée à tout le bloc, elle chevauchait la grille.
   return (
-    <div className={cn("relative", shots.length > 1 && "pb-10 pr-6 md:pb-12 md:pr-10")}>
-      <StoryShotFrame shot={shots[0]} />
-      {shots[1] ? (
-        <div className="absolute -bottom-1 -right-1 w-[42%] md:w-[38%]">
-          <StoryShotFrame shot={shots[1]} compact sizes="(max-width: 768px) 40vw, 420px" />
-        </div>
-      ) : null}
+    <div>
+      <div className={cn("relative", shots.length > 1 && "pb-10 pr-6 md:pb-12 md:pr-10")}>
+        <StoryShotFrame shot={shots[0]} />
+        {shots[1] ? (
+          <div className="absolute -bottom-1 -right-1 w-[42%] md:w-[38%]">
+            <StoryShotFrame shot={shots[1]} compact sizes="(max-width: 768px) 40vw, 420px" />
+          </div>
+        ) : null}
+      </div>
       {shots.slice(2).length > 0 ? (
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
           {shots.slice(2).map((shot) => (
             <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF_WIDTH} />
           ))}
@@ -250,44 +250,16 @@ function StoryShots({
 }
 
 /**
- * Habillage d'écran : châssis vectoriel, net à toute résolution, qui donne aux
- * captures d'application l'allure d'un logiciel plutôt que d'une image collée.
+ * Cadre des captures d'interface : une marge teintée et un filet, sans ombre,
+ * sans reflet ni fausse barre de fenêtre. Il distingue un écran de logiciel
+ * d'une planche ou d'une page web, et laisse toute l'attention à l'interface.
  * Réservé aux captures d'interface - une planche d'identité ou une page web
  * entière n'a rien à y gagner.
  */
-function ScreenChrome({ children }: { children: React.ReactNode }) {
+function ScreenFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative">
-      {/* Halo diffus derrière l'écran : il détache la dalle du fond et suggère
-          une source lumineuse, plutôt qu'un cadre posé à plat. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-8 -top-6 bottom-0 rounded-[2.5rem] bg-[radial-gradient(55%_50%_at_50%_45%,rgba(122,150,255,0.14),rgba(122,150,255,0.05)_45%,transparent_72%)] blur-2xl"
-      />
-      {/* Ombre de contact, resserrée sous l'écran : c'est elle qui donne
-          l'impression que la dalle flotte au-dessus du fond. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-10 -bottom-4 h-10 rounded-[50%] bg-black/55 blur-2xl"
-      />
-
-      {/* Ombres empilées plutôt qu'une seule : une ombre courte et dense pour
-          l'épaisseur du châssis, une longue et douce pour la profondeur. */}
-      <div className="relative rounded-[0.7rem] bg-gradient-to-b from-[#34343e] to-[#1b1b21] p-[3px] shadow-[0_2px_6px_rgba(0,0,0,0.3),0_14px_32px_rgba(0,0,0,0.34),0_52px_100px_-28px_rgba(0,0,0,0.7)]">
-        <div className="overflow-hidden rounded-[0.55rem] border border-white/[0.06] bg-[#0e0e12]">
-          <div className="flex h-6 items-center gap-1.5 border-b border-white/[0.06] bg-gradient-to-b from-[#2c2c34] to-[#22222a] px-3 md:h-7">
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#ff5f57]/75" />
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#febc2e]/75" />
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#28c840]/75" />
-          </div>
-          {children}
-        </div>
-        {/* Reflet oblique très discret sur la dalle. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[0.7rem] bg-gradient-to-tr from-transparent via-white/[0.04] to-transparent"
-        />
-      </div>
+    <div className="rounded-[0.7rem] border border-ink/10 bg-ink/[0.04] p-1.5 md:p-2">
+      <div className="overflow-hidden rounded-[0.45rem] border border-ink/[0.06]">{children}</div>
     </div>
   );
 }
@@ -313,10 +285,12 @@ function StoryShotFrame({
   sizes?: string;
 }) {
   const caption = (
+    // Légende en minuscules, alignée sur le bord de l'image (cf. `CAPTION`
+    // dans ProjectDetail).
     <figcaption
       className={cn(
-        "mt-3 text-center uppercase tracking-[0.18em] text-white/35",
-        compact ? "text-[0.55rem]" : "text-[0.62rem]",
+        "mt-3 text-left leading-snug text-ink/65",
+        compact ? "text-[0.75rem]" : "text-[0.8125rem]",
       )}
     >
       {shot.caption}
@@ -354,14 +328,14 @@ function StoryShotFrame({
       <figure>
         <MediaButton media={{ title: shot.caption, image: shot.image }} className="rounded-[0.7rem]">
           {framed ? (
-            <ScreenChrome>{picture}</ScreenChrome>
+            <ScreenFrame>{picture}</ScreenFrame>
           ) : (
-            <div className="relative overflow-hidden rounded-[0.6rem] border border-white/10 bg-white/[0.03] shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
+            <div className="relative overflow-hidden rounded-[0.6rem] border border-ink/10 bg-ink/[0.03]">
               {picture}
               {isTallPage ? (
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#121212] to-transparent"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-page to-transparent"
                 />
               ) : null}
             </div>
@@ -376,14 +350,14 @@ function StoryShotFrame({
     <figure>
       <div
         className={cn(
-          "flex items-center justify-center rounded-[0.6rem] border border-dashed border-white/15 bg-white/[0.02]",
+          "flex items-center justify-center rounded-[0.6rem] border border-dashed border-ink/15 bg-ink/[0.02]",
           ratio === "square" ? "aspect-square p-4" : compact ? "aspect-[4/3] p-4" : "aspect-[16/10] p-6",
         )}
       >
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className={cn("text-white/20", compact ? "h-5 w-5" : "h-7 w-7")}
+          className={cn("text-ink/20", compact ? "h-5 w-5" : "h-7 w-7")}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.4"

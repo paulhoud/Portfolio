@@ -14,30 +14,45 @@
   --ink: #f5f2f4;
   --page: #121212;
   --glass: #121118;
+  /* Contour et ombre des capsules de verre. Le contour prend une pointe de la
+     couleur du projet affiché sur l'accueil (`--accent-glow`, posée sur <html>). */
+  --glass-border: color-mix(in srgb, var(--accent-glow, #ffffff) 16%, rgba(255, 255, 255, 0.08));
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 40px -18px rgba(0, 0, 0, 0.8);
   /* Fond de la zone de lecture des pages texte (À propos, Méthode, Contact). */
   --reading-surface: linear-gradient(120deg, #172237 0%, #191820 46%, #17161d 100%);
+  /* Fond de la scène 3D de l'accueil et du voile qui porte son texte : la même
+     couleur que celle du moteur 3D (cf. `LIGHT_THEME` dans galleryRenderer.ts). */
+  --stage: #08080b;
   /* Hauteur du header flottant (cf. SiteHeader). */
   --header-height: 56px;
 }
 
 /* Thème clair : posé sur <html> en dehors de l'accueil, qui reste sombre.
-   Fond « papier » plutôt que blanc pur, encre presque noire : un registre
-   d'édition imprimée, calme, à l'opposé de la scène 3D. */
+   Fond gris chaud plutôt que blanc : les éléments en blanc pur (captures,
+   verre du header, plaques de l'accueil) s'en détachent nettement. Encre
+   presque noire : un registre d'édition imprimée, calme. */
 :root[data-theme="light"] {
-  --background: #f4f2ee;
+  --background: #e8e6e1;
   --panel: #ffffff;
-  --panel-soft: #ece9e3;
+  --panel-soft: #dedbd5;
   --foreground: #18171c;
   --muted: #5c5a55;
   --ink: #18171c;
-  --page: #f4f2ee;
+  --page: #e8e6e1;
   --glass: #fbfaf7;
-  --reading-surface: #f4f2ee;
+  --glass-border: rgba(24, 23, 28, 0.1);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 32px -18px rgba(24, 23, 28, 0.3);
+  --reading-surface: #e8e6e1;
+  --stage: #d9d6cf;
   color-scheme: light;
 }
 
 /* Utilitaires Tailwind branchés sur ces variables : `text-ink`, `bg-page`,
    `bg-glass`… (« inline » : la classe lit la variable, donc suit le thème). */
+/* Variante `light:` : réglage propre au thème clair, quand une même opacité
+   d'encre ne se lit pas aussi bien sur les deux fonds. */
+@custom-variant light (&:where(:root[data-theme="light"] *));
+
 @theme inline {
   --color-ink: var(--ink);
   --color-page: var(--page);
@@ -80,6 +95,24 @@ body {
 
 :root[data-theme="light"] body {
   background: var(--page);
+}
+
+/* Deux versions d'un même visuel, une par thème (logo blanc dessiné pour le
+   noir et sa version foncée, par exemple) : seule celle du thème affiché est
+   rendue. Le choix se fait en CSS, le thème n'étant connu qu'au navigateur. */
+:root[data-theme="light"] .theme-dark-only,
+:root:not([data-theme="light"]) .theme-light-only {
+  display: none;
+}
+
+/* Logo « PH » du header (fichier blanc) et ses lignes 3D : inversés en noir sur
+   le verre clair. Au survol, l'ombre légère remplace le halo blanc. */
+:root[data-theme="light"] .logo-ink {
+  filter: invert(1);
+}
+
+:root[data-theme="light"] .group:hover .logo-ink {
+  filter: invert(1) drop-shadow(0 0 5px rgba(0, 0, 0, 0.18));
 }
 
 /* Dans la couche « base » de Tailwind : hors couche, ces règles passaient
@@ -137,8 +170,10 @@ body {
   background-color: rgba(255, 255, 255, 0.36);
 }
 
-:root[data-theme="light"] {
-  scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+@supports not selector(::-webkit-scrollbar) {
+  :root[data-theme="light"] {
+    scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+  }
 }
 
 :root[data-theme="light"] ::-webkit-scrollbar-thumb {

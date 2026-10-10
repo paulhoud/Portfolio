@@ -123,7 +123,7 @@ function AnimatedLogoMark({ className }: { className?: string }) {
         height={70}
         loading="eager"
         className={cn(
-          "transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "logo-ink transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)]",
           // Avec les lignes, le logo blanc s'efface vite au survol et revient
           // pendant qu'elles se replient ; sinon, un halo blanc l'entoure.
           lines
@@ -139,7 +139,7 @@ function AnimatedLogoMark({ className }: { className?: string }) {
         key={calm ? "calm" : "lines"}
         ref={canvasRef}
         aria-hidden="true"
-        className="pointer-events-none absolute"
+        className="logo-ink pointer-events-none absolute"
         style={{
           left: -LINES_PAD,
           top: -LINES_PAD,

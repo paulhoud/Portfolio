@@ -41,7 +41,7 @@ export function MediaButton({
       aria-label={label}
       onClick={() => viewer.openMedia(media)}
       className={cn(
-        "group/media relative block w-full transition duration-300 hover:brightness-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/50",
+        "group/media relative block w-full transition duration-300 hover:brightness-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/50",
         isVideo ? "cursor-pointer" : "cursor-zoom-in",
         className,
       )}

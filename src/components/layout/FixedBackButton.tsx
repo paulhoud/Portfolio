@@ -70,7 +70,7 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
         scroll={false}
         onClick={goBack}
         aria-label={t.site.common.back}
-        className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 backdrop-blur-md transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+        className="group flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-glass/55 text-ink/70 backdrop-blur-md transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/60"
       >
         <svg
           aria-hidden="true"

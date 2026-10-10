@@ -27,6 +27,11 @@ export const frSite: SiteCopy = {
     pause: "Mettre en pause les animations",
     resume: "Relancer les animations",
   },
+  theme: {
+    label: "Thème clair",
+    toLight: "Passer en thème clair",
+    toDark: "Passer en thème sombre",
+  },
   sound: {
     mute: "Couper le son",
     unmute: "Activer le son",

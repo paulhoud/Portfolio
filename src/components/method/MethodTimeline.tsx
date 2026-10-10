@@ -56,7 +56,7 @@ export function MethodTimeline({ steps }: { steps: MethodStep[] }) {
       {/* Fil conducteur reliant les étapes, estompé à ses extrémités. */}
       <span
         aria-hidden="true"
-        className="absolute left-[1.4rem] top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-white/12 to-transparent md:left-[1.65rem]"
+        className="absolute left-[1.4rem] top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-ink/12 to-transparent md:left-[1.65rem]"
       />
 
       {steps.map((step, index) => (
@@ -65,7 +65,7 @@ export function MethodTimeline({ steps }: { steps: MethodStep[] }) {
             <div className="flex gap-5 md:gap-7">
               <span
                 aria-hidden="true"
-                className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-[#191820] text-white/55 md:h-[3.3rem] md:w-[3.3rem]"
+                className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ink/12 bg-[var(--background)] text-ink/55 md:h-[3.3rem] md:w-[3.3rem]"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -81,10 +81,10 @@ export function MethodTimeline({ steps }: { steps: MethodStep[] }) {
               </span>
 
               <div className="pt-1 md:pt-2">
-                <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.28em] text-white/30">
+                <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.28em] text-ink/55">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <h2 className="mt-2 text-base font-bold text-white md:text-lg">{step.title}</h2>
+                <h2 className="mt-2 text-base font-bold text-ink md:text-lg">{step.title}</h2>
                 <p className="copy mt-2">{step.body}</p>
               </div>
             </div>

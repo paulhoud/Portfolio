@@ -4,6 +4,7 @@ import { personSchema, webSiteSchema } from "@/components/seo/schemas";
 import { siteOpenGraph, siteTitle } from "@/components/seo/shareMetadata";
 import { profile, siteUrl } from "@/content/profile";
 import { LanguageProvider } from "@/i18n/context";
+import { THEME_BOOT_SCRIPT } from "@/lib/themeBoot";
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import "./globals.css";
@@ -107,7 +108,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={lato.variable}>
+    // `data-theme` est posé par le script ci-dessous avant l'hydratation : React
+    // ne doit pas s'étonner de le trouver sur <html>.
+    <html lang="fr" className={lato.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body>
         <JsonLd schema={personSchema()} />
         <JsonLd schema={webSiteSchema()} />

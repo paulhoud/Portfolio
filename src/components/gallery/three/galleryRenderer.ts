@@ -131,6 +131,11 @@ export type GalleryOptions = {
 
 export type GalleryRenderer = {
   /**
+   * Thème clair ou sombre (cf. src/lib/theme.ts) : seuls le fond, le brouillard
+   * et le sol changent ; plaques et objets gardent leurs couleurs.
+   */
+  setTheme(light: boolean): void;
+  /**
    * Entrer dans un projet : la caméra rejoint sa plaque, s'avance jusqu'à ce
    * qu'elle remplisse l'écran, les autres s'éteignent ; `onCovered` est appelé
    * quand l'écran est presque couvert (moment de changer de page). Renvoie la
@@ -174,6 +179,12 @@ export type GalleryRenderer = {
 };
 
 const BACKGROUND = "#08080b";
+/**
+ * Thème clair : un gris chaud un peu plus soutenu que le fond des pages
+ * (`--stage` dans globals.css), pour que les plaques blanches s'en détachent.
+ */
+const LIGHT_THEME = { background: "#d9d6cf", floorBase: "#d9d6cf", floorGrid: "#bab5ac" };
+const DARK_THEME = { background: BACKGROUND, floorBase: "#09090c", floorGrid: "#24242c" };
 /** Le sol se creuse au plus de tant sous un objet poussé vers lui (m)… */
 const WELL_MAX = 1.6;
 /** … et commence à céder quand l'objet passe sous cette hauteur (m). */
@@ -707,8 +718,8 @@ export function createGalleryRenderer(
     defines: { PIECES: count },
     uniforms: {
       ...fog,
-      uBase: { value: new Color("#09090c") },
-      uGrid: { value: new Color("#24242c") },
+      uBase: { value: new Color(DARK_THEME.floorBase) },
+      uGrid: { value: new Color(DARK_THEME.floorGrid) },
       uPiecePos: { value: floorPos },
       uPieceGlow: { value: floorGlow },
       uDim: { value: 0 },
@@ -2293,6 +2304,15 @@ export function createGalleryRenderer(
       }
       activity();
       updateScheduler();
+      invalidate();
+    },
+    setTheme(light) {
+      const palette = light ? LIGHT_THEME : DARK_THEME;
+      // Le brouillard partage cette couleur : les lointains se fondent dans le fond.
+      background.set(palette.background);
+      renderer.setClearColor(background, 1);
+      floorMaterial.uniforms.uBase.value.set(palette.floorBase);
+      floorMaterial.uniforms.uGrid.value.set(palette.floorGrid);
       invalidate();
     },
     nudgeObjects() {

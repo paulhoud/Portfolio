@@ -76,10 +76,10 @@ export function LanguageFlags() {
             className={cn(
               // Au survol, le drapeau ondule et un reflet le traverse (cf. globals.css).
               "flag-button relative block cursor-pointer overflow-hidden p-[1.5px] transition-opacity duration-300",
-              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/60",
+              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/60",
               FLAG_OUTER_RADIUS,
               isActive
-                ? "border border-white opacity-100"
+                ? "border border-ink opacity-100"
                 : "border border-transparent opacity-70 hover:opacity-100",
             )}
           >

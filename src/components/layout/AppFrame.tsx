@@ -2,9 +2,10 @@
 
 import { AnimatePresence, MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
+import { applyTheme, useTheme } from "@/lib/theme";
 import { FixedBackButton } from "./FixedBackButton";
 import { Opening } from "./Opening";
 import { PageTransition } from "./PageTransition";
@@ -25,11 +26,16 @@ export function AppFrame({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const [motionPaused] = useMotionPaused();
 
+  const [theme] = useTheme();
+
   // Accueil sur téléphone : le défilement s'arrête sur chaque projet (cf. globals.css).
   useEffect(() => {
     document.documentElement.classList.toggle("home-snap", isHome);
     return () => document.documentElement.classList.remove("home-snap");
   }, [isHome]);
+
+  // Thème clair ou sombre, appliqué avant la peinture.
+  useLayoutEffect(() => applyTheme(theme), [theme]);
 
   return (
     // En pause, framer-motion réduit tous les mouvements comme le ferait le

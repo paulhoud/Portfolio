@@ -8,6 +8,7 @@ import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
 import { initSound, useSoundOn } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { LanguageFlags } from "./LanguageFlags";
 import { LogoMark } from "./LogoMark";
@@ -37,9 +38,9 @@ const ease = [0.22, 1, 0.36, 1] as const;
 /** Pastille des réglages aux coins bas de l'écran : le verre de la capsule. */
 const DOCK_PILL = cn(
   "pointer-events-auto flex h-11 items-center gap-1 rounded-full border px-1.5",
-  "bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150 transition-[border-color] duration-700",
-  "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)]",
-  "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
+  "bg-glass/55 backdrop-blur-xl backdrop-saturate-150 transition-[border-color] duration-700",
+  "shadow-[var(--glass-shadow)]",
+  "[border-color:var(--glass-border)]",
 );
 
 /**
@@ -200,21 +201,21 @@ export function SiteHeader() {
         animate={{ y: visible ? 0 : "-120%" }}
         transition={{ duration: reduceMotion ? 0 : 0.35, ease }}
         // Seule la capsule capte les clics : autour, on atteint la scène.
-        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[var(--header-height)] text-white"
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[var(--header-height)] text-ink"
       >
         <div
           onPointerMove={onCapsulePointer}
           className={cn(
             "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 overflow-hidden rounded-full lg:inset-x-6 lg:top-3",
-            "border bg-[#121118]/55 backdrop-blur-xl backdrop-saturate-150",
-            "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_40px_-18px_rgba(0,0,0,0.8)] transition-[border-color] duration-700",
-            "[border-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_16%,rgba(255,255,255,0.08))]",
+            "border bg-glass/55 backdrop-blur-xl backdrop-saturate-150",
+            "shadow-[var(--glass-shadow)] transition-[border-color] duration-700",
+            "[border-color:var(--glass-border)]",
           )}
         >
           {/* Halo de la souris, reflet du contour et lisière éclairée en bas.
               Tout reste dans la capsule, lignes du logo comprises. */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-            <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,rgba(255,255,255,0.08),transparent_70%)]" />
+            <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,color-mix(in_srgb,var(--ink)_8%,transparent),transparent_70%)]" />
             {!motionPaused ? <span className="capsule-sweep" /> : null}
             <span className="absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]" />
           </div>
@@ -226,7 +227,7 @@ export function SiteHeader() {
                 survol ; il est seulement réduit à l'affichage, assez pour
                 garder de l'air jusqu'aux bouts arrondis de la capsule. */}
             <div className="relative h-[32px] w-[28px] shrink-0 md:justify-self-start lg:h-[36px] lg:w-[32px]">
-              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.46] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 lg:scale-[0.52]" />
+              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.46] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 lg:scale-[0.52]" />
             </div>
 
             <nav aria-label={t.site.nav.main} className="hidden items-center gap-1 md:flex md:justify-self-center">
@@ -255,7 +256,7 @@ export function SiteHeader() {
                 aria-expanded={isOpen}
                 aria-controls="mobile-menu"
                 onClick={() => setIsOpen((current) => !current)}
-                className="relative flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70"
+                className="relative flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-full focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-ink/70"
               >
                 {/* Les deux barres extrêmes convergent vers le centre en pivotant,
                     la barre médiane s'efface : le burger devient une croix. */}
@@ -283,13 +284,14 @@ export function SiteHeader() {
       {/* Grand écran : les réglages quittent la capsule pour les coins bas de
           l'écran, dans deux petites pastilles du même verre - la langue à
           gauche, le son et la pause à droite. En dessous, ils sont dans le menu. */}
-      <div className="pointer-events-none fixed inset-x-6 bottom-6 z-40 hidden items-end justify-between text-white lg:flex">
+      <div className="pointer-events-none fixed inset-x-6 bottom-6 z-40 hidden items-end justify-between text-ink lg:flex">
         <div className={cn(DOCK_PILL, "px-3")}>
           <LanguageFlags />
         </div>
         <div className={DOCK_PILL}>
           <SoundToggle />
           <MotionToggle />
+          <ThemeToggle />
         </div>
       </div>
 
@@ -320,7 +322,7 @@ export function SiteHeader() {
               transition={{ duration: reduceMotion ? 0 : 0.22, ease: "easeOut" }}
               // Jamais plus haut que l'écran : le panneau défile de lui-même
               // si la place manque (la page, elle, est verrouillée).
-              className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] max-h-[calc(100svh-var(--header-height)-1.25rem)] overflow-y-auto rounded-3xl border border-white/10 bg-[#121118]/90 p-3 shadow-2xl backdrop-blur-xl lg:hidden"
+              className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] max-h-[calc(100svh-var(--header-height)-1.25rem)] overflow-y-auto rounded-3xl border border-ink/10 bg-glass/90 p-3 shadow-2xl backdrop-blur-xl lg:hidden"
             >
               {/* Écran bas (téléphone en paysage) : liens à gauche, réseaux et
                   réglages à droite, pour que tout tienne sans défiler. Sur
@@ -338,8 +340,8 @@ export function SiteHeader() {
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
                           "relative flex min-h-11 items-center rounded-2xl px-3 text-base uppercase tracking-[0.04em] transition-colors",
-                          "focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-white/60",
-                          isActive ? "bg-white/[0.08] font-bold text-white" : "font-medium text-white/75 active:bg-white/[0.06]",
+                          "focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ink/60",
+                          isActive ? "bg-ink/[0.08] font-bold text-ink" : "font-medium text-ink/75 active:bg-ink/[0.06]",
                         )}
                       >
                         {isActive ? (
@@ -354,13 +356,14 @@ export function SiteHeader() {
                     );
                   })}
                 </nav>
-                <div className="mt-2 border-t border-white/10 pt-2 md:mt-0 md:border-t-0 md:pt-0 [@media(max-height:520px)]:mt-0 [@media(max-height:520px)]:border-l [@media(max-height:520px)]:border-t-0 [@media(max-height:520px)]:pl-3 [@media(max-height:520px)]:pt-0">
+                <div className="mt-2 border-t border-ink/10 pt-2 md:mt-0 md:border-t-0 md:pt-0 [@media(max-height:520px)]:mt-0 [@media(max-height:520px)]:border-l [@media(max-height:520px)]:border-t-0 [@media(max-height:520px)]:pl-3 [@media(max-height:520px)]:pt-0">
                   <div className="flex min-h-11 items-center justify-between px-3">
                     <SocialLinks />
                     <LanguageFlags />
                   </div>
                   <SoundToggle variant="labelled" />
                   <MotionToggle labelled />
+                  <ThemeToggle labelled />
                 </div>
               </div>
             </motion.div>
@@ -391,17 +394,17 @@ function HeaderNavLink({
       aria-current={isActive ? "page" : undefined}
       className={cn(
         "group relative rounded-full px-4 py-1.5 text-[0.8rem] uppercase tracking-[0.06em] transition-[color,background-color,box-shadow] duration-300",
-        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/50",
+        "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50",
         isActive
-          ? "bg-white/[0.08] font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]"
-          : "font-medium text-white/75 hover:bg-white/[0.06] hover:text-white",
+          ? "bg-ink/[0.08] font-bold text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]"
+          : "font-medium text-ink/75 hover:bg-ink/[0.06] hover:text-ink",
       )}
     >
       {label}
       {isActive ? (
         <span
           aria-hidden="true"
-          className="absolute bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 rounded-full [background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)] shadow-[0_0_6px_var(--accent-glow,#ffffff)]"
+          className="absolute bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 rounded-full [background-color:color-mix(in_srgb,var(--accent-glow,var(--ink))_70%,var(--ink))] shadow-[0_0_6px_var(--accent-glow,#ffffff)]"
         />
       ) : null}
     </Link>
@@ -416,13 +419,13 @@ function HeaderNavLink({
  */
 function toggleClasses(labelled: boolean, pressed: boolean) {
   return cn(
-    "flex cursor-pointer items-center gap-3 transition-colors duration-300 hover:text-white",
-    "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-white/50",
+    "flex cursor-pointer items-center gap-3 transition-colors duration-300 hover:text-ink",
+    "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50",
     labelled
-      ? cn("min-h-11 rounded-2xl px-3 text-sm", pressed ? "text-white" : "text-white/70")
+      ? cn("min-h-11 rounded-2xl px-3 text-sm", pressed ? "text-ink" : "text-ink/70")
       : cn(
-          "h-8 w-8 justify-center rounded-full hover:bg-white/[0.06]",
-          pressed ? "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]" : "text-white/50",
+          "h-8 w-8 justify-center rounded-full hover:bg-ink/[0.06]",
+          pressed ? "bg-ink/[0.08] text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09)]" : "text-ink/50",
         ),
   );
 }
@@ -453,8 +456,8 @@ function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "lab
         variant === "capsule"
           ? cn(
               "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-colors duration-300",
-              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-white/70",
-              on ? "text-white" : "text-white/55",
+              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-ink/70",
+              on ? "text-ink" : "text-ink/55",
             )
           : cn(toggleClasses(labelled, on), labelled && "w-full")
       }
@@ -474,13 +477,13 @@ function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "lab
         <>
           <span>{t.site.sound.label}</span>
           {/* L'état en toutes lettres, et un petit interrupteur. */}
-          <span className="ml-auto flex items-center gap-2 text-xs text-white/60">
+          <span className="ml-auto flex items-center gap-2 text-xs text-ink/60">
             {on ? t.site.sound.on : t.site.sound.off}
             <span
               aria-hidden="true"
               className={cn(
                 "relative h-5 w-9 rounded-full transition-colors duration-300",
-                on ? "[background-color:color-mix(in_srgb,var(--accent-glow,#ffffff)_70%,white)]" : "bg-white/15",
+                on ? "[background-color:color-mix(in_srgb,var(--accent-glow,var(--ink))_70%,var(--ink))]" : "bg-ink/15",
               )}
             >
               <span
@@ -521,6 +524,40 @@ function MotionToggle({ labelled = false }: { labelled?: boolean }) {
         {paused ? <path d="M8 5.5v13l10.5-6.5L8 5.5Z" /> : <path d="M7 5h3.5v14H7V5Zm6.5 0H17v14h-3.5V5Z" />}
       </svg>
       {labelled ? <span>{label}</span> : null}
+    </button>
+  );
+}
+
+/**
+ * Thème clair ou sombre du site (cf. src/lib/theme.ts). Un interrupteur
+ * « Thème clair » : enfoncé en thème clair, l'icône passe de la lune au soleil.
+ */
+function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
+  const { t } = useTranslation();
+  const [theme, toggle] = useTheme();
+  const light = theme === "light";
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      onClick={toggle}
+      aria-checked={light}
+      aria-label={labelled ? undefined : t.site.theme.label}
+      title={labelled ? undefined : light ? t.site.theme.toDark : t.site.theme.toLight}
+      className={cn(toggleClasses(labelled, light), labelled && "w-full")}
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {light ? (
+          <>
+            <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+          </>
+        ) : (
+          <path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1Z" fill="currentColor" stroke="none" />
+        )}
+      </svg>
+      {labelled ? <span>{t.site.theme.label}</span> : null}
     </button>
   );
 }
