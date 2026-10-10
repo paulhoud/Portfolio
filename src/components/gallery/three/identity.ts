@@ -409,7 +409,7 @@ export const IDENTITY_CATALOG: IdentityEntry[] = [
   { name: "speaker", file: "speaker.glb", front: true, sounds: ["speaker-1", "speaker-2", "speaker-3"], music: true },
   // L’étoile argentée de Mario Galaxy, repeinte en jaune vif, avec une lueur.
   { name: "marioStar", file: "mario-star.glb", front: true, tints: { FooMat: "#ffd21a" }, aura: "#ffc61a", sounds: ["mario-star"] },
-  { name: "wineGlass", file: "wine-glass.glb", glass: ["Glass"], sounds: ["wine"] },
+  { name: "wineGlass", file: "wine-glass.glb", glass: ["Glass"], sounds: ["glass-1", "glass-2", "glass-3"] },
   { name: "flower", file: "flower.glb", sounds: ["flower-1", "flower-2"] },
   { name: "cheese", file: "cheese.glb", tints: { Cheese: "#f6c445" }, sounds: ["cheese-1", "cheese-2"] },
   { name: "chessPawn", file: "chess-pawn.glb", sounds: ["chess-1", "chess-2"] },
