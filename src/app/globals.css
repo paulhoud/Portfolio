@@ -20,7 +20,7 @@
   --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 40px -18px rgba(0, 0, 0, 0.8);
   /* Liseré du curseur de la scène 3D : sombre sur fond sombre, blanc en thème
      clair, pour que le curseur (à l'encre du thème) se détache de tout. */
-  --cursor-halo: rgba(0, 0, 0, 0.5);
+  --cursor-halo: rgba(0, 0, 0, 0.7);
   /* Fond de la zone de lecture des pages texte (À propos, Méthode, Contact). */
   --reading-surface: linear-gradient(120deg, #172237 0%, #191820 46%, #17161d 100%);
   /* Fond de la scène 3D de l'accueil et du voile qui porte son texte : la même
@@ -61,6 +61,25 @@
   --color-ink: var(--ink);
   --color-page: var(--page);
   --color-glass: var(--glass);
+}
+
+/*
+ * Thème clair : les textes secondaires (encre à 40-60 %) se lisaient mal sur
+ * le fond gris (2,8 à 4,3:1, audit du 12 oct. 2026). Ils passent à 66 et
+ * 68 %, au moins 4,6:1 sur tous les fonds clairs (page, panneaux, scène) :
+ * le seuil AA des petits textes. Une classe `light:` explicite garde la main,
+ * le survol aussi (spécificité d'une seule classe, grâce à `:where`).
+ */
+@layer utilities {
+  :where(:root[data-theme="light"]) :is(.text-ink\/40, .text-ink\/45, .text-ink\/50, .text-ink\/55):where(:not([class*="light:text-"])) {
+    color: color-mix(in oklab, var(--ink) 66%, transparent);
+  }
+  :where(:root[data-theme="light"]) .text-ink\/60:where(:not([class*="light:text-"])) {
+    color: color-mix(in oklab, var(--ink) 68%, transparent);
+  }
+  :where(:root[data-theme="light"]) .fill-ink\/45 {
+    fill: color-mix(in oklab, var(--ink) 66%, transparent);
+  }
 }
 
 @media (min-width: 1024px) {

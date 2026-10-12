@@ -83,7 +83,8 @@ function MethodTimelineStep({ step, index, last }: { step: MethodStep; index: nu
   // d'autre, sur quelques points de hauteur d'écran).
   const { scrollYProgress: lit } = useScroll({ target: dotRef, offset: [...READ_SPAN] });
   const litScale = useTransform(lit, [0, 1], [0.6, 1]);
-  const numberOpacity = useTransform(lit, [0, 1], [0.55, 1]);
+  // Pas encore atteint, le numéro reste lisible (au moins 4,5:1 en thème clair).
+  const numberOpacity = useTransform(lit, [0, 1], [0.72, 1]);
 
   return (
     <li className="relative pb-10 last:pb-0 md:pb-14">

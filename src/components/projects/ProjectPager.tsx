@@ -110,7 +110,7 @@ export function ProjectPager({ slug }: { slug: string }) {
             {side === "next" ? <Arrow /> : null}
           </span>
           <span className="mt-1.5 block text-lg font-bold text-ink">
-            <span className="mr-2 font-normal tabular-nums text-ink/45">{number}</span>
+            <span className="mr-2 font-normal tabular-nums text-ink/55">{number}</span>
             {localized.title}
           </span>
           <span className="mt-0.5 block truncate text-sm text-ink/55">{localized.eyebrow}</span>

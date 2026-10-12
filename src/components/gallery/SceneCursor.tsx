@@ -13,11 +13,15 @@ type Mode = Exclude<SceneCursorState, null> | "link";
  */
 const RING_SCALE: Record<Mode, number> = { scene: 0.3, object: 0.42, grab: 0.24, link: 0.36, project: 0.47 };
 
-/** Ombre très douce : le blanc reste lisible sur une plaque claire. */
-// Liseré qui détache le curseur de ce qu'il survole : sombre en thème sombre,
-// blanc en thème clair (`--cursor-halo`, globals.css), doublé pour tenir aussi
-// sur un objet sombre.
-const LEGIBLE = "[filter:drop-shadow(0_0_1.5px_var(--cursor-halo))_drop-shadow(0_0_0.5px_var(--cursor-halo))]";
+/**
+ * Liseré qui détache le curseur de ce qu'il survole : sombre en thème sombre,
+ * blanc en thème clair (`--cursor-halo`, globals.css). Deux ombres serrées
+ * font un contour net, une troisième un léger flou autour : le curseur reste
+ * lisible sur une image chargée (dimensions Dofus, South Park), sur la neige
+ * comme sur le noir.
+ */
+const LEGIBLE =
+  "[filter:drop-shadow(0_0_0.75px_var(--cursor-halo))_drop-shadow(0_0_0.75px_var(--cursor-halo))_drop-shadow(0_0_2.5px_var(--cursor-halo))]";
 
 /**
  * Curseur de la galerie (souris seulement). Dans toute la zone de
@@ -158,9 +162,9 @@ export function SceneCursor({
               cy="56"
               r="55"
               fill="none"
-              strokeWidth="1.25"
+              strokeWidth="1.75"
               vectorEffect="non-scaling-stroke"
-              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/60 light:stroke-ink/85")}
+              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/90 light:stroke-ink")}
             />
           </svg>
         </div>
@@ -174,7 +178,7 @@ export function SceneCursor({
           )}
         >
           <svg viewBox="0 0 112 112" className={cn("absolute inset-0 h-full w-full overflow-visible text-ink", LEGIBLE, !calm && "cursor-spin")}>
-            <circle cx="56" cy="56" r="26" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="130 33.4" strokeLinecap="round" />
+            <circle cx="56" cy="56" r="26" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="130 33.4" strokeLinecap="round" />
             <circle cx="63.4" cy="31.1" r="3.2" className="transition-[fill] duration-500 [fill:var(--accent-glow,#ffffff)]" />
           </svg>
           <svg
@@ -224,11 +228,11 @@ export function SceneCursor({
         />
         <span
           className={cn(
-            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-ink/15 light:bg-ink/30 transition-opacity duration-200",
+            "absolute -left-px -top-1.5 block h-3 w-[2px] overflow-hidden rounded-full bg-ink/35 light:bg-ink/40 transition-opacity duration-200",
             shown === "scene" ? "opacity-100" : "opacity-0",
           )}
         >
-          <span className={cn("absolute left-0 top-0 block h-1 w-[2px] rounded-full bg-ink/80", !calm && "cursor-scroll-dot")} />
+          <span className={cn("absolute left-0 top-0 block h-1 w-[2px] rounded-full bg-ink", !calm && "cursor-scroll-dot")} />
         </span>
       </div>
     </div>
