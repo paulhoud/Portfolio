@@ -107,6 +107,7 @@ export function StatsDashboard({
     if (path === "/method") return "Méthodologie";
     if (path === "/about") return "À propos";
     if (path === "/contact") return "Contact";
+    if (path === "/legal") return "Mentions légales";
     const slug = path.split("/")[2];
     return titles.get(slug) ?? path;
   };

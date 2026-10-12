@@ -12,7 +12,7 @@ import { EVENT_NAMES, MAX_BODY, MAX_EVENTS, type EventName, type SentBatch } fro
 
 export const runtime = "nodejs";
 
-const PAGES = new Set(["/", "/method", "/about", "/contact", ...projects.map((project) => `/projects/${project.slug}`)]);
+const PAGES = new Set(["/", "/method", "/about", "/contact", "/legal", ...projects.map((project) => `/projects/${project.slug}`)]);
 const NAMES = new Set<string>(EVENT_NAMES);
 const TARGET = /^[\p{L}\p{N} .,:'’@/&()+_-]{1,80}$/u;
 const HOST = /^[a-z0-9.-]{1,80}$/;

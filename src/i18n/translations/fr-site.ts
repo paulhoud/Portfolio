@@ -23,6 +23,7 @@ export const frSite: SiteCopy = {
     rights: "Tous droits réservés.",
     models: "Modèles 3D",
     by: "par",
+    legal: "Mentions légales",
     audience: "Mesure d'audience anonyme, sans cookie.",
     optOut: "Ne pas être compté",
     optedOut: "Vous n'êtes plus compté sur cet appareil.",

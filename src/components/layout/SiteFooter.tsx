@@ -98,7 +98,10 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-10 text-xs text-ink/55">
-          {t.site.footer.copyright} {t.site.footer.rights}
+          {t.site.footer.copyright} {t.site.footer.rights}{" "}
+          <Link href={href("/legal")} className="underline-offset-2 transition-colors hover:text-ink hover:underline">
+            {t.site.footer.legal}
+          </Link>
         </p>
         <AudienceNotice />
         {MODEL_CREDITS.length > 0 ? (

@@ -42,6 +42,8 @@ export type SiteCopy = {
     /** Crédits des modèles 3D de la galerie (« Modèles 3D », « par »). */
     models: string;
     by: string;
+    /** Lien vers les mentions légales et la confidentialité. */
+    legal: string;
     /** Mesure d'audience : information et refus (cf. lib/stats). */
     audience: string;
     optOut: string;

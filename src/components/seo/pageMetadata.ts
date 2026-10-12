@@ -73,6 +73,23 @@ export function contactMetadata(locale: Locale): Metadata {
   };
 }
 
+export function legalMetadata(locale: Locale): Metadata {
+  const en = locale === "en";
+  return {
+    title: en ? "Legal notice" : "Mentions légales",
+    description: en
+      ? `Legal notice and privacy of the portfolio of ${profile.name}: publisher, hosting, intellectual property and anonymous audience measurement.`
+      : `Mentions légales et confidentialité du portfolio de ${profile.name} : éditeur, hébergement, propriété intellectuelle et mesure d'audience anonyme.`,
+    alternates: alternates("/legal", locale),
+    ...shareMetadata({
+      locale,
+      title: en ? `Legal notice - ${profile.name}` : `Mentions légales - ${profile.name}`,
+      description: en ? "Publisher, hosting and privacy of this portfolio." : "Éditeur, hébergement et confidentialité de ce portfolio.",
+      url: localePath("/legal", locale),
+    }),
+  };
+}
+
 export function projectMetadata(slug: string, locale: Locale): Metadata {
   const project = getLocalizedProject(slug, locale);
   if (!project) return { title: locale === "en" ? "Project not found" : "Projet introuvable" };
