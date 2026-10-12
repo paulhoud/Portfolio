@@ -51,6 +51,11 @@ export type BlackHole = {
 
 /** Ordre de dessin : sol (-3), puis le trou noir, puis les objets (0). */
 const ORDER = { hole: -2.2, particles: -2.15, flash: 10 };
+/**
+ * Portail d'une dimension à l'autre : par-dessus le décor des dimensions en
+ * image (7 à 7,6, cf. imageDimension.ts), sous l'éclair.
+ */
+const FRONT_ORDER = { hole: 8, particles: 8.05, flash: 10 };
 /** Rayon de l'ombre pour `size` = 1, dans le repère du trou. */
 export const HORIZON = 0.58;
 /** Demi-côté du panneau (repère du trou) : le disque y tient jusqu'à six rayons. */
@@ -211,7 +216,8 @@ const particleFragment = /* glsl */ `
 const planeMatrix = (target: Matrix3, scratch: Matrix4, euler: Euler) =>
   target.setFromMatrix4(scratch.makeRotationFromEuler(euler));
 
-export function createBlackHole(particleCount = 2400): BlackHole {
+export function createBlackHole(particleCount = 2400, front = false): BlackHole {
+  const order = front ? FRONT_ORDER : ORDER;
   const group = new Group();
   group.visible = false;
 
@@ -232,7 +238,7 @@ export function createBlackHole(particleCount = 2400): BlackHole {
     fragmentShader: holeFragment,
   });
   const hole = new Mesh(new PlaneGeometry(EXTENT * 2, EXTENT * 2), holeMaterial);
-  hole.renderOrder = ORDER.hole;
+  hole.renderOrder = order.hole;
   group.add(hole);
 
   // Poussière du disque (70 %) et deux anneaux inclinés (15 % chacun).
@@ -269,9 +275,13 @@ export function createBlackHole(particleCount = 2400): BlackHole {
     vertexShader: particleVertex,
     fragmentShader: particleFragment,
   });
+  // Devant le décor des dimensions en image, dessiné parmi les objets
+  // transparents : le portail doit l'être aussi, sinon son ordre est ignoré.
+  holeMaterial.transparent = front;
+  particleMaterial.transparent = front;
   const particles = new Points(particleGeometry, particleMaterial);
   particles.frustumCulled = false;
-  particles.renderOrder = ORDER.particles;
+  particles.renderOrder = order.particles;
   group.add(particles);
   const scratch = new Matrix4();
   const euler = new Euler();
@@ -302,7 +312,7 @@ export function createBlackHole(particleCount = 2400): BlackHole {
     `,
   });
   const flashPlane = new Mesh(new PlaneGeometry(40, 40), flashMaterial);
-  flashPlane.renderOrder = ORDER.flash;
+  flashPlane.renderOrder = order.flash;
   group.add(flashPlane);
 
   return {

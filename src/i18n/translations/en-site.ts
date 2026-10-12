@@ -56,7 +56,13 @@ export const enSite: SiteCopy = {
     disclaimerDofus: "Unofficial nod to Dofus (© Ankama). Non-commercial, not affiliated.",
     disclaimerSouthPark: "Unofficial nod to South Park (© Comedy Central). Non-commercial, not affiliated.",
     lostBack: "Back",
+    portal: "Another dimension",
     secretHint: "Psst… type “destroy” on the home page.",
+  },
+  projectNav: {
+    label: "More projects",
+    previous: "Previous project",
+    next: "Next project",
   },
   language: {
     switchTo: "Change language",

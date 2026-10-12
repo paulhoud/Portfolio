@@ -36,6 +36,7 @@ import { onHomeReset } from "@/lib/homeReset";
 import { HeadphonesHint } from "./HeadphonesHint";
 import { SceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
+import { portalAnchor } from "./three/portal";
 import { readScrollMemory } from "@/lib/useScrollMemory";
 import { cn } from "@/lib/utils";
 import type {
@@ -403,6 +404,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   );
   /** Dimension où l'on a atterri (le treillis, ou une image animée). */
   const [landed, setLanded] = useState<DimensionKind>("lattice");
+  /** Place du portail dans la scène (fractions), une fois arrivé dans la dimension. */
+  const [portalAt, setPortalAt] = useState<{ x: number; y: number } | null>(null);
+  const warpingRef = useRef(false);
+  /** Par le portail (ou les flèches, ou une secousse) : la dimension suivante, ou la précédente. */
+  const warpDimension = useCallback((step: 1 | -1) => {
+    const renderer = rendererRef.current;
+    if (!renderer || warpingRef.current) return;
+    const current = renderer.shownDimension() ?? "lattice";
+    const to = DIMENSIONS[(DIMENSIONS.indexOf(current) + step + DIMENSIONS.length) % DIMENSIONS.length];
+    if (renderer.warpDimension(to)) writeDimension(to);
+  }, []);
   // En quittant l’accueil, la musique d’une dimension s’arrête.
   useEffect(() => () => stopThemes(), []);
   const destroyWorld = useCallback(() => {
@@ -429,6 +441,13 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     };
     const onPhase = (phase: WorldPhase) => {
       if (phase === "collapse") playSfx("collapse");
+      if (phase === "warp") {
+        // Le portail s'avance : la musique de la dimension se tait, un souffle l'emporte.
+        warpingRef.current = true;
+        renderer?.setPortalHover(false);
+        stopThemes();
+        playSfx("travel", 0.95);
+      }
       if (phase === "rebirth") {
         stopThemes();
         playSfx("rebirth");
@@ -441,9 +460,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       if (phase === "lost") {
         const shown = renderer?.shownDimension() ?? "lattice";
         setLanded(shown);
+        // Arrivée par le portail : l'éclair éclate.
+        if (warpingRef.current) {
+          warpingRef.current = false;
+          playSfx("collapse");
+        }
+        const box = stageRef.current?.getBoundingClientRect();
+        if (box && started) setPortalAt(portalAnchor(box.width, box.height));
         // La musique de la dimension, une seule fois (cf. playThemes).
         if (shown !== "lattice") playThemes(DIMENSION_THEMES[shown]);
       }
+      if (phase === "rebirth") setPortalAt(null);
       if (phase === "done") finish();
       else setDoom(phase);
     };
@@ -486,14 +513,70 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     backFromVoidRef.current?.focus({ preventScroll: true });
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") leaveVoidRef.current();
+      if (event.key === "ArrowRight") warpDimension(1);
+      if (event.key === "ArrowLeft") warpDimension(-1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [doom]);
+  }, [doom, warpDimension]);
+  // Le portail se replace si la scène change de forme (rotation du téléphone).
+  useEffect(() => {
+    if (doom !== "lost" || !portalAt) return;
+    const onResize = () => {
+      const box = stageRef.current?.getBoundingClientRect();
+      if (box) setPortalAt(portalAnchor(box.width, box.height));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [doom, portalAt]);
+
   const destroyRef = useRef(destroyWorld);
   useEffect(() => {
     destroyRef.current = destroyWorld;
   }, [destroyWorld]);
+
+  // Android : secouer le téléphone ouvre le trou noir, et dans une autre
+  // dimension, passe à la suivante. L'iPhone n'envoie ses mouvements qu'après
+  // une fenêtre d'autorisation, qu'on ne demande pas (choix de Paul) : il
+  // n'en reçoit aucun, et rien ne s'y passe. Un vrai aller-retour
+  // est demandé, quatre changements de sens en moins d'une seconde, pour
+  // qu'un pas ou un geste brusque ne déclenche rien.
+  const doomPhaseRef = useRef(doom);
+  useEffect(() => {
+    doomPhaseRef.current = doom;
+  }, [doom]);
+  useEffect(() => {
+    if (typeof DeviceMotionEvent === "undefined") return;
+    if (!window.matchMedia("(pointer: coarse)").matches) return;
+    const gravity = { x: 0, y: 0, z: 0 };
+    let peaks: number[] = [];
+    let lastSign = 0;
+    let quietUntil = 0;
+    const onMotion = (event: DeviceMotionEvent) => {
+      const raw = event.accelerationIncludingGravity;
+      if (!raw || raw.x === null || raw.y === null || raw.z === null) return;
+      // La gravité, lissée, est retirée : reste le mouvement de la main.
+      gravity.x += (raw.x - gravity.x) * 0.1;
+      gravity.y += (raw.y - gravity.y) * 0.1;
+      gravity.z += (raw.z - gravity.z) * 0.1;
+      const moves = [raw.x - gravity.x, raw.y - gravity.y, raw.z - gravity.z];
+      const strongest = moves.reduce((best, value) => (Math.abs(value) > Math.abs(best) ? value : best), 0);
+      const now = performance.now();
+      if (now < quietUntil || Math.abs(strongest) < SHAKE_FORCE) return;
+      const sign = Math.sign(strongest);
+      if (sign === lastSign) return;
+      lastSign = sign;
+      peaks = [...peaks.filter((at) => now - at < 1000), now];
+      if (peaks.length < 4) return;
+      peaks = [];
+      lastSign = 0;
+      quietUntil = now + 2500;
+      if (doomPhaseRef.current === "lost") warpDimension(1);
+      else if (doomPhaseRef.current === null) destroyRef.current();
+    };
+    window.addEventListener("devicemotion", onMotion);
+    return () => window.removeEventListener("devicemotion", onMotion);
+  }, [warpDimension]);
 
   useEffect(() => {
     let typed = "";
@@ -799,6 +882,32 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     {t.site.gallery.lostBack}
                   </button>
                 </div>
+                {/* Le portail : un petit trou noir dessiné par la scène ; ce bouton
+                    le recouvre exactement (clic, clavier, lecteurs d'écran). */}
+                {portalAt ? (
+                  <motion.button
+                    type="button"
+                    data-cursor="discover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { delay: calm ? 0 : 1.4, duration: 0.6 } }}
+                    onClick={() => warpDimension(1)}
+                    onPointerEnter={() => rendererRef.current?.setPortalHover(true)}
+                    onPointerLeave={() => rendererRef.current?.setPortalHover(false)}
+                    onFocus={() => rendererRef.current?.setPortalHover(true)}
+                    onBlur={() => rendererRef.current?.setPortalHover(false)}
+                    className="pointer-events-auto absolute h-24 w-24 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 light:focus-visible:outline-ink/60"
+                    style={{ left: `${portalAt.x * 100}%`, top: `${portalAt.y * 100}%` }}
+                  >
+                    <span
+                      className={cn(
+                        "absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.625rem] uppercase tracking-[0.24em]",
+                        landed === "lattice" ? "text-white/70 light:text-ink/70" : "bg-[#0b0b10]/60 text-white/85 backdrop-blur-sm light:bg-glass/80 light:text-ink/80",
+                      )}
+                    >
+                      {t.site.gallery.portal}
+                    </span>
+                  </motion.button>
+                ) : null}
                 {/* Mention de non-affiliation, en petit en bas de l'image. */}
                 {landed !== "lattice" ? (
                   <p className="absolute inset-x-0 bottom-3 flex justify-center px-4">
@@ -1151,6 +1260,8 @@ const DIMENSION_THEMES: Record<Exclude<DimensionKind, "lattice">, Theme[]> = {
 };
 
 const DIMENSIONS: DimensionKind[] = ["lattice", "dofus", "southpark"];
+/** Secousse du téléphone : force minimale d'un aller-retour (m/s², gravité retirée). */
+const SHAKE_FORCE = 13;
 const DIMENSION_KEY = "portfolio-dimension";
 function readDimension(): DimensionKind | null {
   try {

@@ -2,6 +2,7 @@
 
 import { notFound } from "next/navigation";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
+import { ProjectPager } from "@/components/projects/ProjectPager";
 import { getLocalizedProject } from "@/i18n/catalog";
 import { useTranslation } from "@/i18n/context";
 
@@ -17,5 +18,10 @@ export function LocalizedProjectPageView({ slug }: LocalizedProjectPageViewProps
     notFound();
   }
 
-  return <ProjectDetail project={project} />;
+  return (
+    <>
+      <ProjectDetail project={project} />
+      <ProjectPager slug={slug} />
+    </>
+  );
 }

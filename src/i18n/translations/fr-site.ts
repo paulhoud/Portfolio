@@ -57,7 +57,13 @@ export const frSite: SiteCopy = {
     disclaimerSouthPark:
       "Clin d'œil non officiel à South Park (© Comedy Central). Sans usage commercial, sans affiliation.",
     lostBack: "Retour",
+    portal: "Autre dimension",
     secretHint: "Psst… tapez « destroy » sur l'accueil.",
+  },
+  projectNav: {
+    label: "Autres projets",
+    previous: "Projet précédent",
+    next: "Projet suivant",
   },
   language: {
     switchTo: "Changer de langue",

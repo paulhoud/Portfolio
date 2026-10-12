@@ -87,8 +87,16 @@ export type SiteCopy = {
     disclaimerSouthPark: string;
     /** Bouton qui fait renaître le monde (retour à l'accueil et aux projets). */
     lostBack: string;
+    /** Portail vers la dimension suivante (sous le petit trou noir). */
+    portal: string;
     /** Indice glissé dans la console du navigateur. */
     secretHint: string;
+  };
+  /** Fin des pages projet : projet précédent et suivant. */
+  projectNav: {
+    label: string;
+    previous: string;
+    next: string;
   };
   language: {
     switchTo: string;

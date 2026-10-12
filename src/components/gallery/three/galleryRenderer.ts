@@ -49,6 +49,7 @@ import {
 import { HORIZON, createBlackHole, type BlackHole } from "./blackHole";
 import { createDimension, type Dimension } from "./dimension";
 import { createImageDimension, type ImageDimension, type ImageDimensionKind } from "./imageDimension";
+import { portalAnchor } from "./portal";
 import { playClip, preloadClip } from "@/lib/sound/sound";
 import { IDENTITY_CATALOG } from "./identity";
 import { loadIdentityModel, type LoadedModel } from "./identityFiles";
@@ -107,9 +108,10 @@ export type SceneCursorState = "scene" | "project" | "object" | "grab" | null;
  * Étapes de « destroy the world » : aspiration, effondrement, puis on reste
  * perdu dans une autre dimension jusqu'à `returnFromVoid` ; renaissance, fin.
  */
-export type WorldPhase = "suck" | "collapse" | "lost" | "rebirth" | "done";
+export type WorldPhase = "suck" | "collapse" | "lost" | "warp" | "rebirth" | "done";
 /** Où l'on tombe après l'effondrement : le treillis, ou une image animée. */
 export type DimensionKind = "lattice" | ImageDimensionKind;
+
 
 export type GalleryOptions = {
   calm: boolean;
@@ -164,6 +166,15 @@ export type GalleryRenderer = {
   setTextLayer(source: HTMLCanvasElement | null): void;
   /** Quitte l'autre dimension : le monde renaît. Faux s'il n'y a rien à quitter. */
   returnFromVoid(): boolean;
+  /**
+   * Passe dans une autre dimension par le portail : il s'avance et grandit
+   * jusqu'à couvrir l'écran, l'éclair, puis la dimension `to` apparaît
+   * (étapes « warp » puis de nouveau « lost »). Faux si ce n'est pas possible
+   * maintenant (arrivée pas finie, retour ou passage en cours).
+   */
+  warpDimension(to: DimensionKind): boolean;
+  /** Survol du bouton du portail : il grossit un peu. */
+  setPortalHover(hover: boolean): void;
   setProgress(raw: number): void;
   setFrame(frame: FrameRect): void;
   setHighlight(index: number | null): void;
@@ -283,6 +294,13 @@ const textFragment = /* glsl */ `
 const HOLE_BEHIND = 2.6;
 /** Instant (s) où l'horloge du trou noir s'arrête, en attendant le retour. */
 const LOST_HOLD = 5.2;
+/** Portail : apparition après l'arrivée (secondes depuis le déclenchement). */
+const PORTAL_IN = 6.4;
+/** Passage : l'ombre couvre l'écran au bout de… ; tout est en place au bout de… (s). */
+const WARP_COVER = 0.95;
+const WARP_SETTLE = 1.9;
+/** Distance du portail à la caméra (unités de la scène). */
+const PORTAL_DISTANCE = 6;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const random = (min: number, max: number) => min + Math.random() * (max - min);
@@ -917,9 +935,23 @@ export function createGalleryRenderer(
     hiddenSatellites: Set<number>;
     onPhase: (phase: WorldPhase) => void;
     reached: Set<WorldPhase>;
+    /** Passage en cours vers une autre dimension (cf. warpDimension). */
+    warp: Warp | null;
+  };
+  type Warp = {
+    start: number;
+    to: DimensionKind;
+    /** Image de la dimension d'arrivée, chargée pendant que le portail grandit. */
+    next: ImageDimension | null;
+    /** Instant où l'écran, couvert, change de dimension. */
+    swapAt: number | null;
   };
   let world: World | null = null;
   let blackHole: BlackHole | null = null;
+  /** Le portail : un petit trou noir dessiné par-dessus la dimension. */
+  let portal: BlackHole | null = null;
+  let portalHover = false;
+  let portalHoverEase = 0;
   let dimension: Dimension | null = null;
   let scenery: ImageDimension | null = null;
   let ready = false;
@@ -952,6 +984,7 @@ export function createGalleryRenderer(
       height = h;
       renderer.setSize(w, h, false);
       blackHole?.setResolution(h * renderer.getPixelRatio());
+      portal?.setResolution(h * renderer.getPixelRatio());
       skipFrame = false;
     }
     const aspect = w / h;
@@ -1224,6 +1257,57 @@ export function createGalleryRenderer(
     velocity.y += random(-0.4, 0.4);
     scene.add(mesh);
     fallers.push({ mesh, velocity, spin: new Vector3(random(-2, 2), random(-2, 2), random(-2, 2)), born: now, leaving: 0 });
+  };
+  /**
+   * Le portail, dans l'autre dimension : un petit trou noir posé à un endroit
+   * fixe de l'écran (cf. portalAnchor). Il apparaît une fois arrivé et grossit
+   * un peu au survol. Touché, il glisse vers le centre en grandissant jusqu'à
+   * couvrir l'écran, l'éclair part, puis son ombre se retire sur la dimension
+   * suivante et il réapparaît à sa place. Au retour, il s'efface.
+   */
+  const portalPoint = new Vector3();
+  const updatePortal = (doom: World | null, raw: number, now: number, dt: number) => {
+    if (!portal) return;
+    if (!doom) {
+      portal.update(camera, 0, 0, 0, 0);
+      return;
+    }
+    portalHoverEase += ((portalHover ? 1 : 0) - portalHoverEase) * Math.min(1, dt * 8);
+    const home = portalAnchor(width, height);
+    const cover = Math.hypot(width, height) * 0.62;
+    let x = home.x;
+    let y = home.y;
+    let radius = home.radius * (1 + 0.2 * portalHoverEase);
+    let shown = doom.returnAt === null ? easeOutBack(clamp01((raw - PORTAL_IN) / 0.8)) : 1 - clamp01((now - doom.returnAt) / 400);
+    let flash = 0;
+    const warp = doom.warp;
+    if (warp && warp.swapAt === null) {
+      const w = clamp01((now - warp.start) / 1000 / WARP_COVER);
+      const move = w * w * (3 - 2 * w);
+      x += (0.5 - x) * move;
+      y += (0.5 - y) * move;
+      radius += (cover - radius) * easeInCubic(w);
+      shown = 1;
+      flash = clamp01((w - 0.86) / 0.14);
+    } else if (warp && warp.swapAt !== null) {
+      const after = (now - warp.swapAt) / 1000;
+      flash = Math.exp(-after * 4.5);
+      if (after < 0.55) {
+        x = 0.5;
+        y = 0.5;
+        radius = cover * (1 - easeOutCubic(after / 0.55));
+        shown = 1;
+      } else {
+        shown = easeOutBack(clamp01((after - 0.75) / 0.8));
+      }
+    }
+    // Posé sur le rayon qui passe par ce point de l'écran, à distance fixe.
+    portalPoint.set(x * 2 - 1, 1 - y * 2, 0.5).unproject(camera).sub(camera.position).normalize();
+    portal.group.position.copy(camera.position).addScaledVector(portalPoint, PORTAL_DISTANCE);
+    const unitsPerPixel = (2 * PORTAL_DISTANCE * Math.tan((camera.fov * Math.PI) / 360)) / height;
+    portal.group.scale.setScalar(Math.max(1e-4, (radius * unitsPerPixel) / HORIZON));
+    const size = Math.max(0, shown);
+    portal.update(camera, size, Math.min(1, size), flash, now / 1000);
   };
   /** Chute : ils accélèrent vers le fond en tournant, s'éteignent au loin et disparaissent avant la limite de vue. */
   const updateFallers = (dt: number, now: number, staying: boolean) => {
@@ -2123,20 +2207,57 @@ export function createGalleryRenderer(
       holeEdge.copy(doom.center).addScaledVector(cameraRight, HORIZON * holeSize * doom.scale).project(camera);
       uniforms.uHorizon.value = Math.hypot(((holeEdge.x + 1) / 2) * width - cx, ((1 - holeEdge.y) / 2) * height - cy);
     }
+    // Passage par le portail : la dimension s'éteint sous l'ombre qui grandit,
+    // change quand l'écran est couvert (et l'image d'arrivée chargée), puis
+    // la suivante s'allume pendant que l'ombre se retire.
+    let warpFade = 1;
+    const passage = doom?.warp ?? null;
+    if (doom && passage) {
+      const w = (now - passage.start) / 1000;
+      if (passage.swapAt === null) {
+        warpFade = 1 - easeInCubic(clamp01((w - 0.45) / (WARP_COVER - 0.45)));
+        const nextReady = passage.next === null || passage.next.ready;
+        if (w >= WARP_COVER && (nextReady || w >= WARP_COVER + 5)) {
+          passage.swapAt = now;
+          if (passage.next) {
+            if (passage.next.ready) {
+              if (scenery) {
+                scene.remove(scenery.group);
+                scenery.dispose();
+              }
+              scenery = passage.next;
+            } else {
+              // Image toujours pas là : on tombe dans le treillis.
+              scene.remove(passage.next.group);
+              passage.next.dispose();
+            }
+            passage.next = null;
+          }
+          doom.kind = passage.to;
+          doom.shown = passage.to !== "lattice" && scenery?.kind === passage.to && scenery.ready ? passage.to : "lattice";
+          doom.onPhase("lost");
+        }
+      } else {
+        warpFade = easeOutCubic(clamp01((now - passage.swapAt) / 900));
+        if (now - passage.swapAt > WARP_SETTLE * 1000) doom.warp = null;
+      }
+      passage.next?.update(0, now / 1000, width, height, renderer.getPixelRatio(), pointer);
+    }
     // L'autre dimension : elle apparaît dans l'éclair et s'efface au retour.
     if (doom && dimension) {
       const presence =
-        doom.returnAt === null ? easeOutCubic(clamp01((raw - 4.4) / 1.2)) : 1 - clamp01((now - doom.returnAt) / 700);
+        (doom.returnAt === null ? easeOutCubic(clamp01((raw - 4.4) / 1.2)) : 1 - clamp01((now - doom.returnAt) / 700)) * warpFade;
       const lattice = doom.shown === null || doom.shown === "lattice";
       dimension.update(camera, lattice ? presence : 0, now / 1000);
       scenery?.update(lattice ? 0 : presence, now / 1000, width, height, renderer.getPixelRatio(), pointer);
       // De temps en temps, un objet tombe dans le vide, au fond de la perspective.
-      if (lattice && doom.returnAt === null && raw > 5.0 && now >= doom.nextFall) {
+      if (lattice && !passage && doom.returnAt === null && raw > 5.0 && now >= doom.nextFall) {
         spawnFaller(now);
         doom.nextFall = now + random(900, 2200);
       }
     }
     updateFallers(dt, now, doom !== null && doom.returnAt === null);
+    updatePortal(doom, raw, now, dt);
 
     return busy;
   }
@@ -2198,7 +2319,13 @@ export function createGalleryRenderer(
         hiddenSatellites: new Set(satellites.flatMap((mesh, index) => (mesh.visible && onScreen(mesh) ? [] : [index]))),
         onPhase,
         reached: new Set(),
+        warp: null,
       };
+      if (!portal) {
+        portal = createBlackHole(coarse ? 500 : 1000, true);
+        portal.setResolution(height * renderer.getPixelRatio());
+        scene.add(portal.group);
+      }
       updateScheduler();
       invalidate();
       return true;
@@ -2235,9 +2362,26 @@ export function createGalleryRenderer(
     shownDimension() {
       return world?.shown ?? null;
     },
+    warpDimension(to) {
+      const doom = world;
+      if (!doom || calm || doom.returnAt !== null || doom.warp || !doom.reached.has("lost")) return false;
+      // L'arrivée doit être finie (le portail est apparu).
+      if ((performance.now() - doom.start) / 1000 < PORTAL_IN) return false;
+      if (to === (doom.shown ?? doom.kind)) return false;
+      const next = to !== "lattice" && scenery?.kind !== to ? createImageDimension(to, invalidate, coarse) : null;
+      if (next) scene.add(next.group);
+      doom.warp = { start: performance.now(), to, next, swapAt: null };
+      doom.onPhase("warp");
+      invalidate();
+      return true;
+    },
+    setPortalHover(hover) {
+      portalHover = hover;
+      invalidate();
+    },
     returnFromVoid() {
       const doom = world;
-      if (!doom || doom.returnAt !== null || !doom.reached.has("lost")) return false;
+      if (!doom || doom.returnAt !== null || doom.warp || !doom.reached.has("lost")) return false;
       doom.returnAt = performance.now();
       invalidate();
       return true;
@@ -2407,6 +2551,8 @@ export function createGalleryRenderer(
       }
       disposeSatellites();
       blackHole?.dispose();
+      portal?.dispose();
+      if (world?.warp?.next) world.warp.next.dispose();
       for (const look of identityLooks.values()) {
         look.geometry.dispose();
         for (const part of look.parts) part.map?.dispose();
