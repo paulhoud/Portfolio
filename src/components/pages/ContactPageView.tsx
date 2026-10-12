@@ -7,6 +7,7 @@ import { TextPage } from "@/components/layout/TextPage";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { activeSocialLinks, profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
+import { track } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 
 /**
@@ -141,6 +142,7 @@ function EmailCard() {
     try {
       await navigator.clipboard.writeText(profile.email);
       setCopied(true);
+      track("contact", "copy");
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
       // Presse-papiers refusé (contexte non sécurisé) : l'adresse reste

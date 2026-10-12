@@ -10,6 +10,7 @@ import { getLocalizedProject } from "@/i18n/catalog";
 import { useTranslation } from "@/i18n/context";
 import { revealWhenOn, setNextTransition, showVeil } from "@/lib/immersion";
 import { playSfx } from "@/lib/sound/sound";
+import { track } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 
 /**
@@ -30,8 +31,9 @@ export function ProjectPager({ slug }: { slug: string }) {
   const next = index < 0 ? null : projects[(index + 1) % count];
 
   const travel = useCallback(
-    (target: (typeof projects)[number]) => {
+    (target: (typeof projects)[number], side: "previous" | "next") => {
       const href = `/projects/${target.slug}`;
+      track("pager", side);
       playSfx("enter");
       void showVeil(getTileEdge(target.mediaKey, target.background), 240).then(() => {
         setNextTransition(href, "cut");
@@ -52,7 +54,8 @@ export function ProjectPager({ slug }: { slug: string }) {
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
       if (document.querySelector("[aria-modal='true']")) return;
-      travel(event.key === "ArrowLeft" ? previous : next);
+      if (event.key === "ArrowLeft") travel(previous, "previous");
+      else travel(next, "next");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -68,7 +71,7 @@ export function ProjectPager({ slug }: { slug: string }) {
     const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      travel(target);
+      travel(target, side);
     };
     return (
       <Link

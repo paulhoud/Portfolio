@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { MODEL_CREDITS } from "@/content/modelCredits";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
+import { setOptOut, useOptOut } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 import { SocialLinks } from "./SocialLinks";
 
@@ -20,6 +21,30 @@ import { SocialLinks } from "./SocialLinks";
  * fixes des coins de l'écran (langue, son, thème), qui ne la recouvrent jamais.
  * Les crédits des modèles 3D n'apparaissent que si une licence les demande.
  */
+/**
+ * Information sur la mesure d'audience, et refus d'être compté (retenu sur
+ * l'appareil) : conditions de l'exemption de consentement de la CNIL.
+ */
+function AudienceNotice() {
+  const { t } = useTranslation();
+  const optedOut = useOptOut();
+  const copy = t.site.footer;
+  return (
+    <p className="mt-2 text-xs text-ink/55">
+      {optedOut ? copy.optedOut : copy.audience}{" "}
+      {optedOut === null ? null : (
+        <button
+          type="button"
+          onClick={() => setOptOut(!optedOut)}
+          className="cursor-pointer underline underline-offset-2 transition-colors hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50"
+        >
+          {optedOut ? copy.optIn : copy.optOut}
+        </button>
+      )}
+    </p>
+  );
+}
+
 export function SiteFooter() {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -74,6 +99,7 @@ export function SiteFooter() {
         <p className="mt-10 text-xs text-ink/55">
           {t.site.footer.copyright} {t.site.footer.rights}
         </p>
+        <AudienceNotice />
         {MODEL_CREDITS.length > 0 ? (
           <p className="mt-2 text-xs text-ink/55">
             {t.site.footer.models} :{" "}

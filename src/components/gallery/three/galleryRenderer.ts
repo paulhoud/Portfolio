@@ -95,6 +95,8 @@ export type GalleryCallbacks = {
   onEmptyClick?: () => void;
   /** Ce qu'il y a sous la souris, pour le curseur (cf. SceneCursor). */
   onCursor?: (state: SceneCursorState) => void;
+  /** Objet touché ou attrapé (son nom au catalogue), pour la mesure d'audience. */
+  onObject?: (name: string) => void;
 };
 
 /**
@@ -1566,6 +1568,7 @@ export function createGalleryRenderer(
     lastVoice = { index, at: now };
     const entry = satellites[index]?.userData.entry as number | undefined;
     if (entry === undefined) return;
+    callbacks.onObject?.(IDENTITY_CATALOG[entry].name);
     const { sounds, music } = IDENTITY_CATALOG[entry];
     if (!sounds?.length) return;
     const turn = soundTurns.get(entry) ?? 0;

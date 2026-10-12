@@ -42,6 +42,11 @@ export type SiteCopy = {
     /** Crédits des modèles 3D de la galerie (« Modèles 3D », « par »). */
     models: string;
     by: string;
+    /** Mesure d'audience : information et refus (cf. lib/stats). */
+    audience: string;
+    optOut: string;
+    optedOut: string;
+    optIn: string;
   };
   /** Bouton qui met en pause les animations automatiques. */
   motion: {

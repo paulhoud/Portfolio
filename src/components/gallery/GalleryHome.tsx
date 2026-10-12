@@ -33,6 +33,7 @@ import { useTheme } from "@/lib/theme";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
 import { onHomeReset } from "@/lib/homeReset";
+import { track } from "@/lib/stats/track";
 import { HeadphonesHint } from "./HeadphonesHint";
 import { SceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
@@ -195,6 +196,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const focusTargetRef = useRef<number | null>(null);
   const [attempt, setAttempt] = useState(0);
   const activeRef = useRef(0);
+  /** Projet le plus loin atteint pendant cette visite de l'accueil (mesure d'audience). */
+  const deepestRef = useRef(0);
   const [active, setActive] = useState(0);
   // Faux tant que la position de défilement (restaurée au retour d'un projet,
   // ou donnée par une ancre) n'a pas été lue : la scène reste alors invisible
@@ -243,6 +246,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       const index = Math.min(count - 1, Math.max(0, Math.round((window.scrollY - trackTop()) / slotHeight())));
       rendererRef.current?.setProgress(readProgress());
       if (index !== activeRef.current) {
+        if (index > deepestRef.current) {
+          deepestRef.current = index;
+          // Le rang suffit : la page des statistiques retrouve le projet.
+          track("reach", undefined, index);
+        }
         setJumped(Math.abs(index - activeRef.current) > 1);
         activeRef.current = index;
         setActive(index);
@@ -413,13 +421,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     if (!renderer || warpingRef.current) return;
     const current = renderer.shownDimension() ?? "lattice";
     const to = DIMENSIONS[(DIMENSIONS.indexOf(current) + step + DIMENSIONS.length) % DIMENSIONS.length];
-    if (renderer.warpDimension(to)) writeDimension(to);
+    if (renderer.warpDimension(to)) {
+      writeDimension(to);
+      track("portal", to);
+    }
   }, []);
   // En quittant l’accueil, la musique d’une dimension s’arrête.
   useEffect(() => () => stopThemes(), []);
-  const destroyWorld = useCallback(() => {
+  const destroyWorld = useCallback((how: string) => {
     if (doomRef.current || enteringRef.current) return;
     doomRef.current = true;
+    track("destroy", how);
     const renderer = rendererRef.current;
     const stage = stageRef.current?.getBoundingClientRect();
     // Jamais deux fois de suite la même dimension.
@@ -460,6 +472,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       if (phase === "lost") {
         const shown = renderer?.shownDimension() ?? "lattice";
         setLanded(shown);
+        track("dimension", shown);
         // Arrivée par le portail : l'éclair éclate.
         if (warpingRef.current) {
           warpingRef.current = false;
@@ -572,7 +585,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       lastSign = 0;
       quietUntil = now + 2500;
       if (doomPhaseRef.current === "lost") warpDimension(1);
-      else if (doomPhaseRef.current === null) destroyRef.current();
+      else if (doomPhaseRef.current === null) destroyRef.current("shake");
     };
     window.addEventListener("devicemotion", onMotion);
     return () => window.removeEventListener("devicemotion", onMotion);
@@ -587,9 +600,10 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       keys = [...keys, event.key].slice(-KONAMI.length);
       typed = (typed + (event.key.length === 1 ? event.key.toLowerCase() : " ")).slice(-12);
       if (typed.endsWith("destroy") || keys.join() === KONAMI.join()) {
+        const how = typed.endsWith("destroy") ? "keyboard" : "konami";
         typed = "";
         keys = [];
-        destroyRef.current();
+        destroyRef.current(how);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -608,7 +622,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     clicksRef.current = [...clicksRef.current.filter((at) => now - at < 2500), now];
     if (clicksRef.current.length >= 7) {
       clicksRef.current = [];
-      destroyRef.current();
+      destroyRef.current("clicks");
     }
   };
   const onEmptyClickRef = useRef(onEmptyClick);
@@ -672,6 +686,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             },
             onSelect: (index) => scrollToPieceRef.current(index),
             onEmptyClick: () => onEmptyClickRef.current(),
+            onObject: (name) => track("object", name),
             onReady: () => {
               if (arrival) writeSession(ARRIVED_KEY);
               if (returning >= 0) {

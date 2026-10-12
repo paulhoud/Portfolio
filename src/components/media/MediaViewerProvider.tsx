@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { track } from "@/lib/stats/track";
 import { createPortal } from "react-dom";
 import type { ProjectMedia } from "@/content/projects";
 import { mediaKeyOf } from "./collectProjectMedia";
@@ -59,9 +60,12 @@ export function MediaViewerProvider({
 
   const openIndex = useCallback(
     (next: number) => {
-      if (next >= 0 && next < media.length) setIndex(next);
+      if (next >= 0 && next < media.length) {
+        setIndex(next);
+        track("media", media[next].title);
+      }
     },
-    [media.length],
+    [media],
   );
 
   const openMedia = useCallback(
@@ -73,7 +77,10 @@ export function MediaViewerProvider({
       // identiques peuvent désigner des visuels distincts.
       const key = mediaKeyOf(item);
       const index = media.findIndex((m) => m === item || mediaKeyOf(m) === key);
-      if (index >= 0) setIndex(index);
+      if (index >= 0) {
+        setIndex(index);
+        track("media", media[index].title);
+      }
     },
     [media],
   );

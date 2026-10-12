@@ -23,6 +23,10 @@ export const enSite: SiteCopy = {
     rights: "All rights reserved.",
     models: "3D models",
     by: "by",
+    audience: "Anonymous audience measurement, no cookies.",
+    optOut: "Opt out",
+    optedOut: "You are no longer counted on this device.",
+    optIn: "Undo",
   },
   motion: {
     pause: "Pause animations",

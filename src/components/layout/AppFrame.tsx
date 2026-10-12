@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { useMotionPaused } from "@/lib/motionPause";
 import { applyTheme, useTheme } from "@/lib/theme";
+import { Analytics } from "@/components/stats/Analytics";
 import { FixedBackButton } from "./FixedBackButton";
 import { Opening } from "./Opening";
 import { PageTransition } from "./PageTransition";
@@ -49,6 +50,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
       </a>
 
       <SiteHeader />
+      <Analytics />
 
       <AnimatePresence>{!isHome ? <FixedBackButton key="back" /> : null}</AnimatePresence>
 
