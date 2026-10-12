@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isHomePath } from "@/i18n/paths";
 import { useEffect } from "react";
 // Chargé sur toutes les pages avec le rideau : la remise à zéro de l'accueil
 // (clic sur le logo, actualisation) doit être prête partout.
@@ -25,7 +26,7 @@ const SAFETY_MS = 8000;
  */
 export function Opening() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = isHomePath(pathname);
   const state = useOpening();
   const [paused] = useMotionPaused();
 

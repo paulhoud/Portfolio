@@ -21,11 +21,11 @@ const logoFillEase = "cubic-bezier(0.22, 1, 0.36, 1)";
 const LINES_PAD = 34;
 
 export function LogoMark({ variant = "white", className }: LogoMarkProps) {
-  const { t } = useTranslation();
+  const { t, href } = useTranslation();
   if (variant === "gradient") {
     return (
       <Link
-        href="/"
+        href={href("/")}
         aria-label={t.site.nav.home}
         className={cn("inline-flex w-fit items-center", className)}
       >
@@ -51,7 +51,7 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
  * animations réduites par le système), le survol est un simple halo blanc.
  */
 function AnimatedLogoMark({ className }: { className?: string }) {
-  const { t } = useTranslation();
+  const { t, href } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [motionPaused] = useMotionPaused();
   const calm = Boolean(prefersReducedMotion) || motionPaused;
@@ -105,7 +105,7 @@ function AnimatedLogoMark({ className }: { className?: string }) {
 
   return (
     <Link
-      href="/"
+      href={href("/")}
       aria-label={t.site.nav.home}
       onMouseEnter={() => play(true)}
       onMouseLeave={() => play(false)}

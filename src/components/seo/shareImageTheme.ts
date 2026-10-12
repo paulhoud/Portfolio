@@ -4,8 +4,8 @@ import { profile } from "@/content/profile";
 
 /**
  * Direction artistique commune aux images de partage : celle du site
- * (`src/app/opengraph-image.tsx`) et celles des projets
- * (`src/app/projects/[slug]/opengraph-image.tsx`).
+ * (`siteShareImage.tsx`) et celles des projets (`projectShareImage.tsx`),
+ * servies par `src/app/share-image`.
  */
 export const shareImageTheme = {
   background: "linear-gradient(120deg, #191820 0%, #14131a 100%)",

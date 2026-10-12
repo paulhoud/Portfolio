@@ -1,5 +1,10 @@
+import { localePath } from "@/i18n/paths";
+import type { Locale } from "@/i18n/types";
 import { absoluteUrl, activeSocialLinks, profile, siteUrl } from "@/content/profile";
 import type { Project } from "@/content/projects";
+
+/** Langue d'une page au format attendu par schema.org. */
+const languageTag = (locale: Locale) => (locale === "en" ? "en-US" : "fr-FR");
 
 /**
  * Schémas Schema.org du site.
@@ -105,15 +110,16 @@ export function webSiteSchema() {
  * choisir la vignette d'un résultat. Sans lui, il puise dans les images de la
  * page - ici, les miniatures de projets.
  */
-export function homePageSchema() {
+export function homePageSchema(locale: Locale = "fr", description: string = profile.description) {
+  const url = absoluteUrl(localePath("/", locale));
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "@id": `${siteUrl}/#webpage`,
-    url: siteUrl,
+    "@id": `${url.replace(/\/$/, "")}/#webpage`,
+    url,
     name: `${profile.name} - ${profile.jobTitle}`,
-    description: profile.description,
-    inLanguage: "fr-FR",
+    description,
+    inLanguage: languageTag(locale),
     isPartOf: { "@id": WEBSITE_ID },
     about: { "@id": PERSON_ID },
     primaryImageOfPage: brandImageSchema(),
@@ -122,21 +128,21 @@ export function homePageSchema() {
 }
 
 /** Page « À propos » déclarée comme page de profil. */
-export function profilePageSchema() {
+export function profilePageSchema(locale: Locale = "fr") {
   return {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
-    url: absoluteUrl("/about"),
-    name: `À propos - ${profile.name}`,
-    inLanguage: "fr-FR",
+    url: absoluteUrl(localePath("/about", locale)),
+    name: `${locale === "en" ? "About" : "À propos"} - ${profile.name}`,
+    inLanguage: languageTag(locale),
     isPartOf: { "@id": WEBSITE_ID },
     mainEntity: { "@id": PERSON_ID },
   };
 }
 
 /** Une réalisation, attribuée à son auteur. */
-export function creativeWorkSchema(project: Project) {
-  const url = absoluteUrl(`/projects/${project.slug}`);
+export function creativeWorkSchema(project: Project, locale: Locale = "fr") {
+  const url = absoluteUrl(localePath(`/projects/${project.slug}`, locale));
 
   return compact({
     "@context": "https://schema.org",
@@ -146,7 +152,7 @@ export function creativeWorkSchema(project: Project) {
     name: project.title,
     headline: project.eyebrow,
     description: project.description,
-    inLanguage: "fr-FR",
+    inLanguage: languageTag(locale),
     creator: { "@id": PERSON_ID },
     author: { "@id": PERSON_ID },
     // Pas de `keywords` : tirés des expertises du profil, ils prêtaient à
@@ -157,17 +163,17 @@ export function creativeWorkSchema(project: Project) {
 }
 
 /** Fil d'ariane d'une page projet (accueil → projet). */
-export function projectBreadcrumbSchema(project: Project) {
+export function projectBreadcrumbSchema(project: Project, locale: Locale = "fr") {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: siteUrl },
+      { "@type": "ListItem", position: 1, name: locale === "en" ? "Home" : "Accueil", item: absoluteUrl(localePath("/", locale)) },
       {
         "@type": "ListItem",
         position: 2,
         name: project.title,
-        item: absoluteUrl(`/projects/${project.slug}`),
+        item: absoluteUrl(localePath(`/projects/${project.slug}`, locale)),
       },
     ],
   };

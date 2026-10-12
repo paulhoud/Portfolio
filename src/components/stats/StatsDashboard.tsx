@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { leaveStats } from "@/app/stats/actions";
+import { leaveStats } from "@/app/(fr)/stats/actions";
 import type { StatsData } from "@/lib/stats/queries";
 import { optOutChosen, setOptOut, useOptOut } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";

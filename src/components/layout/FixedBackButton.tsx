@@ -7,6 +7,7 @@ import type { MouseEvent } from "react";
 import { getTileEdge } from "@/content/projectMedia";
 import { projects } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
+import { splitLocalePath } from "@/i18n/paths";
 import { requestGalleryReturn, setNextTransition, showVeil } from "@/lib/immersion";
 import { playSfx } from "@/lib/sound/sound";
 
@@ -21,10 +22,11 @@ import { playSfx } from "@/lib/sound/sound";
  * devant sa plaque, et la caméra en ressort (cf. GalleryHome).
  */
 export function FixedBackButton({ href = "/" }: { href?: string }) {
-  const { t } = useTranslation();
+  const { t, href: localHref } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
-  const slug = pathname.startsWith("/projects/") ? pathname.split("/")[2] : null;
+  const pagePath = splitLocalePath(pathname).path;
+  const slug = pagePath.startsWith("/projects/") ? pagePath.split("/")[2] : null;
   const index = slug ? projects.findIndex((item) => item.slug === slug) : -1;
 
   const goBack = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -49,8 +51,8 @@ export function FixedBackButton({ href = "/" }: { href?: string }) {
     }
     void showVeil(getTileEdge(project.mediaKey, project.background), 240).then(() => {
       requestGalleryReturn(project.slug);
-      setNextTransition("/", "cut");
-      router.push("/", { scroll: false });
+      setNextTransition(localHref("/"), "cut");
+      router.push(localHref("/"), { scroll: false });
     });
   };
 

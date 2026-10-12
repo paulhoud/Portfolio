@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { isHomePath } from "@/i18n/paths";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { transitionFor, type TransitionKind } from "@/lib/immersion";
 import { FrozenRouter } from "./FrozenRouter";
@@ -58,7 +59,7 @@ const PINNED_STYLES = ["position", "top", "left", "width"] as const;
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
-  const isBase = pathname === "/";
+  const isBase = isHomePath(pathname);
   const variants = isBase ? baseVariants : overlayVariants;
   const kind = transitionFor(pathname);
 

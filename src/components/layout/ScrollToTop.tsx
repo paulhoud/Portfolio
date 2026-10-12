@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/i18n/context";
+import { isHomePath } from "@/i18n/paths";
 
 const SCROLL_THRESHOLD_PX = 240;
 
@@ -33,7 +34,7 @@ export function ScrollToTop() {
   // Sur l’accueil, la liste des projets mène déjà au premier : le bouton y
   // ferait doublon.
   const pathname = usePathname();
-  const hidden = pathname === "/";
+  const hidden = isHomePath(pathname);
 
   return (
     <AnimatePresence>

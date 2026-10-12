@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { MODEL_CREDITS } from "@/content/modelCredits";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
+import { splitLocalePath } from "@/i18n/paths";
 import { setOptOut, useOptOut } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 import { SocialLinks } from "./SocialLinks";
@@ -46,14 +47,14 @@ function AudienceNotice() {
 }
 
 export function SiteFooter() {
-  const { t } = useTranslation();
+  const { t, href } = useTranslation();
   const pathname = usePathname();
-  const isProject = pathname.startsWith("/projects/");
+  const isProject = splitLocalePath(pathname).path.startsWith("/projects/");
 
   const links = [
-    { href: "/method", label: t.site.nav.method },
-    { href: "/about", label: t.site.nav.about },
-    { href: "/contact", label: t.site.nav.contact },
+    { href: href("/method"), label: t.site.nav.method },
+    { href: href("/about"), label: t.site.nav.about },
+    { href: href("/contact"), label: t.site.nav.contact },
   ];
 
   return (

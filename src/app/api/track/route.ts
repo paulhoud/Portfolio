@@ -1,4 +1,5 @@
 import { projects } from "@/content/projects";
+import { splitLocalePath } from "@/i18n/paths";
 import { ensureSchema, statsDatabase } from "@/lib/stats/db";
 import { EVENT_NAMES, MAX_BODY, MAX_EVENTS, type EventName, type SentBatch } from "@/lib/stats/events";
 
@@ -51,8 +52,13 @@ export async function POST(request: Request) {
   const theme = batch.theme === "light" || batch.theme === "dark" ? batch.theme : null;
 
   const rows = batch.e.flatMap((event) => {
-    if (!event || !NAMES.has(event.n) || typeof event.p !== "string" || !PAGES.has(event.p)) return [];
-    const target = typeof event.t === "string" && TARGET.test(event.t) ? event.t : null;
+    if (!event || !NAMES.has(event.n) || typeof event.p !== "string") return [];
+    // Une page anglaise (« /en/about ») est rangée avec sa version française :
+    // la langue est déjà gardée à part.
+    const path = splitLocalePath(event.p).path;
+    if (!PAGES.has(path)) return [];
+    let target = typeof event.t === "string" && TARGET.test(event.t) ? event.t : null;
+    if (event.n === "view" && target?.startsWith("/")) target = splitLocalePath(target).path;
     const value = typeof event.v === "number" && Number.isFinite(event.v) ? Math.min(Math.max(event.v, 0), 86_400) : null;
     const referrer = typeof event.r === "string" && HOST.test(event.r) ? event.r : null;
     // Recalé sur l'horloge du serveur ; jamais plus d'une heure en arrière.
@@ -62,7 +68,7 @@ export async function POST(request: Request) {
         at: new Date(serverNow - (Number.isFinite(age) ? age : 0)),
         session: batch.s,
         name: event.n as EventName,
-        path: event.p,
+        path,
         target,
         value,
         device,

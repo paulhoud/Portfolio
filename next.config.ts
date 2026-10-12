@@ -21,6 +21,12 @@ const LEGACY_PROJECT_SLUGS: [string, string][] = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  experimental: {
+    // Une langue = une mise en page racine (app/(fr), app/(en)) : la page
+    // introuvable de tout le site est app/global-not-found.tsx.
+    globalNotFound: true,
+  },
+
   images: {
     // AVIF d'abord (env. 30 % plus léger que WebP à qualité perçue égale),
     // WebP en repli pour les navigateurs qui ne le gèrent pas.
@@ -34,6 +40,11 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // Images de partage : avant les deux langues, elles étaient servies par
+      // des fichiers `opengraph-image`. Les liens déjà partagés (LinkedIn…)
+      // gardent leur aperçu.
+      { source: "/opengraph-image", destination: "/share-image", permanent: true },
+      { source: "/projects/:slug/opengraph-image", destination: "/share-image/fr/:slug", permanent: true },
       // Anciennes adresses de projets, héritées du prototype et sans rapport
       // avec leur contenu (« /odyssey » pour Sanofi, etc.). Les liens déjà
       // partagés et les pages indexées sont renvoyés vers la nouvelle adresse.

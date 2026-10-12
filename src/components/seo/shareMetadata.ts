@@ -1,24 +1,29 @@
 import type { Metadata } from "next";
 import { profile } from "@/content/profile";
+import type { Locale } from "@/i18n/types";
 
 /** Nom du site : titre par défaut, `og:site_name` et texte alternatif de l'image. */
 export const siteTitle = `${profile.name} - ${profile.jobTitle}`;
 
 /**
- * Champs Open Graph communs à toutes les pages. Le layout les déclare, mais une
- * page qui redéfinit `openGraph` les perd : `shareMetadata` les répète.
+ * Champs Open Graph communs à toutes les pages d'une langue. Le layout les
+ * déclare, mais une page qui redéfinit `openGraph` les perd :
+ * `shareMetadata` les répète. L'autre langue est signalée comme variante.
  */
-export const siteOpenGraph = {
-  siteName: siteTitle,
-  locale: "fr_FR",
-};
+export function siteOpenGraphFor(locale: Locale) {
+  return {
+    siteName: siteTitle,
+    locale: locale === "en" ? "en_US" : "fr_FR",
+    alternateLocale: locale === "en" ? ["fr_FR"] : ["en_US"],
+  };
+}
 
 /**
- * Image de partage générée par `src/app/opengraph-image.tsx`, qui reprend ses
+ * Image de partage du site, servie par `src/app/share-image`, qui reprend ses
  * dimensions, son type et son texte alternatif d'ici : une seule source.
  */
 export const shareImage = {
-  url: "/opengraph-image",
+  url: "/share-image",
   width: 1200,
   height: 630,
   alt: siteTitle,
@@ -30,9 +35,11 @@ type ShareMetadataInput = {
   description: string;
   url: string;
   type?: "website" | "article" | "profile";
+  /** Langue de la page (français par défaut). */
+  locale?: Locale;
   /**
    * Image propre à la page, au même format que `shareImage` (cf.
-   * `src/app/projects/[slug]/opengraph-image.tsx`). À défaut, celle du site.
+   * `src/app/share-image/[locale]/[slug]`). À défaut, celle du site.
    */
   image?: { url: string; alt: string };
 };
@@ -41,27 +48,25 @@ type ShareMetadataInput = {
  * Métadonnées de partage (Open Graph + Twitter Card) d'une page.
  *
  * Next ne fusionne pas `openGraph` ni `twitter` en profondeur avec ceux du
- * layout : une page qui déclare son propre `openGraph` perd l'image injectée
- * par `opengraph-image.tsx`, le nom du site, la langue et le type, et sans
+ * layout : une page qui déclare son propre `openGraph` perd l'image, le nom
+ * du site, la langue et le type déclarés par la mise en page racine, et sans
  * `twitter` propre elle hérite du titre et de la description de l'accueil.
- * Tout est donc redéclaré ici, avec le titre et la description de la page.
- *
- * L'image est toujours déclarée explicitement : Next n'injecte celle d'un
- * fichier `opengraph-image` que si la page n'en déclare aucune, et ne permet
- * alors pas de lui donner un texte alternatif propre à la page.
+ * Tout est donc redéclaré ici, avec le titre et la description de la page,
+ * et l'image (celle du site, ou celle de la page avec son texte alternatif).
  */
 export function shareMetadata({
   title,
   description,
   url,
   type = "website",
+  locale = "fr",
   image,
 }: ShareMetadataInput) {
   const images = [{ ...shareImage, ...image }];
 
   return {
     openGraph: {
-      ...siteOpenGraph,
+      ...siteOpenGraphFor(locale),
       type,
       title,
       description,

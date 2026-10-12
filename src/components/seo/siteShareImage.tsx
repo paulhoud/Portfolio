@@ -7,25 +7,13 @@ import {
 import { shareImage } from "@/components/seo/shareMetadata";
 import { profile } from "@/content/profile";
 
-/**
- * Image de partage social (Open Graph / Twitter Card), générée au build.
- *
- * C'est l'aperçu qui s'affiche quand le lien du site est partagé sur LinkedIn,
- * Slack, WhatsApp, iMessage, etc. Elle est composée automatiquement à partir de
- * `profile.ts` et du portrait : aucun fichier à maintenir à la main, et le
- * visuel reste cohérent avec l'identité du portfolio.
- *
- * Next réutilise cette image pour la Twitter Card en l'absence de
- * `twitter-image`. Il ne l'injecte toutefois que sur les pages sans `openGraph`
- * propre : les autres la redéclarent via `shareMetadata`, d'où les dimensions
- * et le texte alternatif partagés avec `shareImage`. Les pages projet ont leur
- * propre image, dans la même direction artistique (`shareImageTheme`).
- */
-export const alt = shareImage.alt;
-export const size = { width: shareImage.width, height: shareImage.height };
-export const contentType = shareImage.type;
+const size = { width: shareImage.width, height: shareImage.height };
 
-export default async function OpengraphImage() {
+/**
+ * Image de partage du site (nom, intitulé, villes, portrait) : sans texte
+ * propre à une langue, la même pour l'accueil français et anglais.
+ */
+export async function renderSiteShareImage() {
   const [portraitSrc, fonts] = await Promise.all([readPortrait(), readShareFonts()]);
 
   return new ImageResponse(

@@ -6,38 +6,16 @@ import {
 } from "@/components/seo/shareImageTheme";
 import { shareImage } from "@/components/seo/shareMetadata";
 import { profile, siteUrl } from "@/content/profile";
-import { getProject, projects } from "@/content/projects";
+import type { Project } from "@/content/projects";
+
+const size = { width: shareImage.width, height: shareImage.height };
 
 /**
  * Image de partage d'un projet : son eyebrow et son titre, signés du portrait,
- * dans la direction artistique de l'image du site (`src/app/opengraph-image.tsx`).
- *
- * La page la déclare elle-même via `shareMetadata`, avec un texte alternatif
- * propre au projet : le `alt` d'un fichier `opengraph-image` est fixe, il ne
- * peut pas dépendre du slug.
+ * dans la direction artistique de l'image du site. Commune aux pages
+ * françaises et anglaises (chacune passe son projet traduit).
  */
-export const size = { width: shareImage.width, height: shareImage.height };
-export const contentType = shareImage.type;
-
-/** Une image par projet, générée au build comme les pages elles-mêmes. */
-export function generateStaticParams() {
-  return projects.map((project) => ({
-    slug: project.slug,
-  }));
-}
-
-export default async function ProjectOpengraphImage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const project = getProject(slug);
-
-  if (!project) {
-    return new Response("Projet introuvable", { status: 404 });
-  }
-
+export async function renderProjectShareImage(project: Pick<Project, "eyebrow" | "title">) {
   const [portraitSrc, fonts] = await Promise.all([readPortrait(), readShareFonts()]);
 
   return new ImageResponse(

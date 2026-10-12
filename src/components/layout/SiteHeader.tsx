@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTranslation } from "@/i18n/context";
+import { isHomePath } from "@/i18n/paths";
 import { useMotionPaused } from "@/lib/motionPause";
 import { initSound, useSoundOn } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
@@ -71,7 +72,7 @@ const DOCK_PILL = cn(
  */
 export function SiteHeader() {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t, href } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -82,11 +83,11 @@ export function SiteHeader() {
   const settleUntilRef = useRef(0);
 
   const navigation = [
-    { href: "/method", label: t.site.nav.method },
-    { href: "/about", label: t.site.nav.about },
-    { href: "/contact", label: t.site.nav.contact },
+    { href: href("/method"), label: t.site.nav.method },
+    { href: href("/about"), label: t.site.nav.about },
+    { href: href("/contact"), label: t.site.nav.contact },
   ];
-  const mobileNavigation = [{ href: "/", label: t.site.nav.home }, ...navigation];
+  const mobileNavigation = [{ href: href("/"), label: t.site.nav.home }, ...navigation];
 
   const close = () => setIsOpen(false);
   // Fermeture sans navigation (Échap, clic sur le voile) : le focus revient au
@@ -181,7 +182,7 @@ export function SiteHeader() {
     setIsHidden(false);
   }
 
-  const visible = isOpen || !isHidden || pathname === "/";
+  const visible = isOpen || !isHidden || isHomePath(pathname);
   const barTransition = { duration: reduceMotion ? 0 : 0.28, ease };
   const [motionPaused] = useMotionPaused();
 

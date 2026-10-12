@@ -1,5 +1,6 @@
 "use client";
 
+import { isHomePath } from "@/i18n/paths";
 import { peekGalleryReturn } from "./immersion";
 
 /**
@@ -32,7 +33,7 @@ if (typeof window !== "undefined") {
   const firstPath = entry ? new URL(entry.name).pathname : window.location.pathname;
   // Accueil chargé ou actualisé : on repart du début. Le navigateur ne doit
   // pas remettre l'ancienne position ; il reprend la main une fois la page là.
-  if (firstPath === "/" && window.location.pathname === "/" && !window.location.hash) {
+  if (isHomePath(firstPath) && isHomePath(window.location.pathname) && !window.location.hash) {
     forget();
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
@@ -49,8 +50,9 @@ if (typeof window !== "undefined") {
     (event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
-      if (!link || link.getAttribute("href") !== "/" || link.getAttribute("target") === "_blank") return;
-      if (window.location.pathname === "/") {
+      const target = link?.getAttribute("href");
+      if (!link || !target || !isHomePath(target) || link.getAttribute("target") === "_blank") return;
+      if (isHomePath(window.location.pathname)) {
         event.preventDefault();
         forget();
         window.dispatchEvent(new Event(RESET_EVENT));

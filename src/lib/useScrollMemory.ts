@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { splitLocalePath } from "@/i18n/paths";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 /**
@@ -49,7 +50,8 @@ export function readScrollMemory(path: string): number | null {
 
 export function useScrollMemory(path: string) {
   const pathname = usePathname();
-  const isActive = pathname === path;
+  // La position est retenue par page, la même dans les deux langues.
+  const isActive = splitLocalePath(pathname).path === path;
   const key = `scroll-memory:${path}`;
   const isRestoringRef = useRef(false);
 

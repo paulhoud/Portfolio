@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
  * il s'efface. Au clavier, les flèches gauche et droite font de même.
  */
 export function ProjectPager({ slug }: { slug: string }) {
-  const { t, locale } = useTranslation();
+  const { t, locale, href: localHref } = useTranslation();
   const router = useRouter();
   const index = projects.findIndex((project) => project.slug === slug);
   const count = projects.length;
@@ -32,7 +32,7 @@ export function ProjectPager({ slug }: { slug: string }) {
 
   const travel = useCallback(
     (target: (typeof projects)[number], side: "previous" | "next") => {
-      const href = `/projects/${target.slug}`;
+      const href = localHref(`/projects/${target.slug}`);
       track("pager", side);
       playSfx("enter");
       void showVeil(getTileEdge(target.mediaKey, target.background), 240).then(() => {
@@ -41,7 +41,7 @@ export function ProjectPager({ slug }: { slug: string }) {
         revealWhenOn(href, 520);
       });
     },
-    [router],
+    [router, localHref],
   );
 
   // Flèches du clavier : jamais dans un champ, ni quand une image est ouverte
@@ -75,7 +75,7 @@ export function ProjectPager({ slug }: { slug: string }) {
     };
     return (
       <Link
-        href={`/projects/${target.slug}`}
+        href={localHref(`/projects/${target.slug}`)}
         onClick={onClick}
         className={cn(
           "group flex items-center gap-4 rounded-2xl border border-ink/10 p-4 transition duration-300 md:gap-5 md:p-5",

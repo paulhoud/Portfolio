@@ -4,6 +4,7 @@ import { AnimatePresence, MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
+import { isHomePath } from "@/i18n/paths";
 import { useMotionPaused } from "@/lib/motionPause";
 import { applyTheme, useTheme } from "@/lib/theme";
 import { Analytics } from "@/components/stats/Analytics";
@@ -23,7 +24,7 @@ import { Veil } from "./Veil";
  */
 export function AppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = isHomePath(pathname);
   const { t } = useTranslation();
   const [motionPaused] = useMotionPaused();
 

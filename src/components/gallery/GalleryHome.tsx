@@ -19,6 +19,7 @@ import { getMotionEnd, getMotionStart, getProjectMedia, getTileEdge, getTileLigh
 import type { Project } from "@/content/projects";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
+import { localePath, splitLocalePath } from "@/i18n/paths";
 import { requestIdle } from "@/lib/idle";
 import {
   clearGalleryReturn,
@@ -166,7 +167,7 @@ const NO_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
  * sa tuile si la 3D n'est pas disponible.
  */
 export function GalleryHome({ projects }: { projects: Project[] }) {
-  const { t } = useTranslation();
+  const { t, href: localHref } = useTranslation();
   const router = useRouter();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [motionPaused] = useMotionPaused();
@@ -319,7 +320,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       enteringRef.current = true;
       setImmersed(true);
       const target = projects[index];
-      const href = `/projects/${target.slug}`;
+      const href = localHref(`/projects/${target.slug}`);
       // Le défilement se cale sur sa tranche : c'est là que le retour ramènera.
       window.scrollTo({ top: trackTop() + index * slotHeight(), behavior: "auto" });
       const go = async () => {
@@ -335,7 +336,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       if (travel > 0) playSfx("travel", travel);
       window.setTimeout(() => playSfx("enter"), travel * 1000);
     },
-    [projects, router, slotHeight],
+    [projects, router, slotHeight, localHref],
   );
   // De retour sur l'accueil (bouton précédent du navigateur…), on peut repartir.
   useEffect(() => {
@@ -680,7 +681,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             onHover: setHovered3d,
             onCursor: setCursor3d,
             onActivate: (index, newTab) => {
-              const href = `/projects/${projectsRef.current[index].slug}`;
+              // Langue lue dans l'adresse : la scène est créée une fois pour toutes.
+              const href = localePath(`/projects/${projectsRef.current[index].slug}`, splitLocalePath(window.location.pathname).locale);
               if (newTab) window.open(href, "_blank", "noopener");
               else enterProjectRef.current(index);
             },
@@ -1014,7 +1016,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                               </>
                             ) : null}
                             <Link
-                              href={`/projects/${item.slug}`}
+                              href={localHref(`/projects/${item.slug}`)}
                               onClick={onListClick(index)}
                               onMouseEnter={() => setPreview(index)}
                               onMouseLeave={clearPreview}
@@ -1084,7 +1086,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                         >
                           {/* Doublon visuel du lien de la liste : hors du parcours clavier. */}
                           <Link
-                            href={`/projects/${project.slug}`}
+                            href={localHref(`/projects/${project.slug}`)}
                             onClick={onProjectClick(shown)}
                             tabIndex={-1}
                             aria-hidden="true"
@@ -1212,7 +1214,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     d'un projet à l'autre en faisant défiler (cf. le repère vertical). */}
                 <div data-pull className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
                   <Link
-                    href={`/projects/${project.slug}`}
+                    href={localHref(`/projects/${project.slug}`)}
                     onClick={onProjectClick(shown)}
                     aria-label={`${t.site.gallery.viewProject} : ${project.title}`}
                     className="flex h-11 items-center gap-2.5 rounded-full bg-ink pl-5 pr-4 text-sm font-medium text-page focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/70"

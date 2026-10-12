@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { enterStats } from "@/app/stats/actions";
+import { enterStats } from "@/app/(fr)/stats/actions";
 
 /** Entrée de la page des statistiques (page privée de Paul, en français seulement). */
 export function StatsLogin({ ready }: { ready: boolean }) {
