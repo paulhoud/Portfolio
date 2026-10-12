@@ -75,8 +75,8 @@ export function LegalPageView() {
           <ul className="list-disc space-y-2 pl-5">
             <li>
               {en
-                ? "Recorded: pages viewed, time spent and share of each page read, interactions with the site (projects opened, 3D objects touched, dimensions visited, images enlarged, links to profiles, contact actions), type of device, country, language, theme and referring site."
-                : "Ce qui est enregistré : pages vues, temps passé et part de chaque page lue, interactions avec le site (projets ouverts, objets 3D touchés, dimensions visitées, images agrandies, liens vers les profils, prise de contact), type d'appareil, pays, langue, thème et site de provenance."}
+                ? "Recorded: pages viewed, time spent and share of each page read, interactions with the site (projects opened, 3D objects touched, dimensions visited, images enlarged, links to profiles, contact actions), type of device, browser and operating system, country, language, theme and referring site."
+                : "Ce qui est enregistré : pages vues, temps passé et part de chaque page lue, interactions avec le site (projets ouverts, objets 3D touchés, dimensions visitées, images agrandies, liens vers les profils, prise de contact), type d'appareil, navigateur et système, pays, langue, thème et site de provenance."}
             </li>
             <li>
               {en

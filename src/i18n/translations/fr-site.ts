@@ -42,6 +42,7 @@ export const frSite: SiteCopy = {
     mute: "Couper le son",
     unmute: "Activer le son",
     label: "Son",
+    volume: "Volume",
     unmuteShort: "Activer",
     on: "Activé",
     off: "Coupé",

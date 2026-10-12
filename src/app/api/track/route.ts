@@ -18,6 +18,35 @@ const TARGET = /^[\p{L}\p{N} .,:'’@/&()+_-]{1,80}$/u;
 const HOST = /^[a-z0-9.-]{1,80}$/;
 const BOTS = /bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|pingdom|monitor/i;
 
+/**
+ * Navigateur et système, tirés de l'identité du navigateur (qui n'est pas
+ * gardée). L'ordre compte : Edge, Opera ou les applis se déclarent aussi
+ * « Chrome » et « Safari ». Les navigateurs intégrés aux applis (LinkedIn,
+ * Instagram…) sont distingués : un lien partagé s'y ouvre souvent.
+ */
+function browserOf(agent: string) {
+  if (/LinkedInApp/i.test(agent)) return "LinkedIn (appli)";
+  if (/Instagram/i.test(agent)) return "Instagram (appli)";
+  if (/FBAN|FBAV/i.test(agent)) return "Facebook (appli)";
+  if (/Edg(e|A|iOS)?\//.test(agent)) return "Edge";
+  if (/OPR\/|Opera/.test(agent)) return "Opera";
+  if (/SamsungBrowser/.test(agent)) return "Samsung Internet";
+  if (/Firefox\/|FxiOS/.test(agent)) return "Firefox";
+  if (/Chrome\/|CriOS/.test(agent)) return "Chrome";
+  if (/Safari\//.test(agent)) return "Safari";
+  return "Autre";
+}
+
+function osOf(agent: string) {
+  if (/iPhone|iPad|iPod/.test(agent)) return "iOS";
+  if (/Android/.test(agent)) return "Android";
+  if (/Mac OS X|Macintosh/.test(agent)) return "macOS";
+  if (/Windows/.test(agent)) return "Windows";
+  if (/CrOS/.test(agent)) return "ChromeOS";
+  if (/Linux/.test(agent)) return "Linux";
+  return "Autre";
+}
+
 function deviceOf(agent: string) {
   if (/ipad|tablet|(android(?!.*mobile))/i.test(agent)) return "tablet";
   if (/mobi|iphone|ipod|android/i.test(agent)) return "mobile";
@@ -47,6 +76,8 @@ export async function POST(request: Request) {
 
   const serverNow = Date.now();
   const device = deviceOf(agent);
+  const browser = browserOf(agent);
+  const os = osOf(agent);
   const country = (request.headers.get("x-vercel-ip-country") ?? "").slice(0, 2).toUpperCase() || null;
   const locale = batch.locale === "fr" || batch.locale === "en" ? batch.locale : null;
   const theme = batch.theme === "light" || batch.theme === "dark" ? batch.theme : null;
@@ -72,6 +103,8 @@ export async function POST(request: Request) {
         target,
         value,
         device,
+        browser,
+        os,
         country,
         referrer,
         locale,
@@ -83,7 +116,7 @@ export async function POST(request: Request) {
 
   try {
     await ensureSchema(sql);
-    await sql`insert into portfolio_events ${sql(rows, "at", "session", "name", "path", "target", "value", "device", "country", "referrer", "locale", "theme")}`;
+    await sql`insert into portfolio_events ${sql(rows, "at", "session", "name", "path", "target", "value", "device", "browser", "os", "country", "referrer", "locale", "theme")}`;
   } catch (error) {
     console.error("[stats] enregistrement impossible", error);
   }

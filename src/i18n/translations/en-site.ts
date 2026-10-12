@@ -42,6 +42,7 @@ export const enSite: SiteCopy = {
     mute: "Mute sound",
     unmute: "Turn sound on",
     label: "Sound",
+    volume: "Volume",
     unmuteShort: "Turn on",
     on: "On",
     off: "Off",

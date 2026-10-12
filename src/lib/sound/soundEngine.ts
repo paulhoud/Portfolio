@@ -60,7 +60,7 @@ function noise(ctx: AudioContext, seconds: number): AudioBuffer {
  * Crée le moteur sur un contexte audio déjà débloqué par un geste du
  * visiteur (clic, touche) : les navigateurs l'exigent.
  */
-export function createSoundEngine(ctx: AudioContext): SoundEngine {
+export function createSoundEngine(ctx: AudioContext, output: AudioNode = ctx.destination): SoundEngine {
   const master = ctx.createGain();
   master.gain.value = 0;
   const limiter = ctx.createDynamicsCompressor();
@@ -68,7 +68,7 @@ export function createSoundEngine(ctx: AudioContext): SoundEngine {
   limiter.ratio.value = 4;
   limiter.attack.value = 0.01;
   limiter.release.value = 0.4;
-  master.connect(limiter).connect(ctx.destination);
+  master.connect(limiter).connect(output);
 
   const reverb = ctx.createConvolver();
   reverb.buffer = impulse(ctx, 5, 2.4);

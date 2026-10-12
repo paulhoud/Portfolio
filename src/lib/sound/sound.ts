@@ -17,6 +17,58 @@ const listeners = new Set<() => void>();
 let memory = false;
 
 let context: AudioContext | null = null;
+/** Sortie commune de tous les sons : son gain est le volume choisi par le visiteur. */
+let output: GainNode | null = null;
+
+/* Volume du visiteur (0 à 1), mémorisé comme le son lui-même. */
+const VOLUME_KEY = "portfolio-volume";
+const volumeListeners = new Set<() => void>();
+let volumeMemory = 0.8;
+
+function readVolume(): number {
+  try {
+    const stored = window.localStorage.getItem(VOLUME_KEY);
+    const value = stored === null ? NaN : Number(stored);
+    return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : volumeMemory;
+  } catch {
+    return volumeMemory;
+  }
+}
+
+/** Gain d'un réglage : la courbe suit l'oreille (la moitié du curseur sonne à moitié, pas au quart). */
+const gainFor = (volume: number) => volume * volume;
+
+/** Change le volume (0 à 1) ; un volume au-dessus de zéro active le son s'il était coupé. */
+export function setSoundVolume(volume: number) {
+  const value = Math.min(1, Math.max(0, volume));
+  volumeMemory = value;
+  try {
+    window.localStorage.setItem(VOLUME_KEY, String(Math.round(value * 100) / 100));
+  } catch {
+    /* stockage indisponible : le réglage vaut pour cette page seulement */
+  }
+  if (context && output) {
+    const now = context.currentTime;
+    output.gain.cancelScheduledValues(now);
+    output.gain.setTargetAtTime(gainFor(value), now, 0.03);
+  }
+  for (const listener of volumeListeners) listener();
+  if (value > 0 && !getSnapshot()) setSoundOn(true);
+}
+
+/** Volume choisi (0 à 1) ; 0,8 au rendu serveur. */
+export function useSoundVolume(): number {
+  return useSyncExternalStore(
+    (listener) => {
+      volumeListeners.add(listener);
+      return () => {
+        volumeListeners.delete(listener);
+      };
+    },
+    readVolume,
+    () => 0.8,
+  );
+}
 
 /*
  * En développement, le rechargement à chaud réévalue ce module : l'ancien
@@ -65,7 +117,7 @@ function ensureEngine(): Promise<SoundEngine | null> {
   const ctx = context;
   loading ??= import("./soundEngine")
     .then(({ createSoundEngine }) => {
-      engine = createSoundEngine(ctx);
+      engine = createSoundEngine(ctx, output ?? ctx.destination);
       return engine;
     })
     .catch(() => null);
@@ -80,17 +132,17 @@ function apply() {
   // est masqué.
   if (theme) {
     if (!getSnapshot()) haltTheme();
-    else if (document.hidden) theme.pause();
-    else void theme.play().catch(() => {});
+    else if (document.hidden) theme.audio.pause();
+    else void theme.audio.play().catch(() => {});
   }
   // Dans une dimension, la nappe d'ambiance se tait jusqu'au retour, même
   // une fois ses musiques terminées : elles ont la place pour elles seules.
   // De même le temps d'un morceau (le CD).
   const ambient = on && !inDimension && !clipPlaying?.music;
   if (!context || (!ambient && !engine)) return;
-  // Pendant un morceau, la nappe se tait sans mettre le son en veille : la
-  // veille couperait aussi le morceau.
-  const keepAwake = Boolean(clipPlaying?.music);
+  // Pendant un morceau ou la musique d'une dimension, la nappe se tait sans
+  // mettre le son en veille : la veille les couperait aussi.
+  const keepAwake = Boolean(clipPlaying?.music) || theme !== null;
   void ensureEngine().then((ready) => ready?.setOn(ambient, { keepAwake }));
 }
 
@@ -106,24 +158,95 @@ function apply() {
 export type Theme = { src: string; volume: number };
 /** Durée du fondu enchaîné entre deux musiques qui se suivent (secondes). */
 const THEME_CROSSFADE = 1.5;
-let theme: HTMLAudioElement | null = null;
+
+/**
+ * Lecteurs des musiques : deux, pour le fondu enchaîné, créés et débloqués au
+ * premier geste. Safari (iPhone surtout) refuse de lancer un son hors d'un
+ * geste, sauf sur un lecteur qu'un geste a déjà lancé une fois : la musique
+ * d'une dimension démarre plusieurs secondes après le geste qui y mène. Leur
+ * volume passe par le contexte audio : sur iPhone, celui d'un lecteur est
+ * figé au maximum.
+ */
+type Player = { audio: HTMLAudioElement; gain: GainNode | null; busy: boolean };
+const players: Player[] = [];
+/** Un dixième de seconde de silence, joué pour débloquer les lecteurs. */
+const SILENCE = "/sounds/silence.wav";
+
+function preparePlayers(ctx: AudioContext, out: AudioNode) {
+  if (players.length > 0) return;
+  for (let i = 0; i < 2; i += 1) {
+    const audio = new Audio();
+    audio.preload = "auto";
+    let gain: GainNode | null = null;
+    try {
+      gain = ctx.createGain();
+      ctx.createMediaElementSource(audio).connect(gain).connect(out);
+    } catch {
+      gain = null;
+    }
+    players.push({ audio, gain, busy: false });
+  }
+}
+
+/** Dans un geste : chaque lecteur libre joue un silence, ce qui le débloque. */
+function unlockPlayers() {
+  for (const player of players) {
+    if (player.busy || player.audio.dataset.unlocked) continue;
+    player.audio.src = SILENCE;
+    void player.audio
+      .play()
+      .then(() => {
+        player.audio.dataset.unlocked = "1";
+        if (!player.busy) player.audio.pause();
+      })
+      .catch(() => {});
+  }
+}
+
+function setPlayerVolume(player: Player, volume: number) {
+  if (player.gain) {
+    player.gain.gain.value = volume;
+    player.audio.volume = 1;
+  } else {
+    player.audio.volume = volume;
+  }
+}
+
+const playerVolume = (player: Player) => (player.gain ? player.gain.gain.value : player.audio.volume);
+
+let theme: Player | null = null;
 let themeQueue: Theme[] = [];
 /** Le visiteur est dans une dimension (de l'arrivée au retour). */
 let inDimension = false;
 
 /** Amène le volume d'une piste à `to` en `seconds`, puis appelle `done`. */
-function fadeAudio(audio: HTMLAudioElement, to: number, seconds: number, done?: () => void) {
-  const from = audio.volume;
+function fadePlayer(player: Player, to: number, seconds: number, done?: () => void) {
+  const from = playerVolume(player);
   const steps = Math.max(1, Math.round((seconds * 1000) / 50));
   let step = 0;
   const timer = window.setInterval(() => {
     step += 1;
-    audio.volume = Math.min(1, Math.max(0, from + ((to - from) * step) / steps));
+    setPlayerVolume(player, Math.min(1, Math.max(0, from + ((to - from) * step) / steps)));
     if (step >= steps) {
       window.clearInterval(timer);
       done?.();
     }
   }, 50);
+}
+
+/** Un lecteur libre ; à défaut (aucun geste encore), un lecteur ordinaire. */
+function takePlayer(): Player {
+  const free = players.find((player) => !player.busy);
+  if (free) {
+    free.busy = true;
+    return free;
+  }
+  return { audio: new Audio(), gain: null, busy: true };
+}
+
+function releasePlayer(player: Player) {
+  player.audio.pause();
+  player.busy = false;
 }
 
 function nextTheme(crossfade = false) {
@@ -132,33 +255,42 @@ function nextTheme(crossfade = false) {
     theme = null;
     return;
   }
-  const audio = new Audio(next.src);
-  audio.volume = crossfade ? 0 : next.volume;
+  const player = takePlayer();
+  const audio = player.audio;
+  audio.src = next.src;
+  setPlayerVolume(player, crossfade ? 0 : next.volume);
   // Juste avant la fin, la piste suivante entre pendant que celle-ci s'efface.
   let handedOver = false;
   const handOver = () => {
-    if (handedOver || theme !== audio) return;
+    if (handedOver || theme !== player) return;
     handedOver = true;
-    fadeAudio(audio, 0, THEME_CROSSFADE, () => audio.pause());
+    fadePlayer(player, 0, THEME_CROSSFADE, () => releasePlayer(player));
     nextTheme(true);
   };
-  audio.addEventListener("timeupdate", () => {
+  audio.ontimeupdate = () => {
     if (themeQueue.length > 0 && audio.duration - audio.currentTime <= THEME_CROSSFADE) handOver();
-  });
-  audio.addEventListener("ended", () => {
-    if (theme !== audio || handedOver) return;
+  };
+  audio.onended = () => {
+    if (theme !== player || handedOver) return;
+    releasePlayer(player);
     if (themeQueue.length > 0) nextTheme();
-    else theme = null;
-  });
-  theme = audio;
+    else {
+      theme = null;
+      apply();
+    }
+  };
+  theme = player;
   live.theme = audio;
+  // Le contexte audio (par où passe le son) doit tourner pendant la musique.
+  if (context && context.state !== "running") void context.resume().catch(() => {});
   void audio
     .play()
     .then(() => {
-      if (crossfade) fadeAudio(audio, next.volume, THEME_CROSSFADE);
+      if (crossfade) fadePlayer(player, next.volume, THEME_CROSSFADE);
     })
     .catch(() => {
-      if (theme !== audio) return;
+      releasePlayer(player);
+      if (theme !== player) return;
       theme = null;
       themeQueue = [];
     });
@@ -167,9 +299,9 @@ function nextTheme(crossfade = false) {
 /** Coupe le thème en cours en un court fondu. */
 function haltTheme() {
   themeQueue = [];
-  const audio = theme;
+  const player = theme;
   theme = null;
-  if (audio) fadeAudio(audio, 0, 0.6, () => audio.pause());
+  if (player) fadePlayer(player, 0, 0.6, () => releasePlayer(player));
 }
 
 /**
@@ -196,9 +328,11 @@ export function stopThemes() {
 }
 
 /**
- * Prépare le son : au premier geste du visiteur, le contexte audio est créé
- * (dans le geste lui-même, comme l'exige Safari) ; il se tait quand l'onglet
- * est masqué.
+ * Prépare le son. Safari n'autorise le son que dans un geste du visiteur
+ * (toucher, clic, touche) : au premier, le contexte audio et les lecteurs de
+ * musique sont créés ; aux suivants, le contexte est relancé s'il s'est arrêté
+ * (iPhone : appel, retour sur l'onglet, verrouillage). Il se tait quand
+ * l'onglet est masqué.
  */
 export function initSound() {
   if (initialised || typeof window === "undefined") return;
@@ -207,19 +341,43 @@ export function initSound() {
     window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioCtx) return;
 
-  const unlock = () => {
-    for (const type of ["pointerup", "keydown", "touchend"] as const) window.removeEventListener(type, unlock, true);
+  // iPhone : sans cela, le mode silencieux (bouton sur le côté) coupe tout le
+  // son de la page, comme une sonnerie ; le site joue alors comme une vidéo.
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  if (session) {
     try {
-      context = new AudioCtx({ latencyHint: "playback" });
-      live.context = context;
-      void context.resume();
+      session.type = "playback";
     } catch {
-      context = null;
-      return;
+      /* réglage refusé : le mode silencieux garde la main */
     }
-    apply();
+  }
+
+  const wake = () => {
+    if (!context) {
+      try {
+        context = new AudioCtx({ latencyHint: "playback" });
+      } catch {
+        // Anciens Safari : pas d'options au constructeur.
+        try {
+          context = new AudioCtx();
+        } catch {
+          context = null;
+          return;
+        }
+      }
+      live.context = context;
+      output = context.createGain();
+      output.gain.value = gainFor(readVolume());
+      output.connect(context.destination);
+      preparePlayers(context, output);
+      unlockPlayers();
+      apply();
+    } else {
+      unlockPlayers();
+    }
+    if (getSnapshot() && !document.hidden && context.state !== "running") void context.resume().catch(() => {});
   };
-  for (const type of ["pointerup", "keydown", "touchend"] as const) window.addEventListener(type, unlock, true);
+  for (const type of ["pointerup", "touchend", "click", "keydown"] as const) window.addEventListener(type, wake, true);
   document.addEventListener("visibilitychange", apply);
 }
 
@@ -231,6 +389,9 @@ export function setSoundOn(on: boolean) {
     /* stockage indisponible : le réglage vaut pour cette page seulement */
   }
   memory = on;
+  // Dans le geste lui-même (le bouton du son) : Safari n'accepterait pas une
+  // reprise plus tard.
+  if (on && context && context.state !== "running") void context.resume().catch(() => {});
   for (const listener of listeners) listener();
   apply();
 }
@@ -357,7 +518,7 @@ export function playClip(url: string, { music = false }: { music?: boolean } = {
     gain.gain.value = clip.gain;
     const source = ctx.createBufferSource();
     source.buffer = clip.buffer;
-    source.connect(gain).connect(ctx.destination);
+    source.connect(gain).connect(output ?? ctx.destination);
     // Lancé avant tout arrêt programmé : le navigateur refuse l'inverse.
     source.start(now);
     if (!music && clip.buffer.duration > CLIP_LONGEST) {

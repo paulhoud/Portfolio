@@ -1,41 +1,53 @@
 import type { Metadata } from "next";
-import { lato } from "@/components/layout/fonts";
-import { THEME_BOOT_SCRIPT } from "@/lib/themeBoot";
-import "./globals.css";
 
 /**
  * Page introuvable, pour tout le site : chaque langue a sa propre mise en page
  * racine (app/(fr), app/(en)), Next n'en a donc aucune commune pour composer
  * une 404. Celle-ci se suffit à elle-même, dans les deux langues.
+ *
+ * Volontairement autonome (styles en ligne, police du système) : importer la
+ * feuille de style du site ici faisait recompiler cette page en boucle par
+ * le serveur de développement, jusqu'à épuiser sa mémoire.
  */
 export const metadata: Metadata = {
   title: "Page introuvable - Page not found",
   robots: { index: false },
 };
 
+const css = `
+  :root { color-scheme: dark; --ink: #f5f2f4; --page: #17161c; }
+  @media (prefers-color-scheme: light) { :root { color-scheme: light; --ink: #18171c; --page: #e8e6e1; } }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 0 24px; text-align: center; }
+  .code { font-size: 11px; font-weight: 700; letter-spacing: 0.24em; opacity: 0.7; }
+  h1 { margin: 0; font-size: 24px; font-weight: 500; }
+  p { margin: 0; font-size: 14px; opacity: 0.75; }
+  nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px; }
+  a { border-radius: 999px; padding: 10px 20px; font-size: 14px; text-decoration: none; color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  a.main { background: var(--ink); color: var(--page); border-color: transparent; font-weight: 700; }
+`;
+
 export default function GlobalNotFound() {
   return (
-    <html lang="fr" className={lato.variable} suppressHydrationWarning>
+    <html lang="fr">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <style dangerouslySetInnerHTML={{ __html: css }} />
       </head>
       <body>
-        <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-page px-6 text-center text-ink">
-          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-ink/65">404</p>
-          <h1 className="text-2xl font-medium">Cette page n&apos;existe pas.</h1>
-          <p lang="en" className="text-sm text-ink/70">
-            This page does not exist.
-          </p>
+        <main>
+          <span className="code">404</span>
+          <h1>Cette page n&apos;existe pas.</h1>
+          <p lang="en">This page does not exist.</p>
           {/* Liens simples : cette page est rendue hors de l'application (pas de routeur). */}
           {/* eslint-disable @next/next/no-html-link-for-pages */}
-          <div className="mt-2 flex flex-wrap justify-center gap-3 text-sm">
-            <a href="/" className="rounded-full bg-ink px-5 py-2.5 font-bold text-page transition hover:opacity-90">
+          <nav>
+            <a href="/" className="main">
               Retour à l&apos;accueil
             </a>
-            <a href="/en" lang="en" className="rounded-full border border-ink/20 px-5 py-2.5 text-ink/80 transition hover:border-ink/40 hover:text-ink">
+            <a href="/en" lang="en">
               Back to home
             </a>
-          </div>
+          </nav>
           {/* eslint-enable @next/next/no-html-link-for-pages */}
         </main>
       </body>

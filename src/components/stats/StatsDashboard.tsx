@@ -310,6 +310,15 @@ function Dashboard({
         </Card>
       </div>
 
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card title="Navigateurs" note="Mesurés depuis le 12 oct. 2026 ; « appli » : le navigateur intégré d'une application (lien ouvert depuis LinkedIn…).">
+          <BarList rows={data.browsers.map((row) => ({ key: row.label, label: row.label, value: row.count }))} empty="Pas encore de visite mesurée." />
+        </Card>
+        <Card title="Systèmes">
+          <BarList rows={data.systems.map((row) => ({ key: row.label, label: row.label, value: row.count }))} empty="Pas encore de visite mesurée." />
+        </Card>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-3">
         <Card title="Objets 3D touchés" note="Touchés ou attrapés sur l'accueil.">
           <BarList rows={data.objects.map((row) => ({ key: row.label, label: OBJECTS[row.label] ?? row.label, value: row.count }))} limit={12} />

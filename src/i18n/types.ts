@@ -70,6 +70,8 @@ export type SiteCopy = {
     label: string;
     /** « Activer le son » en un mot (petits écrans). */
     unmuteShort: string;
+    /** Curseur de volume. */
+    volume: string;
     on: string;
     off: string;
   };

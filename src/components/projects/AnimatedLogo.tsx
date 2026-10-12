@@ -90,8 +90,11 @@ export function AnimatedLogo({
   const reduceMotion = prefersReducedMotion || motionPaused;
   const isVideo =
     logoKind === "video" || logo.endsWith(".webm") || logo.endsWith(".mp4");
-  // Faux au rendu serveur, puis évalué côté client : pas d'écart d'hydratation.
-  const needsFallback = useSyncExternalStore(noopSubscribe, isWebKitWithoutWebmAlpha, () => false);
+  // Au rendu serveur, l'image de secours (lue par tous les navigateurs) ; côté
+  // client, Chrome et Firefox passent ensuite à la vidéo. Servir d'abord la
+  // vidéo faisait charger à Safari un WebM qu'il ne sait pas afficher, avant
+  // de la remplacer : la page ne finissait pas son chargement dans WebKit.
+  const needsFallback = useSyncExternalStore(noopSubscribe, isWebKitWithoutWebmAlpha, () => true);
   const useFallback = isVideo && Boolean(logoFallback) && needsFallback;
 
   // Boucle partielle (cf. `logoLoop`) : retour à `from` dès `until` atteint.

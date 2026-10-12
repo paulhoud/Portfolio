@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { useTranslation } from "@/i18n/context";
 import { isHomePath } from "@/i18n/paths";
 import { useMotionPaused } from "@/lib/motionPause";
-import { initSound, useSoundOn } from "@/lib/sound/sound";
+import { initSound, setSoundVolume, useSoundOn, useSoundVolume } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -439,10 +439,63 @@ function toggleClasses(labelled: boolean, pressed: boolean) {
  * - `capsule` : dans la capsule, à côté du menu (téléphone, tablette) ;
  * - `labelled` : ligne du menu, avec son état écrit.
  */
+/**
+ * Curseur de volume : à côté du haut-parleur dans la pastille du bas (il se
+ * déplie au survol ou au clavier), sous l'interrupteur dans le menu mobile.
+ * Le monter réactive le son s'il était coupé.
+ */
+function VolumeSlider({ className }: { className?: string }) {
+  const { t } = useTranslation();
+  const volume = useSoundVolume();
+  const [on] = useSoundOn();
+  return (
+    <input
+      type="range"
+      min={0}
+      max={100}
+      step={1}
+      value={on ? Math.round(volume * 100) : 0}
+      onChange={(event) => setSoundVolume(Number(event.target.value) / 100)}
+      aria-label={t.site.sound.volume}
+      aria-valuetext={`${Math.round((on ? volume : 0) * 100)} %`}
+      className={cn("h-1 cursor-pointer accent-[var(--ink)]", className)}
+    />
+  );
+}
+
 function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "labelled" }) {
   const { t } = useTranslation();
   const [on, toggle] = useSoundOn();
   useEffect(() => initSound(), []);
+  const labelled = variant === "labelled";
+
+  // Pastille du bas (ordinateur) : le curseur se déplie à gauche du bouton.
+  if (variant === "icon") {
+    return (
+      <div className="group/volume flex items-center">
+        <div className="w-0 overflow-hidden opacity-0 transition-[width,opacity] duration-300 group-hover/volume:w-24 group-hover/volume:opacity-100 group-focus-within/volume:w-24 group-focus-within/volume:opacity-100">
+          <VolumeSlider className="ml-2 mr-1 w-[5.5rem]" />
+        </div>
+        <SoundSwitch variant={variant} on={on} toggle={toggle} />
+      </div>
+    );
+  }
+  if (labelled) {
+    return (
+      <div>
+        <SoundSwitch variant={variant} on={on} toggle={toggle} />
+        <div className="flex items-center gap-3 px-3 pb-2">
+          <span className="text-xs text-ink/65">{t.site.sound.volume}</span>
+          <VolumeSlider className="w-full" />
+        </div>
+      </div>
+    );
+  }
+  return <SoundSwitch variant={variant} on={on} toggle={toggle} />;
+}
+
+function SoundSwitch({ variant, on, toggle }: { variant: "icon" | "capsule" | "labelled"; on: boolean; toggle: () => void }) {
+  const { t } = useTranslation();
   const labelled = variant === "labelled";
 
   return (

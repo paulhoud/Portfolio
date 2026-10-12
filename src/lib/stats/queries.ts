@@ -30,6 +30,8 @@ export type StatsData = {
   homeVisits: number;
   journey: Count[];
   devices: Count[];
+  browsers: Count[];
+  systems: Count[];
   themes: Count[];
   locales: Count[];
   countries: Count[];
@@ -69,6 +71,8 @@ export async function readStats(days: number, slugs: string[]): Promise<StatsDat
     pageTimes,
     deepest,
     devices,
+    browsers,
+    systems,
     themes,
     locales,
     countries,
@@ -97,6 +101,8 @@ export async function readStats(days: number, slugs: string[]): Promise<StatsDat
           select session, max(value) as deepest from (${recent}) e where name = 'reach' group by session
         ) t group by deepest`,
     sql`select device as label, count(distinct session) as count from (${recent}) e where name = 'view' group by device order by count desc`,
+    sql`select browser as label, count(distinct session) as count from (${recent}) e where name = 'view' and browser is not null group by browser order by count desc`,
+    sql`select os as label, count(distinct session) as count from (${recent}) e where name = 'view' and os is not null group by os order by count desc`,
     sql`select theme as label, count(distinct session) as count from (${recent}) e where name = 'view' group by theme order by count desc`,
     sql`select locale as label, count(distinct session) as count from (${recent}) e where name = 'view' group by locale order by count desc`,
     sql`select country as label, count(distinct session) as count from (${recent}) e where name = 'view' group by country order by count desc limit 12`,
@@ -163,6 +169,8 @@ export async function readStats(days: number, slugs: string[]): Promise<StatsDat
       { label: "contact", count: num(rates.contacts) },
     ],
     devices: counts(devices as never),
+    browsers: counts(browsers as never),
+    systems: counts(systems as never),
     themes: counts(themes as never),
     locales: counts(locales as never),
     countries: counts(countries as never),

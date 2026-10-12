@@ -52,6 +52,9 @@ export function ensureSchema(sql: Sql): Promise<void> {
           theme text
         )
       `;
+      // Ajoutés le 12 oct. 2026 (navigateur et système) : vides avant.
+      await sql`alter table portfolio_events add column if not exists browser text`;
+      await sql`alter table portfolio_events add column if not exists os text`;
       await sql`create index if not exists portfolio_events_at on portfolio_events (at)`;
       await sql`create index if not exists portfolio_events_session on portfolio_events (session, at)`;
     })().catch((error) => {
