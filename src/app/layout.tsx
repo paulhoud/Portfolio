@@ -5,6 +5,7 @@ import { siteOpenGraph, siteTitle } from "@/components/seo/shareMetadata";
 import { profile, siteUrl } from "@/content/profile";
 import { LanguageProvider } from "@/i18n/context";
 import { THEME_BOOT_SCRIPT } from "@/lib/themeBoot";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import "./globals.css";
@@ -120,6 +121,9 @@ export default function RootLayout({
         <LanguageProvider>
           <AppFrame>{children}</AppFrame>
         </LanguageProvider>
+        {/* Temps de chargement mesurés chez les visiteurs (anonyme, sans cookie),
+            visibles dans Vercel une fois Speed Insights activé sur le projet. */}
+        <SpeedInsights />
       </body>
     </html>
   );

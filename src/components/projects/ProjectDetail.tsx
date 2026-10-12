@@ -260,19 +260,17 @@ function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) 
           src="/assets/Logo-3.svg"
           srcOnLight="/assets/Logo-3-ink.svg"
           alt="Jive"
-          width={120}
+          // Proportions du fichier (126 × 61) : sinon Next signale une image déformée.
+          width={99}
           height={48}
           className="h-10 w-auto md:h-12"
         />
         <span aria-hidden="true" className="text-lg text-ink/55 md:text-xl">
           ×
         </span>
-        {/* Le logo d'Orange : texte blanc sur carré orange, quel que soit le thème. */}
-        <span className="inline-flex h-10 items-end overflow-hidden rounded-sm bg-[#FF7900] px-2.5 pb-1.5 md:h-12 md:px-3 md:pb-2">
-          <span className="text-sm font-bold lowercase tracking-tight text-white md:text-base">
-            orange
-          </span>
-        </span>
+        {/* Le logo officiel d'Orange (fourni par Paul le 12 oct. 2026), carré
+            orange quel que soit le thème. Il remplace une imitation en texte. */}
+        <Image src="/assets/orange-logo.svg" alt="Orange" width={48} height={48} priority className="h-10 w-10 md:h-12 md:w-12" />
       </div>
     );
   }
