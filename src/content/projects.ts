@@ -1333,7 +1333,7 @@ export const projects: Project[] = [
             size: "wide",
           },
           {
-            title: "Le perchman et moi en train de filmer un lobby",
+            title: "Le perchman et moi en train de faire un limbo",
             image: grandMenageLobby,
             size: "wide",
           },

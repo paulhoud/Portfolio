@@ -380,7 +380,7 @@ export const enProjectTranslations: ProjectTranslations = {
         media: [
           { title: "The team and myself filming a murder scene" },
           { title: "Me editing the short film on Mac" },
-          { title: "The boom operator and I filming a lobby scene" },
+          { title: "The boom operator and I doing the limbo" },
         ],
       },
     ],
