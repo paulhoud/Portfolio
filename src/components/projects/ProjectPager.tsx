@@ -78,7 +78,9 @@ export function ProjectPager({ slug }: { slug: string }) {
         href={localHref(`/projects/${target.slug}`)}
         onClick={onClick}
         className={cn(
-          "group flex items-center gap-4 rounded-2xl border border-ink/10 p-4 transition duration-300 md:gap-5 md:p-5",
+          // min-w-0 : l'accroche coupée (truncate) ne doit pas élargir la case de la
+          // grille au-delà de l'écran (téléphone).
+          "group flex min-w-0 items-center gap-4 rounded-2xl border border-ink/10 p-4 transition duration-300 md:gap-5 md:p-5",
           "hover:-translate-y-0.5 hover:border-ink/25 hover:bg-ink/[0.03]",
           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60",
           side === "next" && "md:flex-row-reverse md:text-right",
@@ -121,7 +123,7 @@ export function ProjectPager({ slug }: { slug: string }) {
 
   return (
     <nav aria-label={copy.label} className="bg-page px-6 pt-6 md:px-20 md:pt-8">
-      <div className="mx-auto grid max-w-5xl gap-3 md:grid-cols-2 md:gap-5">
+      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 md:gap-5">
         {card(previous, "previous")}
         {card(next, "next")}
       </div>
