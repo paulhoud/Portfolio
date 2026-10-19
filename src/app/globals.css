@@ -655,10 +655,10 @@ body {
   }
 }
 
-/* Curseur de la galerie (cf. SceneCursor) : « Découvrir » tourne lentement,
-   un point descend comme pour faire défiler. Le curseur du système s'efface
-   dans toute la zone de l'expérience, seulement quand celui-ci y est actif
-   (sinon, il reste en secours). */
+/* Curseur du site (cf. SceneCursor) : « Découvrir » tourne lentement, un
+   point descend comme pour faire défiler. Le curseur du système s'efface sur
+   toutes les pages, seulement quand celui-ci est actif (sinon, il reste en
+   secours). */
 @keyframes cursor-spin {
   to {
     transform: rotate(360deg);
@@ -688,8 +688,8 @@ body {
   animation: cursor-scroll 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-html[data-scene-cursor] [data-cursor-zone],
-html[data-scene-cursor] [data-cursor-zone] * {
+html[data-scene-cursor],
+html[data-scene-cursor] * {
   cursor: none !important;
 }
 

@@ -1,11 +1,44 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSoundOn } from "@/lib/sound/sound";
 import { cn } from "@/lib/utils";
 import type { SceneCursorState } from "./three/galleryRenderer";
 
 type Mode = Exclude<SceneCursorState, null> | "link";
+
+/**
+ * Ce que la scène 3D de l'accueil dit au curseur : ce qu'on survole, et si
+ * c'est une tuile sombre. Le curseur vit dans le cadre du site (AppFrame), la
+ * galerie le renseigne tant qu'elle est affichée.
+ */
+type SceneInfo = { scene: SceneCursorState; onDark: boolean };
+const IDLE: SceneInfo = { scene: null, onDark: false };
+let sceneInfo = IDLE;
+const sceneListeners = new Set<() => void>();
+
+export function setSceneCursor(next: SceneInfo) {
+  if (next.scene === sceneInfo.scene && next.onDark === sceneInfo.onDark) return;
+  sceneInfo = next;
+  sceneListeners.forEach((listener) => listener());
+}
+
+export function clearSceneCursor() {
+  setSceneCursor(IDLE);
+}
+
+function useSceneInfo() {
+  return useSyncExternalStore(
+    (listener) => {
+      sceneListeners.add(listener);
+      return () => {
+        sceneListeners.delete(listener);
+      };
+    },
+    () => sceneInfo,
+    () => IDLE,
+  );
+}
 
 /**
  * Taille du cercle selon ce qu'on survole (son plus grand diamètre : 112 px).
@@ -24,8 +57,8 @@ const LEGIBLE =
   "[filter:drop-shadow(0_0_0.75px_var(--cursor-halo))_drop-shadow(0_0_0.75px_var(--cursor-halo))_drop-shadow(0_0_2.5px_var(--cursor-halo))]";
 
 /**
- * Curseur de la galerie (souris seulement). Dans toute la zone de
- * l'expérience, il remplace celui du système et dit ce qu'on peut faire :
+ * Curseur du site (souris seulement), le même sur toutes les pages. Il
+ * remplace celui du système et dit ce qu'on peut faire :
  * - dans le vide : un petit cercle où un point descend, comme l'invitation
  *   à faire défiler ;
  * - sur un projet : un petit arc blanc ouvert qui tourne, un point à la
@@ -35,25 +68,17 @@ const LEGIBLE =
  *   son est actif) ou une main (on peut l'attraper) ; objet tenu : il se
  *   resserre ;
  * - sur un lien ou un bouton : un cercle plein, discret.
- * Hors de la zone (en-tête, pastilles, autres pages), le curseur du système
- * revient ; il reste aussi celui de secours si ce script ne tourne pas. Le
- * curseur ne capte jamais les clics. Au toucher, il n'existe pas : le bouton
+ * Le curseur du système reste celui de secours si ce script ne tourne pas.
+ * Le curseur ne capte jamais les clics. Au toucher, il n'existe pas : le bouton
  * « Voir le projet » et les objets qui sautillent à l'arrivée en tiennent lieu.
  */
-export function SceneCursor({
-  scene,
-  calm,
-  onDark = false,
-}: {
-  scene: SceneCursorState;
-  calm: boolean;
-  /** Survole une tuile sombre : curseur blanc à liseré sombre, quel que soit le thème. */
-  onDark?: boolean;
-}) {
+export function SceneCursor({ calm }: { calm: boolean }) {
+  // Sur une tuile sombre : curseur blanc à liseré sombre, quel que soit le thème.
+  const { scene, onDark } = useSceneInfo();
   const [soundOn] = useSoundOn();
   const [enabled, setEnabled] = useState(false);
-  const [target, setTarget] = useState<{ inZone: boolean; overScene: boolean; dom: Mode | null }>({
-    inZone: false,
+  const [target, setTarget] = useState<{ inside: boolean; overScene: boolean; dom: Mode | null }>({
+    inside: false,
     overScene: false,
     dom: null,
   });
@@ -93,16 +118,15 @@ export function SceneCursor({
       if (first) Object.assign(ring, goal);
       if (!raf) raf = requestAnimationFrame(place);
       const element = event.target instanceof Element ? event.target : null;
-      const inZone = element?.closest("[data-cursor-zone]") != null;
       const overScene = element instanceof HTMLCanvasElement && element.closest("[data-scene-host]") !== null;
       const control = element?.closest("a, button, [role='button'], [data-cursor]");
       const dom: Mode | null = control ? (control.getAttribute("data-cursor") === "discover" ? "project" : "link") : null;
       setTarget((current) =>
-        current.inZone === inZone && current.overScene === overScene && current.dom === dom ? current : { inZone, overScene, dom },
+        current.inside && current.overScene === overScene && current.dom === dom ? current : { inside: true, overScene, dom },
       );
     };
     const onLeave = (event: PointerEvent) => {
-      if (event.relatedTarget === null) setTarget({ inZone: false, overScene: false, dom: null });
+      if (event.relatedTarget === null) setTarget({ inside: false, overScene: false, dom: null });
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
@@ -113,13 +137,13 @@ export function SceneCursor({
     };
   }, [enabled, calm]);
 
-  // Dans la zone, toujours un curseur : celui que la scène indique, ou le
-  // curseur « vide » quand elle ne répond pas (entrée dans un projet, autre
+  // Toujours un curseur : celui que la scène indique, ou le curseur « vide »
+  // ailleurs et quand elle ne répond pas (entrée dans un projet, autre
   // dimension).
-  const mode: Mode | null = !enabled || !target.inZone ? null : (target.dom ?? (target.overScene ? (scene ?? "scene") : "scene"));
+  const mode: Mode | null = !enabled || !target.inside ? null : (target.dom ?? (target.overScene ? (scene ?? "scene") : "scene"));
 
-  // Le curseur du système ne s'efface que dans la zone, et seulement quand
-  // celui-ci est bien là pour le remplacer.
+  // Le curseur du système ne s'efface que quand celui-ci est bien là pour le
+  // remplacer.
   useEffect(() => {
     const root = document.documentElement;
     if (mode) root.dataset.sceneCursor = "on";
@@ -136,7 +160,7 @@ export function SceneCursor({
     <div
       aria-hidden="true"
       data-mode={mode ?? undefined}
-      className={cn("pointer-events-none fixed inset-0 z-[70] transition-opacity duration-200", mode ? "opacity-100" : "opacity-0")}
+      className={cn("pointer-events-none fixed inset-0 z-[120] transition-opacity duration-200", mode ? "opacity-100" : "opacity-0")}
       // Les couleurs du curseur suivent `--ink` et `--cursor-halo` : on les
       // redéfinit ici, pour lui seul, au-dessus d'une tuile sombre.
       style={onDark ? ({ "--ink": "#f5f2f4", "--cursor-halo": "rgba(0, 0, 0, 0.55)" } as React.CSSProperties) : undefined}

@@ -1,12 +1,13 @@
 "use client";
 
-import { AnimatePresence, MotionConfig } from "framer-motion";
+import { AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath } from "@/i18n/paths";
 import { useMotionPaused } from "@/lib/motionPause";
 import { applyTheme, useTheme } from "@/lib/theme";
+import { SceneCursor } from "@/components/gallery/SceneCursor";
 import { Analytics } from "@/components/stats/Analytics";
 import { FixedBackButton } from "./FixedBackButton";
 import { Opening } from "./Opening";
@@ -27,6 +28,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
   const isHome = isHomePath(pathname);
   const { t } = useTranslation();
   const [motionPaused] = useMotionPaused();
+  const reducedMotion = useReducedMotion();
 
   const [theme] = useTheme();
 
@@ -65,6 +67,9 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <ScrollToTop />
 
       <Veil />
+
+      {/* Le même curseur sur toutes les pages ; l'accueil lui dit ce que survole la scène. */}
+      <SceneCursor calm={Boolean(reducedMotion) || motionPaused} />
 
       {/* Rideau d'ouverture, hors de la zone animée pour couvrir aussi l'en-tête. */}
       <Opening />

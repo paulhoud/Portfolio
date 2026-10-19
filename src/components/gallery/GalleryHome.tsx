@@ -36,7 +36,7 @@ import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
 import { onHomeReset } from "@/lib/homeReset";
 import { track } from "@/lib/stats/track";
 import { HeadphonesHint } from "./HeadphonesHint";
-import { SceneCursor } from "./SceneCursor";
+import { clearSceneCursor, setSceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
 import { portalAnchor } from "./three/portal";
 import { readScrollMemory } from "@/lib/useScrollMemory";
@@ -786,6 +786,12 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   useEffect(() => rendererRef.current?.setHighlight(preview), [preview, scene]);
   const live = scene === "ready";
 
+  // Le curseur du site (AppFrame) suit ce que la souris survole dans la scène.
+  // Sur une tuile sombre, il passe en blanc (utile en thème clair).
+  const cursorDark = live && hovered3d !== null && isTileDark(projects[hovered3d]?.mediaKey);
+  useEffect(() => setSceneCursor({ scene: live ? cursor3d : null, onDark: cursorDark }), [live, cursor3d, cursorDark]);
+  useEffect(() => clearSceneCursor, []);
+
   const shown = preview ?? (live ? hovered3d : null) ?? active;
   const project = projects[shown];
   // La lumière du projet affiché teinte la navigation (liste, repère mobile,
@@ -826,7 +832,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
             masquée (100lvh), pour ne laisser aucun vide en bas quand elle se
             cache au défilement ; le texte et les repères restent dans la
             hauteur toujours visible (100svh), et ne sautent donc jamais. */}
-        <div ref={stageRef} data-cursor-zone className="sticky top-0 h-[100lvh] overflow-hidden bg-[var(--stage)]">
+        <div ref={stageRef} className="sticky top-0 h-[100lvh] overflow-hidden bg-[var(--stage)]">
           {/* Lueur de la couleur du projet, derrière le cadre. */}
           <motion.div
             aria-hidden="true"
@@ -1238,12 +1244,6 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
         </div>
       </section>
 
-      <SceneCursor
-        scene={live ? cursor3d : null}
-        calm={calm}
-        // Sur une tuile sombre, le curseur passe en blanc (utile en thème clair).
-        onDark={live && hovered3d !== null && isTileDark(projects[hovered3d]?.mediaKey)}
-      />
       {/* Au toucher, pas de curseur : quand le message s'efface, les objets du
           projet affiché sautillent, pour montrer qu'on peut les toucher. */}
       <HeadphonesHint
