@@ -13,6 +13,9 @@ import { useTheme } from "@/lib/theme";
 
 const INK = { dark: "#f5f2f4", light: "#18171c" };
 
+/** Éléments de lecture au-dessus desquels la grille s'atténue. */
+const TEXT = "p, h1, h2, h3, h4, li, blockquote, figcaption, dt, dd";
+
 /** Mélange deux couleurs hexadécimales (part de `b` entre 0 et 1). */
 function mix(a: string, b: string, amount: number) {
   const channel = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
@@ -36,14 +39,21 @@ export function ProjectBackdrop({ mediaKey }: { mediaKey: string }) {
           gridColor={INK[theme]}
           cellSize={60}
           radius={140}
-          holdTime={400}
-          fadeDuration={800}
+          // Traînée un peu plus courte que l'original (0,4 s + 0,8 s).
+          holdTime={250}
+          fadeDuration={600}
           maxOpacity={theme === "light" ? 0.65 : 0.55}
           fillOpacity={theme === "light" ? 0.1 : 0.06}
           gridOpacity={theme === "light" ? 0.06 : 0.05}
           spotlight={0.6}
           edgeFade={0.2}
           clickPulse
+          // Lignes fines et diffuses : une définition simple suffit, soit
+          // quatre fois moins de calcul sur les écrans haute définition.
+          dpr={1}
+          // Plus discrète sous le texte, pleine dans les marges et sur les images.
+          quietOver={TEXT}
+          quietLevel={0.3}
         />
       </div>
     </div>

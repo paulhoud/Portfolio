@@ -51,6 +51,7 @@ uniform float uSpotlight;
 uniform float uPresence;
 uniform float uEdgeFade;
 uniform float uReveal;
+uniform float uDim;
 
 out vec4 outColor;
 
@@ -96,7 +97,7 @@ void main() {
   float mark = max(vx, vy);
 
   vec2 toMouse = pos - uMouse;
-  float spot = exp(-dot(toMouse, toMouse) / max(uRadius * uRadius, 1.0) * 1.6) * uSpotlight * uPresence;
+  float spot = exp(-dot(toMouse, toMouse) / max(uRadius * uRadius, 1.0) * 1.6) * uSpotlight * uPresence * uDim;
 
   vec2 center = uResolution * 0.5;
   float reach = length(center);
@@ -141,8 +142,8 @@ void main() {
     litAlpha = border * own * uMaxOpacity;
     fillAlpha = inside * own * uFillOpacity;
   }
-  litAlpha *= fade;
-  fillAlpha *= fade;
+  litAlpha *= fade * uDim;
+  fillAlpha *= fade * uDim;
 
   float cellAlpha = clamp(max(litAlpha, fillAlpha), 0.0, 1.0);
   float alpha = cellAlpha + gridAlpha * (1.0 - cellAlpha);
@@ -237,6 +238,10 @@ export type CursorGridProps = {
   pulseSpeed?: number;
   /** Cases qui s'allument d'elles-mêmes, de 0 à 1. */
   ambient?: number;
+  /** Au-dessus de ces éléments (du texte, par exemple), l'effet s'atténue. */
+  quietOver?: string;
+  /** Force de l'effet au-dessus de `quietOver`, de 0 à 1. */
+  quietLevel?: number;
   /** Fondu vers les bords, de 0 à 0,5. */
   edgeFade?: number;
   /** La grille se déploie depuis le centre à l'arrivée. */
@@ -276,6 +281,8 @@ export function CursorGrid({
   clickPulse = true,
   pulseSpeed = 600,
   ambient = 0,
+  quietOver = "",
+  quietLevel = 0.3,
   edgeFade = 0.2,
   intro = true,
   lightMode = false,
@@ -307,6 +314,8 @@ export function CursorGrid({
     clickPulse,
     pulseSpeed: Math.max(1, pulseSpeed),
     ambient: clamp(ambient, 0, 1),
+    quietOver,
+    quietLevel: clamp(quietLevel, 0, 1),
     edgeFade: clamp(edgeFade, 0, 0.5),
     intro,
     dpr,
@@ -364,6 +373,8 @@ export function CursorGrid({
     let touched = new Float32Array(0);
     let pixels = new Uint8Array(0);
     let presence = 0;
+    let dim = 1;
+    let dimGoal = 1;
     let clock = 0;
     let introClock = settingsRef.current.intro && !reduce ? 0 : 1;
     let raf = 0;
@@ -503,6 +514,7 @@ export function CursorGrid({
       gl.uniform1f(u.uSpotlight, s.spotlight);
       gl.uniform1f(u.uPresence, presence);
       gl.uniform1f(u.uEdgeFade, s.edgeFade);
+      gl.uniform1f(u.uDim, dim);
       gl.uniform1f(u.uReveal, introClock >= 1 ? 1 : 1 - Math.pow(1 - introClock, 2.2));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.bindVertexArray(null);
@@ -522,6 +534,7 @@ export function CursorGrid({
       mouse.y += (pointer.y - mouse.y) * follow;
       const presenceGoal = pointer.inside ? 1 : 0;
       presence += (presenceGoal - presence) * (1 - Math.exp(-dt / 0.25));
+      dim += (dimGoal - dim) * (1 - Math.exp(-dt / 0.2));
 
       if (s.ambient > 0 && !reduce && levels.length) {
         const chance = s.ambient * dt * levels.length * 0.04;
@@ -537,7 +550,7 @@ export function CursorGrid({
       const holdSeconds = s.holdTime / 1000;
       const fadeStep = dt / (s.fadeDuration / 1000);
       const attack = 1 - Math.exp(-dt / 0.045);
-      let active = pulses.length > 0 || introClock < 1 || Math.abs(presence - presenceGoal) > 0.002;
+      let active = pulses.length > 0 || introClock < 1 || Math.abs(presence - presenceGoal) > 0.002 || Math.abs(dim - dimGoal) > 0.002;
       for (let i = 0; i < levels.length; i++) {
         let target = targets[i];
         if (target <= 0 && levels[i] <= 0) continue;
@@ -584,6 +597,9 @@ export function CursorGrid({
         mouse.x = x;
         mouse.y = y;
       }
+      const s = settingsRef.current;
+      const over = s.quietOver && event.target instanceof Element ? event.target.closest(s.quietOver) : null;
+      dimGoal = over ? s.quietLevel : 1;
       energize(x, y);
       wake();
     };
@@ -598,6 +614,7 @@ export function CursorGrid({
 
     const onPointerLeave = () => {
       pointer.inside = false;
+      dimGoal = 1;
       wake();
     };
 
