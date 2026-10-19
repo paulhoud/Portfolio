@@ -1,6 +1,7 @@
 "use client";
 
 import { notFound } from "next/navigation";
+import { ProjectBackdrop } from "@/components/projects/ProjectBackdrop";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
 import { ProjectPager } from "@/components/projects/ProjectPager";
 import { getLocalizedProject } from "@/i18n/catalog";
@@ -18,10 +19,13 @@ export function LocalizedProjectPageView({ slug }: LocalizedProjectPageViewProps
     notFound();
   }
 
+  // Fond uni porté ici (et non par l'article) pour que la grille passe entre
+  // le fond et le contenu, du haut de la page jusqu'aux projets voisins.
   return (
-    <>
+    <div className="relative isolate bg-page">
+      <ProjectBackdrop mediaKey={project.mediaKey ?? ""} />
       <ProjectDetail project={project} />
       <ProjectPager slug={slug} />
-    </>
+    </div>
   );
 }

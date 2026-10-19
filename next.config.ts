@@ -38,6 +38,23 @@ const nextConfig: NextConfig = {
     qualities: [75, 92],
   },
 
+  async headers() {
+    return [
+      {
+        // Le HTTPS est déjà imposé par Vercel (redirection et HSTS). En plus :
+        // pas de type de fichier deviné par le navigateur, et le site ne peut
+        // pas être affiché dans le cadre d'un autre site (page des
+        // statistiques comprise).
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
+
   async redirects() {
     return [
       // Images de partage : avant les deux langues, elles étaient servies par

@@ -60,6 +60,8 @@ export async function POST(request: Request) {
   if (!sql) return empty();
   const agent = request.headers.get("user-agent") ?? "";
   if (!agent || BOTS.test(agent)) return empty();
+  // Envoi parti d'un autre site (le navigateur le signale) : du faux trafic.
+  if (request.headers.get("sec-fetch-site") === "cross-site") return empty();
 
   const text = await request.text();
   if (text.length > MAX_BODY) return empty();

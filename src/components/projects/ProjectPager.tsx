@@ -122,7 +122,7 @@ export function ProjectPager({ slug }: { slug: string }) {
   };
 
   return (
-    <nav aria-label={copy.label} className="bg-page px-6 pt-6 md:px-20 md:pt-8">
+    <nav aria-label={copy.label} className="px-6 pt-6 md:px-20 md:pt-8">
       <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 md:gap-5">
         {card(previous, "previous")}
         {card(next, "next")}

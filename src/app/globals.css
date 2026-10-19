@@ -80,6 +80,11 @@
   :where(:root[data-theme="light"]) .fill-ink\/45 {
     fill: color-mix(in oklab, var(--ink) 66%, transparent);
   }
+  /* Thème sombre : l'encre à 40-45 % restait sous le seuil (4,2:1 sur la page,
+     audit du 19 oct. 2026) ; à 50 %, 4,9:1. */
+  :where(:root:not([data-theme="light"])) :is(.text-ink\/40, .text-ink\/45) {
+    color: color-mix(in oklab, var(--ink) 50%, transparent);
+  }
 }
 
 @media (min-width: 1024px) {
