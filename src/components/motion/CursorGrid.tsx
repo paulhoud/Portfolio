@@ -285,7 +285,6 @@ export function CursorGrid({
   style,
 }: CursorGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const wakeRef = useRef<(() => void) | null>(null);
   const ink = lightMode ? "#18181b" : "#ffffff";
   const settings: Settings = {
@@ -316,17 +315,33 @@ export function CursorGrid({
 
   useEffect(() => {
     const container = containerRef.current;
-    const canvas = canvasRef.current;
-    const gl = canvas?.getContext("webgl2", {
+    if (!container) return undefined;
+    // Une zone de dessin neuve à chaque montage, posée ici et non par React :
+    // celle d'un montage précédent a perdu son contexte au démontage (cf. le
+    // nettoyage), et un contexte perdu s'affiche en voile blanc sur la page.
+    const canvas = document.createElement("canvas");
+    canvas.className = "pointer-events-none absolute inset-0 block h-full w-full";
+    canvas.setAttribute("aria-hidden", "true");
+    const gl = canvas.getContext("webgl2", {
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
       depth: false,
       stencil: false,
     });
-    if (!container || !canvas || !gl) return undefined;
+    if (!gl) return undefined;
     const shader = link(gl);
     if (!shader) return undefined;
+    container.prepend(canvas);
+    // Contexte retiré par le navigateur (trop de scènes 3D ouvertes, carte
+    // graphique réinitialisée) : la grille disparaît plutôt que de voiler.
+    const onLost = () => {
+      canvas.style.display = "none";
+      cancelAnimationFrame(raf);
+      raf = 0;
+      visible = false;
+    };
+    canvas.addEventListener("webglcontextlost", onLost);
     const u = shader.uniforms;
     const vao = gl.createVertexArray();
     const stateTexture = gl.createTexture();
@@ -627,7 +642,9 @@ export function CursorGrid({
       gl.deleteTexture(stateTexture);
       gl.deleteVertexArray(vao);
       gl.deleteProgram(shader.program);
+      canvas.removeEventListener("webglcontextlost", onLost);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
+      canvas.remove();
     };
   }, []);
 
@@ -639,7 +656,6 @@ export function CursorGrid({
 
   return (
     <div ref={containerRef} className={`relative h-full w-full overflow-hidden${className ? ` ${className}` : ""}`} style={style}>
-      <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 block h-full w-full" aria-hidden="true" />
       {children ? <div className="relative h-full w-full">{children}</div> : null}
     </div>
   );
