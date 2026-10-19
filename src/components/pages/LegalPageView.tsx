@@ -14,7 +14,7 @@ import { setOptOut, useOptOut } from "@/lib/stats/track";
  * refus d'être compté. Texte validé par Paul avant publication.
  */
 
-const UPDATED = { fr: "Mis à jour le 12 octobre 2026.", en: "Last updated on 12 October 2026." };
+const UPDATED = { fr: "Mis à jour le 19 octobre 2026.", en: "Last updated on 19 October 2026." };
 
 export function LegalPageView() {
   const { locale } = useTranslation();
@@ -63,6 +63,14 @@ export function LegalPageView() {
             {en
               ? "The 3D objects on the home page come from Sketchfab and remain the property of their authors. The hidden dimensions are unofficial nods to Dofus (© Ankama) and South Park (© Comedy Central), non-commercial and not affiliated."
               : "Les objets 3D de l'accueil proviennent de Sketchfab et restent la propriété de leurs auteurs. Les dimensions cachées sont des clins d'œil non officiels à Dofus (© Ankama) et South Park (© Comedy Central), sans usage commercial ni affiliation."}
+          </p>
+        </Section>
+
+        <Section title={en ? "Terms of use" : "Conditions d'utilisation"}>
+          <p>
+            {en
+              ? "Browsing this site is free of charge and open to all. Its content may not be reproduced without permission. Links to other websites are provided for information only: their content is not the responsibility of this site. The site may change or be interrupted at any time. It is governed by French law."
+              : "La consultation du site est libre et gratuite. Ses contenus ne peuvent pas être reproduits sans accord. Les liens vers d'autres sites sont donnés à titre d'information, leur contenu n'engage pas ce site. Le site peut évoluer ou être interrompu à tout moment. Il est soumis au droit français."}
           </p>
         </Section>
 
