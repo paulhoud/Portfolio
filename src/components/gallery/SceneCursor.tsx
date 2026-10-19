@@ -106,7 +106,12 @@ export function SceneCursor({ calm }: { calm: boolean }) {
       ring.x += (goal.x - ring.x) * follow;
       ring.y += (goal.y - ring.y) * follow;
       if (dotRef.current) dotRef.current.style.transform = `translate3d(${goal.x}px, ${goal.y}px, 0)`;
-      if (ringRef.current) ringRef.current.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0)`;
+      // Calé sur les pixels de l'écran : entre deux pixels, le trait fin du
+      // cercle scintillait pendant qu'il rattrape la souris.
+      const ratio = window.devicePixelRatio || 1;
+      const x = Math.round(ring.x * ratio) / ratio;
+      const y = Math.round(ring.y * ratio) / ratio;
+      if (ringRef.current) ringRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       if (Math.abs(goal.x - ring.x) > 0.3 || Math.abs(goal.y - ring.y) > 0.3) raf = requestAnimationFrame(place);
     };
     const onMove = (event: PointerEvent) => {
@@ -155,6 +160,7 @@ export function SceneCursor({ calm }: { calm: boolean }) {
 
   if (!enabled) return null;
   const shown = mode ?? "scene";
+  const ring = 2 * Math.round(56 * RING_SCALE[shown]);
 
   return (
     <div
@@ -167,8 +173,10 @@ export function SceneCursor({ calm }: { calm: boolean }) {
     >
       <div ref={ringRef} className="absolute left-0 top-0 will-change-transform">
         <div
-          className="absolute -left-14 -top-14 h-28 w-28 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          style={{ transform: `scale(${RING_SCALE[shown]})` }}
+          // Dessiné à sa taille réelle (paire, pour un centre sur un pixel) et
+          // non réduit : réduit, son trait tombait à un demi-pixel et vibrait.
+          className="absolute transition-[width,height,margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{ width: ring, height: ring, marginLeft: -ring / 2, marginTop: -ring / 2 }}
         >
           <span
             className={cn(
@@ -186,9 +194,9 @@ export function SceneCursor({ calm }: { calm: boolean }) {
               cy="56"
               r="55"
               fill="none"
-              strokeWidth="1.75"
+              strokeWidth="1"
               vectorEffect="non-scaling-stroke"
-              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/90 light:stroke-ink")}
+              className={cn("transition-[stroke] duration-500", shown === "object" ? "[stroke:var(--accent-glow,#ffffff)]" : "stroke-ink/65 light:stroke-ink/80")}
             />
           </svg>
         </div>
