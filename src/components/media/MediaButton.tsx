@@ -38,6 +38,8 @@ export function MediaButton({
   return (
     <button
       type="button"
+      // La grille des pages projet laisse les images intactes (cf. ProjectBackdrop).
+      data-grid-hole
       aria-label={label}
       onClick={() => viewer.openMedia(media)}
       className={cn(

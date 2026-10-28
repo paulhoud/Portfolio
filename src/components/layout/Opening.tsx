@@ -6,7 +6,6 @@ import { useEffect } from "react";
 // Chargé sur toutes les pages avec le rideau : la remise à zéro de l'accueil
 // (clic sur le logo, actualisation) doit être prête partout.
 import "@/lib/homeReset";
-import { useMotionPaused } from "@/lib/motionPause";
 import { endOpening, useOpening } from "@/lib/opening";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +27,6 @@ export function Opening() {
   const pathname = usePathname();
   const isHome = isHomePath(pathname);
   const state = useOpening();
-  const [paused] = useMotionPaused();
 
   useEffect(() => {
     // Arrivé ailleurs que sur l'accueil (ou parti pendant l'attente) : plus de rideau.
@@ -48,7 +46,6 @@ export function Opening() {
       className={cn(
         "opening fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[#08080b]",
         state === "leaving" && "opening-leave",
-        paused && "opening-still",
       )}
     >
       <svg className="opening-mark" viewBox="0 0 61 70" width="61" height="70">

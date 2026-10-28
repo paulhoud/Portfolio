@@ -60,7 +60,7 @@ export type Spacing = {
    * droite (1). Sinon, ils se répartissent des deux côtés (0).
    */
   rightOnly: boolean;
-  /** Écran en hauteur (téléphone) : rien au-dessus des plaques, où est le titre. */
+  /** Écran en hauteur (téléphone) : objets au-dessus et au-dessous des plaques (cf. placeOnScreen). */
   portrait: boolean;
 };
 
@@ -226,10 +226,10 @@ export function layoutSatellites(
   hint?: (index: number) => SatelliteHint | undefined,
   /** Nombre d'objets différents : jamais plus de places, pour qu'aucun ne se répète. */
   limit = Infinity,
-  /** Ordinateur : ce que montre l'écran (les objets s'y posent, cf. placeOnScreen). */
+  /** Ce que montre l'écran (les objets s'y posent, cf. placeOnScreen). */
   screen?: ScreenFrame,
 ): SatelliteLayout[] {
-  if (screen && !spacing.portrait && spacing.rightOnly) return placeOnScreen(pieces, spacing, hint, screen, limit);
+  if (screen && (spacing.portrait || spacing.rightOnly)) return placeOnScreen(pieces, spacing, hint, screen, limit);
   let placed = placeSatellites(pieces, spacing, hint, new Set());
   const extra = placed.layouts.length - limit;
   if (extra > 0) {
@@ -377,6 +377,11 @@ export type ScreenFrame = {
  * - « left » : la bande libre entre la colonne de texte et la plaque ;
  * - « right » : la bande entre la plaque et le bord droit ;
  * - « edge » : au-dessus de la plaque (sous l'en-tête), sinon au-dessous.
+ * Téléphone (demande de Paul, 28 oct. 2026 : des objets au bord, coupés ou
+ * cachés derrière la plaque, qui prend presque toute la largeur) : quatre
+ * places, au-dessus et au-dessous de la plaque, à gauche et à droite du
+ * milieu (laissé libre pour l'invitation à défiler), dans la bande entre le
+ * titre et le cartel ; deux ou trois par plaque selon le nombre d'objets.
  * Chaque objet y tient entier quand on est arrêté devant sa plaque, un peu
  * en retrait de son plan, à des profondeurs variées. Un objet `textSide`
  * prend la place de gauche, un objet `top` celle du dessus. Les vérifications
@@ -400,9 +405,11 @@ function placeOnScreen(
   };
   const cross = (a: Vec3, b: Vec3): Vec3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
   const focal = screen.height / 2 / Math.tan((screen.fov * Math.PI) / 360);
-  // Rayon d'un objet à l'écran (px) : assez grand pour le reconnaître et l'attraper.
-  const MIN_R = 30;
-  const MAX_R = 58;
+  const phone = spacing.portrait;
+  // Rayon d'un objet à l'écran (px) : assez grand pour le reconnaître et
+  // l'attraper (au doigt aussi), sans voler la vedette à la plaque.
+  const MIN_R = phone ? 24 : 30;
+  const MAX_R = phone ? 44 : 58;
   // Trois places par plaque, mais `limit` objets en tout : quelques plaques,
   // réparties le long de l'allée, n'ont pas d'objet au-dessus.
   const extra = Math.max(0, pieces.length * 3 - limit);
@@ -410,6 +417,9 @@ function placeOnScreen(
 
   pieces.forEach((piece, owner) => {
     if (satellites.length >= limit) return;
+    // Téléphone : autant d'objets par plaque, à un près (un manque se reporte sur la suivante).
+    const due = phone ? Math.floor(((owner + 1) * limit) / pieces.length) - satellites.length : Infinity;
+    if (due <= 0) return;
     const distance = (spacing.view * piece.size) / PIECE_SIZE;
     const pose = cameraPose(pieces, owner, distance);
     const forward = unit(sub(pose.target, pose.position));
@@ -421,7 +431,18 @@ function placeOnScreen(
     const gap = 14;
     const above = slab.top - gap - screen.top;
     const below = screen.bottom - (slab.bottom + gap);
-    const spots: { kind: string; x0: number; x1: number; y0: number; y1: number }[] = [
+    const middle = 44;
+    const phoneSpots = [
+      { kind: "above-left", x0: screen.left, x1: screen.cx - middle, y0: screen.top, y1: slab.top - gap },
+      { kind: "above-right", x0: screen.cx + middle, x1: screen.right, y0: screen.top, y1: slab.top - gap },
+      { kind: "below-left", x0: screen.left, x1: screen.cx - middle, y0: slab.bottom + gap, y1: screen.bottom },
+      { kind: "below-right", x0: screen.cx + middle, x1: screen.right, y0: slab.bottom + gap, y1: screen.bottom },
+    ];
+    // Dans un ordre propre à chaque plaque : la place laissée vide change d'un projet à l'autre.
+    const turn = Math.floor(seeded(owner, 22) * phoneSpots.length);
+    const spots: { kind: string; x0: number; x1: number; y0: number; y1: number }[] = phone
+      ? phoneSpots.map((_, i) => phoneSpots[(i + turn) % phoneSpots.length])
+      : [
       { kind: "right", x0: slab.right + gap, x1: screen.right, y0: screen.top, y1: screen.bottom },
       { kind: "left", x0: screen.left, x1: slab.left - gap, y0: screen.top, y1: screen.bottom },
       above >= below
@@ -439,12 +460,14 @@ function placeOnScreen(
     const order = (k: number) => rows.map((_, i) => rows[(i + shift + k * 3) % rows.length]);
     const depths = [0.4, 1, -0.35, 1.6, 0.15, -0.7, 2.2, 0.7];
     spots.forEach((spot, spotIndex) => {
+      if (found.length >= due) return;
       const r = Math.min(MAX_R, (spot.x1 - spot.x0) / 2 - 4, (spot.y1 - spot.y0) / 2 - 4);
       if (r < MIN_R) return;
       search: for (const row of order(spotIndex)) {
         for (const lift of depths) {
-          const along = spot.kind === "edge" ? row : 0.5;
-          const across = spot.kind === "edge" ? 0.5 : row;
+          const flat = spot.kind !== "left" && spot.kind !== "right";
+          const along = flat ? row : 0.5;
+          const across = flat ? 0.5 : row;
           const x = spot.x0 + r + (spot.x1 - spot.x0 - 2 * r) * along;
           const y = spot.y0 + r + (spot.y1 - spot.y0 - 2 * r) * across;
           const depth = distance + lift;
@@ -477,13 +500,13 @@ function placeOnScreen(
 
     // Puis les objets, dans l'ordre du catalogue : ceux qui ont une place
     // attitrée (côté texte, au-dessus) d'abord servis, les autres ensuite.
-    const count = Math.min(found.length, limit - satellites.length);
+    const count = Math.min(found.length, limit - satellites.length, due);
     const wishes = Array.from({ length: count }, (_, j) => hint?.(satellites.length + j));
     const taken = new Set<number>();
     const choice: number[] = [];
     wishes.forEach((wish, j) => {
-      const kind = wish?.textSide ? "left" : wish?.top ? "edge" : null;
-      const k = kind ? found.findIndex((spot, i) => spot.kind === kind && !taken.has(i)) : -1;
+      const kind = phone ? (wish?.top ? "above" : null) : wish?.textSide ? "left" : wish?.top ? "edge" : null;
+      const k = kind ? found.findIndex((spot, i) => spot.kind.startsWith(kind) && !taken.has(i)) : -1;
       if (k < 0) return;
       taken.add(k);
       choice[j] = k;

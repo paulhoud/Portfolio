@@ -72,7 +72,13 @@ export type GalleryPieceInput = {
 };
 
 /** Emplacement du cadre HTML, en pixels CSS dans le canevas. */
-export type FrameRect = { cx: number; cy: number; size: number };
+export type FrameRect = {
+  cx: number;
+  cy: number;
+  size: number;
+  /** Place libre autour du cadre, entre le titre et le cartel (px, dans la scène). */
+  zone?: { left: number; top: number; right: number; bottom: number };
+};
 
 /** « context-lost » est passager ; « webgl » et « slow » valent pour la session. */
 export type GalleryFailure = "webgl" | "slow" | "context-lost";
@@ -705,7 +711,7 @@ export function createGalleryRenderer(
   /** La disposition dépend de la forme de l'écran : on reconstruit si elle change. */
   const buildSatellites = () => {
     // Sur ordinateur, Paul garde 30 objets (le fromage et le pion n'y sont pas).
-    const limit = screenFrame ? Math.min(30, IDENTITY_CATALOG.length) : IDENTITY_CATALOG.length;
+    const limit = currentSpacing.rightOnly ? Math.min(30, IDENTITY_CATALOG.length) : IDENTITY_CATALOG.length;
     satelliteLayouts = layoutSatellites(layouts, currentSpacing, (index) => IDENTITY_CATALOG[index]?.place, limit, screenFrame ?? undefined);
     const signature = satelliteLayouts.map((layout) => `${layout.owner}:${layout.size.join(",")}`).join("|");
     if (signature === satelliteSignature) return;
@@ -999,6 +1005,8 @@ export function createGalleryRenderer(
     currentSpacing = spacingFor(baseDistance, aspect);
     // La colonne de texte occupe la gauche (jusqu'à ~40 % de la largeur),
     // l'en-tête le haut, le cartel le dessous du cadre.
+    // Téléphone : la bande libre entre le titre et le cartel, au-dessus et
+    // au-dessous de la plaque.
     screenFrame = currentSpacing.rightOnly
       ? {
           width: w,
@@ -1011,7 +1019,19 @@ export function createGalleryRenderer(
           right: w - 16,
           bottom: Math.min(h - 16, frame.cy + frame.size / 2),
         }
-      : null;
+      : currentSpacing.portrait && frame.zone
+        ? {
+            width: w,
+            height: h,
+            fov: framing.fov,
+            cx: frame.cx,
+            cy: frame.cy,
+            left: Math.max(8, frame.zone.left),
+            top: frame.zone.top,
+            right: Math.min(w - 8, frame.zone.right),
+            bottom: frame.zone.bottom,
+          }
+        : null;
     layouts = layoutPieces(count, currentSpacing);
     buildSatellites();
     fog.uFogNear.value = baseDistance + 3;

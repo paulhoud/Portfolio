@@ -87,6 +87,7 @@ export function ProjectPager({ slug }: { slug: string }) {
         )}
       >
         <span
+          data-grid-hole
           className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-ink/10 md:h-20 md:w-20"
           style={{ backgroundColor: target.background }}
         >

@@ -50,11 +50,6 @@ export type SiteCopy = {
     optedOut: string;
     optIn: string;
   };
-  /** Bouton qui met en pause les animations automatiques. */
-  motion: {
-    pause: string;
-    resume: string;
-  };
   /** Thème clair ou sombre des pages de lecture (l'accueil reste sombre). */
   theme: {
     /** Nom de l'interrupteur (« Thème clair »). */

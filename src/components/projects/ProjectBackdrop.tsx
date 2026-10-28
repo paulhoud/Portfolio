@@ -3,12 +3,19 @@
 import { CursorGrid } from "@/components/motion/CursorGrid";
 import { getTileLight } from "@/content/projectMedia";
 import { useTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 /**
  * Fond des pages projet : une grille discrète qui s'allume sous le curseur,
  * à la couleur du projet (celle de sa tuile dans la galerie 3D et du repère
- * de la liste de l'accueil). Elle reste à l'écran pendant la lecture, sous le
- * contenu, et s'arrête avec la page (le pied de page garde son fond uni).
+ * de la liste de l'accueil). Elle reste à l'écran pendant la lecture et
+ * s'arrête avec la page (le pied de page garde son fond uni).
+ *
+ * Elle est posée par-dessus le contenu, fondue dans la page (éclaircir en
+ * sombre, produit en clair : sur le texte, rien ne change) et découpée autour
+ * des images. Posée dessous, elle obligeait le navigateur à ranger tout le
+ * texte dans un calque transparent, lissé en gris : un texte « pixelisé »
+ * sous Windows (constat de Paul, 28 oct. 2026).
  */
 
 const INK = { dark: "#f5f2f4", light: "#18171c" };
@@ -32,7 +39,10 @@ export function ProjectBackdrop({ mediaKey }: { mediaKey: string }) {
   const color = theme === "light" ? mix(glow, INK.light, 0.35) : glow;
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+    <div
+      aria-hidden="true"
+      className={cn("pointer-events-none absolute inset-0 z-[1]", theme === "light" ? "mix-blend-multiply" : "mix-blend-screen")}
+    >
       <div className="sticky top-0 h-[100lvh]">
         <CursorGrid
           color={color}
@@ -51,9 +61,10 @@ export function ProjectBackdrop({ mediaKey }: { mediaKey: string }) {
           // Lignes fines et diffuses : une définition simple suffit, soit
           // quatre fois moins de calcul sur les écrans haute définition.
           dpr={1}
-          // Plus discrète sous le texte, pleine dans les marges et sur les images.
+          // Plus discrète sur le texte, pleine dans les marges ; les images restent intactes.
           quietOver={TEXT}
           quietLevel={0.3}
+          holes="[data-grid-hole]"
         />
       </div>
     </div>

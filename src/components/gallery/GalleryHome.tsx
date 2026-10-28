@@ -29,7 +29,6 @@ import {
   setNextTransition,
   showVeil,
 } from "@/lib/immersion";
-import { useMotionPaused } from "@/lib/motionPause";
 import { useTheme } from "@/lib/theme";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
@@ -147,9 +146,10 @@ const NO_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
  *
  * Une longue piste de défilement porte une scène collée à l'écran. Chaque
  * projet occupe une tranche de la piste (`--slot`) : on fait défiler
- * normalement, et le projet actif change à chaque tranche. Sur téléphone, une
- * tranche fait un écran entier et le défilement s'arrête sur chacune : un
- * geste mène au projet suivant ou précédent, jamais plus loin. La scène montre ce
+ * normalement, et le projet actif change à chaque tranche. Le défilement
+ * s'arrête sur chacune (globals.css, `home-snap`) : un geste mène au projet
+ * suivant ou précédent, jamais plus loin : une tranche fait un écran entier,
+ * un long glissé de pavé tactile ne saute donc pas plusieurs projets. La scène montre ce
  * projet dans un cadre (la tuile actuelle, animée au survol) avec son cartel.
  * Le cadre est l'emplacement où viendra la salle 3D.
  *
@@ -170,8 +170,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const { t, href: localHref } = useTranslation();
   const router = useRouter();
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [motionPaused] = useMotionPaused();
-  const calm = prefersReducedMotion || motionPaused;
+  const calm = prefersReducedMotion;
 
   const trackRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -375,11 +374,19 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const measureFrame = useCallback((): FrameRect | null => {
     const stage = stageRef.current?.getBoundingClientRect();
     const frame = frameRef.current?.getBoundingClientRect();
+    const zone = frameRef.current?.parentElement?.getBoundingClientRect();
     if (!stage || !frame) return null;
     return {
       cx: frame.left + frame.width / 2 - stage.left,
       cy: frame.top + frame.height / 2 - stage.top,
       size: Math.min(frame.width, frame.height),
+      // La place autour du cadre (téléphone : entre le titre et le cartel), où se posent les objets.
+      zone: zone && {
+        left: zone.left - stage.left,
+        top: zone.top - stage.top,
+        right: zone.right - stage.left,
+        bottom: zone.bottom - stage.top,
+      },
     };
   }, []);
 
@@ -411,6 +418,44 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       }),
     [],
   );
+  // Molette et pavé tactile : un geste, élan compris, mène au projet voisin,
+  // jamais plus loin ni entre deux. Les crans rapprochés d'une molette
+  // sensible et la traîne d'un pavé tactile font partie du même geste tant
+  // qu'ils se suivent de près ; un effleurement ne fait rien. Le clavier, la
+  // barre de défilement, le toucher et le redimensionnement restent au
+  // navigateur, calé sur les mêmes points d'arrêt (globals.css, home-snap).
+  useEffect(() => {
+    const GAP_MS = 200;
+    const THRESHOLD_PX = 24;
+    let last = -Infinity;
+    let sum = 0;
+    let stepped = false;
+    let goal: { index: number; at: number } | null = null;
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || doomRef.current || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      // Une zone qui défile elle-même (liste trop haute pour l'écran) garde la molette.
+      if (event.target instanceof Element && scrollsItself(event.target, event.deltaY)) return;
+      event.preventDefault();
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+      if (event.timeStamp - last > GAP_MS || Math.sign(delta) !== Math.sign(sum)) {
+        sum = 0;
+        stepped = false;
+      }
+      last = event.timeStamp;
+      sum += delta;
+      if (stepped || Math.abs(sum) < THRESHOLD_PX) return;
+      stepped = true;
+      // Un nouveau geste pendant le glissement part du projet visé, pas de celui qu'on quitte.
+      const from = goal && event.timeStamp - goal.at < 900 ? goal.index : activeRef.current;
+      const next = Math.min(count - 1, Math.max(0, from + Math.sign(sum)));
+      if (next === from) return;
+      goal = { index: next, at: event.timeStamp };
+      scrollToPiece(next);
+    };
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [count, scrollToPiece]);
+
   /** Dimension où l'on a atterri (le treillis, ou une image animée). */
   const [landed, setLanded] = useState<DimensionKind>("lattice");
   /** Place du portail dans la scène (fractions), une fois arrivé dans la dimension. */
@@ -813,7 +858,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     <>
       <section
         ref={trackRef}
-        className="relative [--slot:100svh] lg:[--slot:35svh]"
+        className="relative [--slot:100svh]"
         style={{ height: `calc(100lvh + ${count - 1} * var(--slot) + 1px)` }}
       >
         {/* Ancres de chaque projet, à la hauteur de sa tranche. */}
@@ -1280,6 +1325,17 @@ const DIMENSIONS: DimensionKind[] = ["lattice", "dofus", "southpark"];
 /** Secousse du téléphone : force minimale d'un aller-retour (m/s², gravité retirée). */
 const SHAKE_FORCE = 13;
 const DIMENSION_KEY = "portfolio-dimension";
+/** Vrai si `element` ou un parent défile lui-même dans ce sens (avant la page). */
+function scrollsItself(element: Element, deltaY: number) {
+  for (let node: Element | null = element; node && node !== document.body; node = node.parentElement) {
+    if (node.scrollHeight <= node.clientHeight + 1) continue;
+    const overflow = getComputedStyle(node).overflowY;
+    if (overflow !== "auto" && overflow !== "scroll") continue;
+    if (deltaY > 0 ? node.scrollTop + node.clientHeight < node.scrollHeight - 1 : node.scrollTop > 0) return true;
+  }
+  return false;
+}
+
 function readDimension(): DimensionKind | null {
   try {
     const value = window.sessionStorage.getItem(DIMENSION_KEY);

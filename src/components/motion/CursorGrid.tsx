@@ -52,6 +52,8 @@ uniform float uPresence;
 uniform float uEdgeFade;
 uniform float uReveal;
 uniform float uDim;
+uniform vec4 uHoles[12];
+uniform int uHoleCount;
 
 out vec4 outColor;
 
@@ -73,6 +75,14 @@ float roundBox(vec2 p, vec2 b, float r) {
 
 void main() {
   vec2 pos = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y);
+  for (int i = 0; i < 12; i++) {
+    if (i >= uHoleCount) break;
+    vec4 hole = uHoles[i];
+    if (pos.x >= hole.x && pos.y >= hole.y && pos.x <= hole.z && pos.y <= hole.w) {
+      outColor = vec4(0.0);
+      return;
+    }
+  }
   vec2 g = (pos - uOffset) / uCellSize;
   vec2 cell = floor(g);
   vec2 f = g - cell;
@@ -242,6 +252,8 @@ export type CursorGridProps = {
   quietOver?: string;
   /** Force de l'effet au-dessus de `quietOver`, de 0 à 1. */
   quietLevel?: number;
+  /** Éléments que la grille laisse intacts (images), suivis au défilement. */
+  holes?: string;
   /** Fondu vers les bords, de 0 à 0,5. */
   edgeFade?: number;
   /** La grille se déploie depuis le centre à l'arrivée. */
@@ -283,6 +295,7 @@ export function CursorGrid({
   ambient = 0,
   quietOver = "",
   quietLevel = 0.3,
+  holes = "",
   edgeFade = 0.2,
   intro = true,
   lightMode = false,
@@ -316,6 +329,7 @@ export function CursorGrid({
     ambient: clamp(ambient, 0, 1),
     quietOver,
     quietLevel: clamp(quietLevel, 0, 1),
+    holes,
     edgeFade: clamp(edgeFade, 0, 0.5),
     intro,
     dpr,
@@ -478,6 +492,25 @@ export function CursorGrid({
       dirty = true;
     };
 
+    const holeRects = new Float32Array(12 * 4);
+    /** Images à l'écran, en pixels de la zone de dessin (12 au plus). */
+    const measureHoles = (selector: string) => {
+      if (!selector) return 0;
+      const box = container.getBoundingClientRect();
+      let count = 0;
+      for (const element of document.querySelectorAll(selector)) {
+        const rect = element.getBoundingClientRect();
+        if (rect.bottom < box.top || rect.top > box.bottom || rect.right < box.left || rect.left > box.right) continue;
+        holeRects.set(
+          [(rect.left - box.left) * view.ratio, (rect.top - box.top) * view.ratio, (rect.right - box.left) * view.ratio, (rect.bottom - box.top) * view.ratio],
+          count * 4,
+        );
+        count += 1;
+        if (count === 12) break;
+      }
+      return count;
+    };
+
     const draw = () => {
       const s = settingsRef.current;
       const ratio = view.ratio;
@@ -515,6 +548,8 @@ export function CursorGrid({
       gl.uniform1f(u.uPresence, presence);
       gl.uniform1f(u.uEdgeFade, s.edgeFade);
       gl.uniform1f(u.uDim, dim);
+      gl.uniform1i(u.uHoleCount, measureHoles(s.holes));
+      gl.uniform4fv(u["uHoles[0]"], holeRects);
       gl.uniform1f(u.uReveal, introClock >= 1 ? 1 : 1 - Math.pow(1 - introClock, 2.2));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.bindVertexArray(null);
@@ -619,6 +654,10 @@ export function CursorGrid({
     };
 
     const onVisibility = () => wake();
+    // Les images défilent sous la grille : elle se redessine pour les suivre.
+    const onScroll = () => {
+      if (settingsRef.current.holes) wake();
+    };
 
     const resizeObserver = new ResizeObserver(() => {
       rebuild();
@@ -635,6 +674,7 @@ export function CursorGrid({
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("scroll", onScroll, { passive: true });
     rebuild();
     if (introClock < 1) pulses.push({ x: view.width / 2, y: view.height / 2, t0: 0.15, strength: 0.6 });
     draw();
@@ -656,6 +696,7 @@ export function CursorGrid({
       window.removeEventListener("pointerdown", onPointerDown);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("scroll", onScroll);
       gl.deleteTexture(stateTexture);
       gl.deleteVertexArray(vao);
       gl.deleteProgram(shader.program);

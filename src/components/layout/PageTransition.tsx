@@ -43,10 +43,24 @@ const overlayVariants: Variants = {
     kind === "cut" ? { opacity: 0, transition: instant } : { x: "100%", boxShadow: SLIDE_SHADOW },
 };
 
+// Le damier s'assombrit sous la page qui le recouvre, sans changer d'échelle :
+// un texte agrandi ou réduit en mouvement se brouille.
 const baseVariants: Variants = {
-  initial: (kind: TransitionKind) => (kind === "cut" ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.01 }),
-  animate: { opacity: 1, scale: 1 },
-  exit: (kind: TransitionKind) => (kind === "cut" ? { opacity: 0, transition: instant } : { opacity: 0.5, scale: 0.96 }),
+  initial: (kind: TransitionKind) => (kind === "cut" ? { opacity: 1 } : { opacity: 0 }),
+  animate: { opacity: 1 },
+  exit: (kind: TransitionKind) => (kind === "cut" ? { opacity: 0, transition: instant } : { opacity: 0.5 }),
+};
+
+/**
+ * Glissement au pixel entier (cf. ScrollReveal) : en fin d'amorti, la page
+ * avançait d'une fraction de pixel par image et son texte scintillait. Arrivée,
+ * plus aucune transformation ne reste.
+ */
+const slideTemplate = ({ x }: { x?: string | number }) => {
+  const value = String(x ?? 0);
+  const amount = Number.parseFloat(value) || 0;
+  const px = Math.round(value.endsWith("%") ? (amount * document.documentElement.clientWidth) / 100 : amount);
+  return px ? `translateX(${px}px)` : "none";
 };
 
 const transition = { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const };
@@ -124,6 +138,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
           className="page-transition-layer"
           style={{ zIndex: isBase ? 1 : 2 }}
           variants={reduceMotion ? undefined : variants}
+          transformTemplate={slideTemplate}
           initial={reduceMotion ? false : "initial"}
           animate={reduceMotion ? undefined : "animate"}
           exit={reduceMotion ? undefined : "exit"}

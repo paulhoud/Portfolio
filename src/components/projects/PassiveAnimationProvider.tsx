@@ -9,7 +9,6 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { isMotionPaused, subscribeMotionPaused } from "@/lib/motionPause";
 import { PassiveScheduler } from "./passiveScheduler";
 
 /**
@@ -111,7 +110,7 @@ export function PassiveAnimationProvider({ children }: { children: ReactNode }) 
     schedulerRef.current = scheduler;
 
     const recomputeEnabled = () => {
-      scheduler.setEnabled(!reduceMotionQuery.matches && !document.hidden && !isMotionPaused());
+      scheduler.setEnabled(!reduceMotionQuery.matches && !document.hidden);
     };
     const onActivity = () => scheduler.notifyActivity();
     activityRef.current = onActivity;
@@ -121,7 +120,6 @@ export function PassiveAnimationProvider({ children }: { children: ReactNode }) 
     }
     document.addEventListener("visibilitychange", recomputeEnabled);
     reduceMotionQuery.addEventListener("change", recomputeEnabled);
-    const unsubscribePause = subscribeMotionPaused(recomputeEnabled);
 
     recomputeEnabled();
 
@@ -133,7 +131,6 @@ export function PassiveAnimationProvider({ children }: { children: ReactNode }) 
       }
       document.removeEventListener("visibilitychange", recomputeEnabled);
       reduceMotionQuery.removeEventListener("change", recomputeEnabled);
-      unsubscribePause();
       scheduler.dispose();
     };
   }, []);

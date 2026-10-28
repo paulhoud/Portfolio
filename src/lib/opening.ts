@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { isMotionPaused } from "./motionPause";
 
 /**
  * Rideau d'ouverture du site : à l'arrivée sur l'accueil, un écran sobre (le
@@ -63,7 +62,7 @@ export function endOpening({ immediate = false }: { immediate?: boolean } = {}) 
   }
   if (ending || state !== "loading") return;
   ending = true;
-  const calm = isMotionPaused() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = Math.max(0, (calm ? MIN_CALM_MS : MIN_MS) - performance.now());
   window.setTimeout(() => {
     if (state !== "loading") return;

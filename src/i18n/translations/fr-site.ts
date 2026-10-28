@@ -29,10 +29,6 @@ export const frSite: SiteCopy = {
     optedOut: "Vous n'êtes plus compté sur cet appareil.",
     optIn: "Annuler",
   },
-  motion: {
-    pause: "Mettre en pause les animations",
-    resume: "Relancer les animations",
-  },
   theme: {
     label: "Thème clair",
     toLight: "Passer en thème clair",

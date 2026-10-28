@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath } from "@/i18n/paths";
-import { useMotionPaused } from "@/lib/motionPause";
 import { initSound, setSoundVolume, useSoundOn, useSoundVolume } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { useTheme } from "@/lib/theme";
@@ -184,7 +183,6 @@ export function SiteHeader() {
 
   const visible = isOpen || !isHidden || isHomePath(pathname);
   const barTransition = { duration: reduceMotion ? 0 : 0.28, ease };
-  const [motionPaused] = useMotionPaused();
 
   // Halo qui suit la souris dans la capsule (sans rendu React à chaque pas).
   const onCapsulePointer = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -217,7 +215,7 @@ export function SiteHeader() {
               Tout reste dans la capsule, lignes du logo comprises. */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
             <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,color-mix(in_srgb,var(--ink)_8%,transparent),transparent_70%)]" />
-            {!motionPaused ? <span className="capsule-sweep" /> : null}
+            <span className="capsule-sweep" />
             <span className="absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]" />
           </div>
 
@@ -291,7 +289,6 @@ export function SiteHeader() {
         </div>
         <div className={DOCK_PILL}>
           <SoundToggle />
-          <MotionToggle />
           <ThemeToggle />
         </div>
       </div>
@@ -363,7 +360,6 @@ export function SiteHeader() {
                     <LanguageFlags />
                   </div>
                   <SoundToggle variant="labelled" />
-                  <MotionToggle labelled />
                   <ThemeToggle labelled />
                 </div>
               </div>
@@ -550,34 +546,6 @@ function SoundSwitch({ variant, on, toggle }: { variant: "icon" | "capsule" | "l
           </span>
         </>
       ) : null}
-    </button>
-  );
-}
-
-/**
- * Met en pause les animations automatiques (tuiles, logos, séquences
- * d'arrivée) et mémorise le choix.
- */
-function MotionToggle({ labelled = false }: { labelled?: boolean }) {
-  const { t } = useTranslation();
-  const [paused, toggle] = useMotionPaused();
-  // Libellé fixe : l'état (en pause ou non) est porté par aria-pressed, et
-  // l'icône bascule entre pause et lecture.
-  const label = t.site.motion.pause;
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={paused}
-      aria-label={labelled ? undefined : label}
-      title={labelled ? undefined : paused ? t.site.motion.resume : label}
-      className={toggleClasses(labelled, paused)}
-    >
-      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
-        {paused ? <path d="M8 5.5v13l10.5-6.5L8 5.5Z" /> : <path d="M7 5h3.5v14H7V5Zm6.5 0H17v14h-3.5V5Z" />}
-      </svg>
-      {labelled ? <span>{label}</span> : null}
     </button>
   );
 }

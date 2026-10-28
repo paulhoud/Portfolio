@@ -29,10 +29,6 @@ export const enSite: SiteCopy = {
     optedOut: "You are no longer counted on this device.",
     optIn: "Undo",
   },
-  motion: {
-    pause: "Pause animations",
-    resume: "Resume animations",
-  },
   theme: {
     label: "Light theme",
     toLight: "Switch to light theme",

@@ -19,8 +19,8 @@ export function LocalizedProjectPageView({ slug }: LocalizedProjectPageViewProps
     notFound();
   }
 
-  // Fond uni porté ici (et non par l'article) pour que la grille passe entre
-  // le fond et le contenu, du haut de la page jusqu'aux projets voisins.
+  // Fond uni porté ici (et non par l'article) : la grille s'y fond, du haut de
+  // la page jusqu'aux projets voisins.
   return (
     <div className="relative isolate bg-page">
       <ProjectBackdrop mediaKey={project.mediaKey ?? ""} />

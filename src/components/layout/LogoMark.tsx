@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useTranslation } from "@/i18n/context";
 import { requestIdle } from "@/lib/idle";
-import { useMotionPaused } from "@/lib/motionPause";
 import { cn } from "@/lib/utils";
 import type { LogoScene } from "./logo/logoScene";
 
@@ -53,8 +52,7 @@ export function LogoMark({ variant = "white", className }: LogoMarkProps) {
 function AnimatedLogoMark({ className }: { className?: string }) {
   const { t, href } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
-  const [motionPaused] = useMotionPaused();
-  const calm = Boolean(prefersReducedMotion) || motionPaused;
+  const calm = Boolean(prefersReducedMotion);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<LogoScene | null>(null);
