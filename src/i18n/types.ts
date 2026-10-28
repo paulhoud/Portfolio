@@ -8,9 +8,26 @@ export type NavItem = {
   label: string;
 };
 
+/** Un temps de la méthode (cf. MethodTimeline). */
 export type MethodStep = {
+  /** Ancre de la frise d'ensemble (`#comprendre`…), identique dans les deux langues. */
+  id: string;
+  /** Nom court du temps, dans la frise d'ensemble. */
+  phase: string;
   title: string;
-  body: string;
+  /** Une phrase qui résume le temps. */
+  lead: string;
+  body: string[];
+  /** Ce que l'IA y apporte. */
+  ai: string;
+  /** Méthodes et outils possibles à ce moment-là. */
+  tools: string[];
+};
+
+/** Un outil et l'usage que j'en fais. */
+export type MethodTool = {
+  name: string;
+  use: string;
 };
 
 export type AboutSection = {
@@ -121,6 +138,26 @@ export type SiteCopy = {
     introTitle: string;
     introOne: string;
     introTwo: string;
+    /** Frise d'ensemble : son intitulé, et la boucle du dernier temps vers le premier. */
+    phasesLabel: string;
+    loop: string;
+    /** Intitulés répétés à chaque temps. */
+    aiLabel: string;
+    toolsLabel: string;
+    /** Après le dernier temps : on repart souvent en arrière. */
+    loopNote: string;
+    ai: {
+      title: string;
+      intro: string;
+      partners: MethodTool[];
+      mine: string;
+    };
+    tools: {
+      title: string;
+      intro: string;
+      items: MethodTool[];
+      note: string;
+    };
   };
   methodSteps: MethodStep[];
   about: {

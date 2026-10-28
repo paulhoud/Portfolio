@@ -20,15 +20,15 @@ export function methodMetadata(locale: Locale): Metadata {
   return {
     title: en ? "My method" : "Ma méthode",
     description: en
-      ? `The method of ${profile.name}, ${profile.jobTitle}: understanding the need, going to the field, framing, designing, testing, shipping and following through in production.`
-      : `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre le besoin, aller sur le terrain, cadrer, concevoir, tester, livrer et suivre en production.`,
+      ? `The method of ${profile.name}, ${profile.jobTitle}: understand, explore, design, experiment and validate, with AI as a design partner and tools chosen for the experience in mind.`
+      : `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre, explorer, concevoir, expérimenter et valider, avec l'IA comme partenaire de conception et des outils choisis pour l'expérience visée.`,
     alternates: alternates("/method", locale),
     ...shareMetadata({
       locale,
       title: en ? `My method - ${profile.name}` : `Ma méthode - ${profile.name}`,
       description: en
-        ? `From understanding the need to shipping: the design approach of ${profile.name}.`
-        : `De la compréhension du besoin à la livraison : la démarche de conception de ${profile.name}.`,
+        ? `From understanding the problem to a working version: the design approach of ${profile.name}.`
+        : `De la compréhension du problème à une version qui fonctionne : la démarche de conception de ${profile.name}.`,
       url: localePath("/method", locale),
     }),
   };

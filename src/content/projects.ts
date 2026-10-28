@@ -1408,29 +1408,6 @@ export const projects: Project[] = [
   },
 ];
 
-export const methodSteps = [
-  {
-    title: "Comprendre le contexte et les besoins du client",
-    body: "La première étape consiste à comprendre les objectifs, les besoins, le public cible et l'environnement concurrentiel du projet.",
-  },
-  {
-    title: "Rechercher et collecter des informations",
-    body: "Je mène une recherche approfondie sur le marché, les tendances, les utilisateurs, les besoins réels et la concurrence.",
-  },
-  {
-    title: "Synthétiser et analyser les données",
-    body: "Les informations sont triées et analysées pour produire des conclusions utiles, des insights et une direction claire.",
-  },
-  {
-    title: "Concevoir, prototyper et tester",
-    body: "Je transforme les hypothèses en interfaces, prototypes et supports testables pour valider rapidement les décisions.",
-  },
-  {
-    title: "Livrer et accompagner",
-    body: "Les livrables sont préparés proprement, documentés et pensés pour être repris ou déployés par les équipes.",
-  },
-];
-
 export function getProject(slug: string) {
   return projects.find((project) => project.slug === slug);
 }

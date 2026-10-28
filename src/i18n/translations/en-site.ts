@@ -83,30 +83,107 @@ export const enSite: SiteCopy = {
     title: "My method",
     introTitle: "In short",
     introOne:
-      "As the sole designer on a product, I cover the whole cycle: understanding the need, framing it, designing it, testing it, then shipping it in code with the developer.",
+      "I am a Product Designer, and design does not start in Figma. It starts with understanding the problem, looking for leads beyond existing solutions, then making ideas concrete as early as possible: a mock-up, a prototype or a first version that works.",
     introTwo:
-      "These five steps set the pace of my sprints. I adapt them to the team's size and the product's maturity, but never skip the last one.",
+      "These five moments are not a straight line. They overlap and repeat, and I scale them to the project, the time available and what is at stake. AI supports me in each of them, without deciding for me.",
+    phasesLabel: "The five moments of the method",
+    loop: "and back again",
+    aiLabel: "With AI",
+    toolsLabel: "Methods and tools",
+    loopNote:
+      "Often, we go back to an earlier moment: what testing teaches sends us back to understanding the need, and an experiment can reopen the exploration.",
+    ai: {
+      title: "AI as a design partner",
+      intro:
+        "AI is now part of how I work. Not to go faster at all costs: to explore more possibilities, and to bring to life ideas I would not have had time to build.",
+      partners: [
+        {
+          name: "GPT",
+          use: "Structuring my thinking, exploring leads, digging into a subject, and writing precise prompts, suited to what I want to get.",
+        },
+        {
+          name: "Claude and Claude Code",
+          use: "Supporting implementation and development: going from an idea to a first version, then iterating on the product.",
+        },
+      ],
+      mine: "What remains mine: framing the problem, choosing the creative direction, assessing the results and making the calls. AI does not replace my reasoning as a Product Designer, it equips it.",
+    },
+    tools: {
+      title: "Tools chosen for the experience in mind",
+      intro:
+        "I choose tools according to the experience I want to design, not the other way round. My working environment, depending on the project:",
+      items: [
+        { name: "GPT", use: "Thinking, exploring leads, writing prompts" },
+        { name: "Claude, Claude Code", use: "Development, implementation, product iterations" },
+        { name: "Figma", use: "Interfaces, wireframes, prototypes, design systems, journeys" },
+        { name: "Blender", use: "3D elements, when a project calls for it" },
+        { name: "Unity", use: "Prototypes of interactive environments, when relevant" },
+      ],
+      note: "I do not use all of them on every project, nor to the same depth: they are possibilities I choose from, or explore.",
+    },
   },
   methodSteps: [
     {
-      title: "Understand the need",
-      body: "I listen to clients, users and business teams to grasp the real goal, the context and the constraints before drawing anything.",
+      id: "comprendre",
+      phase: "Understand",
+      title: "Understand before designing",
+      lead: "Finding the right problem to solve matters more than the first solution that comes to mind.",
+      body: [
+        "I start with the context: who uses the product, in what situation, with which business goals and constraints. I then phrase what I think I have understood as hypotheses, so I can check them rather than assume them.",
+        "To find needs, pain points and opportunities, I pick the tools that fit the context: user interviews, feedback analysis, tests on what exists, benchmarks of solutions and market practices. At UpikaJob, I gather client feedback myself: that is often where the real priorities lie. When time is short, I do less, but I never skip this step.",
+        "I come out of it with improvement leads ranked by priority, shared with the team.",
+      ],
+      ai: "Structuring what I have learned: grouping feedback, surfacing trends, rephrasing a problem, listing angles I might have missed. The conclusions come from the field.",
+      tools: ["Interviews", "Feedback analysis", "Tests", "Benchmark", "GPT"],
     },
     {
-      title: "Go to the field",
-      body: "Interviews, user tests, client feedback and a review of what exists: I gather the signals decisions will rest on.",
+      id: "explorer",
+      phase: "Explore",
+      title: "Feeding the thinking",
+      lead: "Looking elsewhere, so as not to mechanically reproduce what already exists.",
+      body: [
+        "My watch is not about collecting pretty interfaces. I follow how Product Design and UX/UI evolve, new uses and emerging interactions, immersive web experiences and animation, prototyping and development tools, and what AI makes possible.",
+        "Faced with a subject, this material helps me open several directions before choosing one: comparing approaches, seeing how other products solved a similar problem, spotting what can surprise without confusing. The 3D home page of this portfolio came out of this kind of exploration.",
+      ],
+      ai: "Widening the field: weighing several approaches, digging into a subject I know little about, generating first creative leads that I then sort.",
+      tools: ["Design watch", "References", "Design systems", "GPT"],
     },
     {
-      title: "Frame and prioritise",
-      body: "I turn what I learned into a clear direction - product vision, priorities, scope - and settle the trade-offs with the team.",
+      id: "concevoir",
+      phase: "Design",
+      title: "Making ideas tangible",
+      lead: "The sooner an idea takes shape, the sooner we see whether it holds.",
+      body: [
+        "I take an idea through several levels of fidelity: formalising the concept, sketching journeys and wireframes, then mock-ups and interactive prototypes in Figma, built on a design system when one exists.",
+        "Each level is there to decide something: a wireframe validates a structure, a prototype validates an interaction. I only add detail once the previous question is settled.",
+      ],
+      ai: "Preparing the ground: realistic content, wording variants, edge cases to plan for in the screens.",
+      tools: ["Sketches", "Wireframes", "Prototypes", "Design system", "Figma"],
     },
     {
-      title: "Design, prototype and test",
-      body: "I turn hypotheses into journeys, interfaces and prototypes built on the design system, and test them before locking them in.",
+      id: "experimenter",
+      phase: "Experiment",
+      title: "Experimenting and building",
+      lead: "Between the mock-up and the product, the line has become more fluid.",
+      body: [
+        "When the project calls for it, I push experimentation further: animation, 3D elements, interactive environments. I then explore Blender to create 3D elements, or Unity to prototype an interactive environment.",
+        "I also move from design to implementation. At UpikaJob, I take charge of the front-end, paired with the developer. With Claude and Claude Code, I can go as far as a first version that works, test it in real conditions and iterate on it: this portfolio was built that way.",
+        "Not every project needs code, 3D or AI. I choose the level of execution according to what we are trying to learn.",
+      ],
+      ai: "This is where Claude plays the biggest part: supporting development, implementing, fixing, and shortening the loop between an idea and a testable version.",
+      tools: ["Animation", "3D", "Front-end", "Claude", "Claude Code", "Blender", "Unity"],
     },
     {
-      title: "Ship and follow through",
-      body: "Specs, sprint follow-up and front-end paired with the developer: I stay on a feature until it is live in production.",
+      id: "valider",
+      phase: "Validate",
+      title: "Validating, iterating, improving",
+      lead: "Experimentation stays in the service of the user experience.",
+      body: [
+        "I check that the solution answers the original need: are the interfaces and interactions understood? Where are the friction points? I gather feedback, observe, and adjust the design choices.",
+        "The aim is to reconcile usability, visual consistency, technical feasibility and business goals. The work does not stop at delivering a mock-up or a prototype: I follow a feature all the way to production, then watch how it lives.",
+      ],
+      ai: "Analysing feedback at scale and preparing tests. The final assessment remains mine, and the users'.",
+      tools: ["User testing", "Feedback", "Iterations", "Production follow-up"],
     },
   ],
   about: {

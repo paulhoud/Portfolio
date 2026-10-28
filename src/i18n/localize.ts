@@ -1,5 +1,5 @@
 import type { Project, ProjectBlock, ProjectMedia, ProjectSection } from "@/content/projects";
-import type { Locale, MethodStep, ProjectCopy, SiteCopy } from "./types";
+import type { Locale, ProjectCopy, SiteCopy } from "./types";
 
 function mergeSections(
   base: ProjectSection[],
@@ -192,14 +192,6 @@ export function localizeProjects(
   translations: Record<string, ProjectCopy>,
 ): Project[] {
   return items.map((project) => localizeProject(project, locale, translations));
-}
-
-export function localizeMethodSteps(
-  steps: MethodStep[],
-  locale: Locale,
-  englishSteps: MethodStep[],
-): MethodStep[] {
-  return locale === "en" ? englishSteps : steps;
 }
 
 export function localizeLinkLabels(

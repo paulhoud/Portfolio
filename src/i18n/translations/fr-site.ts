@@ -84,30 +84,107 @@ export const frSite: SiteCopy = {
     title: "Ma méthode",
     introTitle: "En bref",
     introOne:
-      "Seul designer d'un produit, je couvre tout le cycle : comprendre le besoin, le cadrer, le concevoir, le tester, puis le livrer en code avec le développeur.",
+      "Je suis Product Designer, et la conception ne commence pas dans Figma. Elle commence par comprendre le problème, chercher des pistes ailleurs que dans les solutions existantes, puis rendre les idées concrètes le plus tôt possible : maquette, prototype ou première version qui fonctionne.",
     introTwo:
-      "Ces cinq étapes rythment mes sprints. Je les adapte à la taille de l'équipe et à la maturité du produit, sans jamais sauter la dernière.",
+      "Ces cinq temps ne forment pas une ligne droite. Ils se chevauchent, se répètent, et je les dose selon le projet, le temps disponible et ce qui est en jeu. L'IA m'accompagne à chacun d'eux, sans décider à ma place.",
+    phasesLabel: "Les cinq temps de la méthode",
+    loop: "et on y revient",
+    aiLabel: "Avec l'IA",
+    toolsLabel: "Méthodes et outils",
+    loopNote:
+      "Souvent, on repart d'un temps précédent : ce qu'on apprend en testant renvoie à la compréhension du besoin, et une expérimentation peut rouvrir l'exploration.",
+    ai: {
+      title: "L'IA, partenaire de conception",
+      intro:
+        "L'IA fait aujourd'hui partie de ma façon de travailler. Pas pour aller plus vite à tout prix : pour explorer plus de possibilités, et concrétiser des idées que je n'aurais pas eu le temps de construire.",
+      partners: [
+        {
+          name: "GPT",
+          use: "Structurer mes réflexions, explorer des pistes, approfondir un sujet, et construire des prompts précis, adaptés à ce que je cherche à obtenir.",
+        },
+        {
+          name: "Claude et Claude Code",
+          use: "M'accompagner dans l'implémentation et le développement : passer d'une idée à une première version, puis itérer sur le produit.",
+        },
+      ],
+      mine: "Ce qui reste à moi : poser le problème, choisir la direction créative, évaluer les résultats et arbitrer. L'IA ne remplace pas mon raisonnement de Product Designer, elle l'outille.",
+    },
+    tools: {
+      title: "Des outils choisis pour l'expérience visée",
+      intro:
+        "Je choisis les outils en fonction de l'expérience que je cherche à concevoir, et non l'inverse. Mon environnement de travail, selon les projets :",
+      items: [
+        { name: "GPT", use: "Réflexion, exploration de pistes, construction de prompts" },
+        { name: "Claude, Claude Code", use: "Développement, implémentation, itérations sur le produit" },
+        { name: "Figma", use: "Interfaces, wireframes, prototypes, design systems, parcours" },
+        { name: "Blender", use: "Éléments 3D, quand un projet le justifie" },
+        { name: "Unity", use: "Prototypes d'environnements interactifs, quand c'est pertinent" },
+      ],
+      note: "Je ne les utilise pas tous sur chaque projet, ni avec la même profondeur : ce sont des possibilités que je choisis, ou que j'explore.",
+    },
   },
   methodSteps: [
     {
-      title: "Comprendre le besoin",
-      body: "J'écoute les clients, les utilisateurs et les équipes métier pour saisir l'objectif réel, le contexte et les contraintes avant de dessiner quoi que ce soit.",
+      id: "comprendre",
+      phase: "Comprendre",
+      title: "Comprendre avant de concevoir",
+      lead: "Trouver le bon problème à résoudre compte plus que la première solution venue.",
+      body: [
+        "Je commence par le contexte : qui utilise le produit, dans quelle situation, avec quels objectifs métier et quelles contraintes. Je formule ensuite ce que je crois avoir compris sous forme d'hypothèses, pour les vérifier plutôt que les supposer.",
+        "Pour trouver les besoins, les irritants et les opportunités, je choisis les outils selon le contexte : entretiens avec des utilisateurs, analyse des retours, tests sur l'existant, benchmark des solutions et des pratiques du marché. Chez UpikaJob, je recueille moi-même les retours des clients : c'est souvent là que se trouvent les vraies priorités. Quand le temps manque, je fais moins, mais je ne saute pas cette étape.",
+        "J'en sors avec des pistes d'amélioration classées par priorité, partagées avec l'équipe.",
+      ],
+      ai: "Structurer ce que j'ai appris : regrouper des retours, faire ressortir des tendances, reformuler une problématique, lister les angles que j'aurais pu oublier. Les conclusions, elles, viennent du terrain.",
+      tools: ["Entretiens", "Analyse des retours", "Tests", "Benchmark", "GPT"],
     },
     {
-      title: "Aller chercher le terrain",
-      body: "Interviews, tests utilisateurs, retours clients et analyse de l'existant : je collecte les signaux sur lesquels les décisions vont s'appuyer.",
+      id: "explorer",
+      phase: "Explorer",
+      title: "Nourrir la réflexion",
+      lead: "Regarder ailleurs, pour ne pas reproduire mécaniquement ce qui existe.",
+      body: [
+        "Ma veille ne consiste pas à collectionner de jolies interfaces. Je suis l'évolution du Product Design et de l'UX/UI, les nouveaux usages et les interactions qui émergent, les expériences web immersives et l'animation, les outils de prototypage et de développement, et ce que l'IA rend possible.",
+        "Face à un sujet, cette matière me sert à ouvrir plusieurs directions avant d'en retenir une : comparer des approches, voir comment d'autres produits ont résolu un problème proche, repérer ce qui peut surprendre sans dérouter. L'accueil en 3D de ce portfolio est né d'une exploration de ce genre.",
+      ],
+      ai: "Élargir le champ : confronter plusieurs approches, approfondir un sujet que je connais mal, générer des premières pistes créatives que je trie ensuite.",
+      tools: ["Veille", "Références", "Systèmes de design", "GPT"],
     },
     {
-      title: "Cadrer et arbitrer",
-      body: "Je synthétise ce que j'ai appris en une direction claire - vision produit, priorités, périmètre - que j'arbitre avec l'équipe.",
+      id: "concevoir",
+      phase: "Concevoir",
+      title: "Rendre les idées tangibles",
+      lead: "Plus tôt une idée prend forme, plus tôt on voit si elle tient.",
+      body: [
+        "Je fais passer une idée par plusieurs niveaux de fidélité : formaliser le concept, esquisser des parcours et des wireframes, puis des maquettes et des prototypes interactifs dans Figma, appuyés sur un design system quand il existe.",
+        "Chaque niveau sert à décider quelque chose : un wireframe valide une structure, un prototype valide une interaction. Je n'ajoute du détail que quand la question précédente est réglée.",
+      ],
+      ai: "Préparer le terrain : contenus réalistes, variantes de formulation, cas limites à prévoir dans les écrans.",
+      tools: ["Croquis", "Wireframes", "Prototypes", "Design system", "Figma"],
     },
     {
-      title: "Concevoir, prototyper et tester",
-      body: "Je transforme les hypothèses en parcours, interfaces et prototypes appuyés sur le design system, et je les teste avant de les figer.",
+      id: "experimenter",
+      phase: "Expérimenter",
+      title: "Expérimenter et construire",
+      lead: "Entre la maquette et le produit, la frontière est devenue plus fluide.",
+      body: [
+        "Quand le projet le justifie, je pousse l'expérimentation plus loin : animations, éléments 3D, environnements interactifs. J'explore alors Blender pour créer des éléments 3D, ou Unity pour prototyper un environnement interactif.",
+        "Je passe aussi de la conception à l'implémentation. Chez UpikaJob, je prends en charge le front-end en binôme avec le développeur. Avec Claude et Claude Code, je peux aller jusqu'à une première version qui fonctionne, la tester en conditions réelles et itérer dessus : ce portfolio a été construit ainsi.",
+        "Tous les projets n'ont pas besoin de code, de 3D ou d'IA. Je choisis le niveau de réalisation selon ce qu'on cherche à apprendre.",
+      ],
+      ai: "C'est là que Claude intervient le plus : m'accompagner dans le développement, implémenter, corriger, et raccourcir la boucle entre une idée et sa version testable.",
+      tools: ["Animation", "3D", "Front-end", "Claude", "Claude Code", "Blender", "Unity"],
     },
     {
-      title: "Livrer et suivre en production",
-      body: "Specs, suivi des sprints et front-end en binôme avec le développeur : je reste sur la fonctionnalité jusqu'à sa mise en production.",
+      id: "valider",
+      phase: "Valider",
+      title: "Valider, itérer, améliorer",
+      lead: "L'expérimentation reste au service de l'expérience utilisateur.",
+      body: [
+        "Je vérifie que la solution répond au besoin de départ : les interfaces et les interactions sont-elles comprises ? Où sont les points de friction ? Je recueille des retours, j'observe, et j'ajuste les choix de conception.",
+        "Il s'agit de concilier la qualité d'usage, la cohérence visuelle, la faisabilité technique et les objectifs métier. Le travail ne s'arrête pas à la livraison d'une maquette ou d'un prototype : je suis la fonctionnalité jusqu'en production, puis je regarde comment elle vit.",
+      ],
+      ai: "Analyser des retours en volume et préparer des tests. L'évaluation finale reste la mienne, et celle des utilisateurs.",
+      tools: ["Tests utilisateurs", "Retours", "Itérations", "Suivi en production"],
     },
   ],
   about: {
