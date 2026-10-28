@@ -443,6 +443,62 @@ export const enProjectTranslations: ProjectTranslations = {
           { caption: "A manager's scope" },
         ],
       },
+      system: {
+        label: "The design system",
+        title: "A shared language, built from the code",
+        body: "I rebuilt the app's entire design system in Figma, starting from the code: a component only enters the file once it exists in the app, and any gap gets fixed. Every component comes with its variants and states, is interactive, and carries the call the developer copies.",
+        cover: { caption: "The file's cover: the app's foundations, atoms, molecules and organisms" },
+        levelsTitle: "Four levels, from token to screen",
+        levels: [
+          {
+            name: "Foundations",
+            role: "The tokens everything is made of.",
+            items: "Colors · Typography · Radii and spacing · Elevation and motion · Icons",
+          },
+          {
+            name: "Atoms",
+            role: "The smallest elements that stand on their own.",
+            items: "Button · Badges · Checkboxes and radios · Loading · Progress bar · Avatars",
+          },
+          {
+            name: "Molecules",
+            role: "Atoms assembled for a purpose.",
+            items: "Fields · Dropdowns · Search · Action menu · Tabs · Breadcrumb · Tooltip · Callout · KPI card · Empty state · Skeletons · Toast",
+          },
+          {
+            name: "Organisms",
+            role: "Complete interface blocks.",
+            items: "Modal and action confirmation · Data table",
+          },
+        ],
+        foundations: [
+          { caption: "Status colors: a background, a border and content for info, success, warning, error and AI" },
+          { caption: "Two families: Poppins for headings, Inter for text and controls" },
+        ],
+        zoomsTitle: "One component instead of hundreds of copies",
+        zooms: [
+          {
+            caption: "The button: four variants, three sizes, four states (default, hover, focus, disabled)",
+            figureNote: "hand-copied buttons, replaced by a single component",
+          },
+          { caption: "The KPI card: a figure, its context, its trend", figureNote: "copied KPI cards, migrating to it" },
+          {
+            caption: "The data table: sorting, movable columns, search, pagination",
+            figureNote: "existing tables, migrating to it as screens are reworked",
+          },
+        ],
+        decision: {
+          label: "One decision, and why",
+          title: "Fields you can tell apart from the page",
+          body: "At 1.48:1 on white, field borders were barely visible. At 4.8:1, they exceed the 3:1 that accessibility guidelines require for interface components (WCAG 1.4.11). The contrast of 43 color pairs was checked the same way.",
+          before: { label: "Before", ratio: "1.48:1" },
+          after: { label: "After", ratio: "4.8:1" },
+          shot: { caption: "Fields in every state: empty, filled, focus, error, disabled" },
+        },
+        assembled: {
+          caption: "The components put together: the file's interactive demo, where you hover, tick, sort the table and open the modal",
+        },
+      },
       bridge: "The product did not always look like this.",
       trackLabels: { product: "The product", role: "My role" },
       beats: [
@@ -482,8 +538,8 @@ export const enProjectTranslations: ProjectTranslations = {
           shots: [
             { caption: "Logotype variations" },
             { caption: "Type scale and tokens" },
-            { caption: "Component library" },
-            { caption: "File structure and shared styles" },
+            { caption: "The first component library" },
+            { caption: "The first file: structure and shared styles" },
           ],
         },
         {

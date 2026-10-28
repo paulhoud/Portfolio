@@ -29,6 +29,16 @@ import upikaFormEditor from "../../assets/upika-form-editor.png";
 import upikaSiteHome from "../../assets/upika-site-home.png";
 import upikaSiteSolution from "../../assets/upika-site-solution.png";
 import upikaSiteTarifs from "../../assets/upika-site-tarifs.jpg";
+// Design system de l'app (fichier Figma de Paul, 28 oct. 2026) : pages
+// exportées en double définition, recadrées sur ce qu'elles montrent.
+import upikaDsCover from "../../assets/upika-ds-cover.png";
+import upikaDsStatus from "../../assets/upika-ds-status.png";
+import upikaDsType from "../../assets/upika-ds-type.png";
+import upikaDsButton from "../../assets/upika-ds-button.png";
+import upikaDsKpi from "../../assets/upika-ds-kpi.png";
+import upikaDsTable from "../../assets/upika-ds-table.png";
+import upikaDsFields from "../../assets/upika-ds-fields.png";
+import upikaDsSandbox from "../../assets/upika-ds-sandbox.png";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -192,6 +202,39 @@ export type ProjectStoryPivot = {
   statement: string;
 };
 
+/**
+ * Chapitre du design system, entre la mise en avant et le récit : comment le
+ * produit tient ensemble. Ajouté pour UpikaJob le 28 oct. 2026, à partir du
+ * fichier Figma du design system (textes et chiffres tirés de ses pages).
+ */
+export type ProjectStorySystem = {
+  label: string;
+  title: string;
+  body: string;
+  /** Couverture du fichier, en ouverture. */
+  cover: ProjectStoryShot;
+  /** Organisation du fichier, du plus petit au plus grand. */
+  levelsTitle: string;
+  levels: { name: string; role: string; items: string }[];
+  /** Les jetons dont tout est fait (couleurs, typographie). */
+  foundations: ProjectStoryShot[];
+  /** Gros plans : un composant, et le nombre de copies qu'il remplace dans le code. */
+  zoomsTitle: string;
+  zooms: (ProjectStoryShot & { figure: number; figureNote: string })[];
+  /** Une décision et son pourquoi, avant et après. */
+  decision: {
+    label: string;
+    title: string;
+    body: string;
+    /** Couleur de la bordure de champ avant et après, et son contraste sur blanc. */
+    before: { label: string; color: string; ratio: string };
+    after: { label: string; color: string; ratio: string };
+    shot: ProjectStoryShot;
+  };
+  /** Les composants assemblés. */
+  assembled: ProjectStoryShot;
+};
+
 /** Temps fort du récit : une étape, ou une bascule entre deux étapes. */
 export type ProjectStoryBeat =
   | ({ type: "stage" } & ProjectStoryStage)
@@ -214,6 +257,7 @@ export type ProjectStory = {
     body: string;
     shots: ProjectStoryShot[];
   };
+  system?: ProjectStorySystem;
   /** Phrase de bascule entre la mise en avant et le récit. */
   bridge?: string;
   /** Intitulés des deux trajectoires suivies en parallèle. */
@@ -363,6 +407,84 @@ export const projects: Project[] = [
           { caption: "Le périmètre d'un manager", image: upikaTeamScores, frame: "screen", optimize: true },
         ],
       },
+      // Sources : le fichier Figma du design system (pages Lisez-moi, Couleurs,
+      // Typographie, Bouton, Champs, Carte d'indicateur, Tableau de données,
+      // Bac à sable) et Paul (« j'ai entièrement retravaillé le design system
+      // d'Upikajob dans Figma », 28 oct. 2026).
+      system: {
+        label: "Le design system",
+        title: "Un langage commun, construit depuis le code",
+        body: "J'ai repris tout le design system de l'application dans Figma, à partir du code : un composant n'y entre qu'une fois qu'il existe dans l'app, et toute différence se corrige. Chaque composant y est décliné en variantes et en états, rendu interactif, et porte l'appel à copier pour le développeur.",
+        cover: { caption: "La couverture du fichier : fondations, atomes, molécules et organismes de l'app", image: upikaDsCover, optimize: true },
+        levelsTitle: "Quatre niveaux, du jeton à l'écran",
+        levels: [
+          {
+            name: "Fondations",
+            role: "Les jetons : ce dont tout est fait.",
+            items: "Couleurs · Typographie · Rayons et espacements · Élévation et mouvement · Icônes",
+          },
+          {
+            name: "Atomes",
+            role: "Les plus petits éléments utilisables seuls.",
+            items: "Bouton · Badges · Cases et radios · Chargement · Barre de progression · Avatars",
+          },
+          {
+            name: "Molécules",
+            role: "Des atomes assemblés pour une fonction.",
+            items: "Champs · Listes déroulantes · Recherche · Menu d'actions · Onglets · Fil d'Ariane · Infobulle · Encart · Carte d'indicateur · État vide · Skeletons · Toast",
+          },
+          {
+            name: "Organismes",
+            role: "Des blocs d'interface complets.",
+            items: "Modale et confirmation d'action · Tableau de données",
+          },
+        ],
+        foundations: [
+          {
+            caption: "Les couleurs de statut : un fond, une bordure, un contenu, pour l'info, le succès, l'attention, l'erreur et l'IA",
+            image: upikaDsStatus,
+            optimize: true,
+          },
+          { caption: "Deux familles : Poppins pour les titres, Inter pour le texte et les contrôles", image: upikaDsType, optimize: true },
+        ],
+        zoomsTitle: "Un composant à la place de centaines de copies",
+        zooms: [
+          {
+            caption: "Le bouton : quatre variantes, trois tailles, quatre états (défaut, survol, focus, désactivé)",
+            image: upikaDsButton,
+            optimize: true,
+            figure: 4600,
+            figureNote: "boutons recopiés à la main, remplacés par un seul composant",
+          },
+          {
+            caption: "La carte d'indicateur : un chiffre, son contexte, sa tendance",
+            image: upikaDsKpi,
+            optimize: true,
+            figure: 55,
+            figureNote: "cartes de chiffres clés recopiées, qui migrent vers elle",
+          },
+          {
+            caption: "Le tableau de données : tri, colonnes déplaçables, recherche, pagination",
+            image: upikaDsTable,
+            optimize: true,
+            figure: 213,
+            figureNote: "tableaux existants, qui migrent vers lui au fil des retouches",
+          },
+        ],
+        decision: {
+          label: "Une décision, et son pourquoi",
+          title: "Des champs qu'on distingue de la page",
+          body: "À 1,48:1 sur fond blanc, la bordure des champs se voyait à peine. Passée à 4,8:1, elle dépasse les 3:1 que demandent les règles d'accessibilité pour un élément d'interface (critère WCAG 1.4.11). Les contrastes de 43 paires de couleurs ont été vérifiés de la même façon.",
+          before: { label: "Avant", color: "#cbd5e1", ratio: "1,48:1" },
+          after: { label: "Après", color: "#64748b", ratio: "4,8:1" },
+          shot: { caption: "Les champs dans tous leurs états : vide, rempli, focus, erreur, désactivé", image: upikaDsFields, optimize: true },
+        },
+        assembled: {
+          caption: "Les composants assemblés : la démo interactive du fichier, où l'on survole, coche, trie le tableau et ouvre la modale",
+          image: upikaDsSandbox,
+          optimize: true,
+        },
+      },
       bridge: "Le produit n'a pas toujours eu ce visage.",
       trackLabels: { product: "Le produit", role: "Mon rôle" },
       beats: [
@@ -408,9 +530,10 @@ export const projects: Project[] = [
             // le réencodage, pour un gain de netteté qu'on ne voit pas.
             { caption: "Déclinaisons du logotype", image: upikaLogotype, optimize: true },
             { caption: "Échelle typographique et tokens", image: upikaTypescale, optimize: true },
-            { caption: "Bibliothèque de composants", image: upikaFigmaComponents, optimize: true },
+            // « Premier » : le design system actuel est montré plus haut.
+            { caption: "La première bibliothèque de composants", image: upikaFigmaComponents, optimize: true },
             {
-              caption: "Organisation du fichier et styles partagés",
+              caption: "Le premier fichier : organisation et styles partagés",
               image: upikaFigmaTokens,
               optimize: true,
             },

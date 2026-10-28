@@ -1,14 +1,18 @@
 "use client";
 
+import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { MediaButton } from "@/components/media/MediaButton";
-import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/motion/ScrollReveal";
 import type {
   ProjectStoryBeat,
   ProjectStoryPivot,
   ProjectStoryShot,
   ProjectStoryStage,
+  ProjectStorySystem,
 } from "@/content/projects";
+import { useTranslation } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
 /** Deux colonnes sur grand écran : chaque cadre occupe la moitié de la colonne. */
@@ -191,6 +195,206 @@ export function ProjectStoryHighlight({
         </ScrollReveal>
       ) : null}
     </section>
+  );
+}
+
+const SYSTEM_LABEL = "block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55";
+
+/**
+ * Chapitre du design system, entre la mise en avant et le récit (UpikaJob,
+ * 28 oct. 2026) : comment le produit tient ensemble. Il avance du général au
+ * particulier :
+ * - la couverture du fichier, puis son organisation en quatre niveaux, du
+ *   jeton au bloc d'interface ;
+ * - les fondations (couleurs, typographie) ;
+ * - trois gros plans sur des composants, chacun avec le nombre de copies
+ *   qu'il remplace dans le code ;
+ * - une décision et son pourquoi (avant, après), puis les composants
+ *   assemblés.
+ */
+export function ProjectDesignSystem({ system }: { system: ProjectStorySystem }) {
+  const [main, ...side] = system.zooms;
+  const { decision } = system;
+
+  return (
+    <section aria-label={system.title} className="pb-20 md:pb-28">
+      <ScrollReveal>
+        <div className="mx-auto mb-9 max-w-2xl text-center md:mb-12">
+          <span className={SYSTEM_LABEL}>{system.label}</span>
+          <h2 className="mt-4 text-balance text-xl font-medium leading-snug text-ink md:text-2xl">{system.title}</h2>
+          <p className="copy mt-4">{system.body}</p>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.05}>
+        <StoryShotFrame shot={system.cover} sizes="(max-width: 768px) 92vw, 1100px" />
+      </ScrollReveal>
+
+      <SystemHeading>{system.levelsTitle}</SystemHeading>
+      <ScrollRevealGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {system.levels.map((level, index) => (
+          <ScrollRevealItem key={level.name} className="rounded-[0.75rem] border border-ink/10 bg-ink/[0.03] p-5">
+            <LevelGlyph level={index} />
+            <h4 className="mt-4 text-base font-bold text-ink">{level.name}</h4>
+            <p className="mt-1 text-sm leading-snug text-ink/80">{level.role}</p>
+            <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink/60">{level.items}</p>
+          </ScrollRevealItem>
+        ))}
+      </ScrollRevealGroup>
+      <ScrollReveal>
+        <div className="mt-5 grid gap-5 md:mt-6 md:grid-cols-2">
+          {system.foundations.map((shot) => (
+            <StoryShotFrame key={shot.caption} shot={shot} sizes={HALF_WIDTH} />
+          ))}
+        </div>
+      </ScrollReveal>
+
+      <SystemHeading>{system.zoomsTitle}</SystemHeading>
+      <div className="grid gap-8 md:grid-cols-[1.05fr_1fr] md:gap-6">
+        {main ? (
+          <ScrollReveal>
+            <Zoom zoom={main} sizes="(max-width: 768px) 92vw, 560px" />
+          </ScrollReveal>
+        ) : null}
+        <div className="grid content-start gap-8 md:gap-6">
+          {side.map((zoom, index) => (
+            <ScrollReveal key={zoom.caption} delay={0.05 * (index + 1)}>
+              <Zoom zoom={zoom} sizes={HALF_WIDTH} />
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+
+      <ScrollReveal>
+        <div className="mt-16 rounded-[0.75rem] border border-ink/10 bg-ink/[0.03] p-5 md:mt-24 md:p-10">
+          <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-12">
+            <div>
+              <span className={SYSTEM_LABEL}>{decision.label}</span>
+              <h3 className="mt-3 text-lg font-bold text-ink md:text-xl">{decision.title}</h3>
+              <p className="copy mt-3 max-w-xl">{decision.body}</p>
+            </div>
+            <div className="flex gap-3">
+              <FieldSample {...decision.before} />
+              <FieldSample {...decision.after} />
+            </div>
+          </div>
+          <div className="mt-8">
+            <StoryShotFrame shot={decision.shot} sizes="(max-width: 768px) 92vw, 1000px" />
+          </div>
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <div className="mx-auto mt-16 max-w-3xl md:mt-24">
+          <StoryShotFrame shot={system.assembled} sizes="(max-width: 768px) 92vw, 768px" />
+        </div>
+      </ScrollReveal>
+    </section>
+  );
+}
+
+function SystemHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <ScrollReveal>
+      <h3 className="mb-6 mt-16 text-balance text-lg font-medium text-ink md:mb-8 md:mt-24 md:text-xl">{children}</h3>
+    </ScrollReveal>
+  );
+}
+
+/**
+ * Repère de chaque niveau, du plus petit au plus grand : des jetons, un
+ * élément, des éléments assemblés, un bloc d'interface.
+ */
+const levelGlyphs = [
+  <>
+    <circle cx="8" cy="12" r="2.5" fill="currentColor" stroke="none" />
+    <circle cx="20" cy="12" r="2.5" fill="currentColor" stroke="none" />
+    <circle cx="32" cy="12" r="2.5" fill="currentColor" stroke="none" />
+  </>,
+  <>
+    <rect x="13" y="5" width="14" height="14" rx="3" />
+  </>,
+  <>
+    <rect x="3" y="7" width="10" height="10" rx="2.5" />
+    <rect x="15" y="7" width="10" height="10" rx="2.5" />
+    <rect x="27" y="7" width="10" height="10" rx="2.5" />
+  </>,
+  <>
+    <rect x="2" y="2" width="36" height="20" rx="3" />
+    <path d="M2 8h36" />
+    <rect x="6" y="11.5" width="8" height="7" rx="1.5" />
+    <rect x="17" y="11.5" width="8" height="7" rx="1.5" />
+  </>,
+];
+
+function LevelGlyph({ level }: { level: number }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 40 24" className="h-6 w-10 text-ink/60" fill="none" stroke="currentColor" strokeWidth="1.4">
+      {levelGlyphs[level]}
+    </svg>
+  );
+}
+
+/** Gros plan sur un composant, et le nombre de copies qu'il remplace. */
+function Zoom({ zoom, sizes }: { zoom: ProjectStorySystem["zooms"][number]; sizes: string }) {
+  return (
+    <div>
+      <StoryShotFrame shot={zoom} sizes={sizes} />
+      <p className="mt-3 flex items-baseline gap-3 border-t border-ink/10 pt-3">
+        <span className="shrink-0 text-2xl font-medium tabular-nums text-ink md:text-[1.75rem]">
+          ≈ <CountUp to={zoom.figure} />
+        </span>
+        <span className="text-[0.8125rem] leading-snug text-ink/65">{zoom.figureNote}</span>
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Chiffre qui défile jusqu'à sa valeur quand il entre à l'écran (d'après Count
+ * Up de React Bits). La place du chiffre final est réservée : rien ne bouge
+ * autour pendant qu'il défile. Animations réduites : le chiffre reste fixe.
+ */
+function CountUp({ to }: { to: number }) {
+  const { locale } = useTranslation();
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.8 });
+  const reduceMotion = useReducedMotion();
+  const value = useMotionValue(to);
+  const format = (n: number) => new Intl.NumberFormat(locale).format(Math.round(n));
+  const text = useTransform(value, format);
+
+  useEffect(() => {
+    if (!inView || reduceMotion) return;
+    value.set(0);
+    const controls = animate(value, to, { duration: 1.4, ease: [0.22, 1, 0.36, 1] });
+    return () => controls.stop();
+  }, [inView, reduceMotion, to, value]);
+
+  return (
+    <span ref={ref} className="inline-grid">
+      <span aria-hidden="true" className="invisible col-start-1 row-start-1">
+        {format(to)}
+      </span>
+      <motion.span className="col-start-1 row-start-1">{text}</motion.span>
+    </span>
+  );
+}
+
+/**
+ * Bordure de champ telle que dans l'application, sur son fond blanc : avant
+ * et après la décision, avec son contraste.
+ */
+function FieldSample({ label, color, ratio }: { label: string; color: string; ratio: string }) {
+  return (
+    <figure className="min-w-0 flex-1 md:w-40 md:flex-none">
+      <div className="rounded-lg bg-white p-3">
+        <div aria-hidden="true" className="h-9 rounded-md border bg-white" style={{ borderColor: color }} />
+      </div>
+      <figcaption className="mt-2 text-[0.8125rem] leading-snug text-ink/65">
+        <span className="font-semibold text-ink">{label}</span> · <span className="tabular-nums">{ratio}</span>
+      </figcaption>
+    </figure>
   );
 }
 

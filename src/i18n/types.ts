@@ -219,6 +219,26 @@ export type ProjectCopy = {
       body: string;
       shots: { caption: string }[];
     };
+    system?: {
+      label: string;
+      title: string;
+      body: string;
+      cover: { caption: string };
+      levelsTitle: string;
+      levels: { name: string; role: string; items: string }[];
+      foundations: { caption: string }[];
+      zoomsTitle: string;
+      zooms: { caption: string; figureNote: string }[];
+      decision: {
+        label: string;
+        title: string;
+        body: string;
+        before: { label: string; ratio: string };
+        after: { label: string; ratio: string };
+        shot: { caption: string };
+      };
+      assembled: { caption: string };
+    };
     bridge?: string;
     trackLabels: { product: string; role: string };
     /** Même ordre que le catalogue : chaque entrée traduit le temps fort correspondant. */

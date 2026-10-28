@@ -19,7 +19,7 @@ import type {
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
 import { AnimatedLogo } from "./AnimatedLogo";
-import { ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
+import { ProjectDesignSystem, ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
 
 type ProjectDetailProps = {
   project: Project;
@@ -465,6 +465,9 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
             shots={story.highlight.shots}
           />
         ) : null}
+
+        {/* Le design system : comment le produit tient ensemble. */}
+        {story.system ? <ProjectDesignSystem system={story.system} /> : null}
 
         {/* Vue d'ensemble, enjeu, solution, résultat : même grille de lecture
             que les autres études de cas. */}

@@ -88,6 +88,36 @@ function mergeBlocks(
   });
 }
 
+/** Textes traduits du chapitre du design system ; images, couleurs et chiffres restent ceux du catalogue. */
+function mergeSystem(
+  base: NonNullable<Project["story"]>["system"],
+  translated: NonNullable<ProjectCopy["story"]>["system"],
+): NonNullable<Project["story"]>["system"] {
+  if (!base || !translated) return base;
+  return {
+    ...base,
+    label: translated.label,
+    title: translated.title,
+    body: translated.body,
+    cover: { ...base.cover, caption: translated.cover.caption },
+    levelsTitle: translated.levelsTitle,
+    levels: base.levels.map((level, index) => translated.levels[index] ?? level),
+    foundations: base.foundations.map((shot, index) => ({ ...shot, caption: translated.foundations[index]?.caption ?? shot.caption })),
+    zoomsTitle: translated.zoomsTitle,
+    zooms: base.zooms.map((zoom, index) => ({ ...zoom, ...translated.zooms[index] })),
+    decision: {
+      ...base.decision,
+      label: translated.decision.label,
+      title: translated.decision.title,
+      body: translated.decision.body,
+      before: { ...base.decision.before, ...translated.decision.before },
+      after: { ...base.decision.after, ...translated.decision.after },
+      shot: { ...base.decision.shot, caption: translated.decision.shot.caption },
+    },
+    assembled: { ...base.assembled, caption: translated.assembled.caption },
+  };
+}
+
 /**
  * Applique les textes traduits au récit, chapitre par chapitre, en conservant
  * les captures du catalogue (elles ne dépendent pas de la langue). Un chapitre
@@ -127,6 +157,7 @@ function mergeStory(
             })),
           }
         : base.highlight,
+    system: mergeSystem(base.system, translated.system),
     trackLabels: translated.trackLabels ?? base.trackLabels,
     beats: base.beats.map((beat, index) => {
       const copy = translated.beats?.[index];
