@@ -13,6 +13,12 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
  */
 
 const INTRO_SECONDS = 1.4;
+/** Zones de contenu que la grille contourne (cf. `holes`), au plus. */
+const MAX_HOLES = 32;
+/** Marge autour du contenu, fondu jusqu'à la grille pleine, écart sous lequel deux éléments ne font qu'une zone (px). */
+const HOLE_PAD = 6;
+const HOLE_SOFT = 18;
+const HOLE_MERGE = 44;
 const STYLES = { lines: 0, dashed: 1, dots: 2, crosses: 3 } as const;
 
 const FALLOFF_CURVES = {
@@ -52,8 +58,9 @@ uniform float uPresence;
 uniform float uEdgeFade;
 uniform float uReveal;
 uniform float uDim;
-uniform vec4 uHoles[12];
+uniform vec4 uHoles[32];
 uniform int uHoleCount;
+uniform float uHoleSoft;
 
 out vec4 outColor;
 
@@ -75,13 +82,18 @@ float roundBox(vec2 p, vec2 b, float r) {
 
 void main() {
   vec2 pos = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y);
-  for (int i = 0; i < 12; i++) {
+  // Contenu à laisser intact : la grille s'efface en fondu à son approche.
+  float open = 1.0;
+  for (int i = 0; i < 32; i++) {
     if (i >= uHoleCount) break;
     vec4 hole = uHoles[i];
-    if (pos.x >= hole.x && pos.y >= hole.y && pos.x <= hole.z && pos.y <= hole.w) {
-      outColor = vec4(0.0);
-      return;
-    }
+    vec2 q = abs(pos - (hole.xy + hole.zw) * 0.5) - (hole.zw - hole.xy) * 0.5;
+    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+    open = min(open, smoothstep(0.0, uHoleSoft, d));
+  }
+  if (open <= 0.0) {
+    outColor = vec4(0.0);
+    return;
   }
   vec2 g = (pos - uOffset) / uCellSize;
   vec2 cell = floor(g);
@@ -158,7 +170,7 @@ void main() {
   float cellAlpha = clamp(max(litAlpha, fillAlpha), 0.0, 1.0);
   float alpha = cellAlpha + gridAlpha * (1.0 - cellAlpha);
   vec3 premul = uColor * cellAlpha + uGridColor * gridAlpha * (1.0 - cellAlpha);
-  outColor = vec4(premul, alpha);
+  outColor = vec4(premul, alpha) * open;
 }`;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -252,7 +264,7 @@ export type CursorGridProps = {
   quietOver?: string;
   /** Force de l'effet au-dessus de `quietOver`, de 0 à 1. */
   quietLevel?: number;
-  /** Éléments que la grille laisse intacts (images), suivis au défilement. */
+  /** Éléments que la grille contourne en fondu (texte, logos, images), suivis au défilement. */
   holes?: string;
   /** Fondu vers les bords, de 0 à 0,5. */
   edgeFade?: number;
@@ -492,21 +504,39 @@ export function CursorGrid({
       dirty = true;
     };
 
-    const holeRects = new Float32Array(12 * 4);
-    /** Images à l'écran, en pixels de la zone de dessin (12 au plus). */
+    const holeRects = new Float32Array(MAX_HOLES * 4);
+    /**
+     * Contenu à l'écran, en pixels de la zone de dessin (32 zones au plus) :
+     * les éléments voisins (paragraphes d'une même partie, image et légende)
+     * sont réunis en une zone, pour que la grille ne passe pas en fines bandes
+     * entre deux lignes.
+     */
     const measureHoles = (selector: string) => {
       if (!selector) return 0;
       const box = container.getBoundingClientRect();
-      let count = 0;
+      const zones: number[][] = [];
       for (const element of document.querySelectorAll(selector)) {
         const rect = element.getBoundingClientRect();
-        if (rect.bottom < box.top || rect.top > box.bottom || rect.right < box.left || rect.left > box.right) continue;
+        if (!rect.width || !rect.height) continue;
+        if (rect.bottom < box.top - HOLE_MERGE || rect.top > box.bottom + HOLE_MERGE || rect.right < box.left || rect.left > box.right) continue;
+        let zone = [rect.left - box.left, rect.top - box.top, rect.right - box.left, rect.bottom - box.top];
+        // Une zone qui en touche d'autres les absorbe, jusqu'à ce que plus rien ne se touche.
+        for (let k = zones.length - 1; k >= 0; k--) {
+          const other = zones[k];
+          if (zone[0] - HOLE_MERGE > other[2] || other[0] - HOLE_MERGE > zone[2] || zone[1] - HOLE_MERGE > other[3] || other[1] - HOLE_MERGE > zone[3]) continue;
+          zone = [Math.min(zone[0], other[0]), Math.min(zone[1], other[1]), Math.max(zone[2], other[2]), Math.max(zone[3], other[3])];
+          zones.splice(k, 1);
+          k = zones.length;
+        }
+        zones.push(zone);
+      }
+      const count = Math.min(zones.length, MAX_HOLES);
+      for (let i = 0; i < count; i++) {
+        const [left, top, right, bottom] = zones[i];
         holeRects.set(
-          [(rect.left - box.left) * view.ratio, (rect.top - box.top) * view.ratio, (rect.right - box.left) * view.ratio, (rect.bottom - box.top) * view.ratio],
-          count * 4,
+          [(left - HOLE_PAD) * view.ratio, (top - HOLE_PAD) * view.ratio, (right + HOLE_PAD) * view.ratio, (bottom + HOLE_PAD) * view.ratio],
+          i * 4,
         );
-        count += 1;
-        if (count === 12) break;
       }
       return count;
     };
@@ -550,6 +580,7 @@ export function CursorGrid({
       gl.uniform1f(u.uDim, dim);
       gl.uniform1i(u.uHoleCount, measureHoles(s.holes));
       gl.uniform4fv(u["uHoles[0]"], holeRects);
+      gl.uniform1f(u.uHoleSoft, HOLE_SOFT * ratio);
       gl.uniform1f(u.uReveal, introClock >= 1 ? 1 : 1 - Math.pow(1 - introClock, 2.2));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.bindVertexArray(null);

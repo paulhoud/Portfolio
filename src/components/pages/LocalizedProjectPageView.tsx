@@ -22,7 +22,7 @@ export function LocalizedProjectPageView({ slug }: LocalizedProjectPageViewProps
   // Fond uni porté ici (et non par l'article) : la grille s'y fond, du haut de
   // la page jusqu'aux projets voisins.
   return (
-    <div className="relative isolate bg-page">
+    <div data-grid-scope className="relative isolate bg-page">
       <ProjectBackdrop mediaKey={project.mediaKey ?? ""} />
       <ProjectDetail project={project} />
       <ProjectPager slug={slug} />
