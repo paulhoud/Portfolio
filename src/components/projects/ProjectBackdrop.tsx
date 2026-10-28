@@ -14,10 +14,11 @@ import { cn } from "@/lib/utils";
  * Elle est posée par-dessus le contenu, fondue dans la page (éclaircir en
  * sombre, produit en clair). Posée dessous, elle obligeait le navigateur à
  * ranger tout le texte dans un calque transparent, lissé en gris : un texte
- * « pixelisé » sous Windows (constat de Paul, 28 oct. 2026). Pour qu'elle
- * paraisse derrière, elle contourne en fondu tout le contenu : texte, logos,
- * icônes, images (seules les images y échappaient : on la voyait à travers
- * les logos et les icônes, remarque de Paul du 28 oct. 2026).
+ * « pixelisé » sous Windows (constat de Paul, 28 oct. 2026). Elle contourne
+ * les images et les logos (on la voyait à travers les logos), et s'atténue
+ * quand le pointeur passe sur le texte. Contourner aussi le texte la faisait
+ * disparaître de toute la colonne de lecture : on aurait dit un encart sombre
+ * posé derrière (retiré à la demande de Paul, 28 oct. 2026).
  */
 
 const INK = { dark: "#f5f2f4", light: "#18171c" };
@@ -25,8 +26,8 @@ const INK = { dark: "#f5f2f4", light: "#18171c" };
 /** Éléments de lecture au-dessus desquels la grille s'atténue. */
 const TEXT = "p, h1, h2, h3, h4, li, blockquote, figcaption, dt, dd";
 
-/** Contenu de la page que la grille contourne (cf. `data-grid-scope` dans LocalizedProjectPageView). */
-const CONTENT = "[data-grid-hole], [data-grid-scope] :is(h1, h2, h3, h4, p, li, blockquote, figcaption, dt, dd, span, img, video, svg, button, a)";
+/** Images et logos, que la grille contourne (cf. `data-grid-logo` dans ProjectDetail). */
+const CONTENT = "[data-grid-hole], [data-grid-logo] :is(img, video, svg)";
 
 /** Mélange deux couleurs hexadécimales (part de `b` entre 0 et 1). */
 function mix(a: string, b: string, amount: number) {
@@ -68,9 +69,9 @@ export function ProjectBackdrop({ mediaKey }: { mediaKey: string }) {
           // Lignes fines et diffuses : une définition simple suffit, soit
           // quatre fois moins de calcul sur les écrans haute définition.
           dpr={1}
-          // Plus discrète quand on lit, pleine dans les marges ; le contenu reste intact.
+          // Plus discrète quand on lit, pleine dans les marges ; images et logos intacts.
           quietOver={TEXT}
-          quietLevel={0.3}
+          quietLevel={0.22}
           holes={CONTENT}
         />
       </div>

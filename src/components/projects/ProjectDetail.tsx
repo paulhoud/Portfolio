@@ -57,6 +57,8 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
               {project.eyebrow}
             </h1>
             <div
+              // Logo : la grille du fond le contourne (cf. ProjectBackdrop).
+              data-grid-logo
               className="flex h-44 w-full items-center justify-center rounded-[2rem]"
               style={{ color: project.foreground }}
             >
@@ -255,7 +257,7 @@ function CaseStudySection({ section }: { section: ProjectSection }) {
 function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) {
   if (headerLogo.kind === "jive-orange") {
     return (
-      <div className="flex items-center justify-center gap-4 md:gap-5">
+      <div data-grid-logo className="flex items-center justify-center gap-4 md:gap-5">
         <ThemedImage
           src="/assets/Logo-3.svg"
           srcOnLight="/assets/Logo-3-ink.svg"
@@ -276,7 +278,7 @@ function CaseStudyHeaderLogo({ headerLogo }: { headerLogo: ProjectHeaderLogo }) 
   }
 
   return (
-    <div className="flex items-center justify-center">
+    <div data-grid-logo className="flex items-center justify-center">
       <ThemedImage
         src={headerLogo.src}
         srcOnLight={headerLogo.srcOnLight}
@@ -418,6 +420,8 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
               {project.eyebrow}
             </h1>
             <div
+              // Logo : la grille du fond le contourne (cf. ProjectBackdrop).
+              data-grid-logo
               className="flex h-44 w-full items-center justify-center rounded-[2rem]"
               style={{ color: project.foreground }}
             >

@@ -15,10 +15,10 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 const INTRO_SECONDS = 1.4;
 /** Zones de contenu que la grille contourne (cf. `holes`), au plus. */
 const MAX_HOLES = 32;
-/** Marge autour du contenu, fondu jusqu'à la grille pleine, écart sous lequel deux éléments ne font qu'une zone (px). */
-const HOLE_PAD = 6;
-const HOLE_SOFT = 18;
-const HOLE_MERGE = 44;
+/** Marge autour d'un élément contourné, fondu jusqu'à la grille pleine, écart sous lequel deux éléments ne font qu'une zone (px). */
+const HOLE_PAD = 4;
+const HOLE_SOFT = 10;
+const HOLE_MERGE = 8;
 const STYLES = { lines: 0, dashed: 1, dots: 2, crosses: 3 } as const;
 
 const FALLOFF_CURVES = {
@@ -264,7 +264,7 @@ export type CursorGridProps = {
   quietOver?: string;
   /** Force de l'effet au-dessus de `quietOver`, de 0 à 1. */
   quietLevel?: number;
-  /** Éléments que la grille contourne en fondu (texte, logos, images), suivis au défilement. */
+  /** Éléments que la grille contourne en fondu (images, logos), suivis au défilement. */
   holes?: string;
   /** Fondu vers les bords, de 0 à 0,5. */
   edgeFade?: number;
@@ -506,10 +506,8 @@ export function CursorGrid({
 
     const holeRects = new Float32Array(MAX_HOLES * 4);
     /**
-     * Contenu à l'écran, en pixels de la zone de dessin (32 zones au plus) :
-     * les éléments voisins (paragraphes d'une même partie, image et légende)
-     * sont réunis en une zone, pour que la grille ne passe pas en fines bandes
-     * entre deux lignes.
+     * Éléments contournés à l'écran, en pixels de la zone de dessin (32 zones
+     * au plus) ; deux éléments presque collés ne font qu'une zone.
      */
     const measureHoles = (selector: string) => {
       if (!selector) return 0;
