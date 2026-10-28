@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
-import { isHomePath } from "@/i18n/paths";
+import { isHomePath, splitLocalePath } from "@/i18n/paths";
 import { initSound, setSoundVolume, useSoundOn, useSoundVolume } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { useTheme } from "@/lib/theme";
@@ -59,15 +60,18 @@ const DOCK_PILL = cn(
  * sans aller-retour qui distrairait de la scène.
  *
  * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux à
- *   droite ; la langue, le son et la pause sont aux coins bas de l'écran
+ *   droite ; la langue, le son et le thème sont aux coins bas de l'écran
  *   (pastilles du même verre). Le rang est une grille à trois
  *   colonnes « 1fr auto 1fr » : les colonnes latérales sont égales tant qu'il
  *   y a la place (liens exactement au centre) et, quand la place manque, la
  *   colonne de droite garde sa largeur et les liens glissent vers le logo -
  *   jamais de chevauchement, sans point de rupture supplémentaire.
- * - Tablette (≥ 768 px) : logo, liens au centre, bouton menu pour le reste.
- * - Téléphone : logo et bouton menu ; le menu déroule les liens (accueil
+ * - Téléphone et tablette (demande de Paul, 28 oct. 2026) : plus de capsule,
+ *   de contour ni de logo, seulement le nom et le métier à gauche (l'identité
+ *   reste visible, et l'accueil ne la répète plus) et le bouton menu à droite,
+ *   sur le fond même de la page, fondu en bas. Le menu déroule les liens (accueil
  *   compris), les réseaux et les réglages, sur un voile qui assombrit la page.
+ *   Le son a aussi son bouton en bas à droite (cf. `SoundToggle` « quick »).
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -181,7 +185,8 @@ export function SiteHeader() {
     setIsHidden(false);
   }
 
-  const visible = isOpen || !isHidden || isHomePath(pathname);
+  const isHome = isHomePath(pathname);
+  const visible = isOpen || !isHidden || isHome;
   const barTransition = { duration: reduceMotion ? 0 : 0.28, ease };
 
   // Halo qui suit la souris dans la capsule (sans rendu React à chaque pas).
@@ -202,34 +207,63 @@ export function SiteHeader() {
         // Seule la capsule capte les clics : autour, on atteint la scène.
         className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[var(--header-height)] text-ink"
       >
+        {/* Téléphone et tablette : le fond même de la page (comme le pied de
+            page), qui se fond dans la page en bas, pour que le nom se lise
+            sur le texte qui passe dessous. Il s'efface menu ouvert, le voile
+            prenant le relais. */}
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-0 h-[calc(100%+1rem)] transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,#000_calc(100%-1.5rem),transparent)] lg:hidden",
+            isHome
+              ? "bg-[var(--stage)]"
+              : splitLocalePath(pathname).path.startsWith("/projects/")
+                ? "bg-page"
+                : "[background:var(--reading-surface)_fixed]",
+            isOpen && "opacity-0",
+          )}
+        />
         <div
           onPointerMove={onCapsulePointer}
           className={cn(
-            "group/capsule pointer-events-auto absolute inset-x-3 bottom-0 top-2 overflow-hidden rounded-full lg:inset-x-6 lg:top-3",
-            "border bg-glass/55 backdrop-blur-xl backdrop-saturate-150",
-            "shadow-[var(--glass-shadow)] transition-[border-color] duration-700",
-            "[border-color:var(--glass-border)]",
+            "group/capsule pointer-events-auto absolute inset-x-0 bottom-0 top-0 lg:inset-x-6 lg:top-3 lg:overflow-hidden lg:rounded-full",
+            "lg:border lg:bg-glass/55 lg:backdrop-blur-xl lg:backdrop-saturate-150",
+            "lg:shadow-[var(--glass-shadow)] lg:transition-[border-color] lg:duration-700",
+            "lg:[border-color:var(--glass-border)]",
           )}
         >
           {/* Halo de la souris, reflet du contour et lisière éclairée en bas.
               Tout reste dans la capsule, lignes du logo comprises. */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden overflow-hidden rounded-full lg:block">
             <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/capsule:opacity-100 [background:radial-gradient(180px_circle_at_var(--spot-x,50%)_50%,color-mix(in_srgb,var(--ink)_8%,transparent),transparent_70%)]" />
             <span className="capsule-sweep" />
             <span className="absolute inset-x-[22%] bottom-0 h-px opacity-70 transition-colors duration-700 [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--accent-glow,#ffffff)_55%,white),transparent)]" />
           </div>
 
-          {/* Rang en grille « 1fr auto 1fr » dès la tablette (cf. doc du
-              composant) ; en dessous, logo et bouton menu aux deux bouts. */}
-          <div className="relative flex h-full items-center justify-between pl-5 pr-2 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-x-6 lg:pl-6 lg:pr-3">
+          {/* Rang en grille « 1fr auto 1fr » sur grand écran (cf. doc du
+              composant) ; en dessous, le nom et le bouton menu aux deux bouts. */}
+          <div className="relative flex h-full items-center justify-between pl-5 pr-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-6 lg:pl-6">
             {/* Le logo garde sa taille de dessin (61 × 70) et son effet au
                 survol ; il est seulement réduit à l'affichage, assez pour
                 garder de l'air jusqu'aux bouts arrondis de la capsule. */}
-            <div className="relative h-[32px] w-[28px] shrink-0 md:justify-self-start lg:h-[36px] lg:w-[32px]">
-              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.46] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 lg:scale-[0.52]" />
+            <div className="relative hidden h-[36px] w-[32px] shrink-0 lg:block lg:justify-self-start">
+              <LogoMark className="absolute left-0 top-0 origin-top-left scale-[0.52] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60" />
             </div>
 
-            <nav aria-label={t.site.nav.main} className="hidden items-center gap-1 md:flex md:justify-self-center">
+            {/* Téléphone et tablette : le nom et le métier, qui ramènent à
+                l'accueil comme le logo (et, déjà sur l'accueil, au premier
+                projet, cf. homeReset). */}
+            <Link
+              href={href("/")}
+              className="min-w-0 rounded-lg leading-tight text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/60 lg:hidden"
+            >
+              <span className="block truncate text-lg font-medium tracking-[0.02em]">{profile.name}</span>
+              <span className="mt-0.5 block text-[0.625rem] font-bold uppercase tracking-[0.24em] text-ink/60 light:text-ink/75">
+                {profile.jobTitle}
+              </span>
+            </Link>
+
+            <nav aria-label={t.site.nav.main} className="hidden items-center gap-1 lg:flex lg:justify-self-center">
               {navigation.map((item) => (
                 <HeaderNavLink
                   key={item.href}
@@ -245,9 +279,8 @@ export function SiteHeader() {
               <SocialLinks />
             </div>
 
-            {/* Téléphone et tablette : le son reste à portée de pouce, à côté du menu. */}
-            <div className="flex items-center gap-1 md:justify-self-end lg:hidden">
-              <SoundToggle variant="capsule" />
+            {/* Téléphone et tablette : le menu ; le son est en bas à droite. */}
+            <div className="flex shrink-0 items-center lg:hidden">
               <button
                 ref={burgerRef}
                 type="button"
@@ -293,6 +326,15 @@ export function SiteHeader() {
         </div>
       </div>
 
+      {/* Téléphone et tablette : le son d'un toucher, en bas à droite (le
+          bouton « haut de page » se range au-dessus). Sur l'accueil, il est
+          à côté de « Voir le projet » (cf. GalleryHome). */}
+      {isHome ? null : (
+        <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-6 z-40 lg:hidden">
+          <SoundToggle variant="quick" />
+        </div>
+      )}
+
       <AnimatePresence>
         {isOpen ? (
           <>
@@ -323,10 +365,9 @@ export function SiteHeader() {
               className="fixed inset-x-3 top-[calc(var(--header-height)+0.5rem)] z-[45] max-h-[calc(100svh-var(--header-height)-1.25rem)] overflow-y-auto rounded-3xl border border-ink/10 bg-glass/90 p-3 shadow-2xl backdrop-blur-xl lg:hidden"
             >
               {/* Écran bas (téléphone en paysage) : liens à gauche, réseaux et
-                  réglages à droite, pour que tout tienne sans défiler. Sur
-                  tablette, les liens sont déjà dans la capsule. */}
+                  réglages à droite, pour que tout tienne sans défiler. */}
               <div className="[@media(max-height:520px)]:grid [@media(max-height:520px)]:grid-cols-2 [@media(max-height:520px)]:gap-x-3">
-                <nav aria-label={t.site.nav.mobile} className="flex flex-col md:hidden">
+                <nav aria-label={t.site.nav.mobile} className="flex flex-col">
                   {mobileNavigation.map((item) => {
                     const isActive = pathname === item.href;
 
@@ -354,7 +395,7 @@ export function SiteHeader() {
                     );
                   })}
                 </nav>
-                <div className="mt-2 border-t border-ink/10 pt-2 md:mt-0 md:border-t-0 md:pt-0 [@media(max-height:520px)]:mt-0 [@media(max-height:520px)]:border-l [@media(max-height:520px)]:border-t-0 [@media(max-height:520px)]:pl-3 [@media(max-height:520px)]:pt-0">
+                <div className="mt-2 border-t border-ink/10 pt-2 [@media(max-height:520px)]:mt-0 [@media(max-height:520px)]:border-l [@media(max-height:520px)]:border-t-0 [@media(max-height:520px)]:pl-3 [@media(max-height:520px)]:pt-0">
                   <div className="flex min-h-11 items-center justify-between px-3">
                     <SocialLinks />
                     <LanguageFlags />
@@ -432,8 +473,11 @@ function toggleClasses(labelled: boolean, pressed: boolean) {
  * geste et mémorisés. Un interrupteur (« Son », activé ou coupé) : l'icône
  * le dit (ondes ou croix), le menu l'écrit en toutes lettres.
  * - `icon` : pastille du bas de l'écran (ordinateur) ;
- * - `capsule` : dans la capsule, à côté du menu (téléphone, tablette) ;
+ * - `quick` : bouton de verre en bas à droite (téléphone, tablette), à côté
+ *   de « Voir le projet » sur l'accueil ;
  * - `labelled` : ligne du menu, avec son état écrit.
+ * Tous lisent et changent le même réglage (`useSoundOn`) : ils montrent
+ * toujours le même état.
  */
 /**
  * Curseur de volume : à côté du haut-parleur dans la pastille du bas (il se
@@ -459,7 +503,7 @@ function VolumeSlider({ className }: { className?: string }) {
   );
 }
 
-function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "labelled" }) {
+export function SoundToggle({ variant = "icon" }: { variant?: "icon" | "quick" | "labelled" }) {
   const { t } = useTranslation();
   const [on, toggle] = useSoundOn();
   useEffect(() => initSound(), []);
@@ -490,7 +534,7 @@ function SoundToggle({ variant = "icon" }: { variant?: "icon" | "capsule" | "lab
   return <SoundSwitch variant={variant} on={on} toggle={toggle} />;
 }
 
-function SoundSwitch({ variant, on, toggle }: { variant: "icon" | "capsule" | "labelled"; on: boolean; toggle: () => void }) {
+function SoundSwitch({ variant, on, toggle }: { variant: "icon" | "quick" | "labelled"; on: boolean; toggle: () => void }) {
   const { t } = useTranslation();
   const labelled = variant === "labelled";
 
@@ -503,16 +547,18 @@ function SoundSwitch({ variant, on, toggle }: { variant: "icon" | "capsule" | "l
       aria-label={labelled ? undefined : t.site.sound.label}
       title={labelled ? undefined : on ? t.site.sound.mute : t.site.sound.unmute}
       className={
-        variant === "capsule"
+        variant === "quick"
           ? cn(
-              "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-colors duration-300",
-              "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-ink/70",
-              on ? "text-ink" : "text-ink/55",
+              // Le verre des pastilles du bas (cf. DOCK_PILL), en rond.
+              "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border transition-colors duration-300",
+              "bg-glass/55 shadow-[var(--glass-shadow)] backdrop-blur-xl backdrop-saturate-150 [border-color:var(--glass-border)]",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/60",
+              on ? "text-ink" : "text-ink/70",
             )
           : cn(toggleClasses(labelled, on), labelled && "w-full")
       }
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" className={cn("shrink-0", variant === "capsule" ? "h-5 w-5" : "h-4 w-4")} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" viewBox="0 0 24 24" className={cn("shrink-0", variant === "quick" ? "h-5 w-5" : "h-4 w-4")} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor" stroke="none" />
         {on ? (
           <>

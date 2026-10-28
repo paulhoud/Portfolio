@@ -16,8 +16,19 @@ const STAY_WITH_BUTTON_MS = 6000;
  * mieux au casque. Une fois par session, sans rien bloquer (seule la pastille
  * capte les clics). Le son étant coupé par défaut, il propose alors de
  * l'activer ; survolé ou atteint au clavier, il reste le temps qu'on le lise.
+ * `onDone` : il s'est effacé ; `onSkip` : déjà vu, il ne s'affiche pas.
  */
-export function HeadphonesHint({ ready, calm, onDone }: { ready: boolean; calm: boolean; onDone?: () => void }) {
+export function HeadphonesHint({
+  ready,
+  calm,
+  onDone,
+  onSkip,
+}: {
+  ready: boolean;
+  calm: boolean;
+  onDone?: () => void;
+  onSkip?: () => void;
+}) {
   const { t } = useTranslation();
   const [soundOn, toggleSound] = useSoundOn();
   const [visible, setVisible] = useState(false);
@@ -25,8 +36,10 @@ export function HeadphonesHint({ ready, calm, onDone }: { ready: boolean; calm: 
   // Le bouton reste proposé jusqu'à la fin, même une fois le son activé.
   const [offered, setOffered] = useState(false);
   const done = useRef(onDone);
+  const skip = useRef(onSkip);
   useEffect(() => {
     done.current = onDone;
+    skip.current = onSkip;
   });
   const started = useRef(false);
 
@@ -34,7 +47,10 @@ export function HeadphonesHint({ ready, calm, onDone }: { ready: boolean; calm: 
     if (!ready || started.current) return;
     started.current = true;
     try {
-      if (window.sessionStorage.getItem(SHOWN_KEY)) return;
+      if (window.sessionStorage.getItem(SHOWN_KEY)) {
+        skip.current?.();
+        return;
+      }
       window.sessionStorage.setItem(SHOWN_KEY, "1");
     } catch {
       /* stockage indisponible : on l'affiche quand même, une fois par page */

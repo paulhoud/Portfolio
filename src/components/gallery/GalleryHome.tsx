@@ -34,7 +34,9 @@ import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
 import { onHomeReset } from "@/lib/homeReset";
 import { track } from "@/lib/stats/track";
+import { SoundToggle } from "@/components/layout/SiteHeader";
 import { HeadphonesHint } from "./HeadphonesHint";
+import { ScrollGestureHint } from "./ScrollGestureHint";
 import { clearSceneCursor, setSceneCursor } from "./SceneCursor";
 import { snapshotText } from "./textSnapshot";
 import { portalAnchor } from "./three/portal";
@@ -789,6 +791,17 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
     if (opening !== "loading") rendererRef.current?.releaseIntro();
   }, [opening, scene]);
 
+  // Fin de l'arrivée : le message du casque est passé (ou n'avait pas lieu
+  // d'être), 4,5 s au plus après le rideau. L'indication du geste attend ce
+  // moment, pour ne pas se mêler aux animations d'arrivée.
+  const introReady = synced && opening !== "loading";
+  const [introOver, setIntroOver] = useState(false);
+  useEffect(() => {
+    if (!introReady) return;
+    const timer = window.setTimeout(() => setIntroOver(true), 4500);
+    return () => window.clearTimeout(timer);
+  }, [introReady]);
+
   // Le cadre change de place ou de taille : la scène suit. Sa boîte et celle
   // qui le contient sont observées, et la fenêtre aussi : il peut se déplacer
   // sans changer de taille (fenêtre élargie, cartel plus ou moins haut).
@@ -1011,11 +1024,13 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                 synced && (!immersed || scene === "failed") ? "opacity-100" : "pointer-events-none opacity-0",
               )}
             >
-              {/* Colonne texte : identité, liste des projets, réglages. */}
+              {/* Colonne texte : identité, liste des projets, réglages. Sur
+                  téléphone et tablette, l'identité est dans l'en-tête : le
+                  titre ne reste que pour les lecteurs d'écran. */}
               {/* Centrée en hauteur sur la plaque (qui se tient au-dessus du cartel),
                   et non sur l'écran entier : elle paraissait trop basse. */}
               <div className="pointer-events-auto flex min-h-0 flex-col lg:justify-center lg:pb-40">
-                <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-ink lg:text-5xl [@media(max-height:500px)]:sr-only">
+                <h1 data-pull className="shrink-0 text-lg font-medium leading-tight tracking-[0.02em] text-ink max-lg:sr-only lg:text-5xl [@media(max-height:500px)]:sr-only">
                   {profile.name}
                   <span className="mt-0.5 block text-[0.625rem] font-bold uppercase tracking-[0.24em] text-ink/60 light:text-ink/75 lg:mt-3 lg:text-sm">
                     {profile.jobTitle}
@@ -1158,7 +1173,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                     </AnimatePresence>
                   </div>
 
-                  {/* Invitation à défiler : à l'arrivée seulement, jusqu'au premier défilement. */}
+                  {/* Invitation à défiler : à l'arrivée seulement, jusqu'au premier
+                      défilement. Au toucher, la main qui montre le geste la remplace. */}
                   <AnimatePresence>
                     {synced && !scrolled && !immersed && active === 0 && doom === null ? (
                       <motion.div
@@ -1166,7 +1182,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1, transition: { delay: calm ? 0 : 1.6, duration: 0.6 } }}
                         exit={{ opacity: 0, transition: { duration: 0.3 } }}
-                        className="pointer-events-none absolute bottom-1 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 lg:bottom-3"
+                        className="pointer-events-none absolute bottom-1 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 pointer-coarse:hidden lg:bottom-3"
                       >
                         <span className="relative block h-7 w-px overflow-hidden bg-ink/15">
                           <span className={cn("absolute left-1/2 top-1 block h-2 w-[3px] -translate-x-1/2 rounded-full bg-ink/85", !calm && "scroll-cue-dot")} />
@@ -1175,6 +1191,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
+                  <ScrollGestureHint armed={introOver && !scrolled && !immersed && active === 0 && doom === null} />
 
                   {/* Mobile : repère vertical au bord droit, qui montre qu'on avance
                       en faisant défiler et où l'on en est (un point par projet,
@@ -1262,8 +1279,9 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
                 {/* Mobile : un bouton qui dit ce qu'il fait, pour entrer dans le
                     projet affiché (en plus d'un toucher sur la plaque). On passe
-                    d'un projet à l'autre en faisant défiler (cf. le repère vertical). */}
-                <div data-pull className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
+                    d'un projet à l'autre en faisant défiler (cf. le repère vertical).
+                    À droite, le son d'un toucher (le même réglage que le menu). */}
+                <div data-pull className="pointer-events-auto mx-auto mt-4 flex w-full max-w-xl shrink-0 items-center justify-between gap-3 lg:hidden [@media(max-height:500px)]:mt-0 [@media(max-height:500px)]:w-auto">
                   <Link
                     href={localHref(`/projects/${project.slug}`)}
                     onClick={onProjectClick(shown)}
@@ -1275,6 +1293,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       <path d="M5 12h14M13 6l6 6-6 6" />
                     </svg>
                   </Link>
+                  <SoundToggle variant="quick" />
                 </div>
               </div>
 
@@ -1292,9 +1311,11 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
       {/* Au toucher, pas de curseur : quand le message s'efface, les objets du
           projet affiché sautillent, pour montrer qu'on peut les toucher. */}
       <HeadphonesHint
-        ready={synced && opening !== "loading"}
+        ready={introReady}
         calm={calm}
+        onSkip={() => setIntroOver(true)}
         onDone={() => {
+          setIntroOver(true);
           if (window.matchMedia("(pointer: coarse)").matches) rendererRef.current?.nudgeObjects();
         }}
       />

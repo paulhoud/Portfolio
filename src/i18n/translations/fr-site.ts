@@ -50,6 +50,7 @@ export const frSite: SiteCopy = {
     viewProject: "Voir le projet",
     nextProject: "Projet suivant",
     scrollHint: "Faire défiler",
+    swipeHint: "Glissez vers le haut",
     headphones: "Meilleure expérience avec un casque",
     lostTitle: "Vous dérivez dans une autre dimension.",
     lostHint: "Les projets flottent quelque part par ici…",

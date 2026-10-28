@@ -307,6 +307,69 @@ body {
   }
 }
 
+/* Indication du geste au toucher (cf. ScrollGestureHint) : la main se pose,
+   le point touché s'élargit, elle glisse vers le haut puis s'efface. Un
+   geste dure 2,2 s. */
+@keyframes swipe-hand {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12%,
+  22% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  64% {
+    transform: translateY(-24px);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: translateY(-26px);
+    opacity: 0;
+  }
+}
+
+@keyframes swipe-tap {
+  0%,
+  12% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  44%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.swipe-hand {
+  animation: swipe-hand 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.swipe-tap {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: swipe-tap 2.2s ease-out infinite;
+}
+
+/* Animations réduites : la main reste posée, la flèche dit le sens. */
+@media (prefers-reduced-motion: reduce) {
+  .swipe-hand {
+    animation: none;
+    transform: translateY(-12px);
+  }
+  .swipe-tap {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 /* Accueil : un geste de défilement (molette, pavé tactile, doigt, clavier)
    mène au projet suivant ou précédent, jamais plus loin ni entre deux (les
    ancres de chaque projet servent de points d'arrêt, cf. GalleryHome). Le
