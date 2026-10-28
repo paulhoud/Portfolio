@@ -1,6 +1,7 @@
 "use client";
 
 import { TechGlyph } from "@/components/about/TechStack";
+import { LucideIcon } from "@/components/icons/Lucide";
 import { TextPage } from "@/components/layout/TextPage";
 import { MethodPhases } from "@/components/method/MethodPhases";
 import { MethodTimeline, toolLogo } from "@/components/method/MethodTimeline";
@@ -51,7 +52,7 @@ export function MethodPageView() {
       {/* Après le dernier temps : la boucle. */}
       <ScrollReveal>
         <p className="mx-auto mt-20 max-w-2xl text-balance text-center text-sm italic leading-relaxed text-ink/65 md:mt-24">
-          <span aria-hidden="true" className="mr-2 not-italic">↺</span>
+          <LucideIcon name="refresh-ccw" className="mr-2 inline h-3.5 w-3.5 align-[-2px]" />
           {method.loopNote}
         </p>
       </ScrollReveal>

@@ -3,6 +3,7 @@
 import { motion, useScroll } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { TechGlyph } from "@/components/about/TechStack";
+import { LucideIcon, type LucideName } from "@/components/icons/Lucide";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { techById } from "@/content/techStack";
 import type { MethodStep, SiteCopy } from "@/i18n/types";
@@ -97,6 +98,35 @@ export function toolLogo(name: string) {
   return id ? techById(id)?.icon : undefined;
 }
 
+/**
+ * Icône Lucide d'une méthode (français ou anglais), choisie pour ce qu'elle
+ * désigne. L'ordre compte : « Analyse des retours » est une analyse avant
+ * d'être un retour.
+ */
+const TOOL_ICONS: [RegExp, LucideName][] = [
+  [/entretien|interview/i, "messages-square"],
+  [/analys/i, "chart-no-axes-column"],
+  [/utilisateur|user test/i, "users"],
+  [/^tests?$/i, "flask-conical"],
+  [/benchmark/i, "scale"],
+  [/veille|watch/i, "radar"],
+  [/r[ée]f[ée]rence/i, "bookmark"],
+  [/syst[eè]m/i, "component"],
+  [/croquis|sketch/i, "pencil"],
+  [/wireframe/i, "layout-template"],
+  [/prototype/i, "mouse-pointer-click"],
+  [/animation/i, "clapperboard"],
+  [/^3d$/i, "box"],
+  [/front/i, "code-xml"],
+  [/it[ée]ration/i, "refresh-cw"],
+  [/suivi|follow/i, "activity"],
+  [/retour|feedback/i, "message-square-text"],
+];
+
+function toolIcon(name: string) {
+  return TOOL_ICONS.find(([pattern]) => pattern.test(name))?.[1];
+}
+
 type Labels = { ai: string; tools: string; progress: string; figures: SiteCopy["method"]["figures"] };
 
 /**
@@ -109,8 +139,8 @@ type Labels = { ai: string; tools: string; progress: string; figures: SiteCopy["
  * - Un repère reste visible pendant la lecture : la colonne des cinq temps
  *   sur ordinateur, une pastille en haut de l'écran sur téléphone. Le temps
  *   lu y prend sa couleur. Rien n'est imposé au défilement.
- * - Les outils cités montrent leur logo ; les méthodes, une pastille de la
- *   teinte du temps.
+ * - Les outils cités montrent leur logo ; les méthodes, une icône Lucide de
+ *   la teinte du temps.
  */
 export function MethodTimeline({ steps, labels }: { steps: MethodStep[]; labels: Labels }) {
   const listRef = useRef<HTMLOListElement>(null);
@@ -163,17 +193,22 @@ export function MethodTimeline({ steps, labels }: { steps: MethodStep[]; labels:
  * Colonne des cinq temps, à gauche, qui suit la lecture (ordinateur). Posée
  * sur le fond même de la page : collée en haut, elle a son propre calque, et
  * un calque transparent lisserait son texte en gris.
+ *
+ * Trois états nets (revus le 28 oct. 2026, l'état en cours manquait de
+ * lisibilité) : le temps lu est surligné de sa teinte, pastille pleine et
+ * nom en gras ; les temps passés gardent leur teinte en contour ; les temps
+ * à venir restent gris. Rien ne clignote ni ne se retrace en changeant.
  */
 function MethodRail({ steps, active, label }: { steps: MethodStep[]; active: number; label: string }) {
   const progress = steps.length > 1 ? active / (steps.length - 1) : 1;
   return (
     <nav aria-label={label} className="hidden lg:block">
       <div className="sticky top-28 -mx-3 px-3 py-2 [background:var(--reading-surface)_fixed]">
-        <ol className="relative space-y-5">
+        <ol className="relative space-y-1">
           {/* Le fil, de la première pastille à la dernière, rempli jusqu'au temps lu. */}
-          <span aria-hidden="true" className="absolute bottom-[1.125rem] left-[1.125rem] top-[1.125rem] w-px -translate-x-1/2 bg-ink/12">
+          <span aria-hidden="true" className="absolute bottom-[1.375rem] left-[1.625rem] top-[1.375rem] w-px -translate-x-1/2 bg-ink/15">
             <span
-              className="absolute inset-x-0 top-0 origin-top bg-[var(--step)] transition-[height,background-color] duration-500 ease-out"
+              className="absolute inset-x-0 top-0 bg-[var(--step)] transition-[height,background-color] duration-500 ease-out"
               style={{ ...stepColor(active), height: `${progress * 100}%` }}
             />
           </span>
@@ -185,33 +220,37 @@ function MethodRail({ steps, active, label }: { steps: MethodStep[]; active: num
                 <a
                   href={`#${step.id}`}
                   aria-current={current ? "step" : undefined}
-                  className="group flex items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50"
+                  className={cn(
+                    "group flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors duration-300",
+                    "focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50",
+                    current ? "bg-[color-mix(in_srgb,var(--step)_14%,transparent)]" : "hover:bg-ink/[0.05]",
+                  )}
                 >
                   <span
                     className={cn(
-                      "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-500",
+                      "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors duration-300",
                       current
                         ? "border-[color:var(--step)] bg-[var(--step)] text-page"
                         : passed
-                          ? "border-[color:var(--step)] bg-page text-[var(--step)]"
-                          : "border-ink/15 bg-page text-ink/45 group-hover:text-ink/80",
+                          ? "border-[color:var(--step)] text-[var(--step)] [background:var(--reading-surface)_fixed]"
+                          : "border-ink/20 text-ink/50 [background:var(--reading-surface)_fixed]",
                     )}
                   >
-                    <StepGlyph index={index} className={cn("h-[1.05rem] w-[1.05rem]", current && "glyph-draw")} />
+                    <StepGlyph index={index} className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
                     <span
                       className={cn(
-                        "block text-[0.625rem] font-semibold tabular-nums tracking-[0.2em] transition-colors duration-500",
-                        current || passed ? "text-[var(--step)]" : "text-ink/45",
+                        "block text-[0.625rem] font-semibold tabular-nums tracking-[0.2em] transition-colors duration-300",
+                        current || passed ? "text-[var(--step)]" : "text-ink/50",
                       )}
                     >
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span
                       className={cn(
-                        "block text-[0.8125rem] font-semibold transition-colors duration-500",
-                        current ? "text-ink" : "text-ink/55 group-hover:text-ink/80",
+                        "block text-[0.8125rem] leading-tight transition-colors duration-300",
+                        current ? "font-bold text-ink" : passed ? "font-semibold text-ink/75" : "font-semibold text-ink/55 group-hover:text-ink/80",
                       )}
                     >
                       {step.phase}
@@ -249,7 +288,10 @@ function MobileProgress({ steps, active, label }: { steps: MethodStep[]; active:
             />
           ))}
         </span>
-        <span className="text-[0.75rem] font-semibold tabular-nums text-ink">
+        <span className="flex items-center gap-1.5 text-[0.75rem] font-semibold tabular-nums text-ink">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--step)] text-page">
+            <StepGlyph index={active} className="h-3 w-3" />
+          </span>
           <span className="text-[var(--step)]">{String(active + 1).padStart(2, "0")}</span> · {step?.phase}
         </span>
       </span>
@@ -333,21 +375,29 @@ function MethodStepItem({ step, index, labels }: { step: MethodStep; index: numb
         <div className="relative pl-5">
           <ReadingRule />
           <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--step)]" fill="currentColor">
-              <path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9zM18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
-            </svg>
+            <LucideIcon name="sparkles" className="h-3.5 w-3.5 text-[var(--step)]" />
             {labels.ai}
           </p>
           <p className="copy mt-2">{step.ai}</p>
         </div>
         <div>
-          <p className="text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">{labels.tools}</p>
+          <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
+            <LucideIcon name="wrench" className="h-3.5 w-3.5 text-[var(--step)]" />
+            {labels.tools}
+          </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {step.tools.map((tool) => {
               const logo = toolLogo(tool);
+              const icon = logo ? undefined : toolIcon(tool);
               return (
                 <li key={tool} className="inline-flex items-center gap-2 rounded-full border border-ink/12 px-3 py-1.5 text-[0.8125rem] leading-none text-ink/80">
-                  {logo ? <TechGlyph icon={logo} size="chip" /> : <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--step)]" />}
+                  {logo ? (
+                    <TechGlyph icon={logo} size="chip" />
+                  ) : icon ? (
+                    <LucideIcon name={icon} className="h-4 w-4 text-[var(--step)]" />
+                  ) : (
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--step)]" />
+                  )}
                   {tool}
                 </li>
               );

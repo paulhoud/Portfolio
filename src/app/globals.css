@@ -448,6 +448,93 @@ body {
     animation: glyph-trace 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+/* Schémas animés de la méthode (cf. MethodFigures) : uniquement des couleurs,
+   des tracés et des éléments de SVG, jamais un élément de page qui bouge
+   (il passerait sur son propre calque et entraînerait le texte voisin, lissé
+   en gris). */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -6;
+  }
+}
+@keyframes probe-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--step) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+@keyframes proto-cursor {
+  0%,
+  20% {
+    transform: translate(16px, 10px);
+  }
+  45%,
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes proto-ripple {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+@keyframes proto-button {
+  0%,
+  50%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  58% {
+    opacity: 0.55;
+  }
+}
+@keyframes caption-in {
+  from {
+    color: transparent;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .flow-dash {
+    stroke-dasharray: 3 3;
+    animation: flow-dash 0.6s linear infinite;
+  }
+  .probe-pulse {
+    animation: probe-pulse 0.85s ease-out;
+  }
+  .proto-cursor {
+    animation: proto-cursor 2.4s ease-in-out infinite;
+  }
+  .proto-ripple {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: proto-ripple 2.4s ease-out infinite;
+  }
+  .proto-button {
+    animation: proto-button 2.4s ease-in-out infinite;
+  }
+  .caption-in {
+    animation: caption-in 0.5s ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proto-ripple {
+    opacity: 0;
+  }
+}
+
 /* Colonne de la méthode : le pictogramme du temps lu se retrace. */
 @media (prefers-reduced-motion: no-preference) {
   .glyph-draw > :not([stroke-dasharray]) {
