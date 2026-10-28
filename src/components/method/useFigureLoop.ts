@@ -16,8 +16,10 @@ import { useEffect, useState, type RefObject } from "react";
  *   (`still`).
  *
  * `cycle` compte les tours (une version de plus à chaque boucle, etc.).
+ * `restart` : le temps où reprend chaque nouveau tour (0, le premier, par
+ * défaut ; la carte de la méthode ne repasse pas par son point de départ).
  */
-export function useFigureLoop(ref: RefObject<HTMLElement | null>, durations: readonly number[], paused = false) {
+export function useFigureLoop(ref: RefObject<HTMLElement | null>, durations: readonly number[], paused = false, restart = 0) {
   const reduceMotion = useReducedMotion() ?? false;
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState(0);
@@ -41,12 +43,12 @@ export function useFigureLoop(ref: RefObject<HTMLElement | null>, durations: rea
   useEffect(() => {
     if (reduceMotion || !visible || !tabShown || paused) return;
     const timer = window.setTimeout(() => {
-      const next = (phase + 1) % durations.length;
-      setPhase(next);
-      if (next === 0) setCycle((count) => count + 1);
+      const lap = phase + 1 >= durations.length;
+      setPhase(lap ? restart : phase + 1);
+      if (lap) setCycle((count) => count + 1);
     }, durations[phase]);
     return () => window.clearTimeout(timer);
-  }, [reduceMotion, visible, tabShown, paused, phase, durations]);
+  }, [reduceMotion, visible, tabShown, paused, phase, durations, restart]);
 
   return { phase, setPhase, cycle, still: reduceMotion };
 }
