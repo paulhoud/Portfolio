@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Portrait } from "@/components/about/Portrait";
 import { TechStack } from "@/components/about/TechStack";
 import { TextPage } from "@/components/layout/TextPage";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/motion/ScrollReveal";
@@ -28,21 +28,7 @@ export function AboutPageView() {
             ))}
           </div>
 
-          <div className="relative mx-auto md:mx-0">
-            <span
-              aria-hidden="true"
-              className="absolute -inset-4 rounded-full bg-ink/5 blur-2xl"
-            />
-            <Image
-              src={profile.photo}
-              alt={about.photoAlt}
-              width={260}
-              height={260}
-              priority
-              sizes="(min-width: 768px) 260px, 200px"
-              className="relative h-[200px] w-[200px] rounded-full object-cover shadow-[0_24px_60px_rgba(0,0,0,0.45)] ring-1 ring-ink/15 md:h-[260px] md:w-[260px]"
-            />
-          </div>
+          <Portrait src={profile.photo} alt={about.photoAlt} />
         </div>
       </ScrollReveal>
 

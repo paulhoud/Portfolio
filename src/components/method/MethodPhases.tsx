@@ -8,7 +8,8 @@ import { StepGlyph } from "./MethodTimeline";
  * Vue d'ensemble de la méthode, avant le détail : les cinq temps côte à côte,
  * chacun menant à son étape, et une boucle qui ramène du dernier au premier
  * (la méthode n'est pas une ligne droite). La boucle se trace quand elle
- * entre à l'écran. Tablette et ordinateur : sur téléphone, la frise détaillée
+ * entre à l'écran ; au survol d'un temps, son pictogramme se retrace.
+ * Tablette et ordinateur : sur téléphone, la frise détaillée
  * suffit.
  */
 export function MethodPhases({ steps, label, loop }: { steps: MethodStep[]; label: string; loop: string }) {
@@ -26,7 +27,7 @@ export function MethodPhases({ steps, label, loop }: { steps: MethodStep[]; labe
               className="group flex flex-col items-center gap-3 rounded-lg px-1 text-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50"
             >
               <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/15 bg-[var(--background)] text-ink/70 transition-colors duration-300 group-hover:border-ink/40 group-hover:text-ink">
-                <StepGlyph index={index} className="h-5 w-5" />
+                <StepGlyph index={index} className="glyph-trace h-5 w-5" />
               </span>
               <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink/70 transition-colors duration-300 group-hover:text-ink">
                 {step.phase}

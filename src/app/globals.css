@@ -370,6 +370,67 @@ body {
   }
 }
 
+/* Lueur qui suit le pointeur sur une carte (cf. pointerGlow ; d'après
+   Spotlight Card et Border Glow de React Bits) : un halo doux dans le fond,
+   le contour qui s'éclaire près du pointeur. Tout est peint dans la carte,
+   sous le texte, sans calque à part : le texte garde son lissage. */
+@property --glow-o {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+.pointer-glow {
+  position: relative;
+  isolation: isolate;
+  transition: --glow-o 0.45s ease;
+}
+.pointer-glow::before,
+.pointer-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.pointer-glow::before {
+  z-index: -1;
+  background: radial-gradient(
+    20rem circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    color-mix(in srgb, var(--ink) calc(var(--glow-o) * 11%), transparent),
+    transparent 70%
+  );
+}
+/* Posé sur le contour d'un pixel de la carte. */
+.pointer-glow::after {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(
+    11rem circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    color-mix(in srgb, var(--ink) calc(var(--glow-o) * 70%), transparent),
+    transparent 70%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* Vue d'ensemble de la méthode : au survol d'un temps, son pictogramme se
+   retrace (ses traits ont une longueur de 1, cf. MethodTimeline). */
+@keyframes glyph-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .glyph-trace > :not([stroke-dasharray]) {
+    stroke-dasharray: 1;
+    animation: glyph-trace 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 /* Accueil : un geste de défilement (molette, pavé tactile, doigt, clavier)
    mène au projet suivant ou précédent, jamais plus loin ni entre deux (les
    ancres de chaque projet servent de points d'arrêt, cf. GalleryHome). Le

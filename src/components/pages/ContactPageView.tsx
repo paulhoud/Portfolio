@@ -1,9 +1,11 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
 import { brandIconPaths, type BrandIconId } from "@/components/layout/icons/brandIconPaths";
 import { TextPage } from "@/components/layout/TextPage";
+import { pointerGlow } from "@/components/motion/pointerGlow";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { activeSocialLinks, profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
@@ -21,6 +23,10 @@ import { cn } from "@/lib/utils";
  * L'adresse reste affichée en clair : c'est l'appel à l'action principal. Les
  * profils et les villes viennent de `profile.ts`, source unique déjà utilisée
  * par le SEO.
+ *
+ * Un peu de vie au pointeur, sans rien déplacer du texte (28 oct. 2026) : une
+ * lueur suit la souris sur les cartes, des étincelles confirment la copie de
+ * l'adresse, un trait glisse d'un profil à l'autre dans l'index.
  */
 export function ContactPageView() {
   const { t, locale } = useTranslation();
@@ -66,8 +72,9 @@ export function ContactPageView() {
               // `download` force l'enregistrement plutôt que l'ouverture dans
               // le navigateur ; le nom du fichier servi est déjà explicite.
               download
+              {...pointerGlow}
               className={cn(
-                "group flex items-center gap-4 rounded-2xl border border-ink/12 px-5 py-4 text-sm text-ink/80 transition duration-300",
+                "pointer-glow group flex items-center gap-4 rounded-2xl border border-ink/12 px-5 py-4 text-sm text-ink/80 transition duration-300",
                 "hover:-translate-y-0.5 hover:border-ink/30 hover:bg-ink/[0.04] hover:text-ink",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60",
               )}
@@ -85,7 +92,7 @@ export function ContactPageView() {
           {activeSocialLinks.length > 0 ? (
             <nav aria-label={contact.socialLabel} className="mt-6">
               <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-ink/55">{contact.socialLabel}</h2>
-              <ul className="mt-3 divide-y divide-ink/10 border-y border-ink/10">
+              <SocialIndex>
                 {activeSocialLinks.map((link) => (
                   <li key={link.id}>
                     <a
@@ -114,7 +121,7 @@ export function ContactPageView() {
                     </a>
                   </li>
                 ))}
-              </ul>
+              </SocialIndex>
             </nav>
           ) : null}
         </ScrollReveal>
@@ -129,6 +136,77 @@ function handleOf(url: string) {
   return last.startsWith("@") ? last : `@${last}`;
 }
 
+type Mark = { top: number; height: number; on: boolean; slide: boolean };
+
+/**
+ * Index des profils : un trait, à gauche, glisse jusqu'au profil survolé ou
+ * atteint au clavier (d'après Pill Nav de React Bits). Il se déplace par sa
+ * position, sans calque à part : le texte garde son lissage.
+ */
+function SocialIndex({ children }: { children: ReactNode }) {
+  const [mark, setMark] = useState<Mark | null>(null);
+  const reach = (row: HTMLElement) =>
+    setMark((previous) => ({ top: row.offsetTop, height: row.offsetHeight, on: true, slide: previous?.on ?? false }));
+  const leave = () => setMark((previous) => previous && { ...previous, on: false, slide: false });
+
+  return (
+    <ul
+      className="relative mt-3 divide-y divide-ink/10 border-y border-ink/10"
+      onPointerOver={(event: PointerEvent<HTMLUListElement>) => {
+        const row = event.pointerType === "mouse" && event.target instanceof Element ? event.target.closest("li") : null;
+        if (row) reach(row);
+      }}
+      onPointerLeave={leave}
+      onFocus={(event) => {
+        const row = event.target.closest("li");
+        if (row) reach(row);
+      }}
+      onBlur={leave}
+    >
+      {mark ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-3 w-0.5 rounded-full bg-ink/70 duration-300 ease-out"
+          style={{
+            top: mark.top + 12,
+            height: Math.max(0, mark.height - 24),
+            opacity: mark.on ? 1 : 0,
+            transitionProperty: mark.slide ? "top, height, opacity" : "opacity",
+          }}
+        />
+      ) : null}
+      {children}
+    </ul>
+  );
+}
+
+/**
+ * Étincelles autour de l'icône quand l'adresse est copiée (d'après Click
+ * Spark de React Bits) : la confirmation se voit là où l'on a cliqué.
+ */
+function CopySparks() {
+  return (
+    <svg aria-hidden="true" viewBox="-16 -16 32 32" className="pointer-events-none absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 overflow-visible">
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+        return (
+          <motion.path
+            key={angle}
+            d={`M${(cos * 10).toFixed(2)} ${(sin * 10).toFixed(2)}L${(cos * 16).toFixed(2)} ${(sin * 16).toFixed(2)}`}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            initial={{ pathLength: 0, pathOffset: 0, opacity: 1 }}
+            animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [1, 1, 0] }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 /**
  * Carte de l'e-mail : l'adresse en grand, puis deux gestes, l'écrire (client
  * de messagerie) ou la copier (pour qui écrit depuis un webmail).
@@ -136,12 +214,15 @@ function handleOf(url: string) {
 function EmailCard() {
   const { t } = useTranslation();
   const contact = t.site.contact;
+  const reduceMotion = useReducedMotion();
   const [copied, setCopied] = useState(false);
+  const [sparks, setSparks] = useState(0);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(profile.email);
       setCopied(true);
+      setSparks((count) => count + 1);
       track("contact", "copy");
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
@@ -152,8 +233,9 @@ function EmailCard() {
 
   return (
     <div
+      {...pointerGlow}
       className={cn(
-        "rounded-3xl border p-6 md:p-8 [border-color:var(--glass-border)] shadow-[var(--glass-shadow)]",
+        "pointer-glow rounded-3xl border p-6 md:p-8 [border-color:var(--glass-border)] shadow-[var(--glass-shadow)]",
         "[background:radial-gradient(120%_120%_at_0%_0%,color-mix(in_srgb,var(--ink)_7%,transparent),transparent_60%),var(--glass)]",
       )}
     >
@@ -179,9 +261,12 @@ function EmailCard() {
           onClick={copy}
           className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink/15 px-5 py-2.5 text-sm font-medium text-ink/80 transition duration-300 hover:-translate-y-0.5 hover:border-ink/35 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60"
         >
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {copied ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M9 9h10v10H9zM5 15V5h10" />}
-          </svg>
+          <span className="relative flex">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {copied ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M9 9h10v10H9zM5 15V5h10" />}
+            </svg>
+            {sparks && !reduceMotion ? <CopySparks key={sparks} /> : null}
+          </span>
           {/* Le libellé change, et il est annoncé aux lecteurs d'écran. */}
           <span aria-live="polite">{copied ? contact.copied : contact.copy}</span>
         </button>
