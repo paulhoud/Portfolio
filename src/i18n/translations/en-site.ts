@@ -92,6 +92,33 @@ export const enSite: SiteCopy = {
     toolsLabel: "Methods and tools",
     loopNote:
       "Often, we go back to an earlier moment: what testing teaches sends us back to understanding the need, and an experiment can reopen the exploration.",
+    map: { label: "From problem to solution", from: "A need, a problem", to: "A solution in use" },
+    progressLabel: "Progress through the method",
+    figures: {
+      understand: {
+        context: "The context",
+        hypotheses: "Hypotheses to check",
+        field: "Checked in the field",
+        output: "Improvement leads, ranked by priority",
+      },
+      explore: { subject: "A subject", directions: "Several directions", chosen: "One direction kept" },
+      design: {
+        axis: "Fidelity",
+        levels: ["Concept", "Flows and wireframes", "Mock-ups", "Interactive prototype"],
+        structure: "settles a structure",
+        interaction: "settles an interaction",
+      },
+      experiment: {
+        center: "Shorten the loop",
+        steps: ["An idea", "A version that works", "Tested in real conditions", "Iterated"],
+      },
+      validate: {
+        center: "The solution",
+        criteria: ["Usability", "Visual consistency", "Technical feasibility", "Business goals"],
+        trackLabel: "Into production, and beyond",
+        track: ["Mock-up", "Prototype", "In production", "Follow-up"],
+      },
+    },
     ai: {
       title: "AI as a design partner",
       intro:

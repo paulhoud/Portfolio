@@ -448,6 +448,15 @@ export const enProjectTranslations: ProjectTranslations = {
         title: "A shared language, built from the code",
         body: "I rebuilt the app's entire design system in Figma, starting from the code: a component only enters the file once it exists in the app, and any gap gets fixed. Every component comes with its variants and states, is interactive, and carries the call the developer copies.",
         cover: { caption: "The file's cover: the app's foundations, atoms, molecules and organisms" },
+        origins: {
+          title: "From first foundations to a system",
+          body: "During the redesigns, I laid first foundations with the developer: a type scale, a component library, an organised file. Today's design system builds on them and goes further, starting from the code.",
+          shots: [
+            { caption: "Type scale and tokens" },
+            { caption: "The first component library" },
+            { caption: "The first file: structure and shared styles" },
+          ],
+        },
         levelsTitle: "Four levels, from token to screen",
         levels: [
           {
@@ -537,9 +546,6 @@ export const enProjectTranslations: ProjectTranslations = {
           },
           shots: [
             { caption: "Logotype variations" },
-            { caption: "Type scale and tokens" },
-            { caption: "The first component library" },
-            { caption: "The first file: structure and shared styles" },
           ],
         },
         {

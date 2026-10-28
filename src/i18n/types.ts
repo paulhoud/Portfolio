@@ -146,6 +146,21 @@ export type SiteCopy = {
     toolsLabel: string;
     /** Après le dernier temps : on repart souvent en arrière. */
     loopNote: string;
+    /** Carte d'ensemble : du problème de départ à la solution en usage. */
+    map: { label: string; from: string; to: string };
+    /** Nom du repère qui suit la lecture des temps. */
+    progressLabel: string;
+    /**
+     * Schémas des cinq temps, tirés de leur texte : ils montrent ce que chaque
+     * temps produit, sans rien ajouter au propos.
+     */
+    figures: {
+      understand: { context: string; hypotheses: string; field: string; output: string };
+      explore: { subject: string; directions: string; chosen: string };
+      design: { axis: string; levels: string[]; structure: string; interaction: string };
+      experiment: { center: string; steps: string[] };
+      validate: { center: string; criteria: string[]; trackLabel: string; track: string[] };
+    };
     ai: {
       title: string;
       intro: string;
@@ -224,6 +239,7 @@ export type ProjectCopy = {
       title: string;
       body: string;
       cover: { caption: string };
+      origins: { title: string; body: string; shots: { caption: string }[] };
       levelsTitle: string;
       levels: { name: string; role: string; items: string }[];
       foundations: { caption: string }[];

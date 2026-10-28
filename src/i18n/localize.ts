@@ -100,6 +100,11 @@ function mergeSystem(
     title: translated.title,
     body: translated.body,
     cover: { ...base.cover, caption: translated.cover.caption },
+    origins: {
+      title: translated.origins.title,
+      body: translated.origins.body,
+      shots: base.origins.shots.map((shot, index) => ({ ...shot, caption: translated.origins.shots[index]?.caption ?? shot.caption })),
+    },
     levelsTitle: translated.levelsTitle,
     levels: base.levels.map((level, index) => translated.levels[index] ?? level),
     foundations: base.foundations.map((shot, index) => ({ ...shot, caption: translated.foundations[index]?.caption ?? shot.caption })),

@@ -1,9 +1,13 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll } from "framer-motion";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { TechGlyph } from "@/components/about/TechStack";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
-import type { MethodStep } from "@/i18n/types";
+import { techById } from "@/content/techStack";
+import type { MethodStep, SiteCopy } from "@/i18n/types";
+import { cn } from "@/lib/utils";
+import { DesignFigure, ExperimentFigure, ExploreFigure, UnderstandFigure, ValidateFigure } from "./MethodFigures";
 
 /**
  * Pictogrammes des cinq temps de la méthode.
@@ -16,7 +20,8 @@ import type { MethodStep } from "@/i18n/types";
  *
  * L'ordre suit celui des temps ; un temps supplémentaire s'afficherait sans
  * pictogramme plutôt que d'en réutiliser un à contresens. Les traits portent
- * une longueur de 1 : la frise les trace à mesure qu'un temps est atteint.
+ * une longueur de 1 : ils se retracent quand un temps devient le temps lu, ou
+ * au survol de la carte d'ensemble.
  */
 const stepGlyphs = [
   // Comprendre : observer, réunir des indices dispersés.
@@ -56,8 +61,7 @@ const stepGlyphs = [
   </>,
 ];
 
-export function StepGlyph({ index, className, drawn }: { index: number; className?: string; drawn?: MotionValue<number> }) {
-  const strokeDashoffset = useTransform(() => (drawn ? 1 - drawn.get() : 0));
+export function StepGlyph({ index, className }: { index: number; className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -69,144 +73,299 @@ export function StepGlyph({ index, className, drawn }: { index: number; classNam
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {drawn ? <motion.g style={{ strokeDasharray: 1, strokeDashoffset }}>{stepGlyphs[index]}</motion.g> : stepGlyphs[index]}
+      {stepGlyphs[index]}
     </svg>
   );
 }
 
-/**
- * Hauteur à laquelle la frise avance : quand le centre d'une pastille passe
- * cette ligne de l'écran (62 % de sa hauteur), le fil l'atteint et elle
- * s'allume. Assez bas pour que la dernière étape s'allume avant la fin de la
- * page.
- */
-const READ_LINE = "62%";
-const READ_SPAN = ["center 65%", "center 59%"] as const;
+/** Teinte d'un temps (cf. `--step-1` à `--step-5` dans globals.css). */
+export function stepColor(index: number) {
+  return { "--step": `var(--step-${index + 1})` } as CSSProperties;
+}
 
-type Labels = { ai: string; tools: string };
+/** Outils dont le logo est connu ; les autres (méthodes) restent en toutes lettres. */
+const TOOL_LOGOS: [RegExp, string][] = [
+  [/claude/i, "claude"],
+  [/gpt/i, "chatgpt"],
+  [/figma/i, "figma"],
+  [/blender/i, "blender"],
+  [/unity/i, "unity"],
+];
+
+export function toolLogo(name: string) {
+  const id = TOOL_LOGOS.find(([pattern]) => pattern.test(name))?.[1];
+  return id ? techById(id)?.icon : undefined;
+}
+
+type Labels = { ai: string; tools: string; progress: string; figures: SiteCopy["method"]["figures"] };
 
 /**
- * Frise de la méthode, animée au défilement : un fil se remplit d'une pastille
- * à l'autre au rythme de la lecture, et chaque temps atteint passe à l'encre
- * pleine. Tout est lié au défilement (aucune minuterie) : on peut remonter, la
- * frise se vide d'autant. Chaque temps porte, dans son déroulé, ce que l'IA y
- * apporte et les méthodes ou outils qui peuvent y servir.
+ * Les cinq temps de la méthode, refaits le 28 oct. 2026 (brief de Paul :
+ * plus de caractère, de couleur et de variété).
  *
- * Un peu plus de caractère (28 oct. 2026, d'après Star Border de React Bits :
- * une lumière qui court sur un trait) : une lueur marque l'avancée du fil, le
- * pictogramme d'un temps se trace quand le fil l'atteint, et le filet de
- * l'apport de l'IA se remplit à sa lecture. Tout reste lié au défilement.
+ * - Chaque temps a sa teinte, son grand numéro et son schéma, tiré de son
+ *   texte ; la mise en page change d'un temps à l'autre (schéma pleine
+ *   largeur, à côté du texte, avant ou après lui).
+ * - Un repère reste visible pendant la lecture : la colonne des cinq temps
+ *   sur ordinateur, une pastille en haut de l'écran sur téléphone. Le temps
+ *   lu y prend sa couleur. Rien n'est imposé au défilement.
+ * - Les outils cités montrent leur logo ; les méthodes, une pastille de la
+ *   teinte du temps.
  */
 export function MethodTimeline({ steps, labels }: { steps: MethodStep[]; labels: Labels }) {
+  const listRef = useRef<HTMLOListElement>(null);
+  const [active, setActive] = useState(0);
+
+  // Le temps lu : le dernier dont le début a passé une ligne un peu au-dessus
+  // du milieu de l'écran (le premier tant qu'aucun ne l'a passée). Mesuré à
+  // chaque image de défilement, au plus.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const items = [...list.querySelectorAll<HTMLElement>("[data-step]")];
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const line = window.innerHeight * 0.45;
+      let current = 0;
+      items.forEach((item, index) => {
+        if (item.getBoundingClientRect().top <= line) current = index;
+      });
+      setActive(current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
-    <ol className="relative mt-16 md:mt-20">
-      {steps.map((step, index) => (
-        <MethodTimelineStep key={step.id} step={step} index={index} last={index === steps.length - 1} labels={labels} />
-      ))}
-    </ol>
+    <div className="relative mt-20 md:mt-28 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
+      <MethodRail steps={steps} active={active} label={labels.progress} />
+      <MobileProgress steps={steps} active={active} label={labels.progress} />
+      <ol ref={listRef} className="min-w-0">
+        {steps.map((step, index) => (
+          <MethodStepItem key={step.id} step={step} index={index} labels={labels} />
+        ))}
+      </ol>
+    </div>
   );
 }
 
-function MethodTimelineStep({ step, index, last, labels }: { step: MethodStep; index: number; last: boolean; labels: Labels }) {
-  const dotRef = useRef<HTMLSpanElement>(null);
-  // La pastille s'allume en traversant la ligne de lecture (de part et
-  // d'autre, sur quelques points de hauteur d'écran).
-  const { scrollYProgress: lit } = useScroll({ target: dotRef, offset: [...READ_SPAN] });
-  const litScale = useTransform(lit, [0, 1], [0.6, 1]);
-  // Pas encore atteint, le numéro reste lisible (au moins 4,5:1 en thème clair).
-  const numberOpacity = useTransform(lit, [0, 1], [0.72, 1]);
-  // Le pictogramme se trace pendant que la pastille s'allume.
-  const reduceMotion = useReducedMotion();
-  const drawn = useTransform(lit, [0.2, 1], [0, 1], { clamp: true });
+/**
+ * Colonne des cinq temps, à gauche, qui suit la lecture (ordinateur). Posée
+ * sur le fond même de la page : collée en haut, elle a son propre calque, et
+ * un calque transparent lisserait son texte en gris.
+ */
+function MethodRail({ steps, active, label }: { steps: MethodStep[]; active: number; label: string }) {
+  const progress = steps.length > 1 ? active / (steps.length - 1) : 1;
+  return (
+    <nav aria-label={label} className="hidden lg:block">
+      <div className="sticky top-28 -mx-3 px-3 py-2 [background:var(--reading-surface)_fixed]">
+        <ol className="relative space-y-5">
+          {/* Le fil, de la première pastille à la dernière, rempli jusqu'au temps lu. */}
+          <span aria-hidden="true" className="absolute bottom-[1.125rem] left-[1.125rem] top-[1.125rem] w-px -translate-x-1/2 bg-ink/12">
+            <span
+              className="absolute inset-x-0 top-0 origin-top bg-[var(--step)] transition-[height,background-color] duration-500 ease-out"
+              style={{ ...stepColor(active), height: `${progress * 100}%` }}
+            />
+          </span>
+          {steps.map((step, index) => {
+            const current = index === active;
+            const passed = index < active;
+            return (
+              <li key={step.id} style={stepColor(index)}>
+                <a
+                  href={`#${step.id}`}
+                  aria-current={current ? "step" : undefined}
+                  className="group flex items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50"
+                >
+                  <span
+                    className={cn(
+                      "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-500",
+                      current
+                        ? "border-[color:var(--step)] bg-[var(--step)] text-page"
+                        : passed
+                          ? "border-[color:var(--step)] bg-page text-[var(--step)]"
+                          : "border-ink/15 bg-page text-ink/45 group-hover:text-ink/80",
+                    )}
+                  >
+                    <StepGlyph index={index} className={cn("h-[1.05rem] w-[1.05rem]", current && "glyph-draw")} />
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={cn(
+                        "block text-[0.625rem] font-semibold tabular-nums tracking-[0.2em] transition-colors duration-500",
+                        current || passed ? "text-[var(--step)]" : "text-ink/45",
+                      )}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={cn(
+                        "block text-[0.8125rem] font-semibold transition-colors duration-500",
+                        current ? "text-ink" : "text-ink/55 group-hover:text-ink/80",
+                      )}
+                    >
+                      {step.phase}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * Sur téléphone et tablette : une pastille collée en haut de l'écran, le
+ * temps lu et cinq traits de progression. L'en-tête du site, quand il
+ * réapparaît, passe par-dessus.
+ */
+function MobileProgress({ steps, active, label }: { steps: MethodStep[]; active: number; label: string }) {
+  const step = steps[active];
+  return (
+    <div className="pointer-events-none sticky top-3 z-30 -mt-2 mb-10 flex justify-center lg:hidden" aria-label={label} role="status">
+      <span
+        className="flex items-center gap-3 rounded-full border border-ink/10 px-3.5 py-2 [background:var(--reading-surface)_fixed]"
+        style={stepColor(active)}
+      >
+        <span className="flex gap-1" aria-hidden="true">
+          {steps.map((item, index) => (
+            <span
+              key={item.id}
+              className={cn("h-1 w-4 rounded-full transition-colors duration-500", index <= active ? "bg-[var(--step)]" : "bg-ink/15")}
+              style={index <= active ? stepColor(index) : undefined}
+            />
+          ))}
+        </span>
+        <span className="text-[0.75rem] font-semibold tabular-nums text-ink">
+          <span className="text-[var(--step)]">{String(active + 1).padStart(2, "0")}</span> · {step?.phase}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function MethodStepItem({ step, index, labels }: { step: MethodStep; index: number; labels: Labels }) {
+  const figures = labels.figures;
+  const body = (
+    <div className="space-y-4">
+      {step.body.map((paragraph) => (
+        <p key={paragraph} className="copy">
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+  const figure = [
+    <UnderstandFigure key="understand" copy={figures.understand} />,
+    <ExploreFigure key="explore" copy={figures.explore} />,
+    <DesignFigure key="design" copy={figures.design} />,
+    <ExperimentFigure key="experiment" copy={figures.experiment} />,
+    <ValidateFigure key="validate" copy={figures.validate} />,
+  ][index];
+
+  // Une composition par temps, pour que la page ne devienne pas une suite de
+  // blocs identiques : schéma après le texte, à côté, avant, de l'autre côté,
+  // puis de nouveau après.
+  let content: ReactNode;
+  if (index === 1) {
+    content = (
+      <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
+        {body}
+        {figure}
+      </div>
+    );
+  } else if (index === 2) {
+    content = (
+      <>
+        {figure}
+        <div className="mt-10">{body}</div>
+      </>
+    );
+  } else if (index === 3) {
+    content = (
+      <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-12">
+        <div className="md:order-2">{body}</div>
+        <div className="md:order-1">{figure}</div>
+      </div>
+    );
+  } else {
+    content = (
+      <>
+        <div className={cn(index === 0 && "md:columns-2 md:gap-10 [&_p]:break-inside-avoid")}>{body}</div>
+        <div className="mt-12">{figure}</div>
+      </>
+    );
+  }
 
   return (
-    <li id={step.id} className="relative scroll-mt-28 pb-16 last:pb-0 md:pb-20">
-      {last ? null : <TimelineThread />}
-      <ScrollReveal delay={index === 0 ? 0 : 0.04}>
-        <div className="flex gap-5 md:gap-7">
-          <span
-            ref={dotRef}
-            aria-hidden="true"
-            className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ink/12 bg-[var(--background)] text-ink/55 md:h-[3.3rem] md:w-[3.3rem]"
-          >
-            <StepGlyph index={index} />
-            {/* Temps atteint : la pastille passe à l'encre pleine. */}
-            <motion.span
-              className="absolute -inset-px flex items-center justify-center rounded-full bg-ink text-page"
-              style={{ opacity: lit, scale: litScale }}
-            >
-              <StepGlyph index={index} drawn={reduceMotion ? undefined : drawn} />
-            </motion.span>
+    <li data-step={index} id={step.id} className="relative scroll-mt-28 pb-24 last:pb-0 md:pb-36" style={stepColor(index)}>
+      <ScrollReveal>
+        <span aria-hidden="true" className="block h-0.5 w-12 rounded-full bg-[var(--step)]" />
+        <div className="mt-6 flex items-end gap-5 md:gap-7">
+          <span aria-hidden="true" className="text-[4rem] font-light leading-[0.78] tabular-nums text-[var(--step)] md:text-[6rem]">
+            {String(index + 1).padStart(2, "0")}
           </span>
-
-          <div className="min-w-0 flex-1 pt-1 md:pt-2">
-            <motion.span
-              className="block text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink"
-              style={{ opacity: numberOpacity }}
-            >
-              {String(index + 1).padStart(2, "0")} · {step.phase}
-            </motion.span>
-            <h2 className="mt-2 text-lg font-bold text-ink md:text-xl">{step.title}</h2>
-            <p className="mt-3 text-balance text-base leading-snug text-ink md:text-lg">{step.lead}</p>
-
-            <div className="mt-5 space-y-4">
-              {step.body.map((paragraph) => (
-                <p key={paragraph} className="copy">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            {/* Ce que l'IA apporte à ce temps : dans le déroulé, pas en annexe. */}
-            <div className="relative mt-6 pl-4 md:pl-5">
-              <ReadingRule />
-              <p className="text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">{labels.ai}</p>
-              <p className="copy mt-2">{step.ai}</p>
-            </div>
-
-            <p className="mt-5 text-sm leading-relaxed text-ink/65">
-              <span className="mb-1.5 block text-[0.625rem] font-semibold uppercase tracking-[0.28em]">{labels.tools}</span>
-              {step.tools.join(" · ")}
-            </p>
+          <div className="min-w-0 pb-0.5">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--step)]">{step.phase}</p>
+            <h2 className="mt-1.5 text-balance text-2xl font-medium leading-tight text-ink md:text-3xl">{step.title}</h2>
           </div>
+        </div>
+        <p className="mt-7 max-w-2xl text-balance text-lg leading-snug text-ink md:text-xl">{step.lead}</p>
+      </ScrollReveal>
+
+      <ScrollReveal className="mt-10">{content}</ScrollReveal>
+
+      <ScrollReveal className="mt-12 grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-12">
+        {/* Ce que l'IA apporte à ce temps : dans le déroulé, pas en annexe. */}
+        <div className="relative pl-5">
+          <ReadingRule />
+          <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--step)]" fill="currentColor">
+              <path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9zM18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
+            </svg>
+            {labels.ai}
+          </p>
+          <p className="copy mt-2">{step.ai}</p>
+        </div>
+        <div>
+          <p className="text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">{labels.tools}</p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {step.tools.map((tool) => {
+              const logo = toolLogo(tool);
+              return (
+                <li key={tool} className="inline-flex items-center gap-2 rounded-full border border-ink/12 px-3 py-1.5 text-[0.8125rem] leading-none text-ink/80">
+                  {logo ? <TechGlyph icon={logo} size="chip" /> : <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--step)]" />}
+                  {tool}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </ScrollReveal>
     </li>
   );
 }
 
-/**
- * Fil jusqu'à la pastille suivante, de centre à centre : il se remplit
- * pendant qu'on lit le temps, une lueur à sa pointe tant qu'il avance. La
- * lueur se place par sa position (sans calque à part, loin du texte).
- */
-function TimelineThread() {
-  const ref = useRef<HTMLSpanElement>(null);
-  const { scrollYProgress: filled } = useScroll({ target: ref, offset: [`start ${READ_LINE}`, `end ${READ_LINE}`] });
-  const tip = useTransform(filled, (value) => `${value * 100}%`);
-  const tipOpacity = useTransform(filled, [0, 0.04, 0.94, 1], [0, 1, 1, 0]);
-  return (
-    <span
-      ref={ref}
-      aria-hidden="true"
-      className="absolute left-[1.375rem] top-[1.375rem] -bottom-[1.375rem] w-px bg-ink/12 md:left-[1.65rem] md:top-[1.65rem] md:-bottom-[1.65rem]"
-    >
-      <motion.span className="absolute inset-0 origin-top bg-ink/55" style={{ scaleY: filled }} />
-      <motion.span
-        className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink shadow-[0_0_10px_3px_color-mix(in_srgb,var(--ink)_35%,transparent)]"
-        style={{ top: tip, opacity: tipOpacity }}
-      />
-    </span>
-  );
-}
-
-/** Filet de l'apport de l'IA : il se remplit pendant qu'on le lit. */
+/** Filet de l'apport de l'IA, à la teinte du temps : il se remplit pendant qu'on le lit. */
 function ReadingRule() {
   const ref = useRef<HTMLSpanElement>(null);
-  const { scrollYProgress: read } = useScroll({ target: ref, offset: [`start 80%`, `end ${READ_LINE}`] });
+  const { scrollYProgress: read } = useScroll({ target: ref, offset: ["start 85%", "end 55%"] });
   return (
-    <span ref={ref} aria-hidden="true" className="absolute bottom-0 left-0 top-0 w-px bg-ink/20">
-      <motion.span className="absolute inset-0 origin-top bg-ink/60" style={{ scaleY: read }} />
+    <span ref={ref} aria-hidden="true" className="absolute bottom-0 left-0 top-0 w-px bg-ink/15">
+      <motion.span className="absolute inset-0 origin-top bg-[var(--step)]" style={{ scaleY: read }} />
     </span>
   );
 }

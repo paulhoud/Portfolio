@@ -2,46 +2,63 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import type { MethodStep } from "@/i18n/types";
-import { StepGlyph } from "./MethodTimeline";
+import { cn } from "@/lib/utils";
+import { StepGlyph, stepColor } from "./MethodTimeline";
 
 /**
- * Vue d'ensemble de la méthode, avant le détail : les cinq temps côte à côte,
- * chacun menant à son étape, et une boucle qui ramène du dernier au premier
- * (la méthode n'est pas une ligne droite). La boucle se trace quand elle
- * entre à l'écran ; au survol d'un temps, son pictogramme se retrace.
- * Tablette et ordinateur : sur téléphone, la frise détaillée
- * suffit.
+ * Carte d'ensemble de la méthode, avant le détail (refaite le 28 oct. 2026) :
+ * d'un besoin à une solution qui vit, cinq cercles de couleur qui se
+ * chevauchent, comme les temps eux-mêmes, chacun menant à son étape. Une
+ * boucle ramène du dernier au premier, tracée quand elle entre à l'écran. Au
+ * survol d'un temps, son pictogramme se retrace.
+ *
+ * Ordinateur : en ligne. Téléphone et tablette : en colonne, les cercles
+ * empilés.
  */
-export function MethodPhases({ steps, label, loop }: { steps: MethodStep[]; label: string; loop: string }) {
+export function MethodPhases({
+  steps,
+  map,
+  loop,
+}: {
+  steps: MethodStep[];
+  map: { label: string; from: string; to: string };
+  loop: string;
+}) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <nav aria-label={label} className="mx-auto mt-14 hidden max-w-3xl sm:block md:mt-16">
-      <ol className="relative grid grid-cols-5">
-        {/* Le fil qui relie les cinq temps, de centre à centre. */}
-        <span aria-hidden="true" className="absolute left-[10%] right-[10%] top-6 h-px bg-ink/15" />
-        {steps.map((step, index) => (
-          <li key={step.id} className="relative flex justify-center">
-            <a
-              href={`#${step.id}`}
-              className="group flex flex-col items-center gap-3 rounded-lg px-1 text-center focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink/50"
-            >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/15 bg-[var(--background)] text-ink/70 transition-colors duration-300 group-hover:border-ink/40 group-hover:text-ink">
-                <StepGlyph index={index} className="glyph-trace h-5 w-5" />
-              </span>
-              <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink/70 transition-colors duration-300 group-hover:text-ink">
-                {step.phase}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
+    <nav aria-label={map.label} className="mt-20 md:mt-28">
+      <p className="text-center text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/55">{map.label}</p>
+
+      <div className="mt-10 flex flex-col items-center gap-5 lg:flex-row lg:justify-center lg:gap-6">
+        <End>{map.from}</End>
+        <Arrow />
+        <ol className="flex flex-col items-center lg:flex-row">
+          {steps.map((step, index) => (
+            <li key={step.id} className={cn("relative", index > 0 && "-mt-4 lg:-ml-5 lg:mt-0")} style={{ ...stepColor(index), zIndex: steps.length - index }}>
+              <a
+                href={`#${step.id}`}
+                className={cn(
+                  "group flex h-[6.5rem] w-[6.5rem] flex-col items-center justify-center gap-1.5 rounded-full border-[1.5px] text-center transition-colors duration-300 lg:h-28 lg:w-28",
+                  "border-[color:var(--step)] bg-[color-mix(in_srgb,var(--step)_9%,transparent)] hover:bg-[color-mix(in_srgb,var(--step)_18%,transparent)]",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60",
+                )}
+              >
+                <StepGlyph index={index} className="glyph-trace h-5 w-5 text-[var(--step)]" />
+                <span className="text-[0.75rem] font-semibold text-ink">{step.phase}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <Arrow />
+        <End strong>{map.to}</End>
+      </div>
 
       {/* Du dernier temps au premier : on y revient. */}
-      <div aria-hidden="true" className="relative mt-2">
-        <svg viewBox="0 0 1000 56" preserveAspectRatio="none" className="block h-12 w-full overflow-visible text-ink/35">
+      <div aria-hidden="true" className="mx-auto mt-3 hidden max-w-[34rem] lg:block">
+        <svg viewBox="0 0 1000 56" preserveAspectRatio="none" className="block h-10 w-full overflow-visible text-ink/35">
           <motion.path
-            d="M900 4 C900 40 870 48 820 48 L180 48 C130 48 100 40 100 6"
+            d="M930 4 C930 40 900 48 850 48 L150 48 C100 48 70 40 70 6"
             fill="none"
             stroke="currentColor"
             strokeWidth="1"
@@ -51,10 +68,32 @@ export function MethodPhases({ steps, label, loop }: { steps: MethodStep[]; labe
             viewport={{ once: true, amount: 0.8 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           />
-          <path d="M92 16 L100 4 L108 16" fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <path d="M62 16 L70 4 L78 16" fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
         </svg>
-        <p className="mt-1 text-center text-xs italic text-ink/60">{loop}</p>
       </div>
+      <p className="mt-4 text-center text-xs italic text-ink/60 lg:mt-1">↺ {loop}</p>
     </nav>
+  );
+}
+
+/** Le point de départ et l'aboutissement, de part et d'autre des cinq temps. */
+function End({ children, strong = false }: { children: string; strong?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "max-w-[9.5rem] text-balance text-center text-[0.8125rem] leading-snug",
+        strong ? "font-semibold text-ink lg:text-left" : "text-ink/65 lg:text-right",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0 rotate-90 text-ink/35 lg:rotate-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12h15M14 7l5 5-5 5" />
+    </svg>
   );
 }

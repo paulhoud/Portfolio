@@ -370,6 +370,24 @@ body {
   }
 }
 
+/* Les cinq temps de la méthode, une teinte chacun (cf. MethodTimeline) :
+   repères, pastilles, schémas, jamais le texte courant. Plus foncées en
+   thème clair, pour tenir le contraste sur le fond gris. */
+:root {
+  --step-1: #7fb2ff;
+  --step-2: #b79bff;
+  --step-3: #5fd3c4;
+  --step-4: #f2b766;
+  --step-5: #82d69d;
+}
+:root[data-theme="light"] {
+  --step-1: #2c66c9;
+  --step-2: #6f47c8;
+  --step-3: #137a71;
+  --step-4: #9c5a0c;
+  --step-5: #2a7a46;
+}
+
 /* Lueur qui suit le pointeur sur une carte (cf. pointerGlow ; d'après
    Spotlight Card et Border Glow de React Bits) : un halo doux dans le fond,
    le contour qui s'éclaire près du pointeur. Tout est peint dans la carte,
@@ -426,6 +444,13 @@ body {
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .group:hover .glyph-trace > :not([stroke-dasharray]) {
+    stroke-dasharray: 1;
+    animation: glyph-trace 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+/* Colonne de la méthode : le pictogramme du temps lu se retrace. */
+@media (prefers-reduced-motion: no-preference) {
+  .glyph-draw > :not([stroke-dasharray]) {
     stroke-dasharray: 1;
     animation: glyph-trace 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }

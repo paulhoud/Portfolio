@@ -213,6 +213,8 @@ export type ProjectStorySystem = {
   body: string;
   /** Couverture du fichier, en ouverture. */
   cover: ProjectStoryShot;
+  /** D'où il part : les premières bases, posées pendant les refontes. */
+  origins: { title: string; body: string; shots: ProjectStoryShot[] };
   /** Organisation du fichier, du plus petit au plus grand. */
   levelsTitle: string;
   levels: { name: string; role: string; items: string }[];
@@ -416,6 +418,15 @@ export const projects: Project[] = [
         title: "Un langage commun, construit depuis le code",
         body: "J'ai repris tout le design system de l'application dans Figma, à partir du code : un composant n'y entre qu'une fois qu'il existe dans l'app, et toute différence se corrige. Chaque composant y est décliné en variantes et en états, rendu interactif, et porte l'appel à copier pour le développeur.",
         cover: { caption: "La couverture du fichier : fondations, atomes, molécules et organismes de l'app", image: upikaDsCover, optimize: true },
+        origins: {
+          title: "Des premières bases au système",
+          body: "Pendant les refontes, j'avais posé de premières bases avec le développeur : une échelle typographique, une bibliothèque de composants, un fichier organisé. Le design system actuel les reprend et va plus loin, en partant du code.",
+          shots: [
+            { caption: "Échelle typographique et tokens", image: upikaTypescale, optimize: true },
+            { caption: "La première bibliothèque de composants", image: upikaFigmaComponents, optimize: true },
+            { caption: "Le premier fichier : organisation et styles partagés", image: upikaFigmaTokens, optimize: true },
+          ],
+        },
         levelsTitle: "Quatre niveaux, du jeton à l'écran",
         levels: [
           {
@@ -525,20 +536,15 @@ export const projects: Project[] = [
             title: "Designer des refontes",
             body: "Je mène les refontes successives, je reprends l'identité graphique et le logotype, et je pose les fondations d'un design system partagé avec le développeur.",
           },
+          // Les trois planches du premier design system sont montrées dans le
+          // chapitre du design system (« Des premières bases au système ») :
+          // ici, elles le répétaient (remarque de Paul, 28 oct. 2026).
           shots: [
-            // Planches montrées en petit : l'original PNG pèse ici 5 à 10 fois
+            // Planche montrée en petit : l'original PNG pèse ici 5 à 10 fois
             // le réencodage, pour un gain de netteté qu'on ne voit pas.
             { caption: "Déclinaisons du logotype", image: upikaLogotype, optimize: true },
-            { caption: "Échelle typographique et tokens", image: upikaTypescale, optimize: true },
-            // « Premier » : le design system actuel est montré plus haut.
-            { caption: "La première bibliothèque de composants", image: upikaFigmaComponents, optimize: true },
-            {
-              caption: "Le premier fichier : organisation et styles partagés",
-              image: upikaFigmaTokens,
-              optimize: true,
-            },
           ],
-          shotLayout: "grid",
+          shotLayout: "stage",
         },
         {
           type: "pivot",

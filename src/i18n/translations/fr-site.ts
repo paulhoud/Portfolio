@@ -93,6 +93,33 @@ export const frSite: SiteCopy = {
     toolsLabel: "Méthodes et outils",
     loopNote:
       "Souvent, on repart d'un temps précédent : ce qu'on apprend en testant renvoie à la compréhension du besoin, et une expérimentation peut rouvrir l'exploration.",
+    map: { label: "Du problème à la solution", from: "Un besoin, un problème", to: "Une solution qui vit" },
+    progressLabel: "Progression dans la méthode",
+    figures: {
+      understand: {
+        context: "Le contexte",
+        hypotheses: "Des hypothèses à vérifier",
+        field: "Vérifiées sur le terrain",
+        output: "Des pistes classées par priorité",
+      },
+      explore: { subject: "Un sujet", directions: "Plusieurs directions", chosen: "Une direction retenue" },
+      design: {
+        axis: "Fidélité",
+        levels: ["Concept", "Parcours et wireframes", "Maquettes", "Prototype interactif"],
+        structure: "valide une structure",
+        interaction: "valide une interaction",
+      },
+      experiment: {
+        center: "Raccourcir la boucle",
+        steps: ["Une idée", "Une version qui fonctionne", "Testée en conditions réelles", "Itérée"],
+      },
+      validate: {
+        center: "La solution",
+        criteria: ["Qualité d'usage", "Cohérence visuelle", "Faisabilité technique", "Objectifs métier"],
+        trackLabel: "Jusqu'en production, et après",
+        track: ["Maquette", "Prototype", "En production", "Suivi"],
+      },
+    },
     ai: {
       title: "L'IA, partenaire de conception",
       intro:

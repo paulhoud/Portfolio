@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/motion/ScrollReveal";
-import { techCategories, type Tech } from "@/content/techStack";
+import { techCategories, type Tech, type TechIcon } from "@/content/techStack";
 import { useTranslation } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
@@ -75,57 +75,75 @@ function TechLink({ tech }: { tech: Tech }) {
         } as React.CSSProperties
       }
     >
-      {icon.kind === "mono" ? (
-        <span
-          aria-hidden="true"
-          className="text-[0.9375rem] font-bold leading-none tracking-tight"
-          style={{ color: icon.color }}
-        >
-          {icon.text}
-        </span>
-      ) : icon.kind === "image" ? (
-        // Logo bitmap : la marque repose sur un dégradé qu'un tracé vectoriel
-        // ne saurait restituer.
-        <Image
-          src={icon.src}
-          alt=""
-          width={64}
-          height={64}
-          className="h-[1.35rem] w-[1.35rem] object-contain opacity-90 transition-opacity duration-300 group-hover/tech:opacity-100 light:opacity-100"
-        />
-      ) : icon.kind === "multi" ? (
-        // Logo multicolore : la hauteur est contrainte et la largeur suit le
-        // ratio d'origine, pour ne pas déformer les marques non carrées.
-        <svg
-          aria-hidden="true"
-          viewBox={icon.viewBox}
-          className="h-[1.45rem] w-auto opacity-90 transition-opacity duration-300 group-hover/tech:opacity-100 light:opacity-100"
-        >
-          {icon.paths.map((shape) => (
-            <path key={shape.d} d={shape.d} fill={shape.fill} />
-          ))}
-        </svg>
-      ) : (
-        <svg
-          aria-hidden="true"
-          viewBox={icon.viewBox ?? "0 0 24 24"}
-          className={cn(
-            "opacity-80 transition-opacity duration-300 group-hover/tech:opacity-100 light:opacity-100",
-            // Logotype en toutes lettres : plus large que haut.
-            icon.viewBox ? "h-auto w-[2.1rem]" : "h-[1.35rem] w-[1.35rem]",
-            light?.color && "light:[fill:var(--icon-light)]",
-          )}
-          style={light?.color ? ({ "--icon-light": light.color } as React.CSSProperties) : undefined}
-          // Logo blanc (Cursor, ChatGPT, macOS…) : à l'encre du thème, sinon il
-          // disparaît sur le fond clair.
-          fill={/^#f{3}(f{3})?$/i.test(icon.color) ? "var(--ink)" : icon.color}
-        >
-          {icon.backdrop ? <rect x="1.5" y="1.5" width="21" height="21" fill={icon.backdrop} /> : null}
-          <path d={icon.d} />
-        </svg>
-      )}
+      <TechGlyph icon={icon} />
       {/* Nom accessible du lien : une icône seule n'en fournit aucun. */}
       <span className="sr-only">{tech.label}</span>
     </a>
+  );
+}
+
+/**
+ * Logo d'une techno : en tuile dans cette grille, ou en petit dans une puce
+ * (page Méthodologie). Au survol de la tuile, le logo s'avive.
+ */
+export function TechGlyph({ icon, size = "tile" }: { icon: TechIcon; size?: "tile" | "chip" }) {
+  const tile = size === "tile";
+  const light = icon.kind === "path" ? icon.light : undefined;
+  const glow = tile && "transition-opacity duration-300 group-hover/tech:opacity-100 light:opacity-100";
+
+  if (icon.kind === "mono") {
+    return (
+      <span
+        aria-hidden="true"
+        className={cn("font-bold leading-none tracking-tight", tile ? "text-[0.9375rem]" : "text-[0.625rem]")}
+        style={{ color: icon.color }}
+      >
+        {icon.text}
+      </span>
+    );
+  }
+  if (icon.kind === "image") {
+    // Logo bitmap : la marque repose sur un dégradé qu'un tracé vectoriel
+    // ne saurait restituer.
+    return (
+      <Image
+        src={icon.src}
+        alt=""
+        width={64}
+        height={64}
+        className={cn("object-contain", tile ? "h-[1.35rem] w-[1.35rem] opacity-90" : "h-4 w-4", glow)}
+      />
+    );
+  }
+  if (icon.kind === "multi") {
+    // Logo multicolore : la hauteur est contrainte et la largeur suit le
+    // ratio d'origine, pour ne pas déformer les marques non carrées.
+    return (
+      <svg aria-hidden="true" viewBox={icon.viewBox} className={cn("w-auto", tile ? "h-[1.45rem] opacity-90" : "h-4", glow)}>
+        {icon.paths.map((shape) => (
+          <path key={shape.d} d={shape.d} fill={shape.fill} />
+        ))}
+      </svg>
+    );
+  }
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox={icon.viewBox ?? "0 0 24 24"}
+      className={cn(
+        tile && "opacity-80",
+        glow,
+        // Logotype en toutes lettres : plus large que haut.
+        icon.viewBox ? (tile ? "h-auto w-[2.1rem]" : "h-auto w-6") : tile ? "h-[1.35rem] w-[1.35rem]" : "h-4 w-4",
+        light?.color && "light:[fill:var(--icon-light)]",
+      )}
+      style={light?.color ? ({ "--icon-light": light.color } as React.CSSProperties) : undefined}
+      // Logo blanc (Cursor, ChatGPT, macOS…) : à l'encre du thème, sinon il
+      // disparaît sur le fond clair.
+      fill={/^#f{3}(f{3})?$/i.test(icon.color) ? "var(--ink)" : icon.color}
+    >
+      {icon.backdrop ? <rect x="1.5" y="1.5" width="21" height="21" fill={icon.backdrop} /> : null}
+      <path d={icon.d} />
+    </svg>
   );
 }

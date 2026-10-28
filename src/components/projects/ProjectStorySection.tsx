@@ -204,8 +204,9 @@ const SYSTEM_LABEL = "block text-[0.6875rem] font-semibold uppercase tracking-[0
  * Chapitre du design system, entre la mise en avant et le récit (UpikaJob,
  * 28 oct. 2026) : comment le produit tient ensemble. Il avance du général au
  * particulier :
- * - la couverture du fichier, puis son organisation en quatre niveaux, du
- *   jeton au bloc d'interface ;
+ * - la couverture du fichier, d'où il part (les premières bases, posées
+ *   pendant les refontes), puis son organisation en quatre niveaux, du jeton
+ *   au bloc d'interface ;
  * - les fondations (couleurs, typographie) ;
  * - trois gros plans sur des composants, chacun avec le nombre de copies
  *   qu'il remplace dans le code ;
@@ -228,6 +229,16 @@ export function ProjectDesignSystem({ system }: { system: ProjectStorySystem }) 
 
       <ScrollReveal delay={0.05}>
         <StoryShotFrame shot={system.cover} sizes="(max-width: 768px) 92vw, 1100px" />
+      </ScrollReveal>
+
+      <SystemHeading>{system.origins.title}</SystemHeading>
+      <ScrollReveal>
+        <p className="copy -mt-2 mb-6 max-w-2xl md:mb-8">{system.origins.body}</p>
+        <div className="grid gap-5 sm:grid-cols-3">
+          {system.origins.shots.map((shot) => (
+            <StoryShotFrame key={shot.caption} shot={shot} compact sizes="(max-width: 640px) 92vw, 360px" />
+          ))}
+        </div>
       </ScrollReveal>
 
       <SystemHeading>{system.levelsTitle}</SystemHeading>
