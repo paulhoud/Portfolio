@@ -511,7 +511,7 @@ export const enProjectTranslations: ProjectTranslations = {
       mascot: {
         label: "The mascot",
         title: "Upikat, from 2D to 3D",
-        body: "Upikat is UpikaJob's assistant: it welcomes users and guides them through the setup. I drew it in 2D, in six states, and I am now taking it to 3D in Blender: model, skeleton and animations. The goal: animate it in the app, use it in communication and give the brand more depth. A work in progress.",
+        body: "Upikat is UpikaJob's assistant: it welcomes users and guides them through the setup. I drew it in 2D, in six states, and I am now taking it to 3D in Blender, with AI: a script describes the model, the skeleton and the animations, and every tweak goes through it rather than by hand. The goal: animate it in the app, use it in communication and give the brand more depth. A work in progress.",
         compare: {
           title: "Six states, from drawing to volume",
           hint: "Drag the handle to go from the drawing to 3D.",

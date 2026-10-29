@@ -550,14 +550,15 @@ export const projects: Project[] = [
           optimize: true,
         },
       },
-      // Sources : Paul (29 oct. 2026 : 2D et 3D faites par lui, pour l'animer
-      // dans l'application, la communication et donner du volume à la marque,
-      // travail en cours) et son dossier Blender (renders/, renders/vitrine/,
+      // Sources : Paul (29 oct. 2026 : 2D et 3D faites par lui, avec l'IA pour
+      // la 3D, pour l'animer dans l'application, la communication et donner du
+      // volume à la marque, travail en cours) et son dossier Blender (LISEZMOI :
+      // tout est produit par le script upikat_build.py ; renders/, renders/vitrine/,
       // upikat_vitrine.glb ; descriptions des états reprises de sa visionneuse).
       mascot: {
         label: "La mascotte",
         title: "Upikat, de la 2D à la 3D",
-        body: "Upikat est l'assistant d'UpikaJob : il accueille et guide la prise en main. Je l'ai dessiné en 2D, dans six états, puis je le fais passer en 3D dans Blender : modèle, squelette et animations. Pour l'animer dans l'application, s'en servir dans la communication et donner du volume à la marque. Un travail en cours.",
+        body: "Upikat est l'assistant d'UpikaJob : il accueille et guide la prise en main. Je l'ai dessiné en 2D, dans six états, puis je le fais passer en 3D dans Blender, avec l'IA : un script décrit le modèle, le squelette et les animations, et chaque retouche passe par lui plutôt que par la main. Pour l'animer dans l'application, s'en servir dans la communication et donner du volume à la marque. Un travail en cours.",
         compare: {
           title: "Six états, du dessin au volume",
           hint: "Faites glisser la poignée pour passer du dessin à la 3D.",
