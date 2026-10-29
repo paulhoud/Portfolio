@@ -29,13 +29,41 @@ export const enProjectTranslations: ProjectTranslations = {
     ],
     media: [
       { title: "B2B presentation video" },
+      { title: "Check-in flow: version 1 and its rules, and the planned extension (v2)" },
       { title: "Event photography coverage" },
       { title: "Memento landing page" },
       { title: "Presentation storyboards" },
+      { title: "Storyboard of a personalized thank-you video, after meeting at a trade show" },
       { title: "Video statistics" },
       { title: "Commercial poster" },
       { title: "QR code event support" },
       { title: "Offer summary and FAQ" },
+    ],
+    chapters: [
+      {
+        type: "walkthrough",
+        label: "The app",
+        title: "Setting up a photo space in a few screens",
+        body: "The organizer opens their event's space, answers two questions that set what guests can see, then dresses it in their own colors.",
+        steps: [
+          {
+            title: "Create the space",
+            body: "The event's name, date and type, then the organizer's email address and first name.",
+          },
+          {
+            title: "A tailored journey",
+            body: "Two questions set up the space: which photos guests can access, only their own or all of them, and whether they can post some.",
+          },
+          {
+            title: "The space is ready",
+            body: "All the event's photos, and a “You” tab to find the ones you appear in.",
+          },
+          {
+            title: "In the organizer's colors",
+            body: "In the settings, the organizer manages guests and photos, and dresses the space: logo, main color.",
+          },
+        ],
+      },
     ],
   },
 
@@ -430,6 +458,8 @@ export const enProjectTranslations: ProjectTranslations = {
       "A selection of graphic work, illustrations, and personal experiments.",
     media: [
       { title: "Skate video filming and editing" },
+      { title: "Design exercise for Engie: two marketing emails (finalist)" },
+      { title: "Design exercise for Unibet: mobile prototype of missions that earn free bets" },
       { title: "Illustrations created for stickers" },
       { title: "Graphic research project around a Bauhaus exhibition" },
       { title: "Graphic research for a space-themed video game project" },

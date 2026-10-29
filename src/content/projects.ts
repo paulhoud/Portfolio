@@ -65,6 +65,22 @@ import mementoStats from "../../assets/img-66.png";
 import mementoPoster from "../../assets/projects/memento-poster.jpg";
 import mementoFlyer from "../../assets/projects/memento-flyer.jpg";
 import mementoFaq from "../../assets/projects/memento-offer-faq.png";
+// Fichiers Figma de Memento (copies de Paul, 29 oct. 2026) : écrans de
+// l'application, planche d'émargement (noms et e-mails réels floutés) et
+// storyboard d'une vidéo de remerciement (sans les cases nommant des personnes).
+import mementoApp01 from "../../assets/projects/memento-app/memento-app-01.webp";
+import mementoApp02 from "../../assets/projects/memento-app/memento-app-02.webp";
+import mementoApp03 from "../../assets/projects/memento-app/memento-app-03.webp";
+import mementoApp04 from "../../assets/projects/memento-app/memento-app-04.webp";
+import mementoApp05 from "../../assets/projects/memento-app/memento-app-05.webp";
+import mementoApp06 from "../../assets/projects/memento-app/memento-app-06.webp";
+import mementoApp07 from "../../assets/projects/memento-app/memento-app-07.webp";
+import mementoApp08 from "../../assets/projects/memento-app/memento-app-08.webp";
+import mementoApp09 from "../../assets/projects/memento-app/memento-app-09.webp";
+import mementoApp10 from "../../assets/projects/memento-app/memento-app-10.webp";
+import mementoApp11 from "../../assets/projects/memento-app/memento-app-11.webp";
+import mementoCheckIn from "../../assets/projects/memento-emargement.webp";
+import mementoThanksStoryboard from "../../assets/projects/memento-storyboard-merci.webp";
 import yvesDelormeWorkshop from "../../assets/projects/ydl-workshop.jpg";
 import yvesDelormeNeeds from "../../assets/projects/ydl-needs.jpg";
 import yvesDelormeStrategy from "../../assets/projects/ydl-strategy.jpg";
@@ -127,6 +143,9 @@ import archivePainting from "../../assets/img-8.png";
 import archiveCitron from "../../assets/archive-citron-triptyque.png";
 import archiveGecko from "../../assets/img-4.png";
 import archiveSkate from "../../assets/img-3.png";
+// Exercices de conception (fichiers Figma de Paul, 29 oct. 2026).
+import archiveEngie from "../../assets/projects/archive-engie-emails.webp";
+import archiveUnibet from "../../assets/projects/archive-unibet-missions.webp";
 
 export type ProjectSection = {
   title: string;
@@ -900,6 +919,11 @@ export const projects: Project[] = [
         featured: true,
       },
       {
+        title: "Parcours d'émargement : la v1 et ses règles, et l'extension envisagée (v2)",
+        image: mementoCheckIn,
+        size: "wide",
+      },
+      {
         title: "Reportage photo événementiel",
         image: mementoEvent,
         size: "wide",
@@ -913,6 +937,11 @@ export const projects: Project[] = [
         title: "Storyboards de présentation",
         image: mementoStoryboard,
         size: "wide",
+      },
+      {
+        title: "Storyboard d'une vidéo de remerciement personnalisée, après une rencontre sur un salon",
+        image: mementoThanksStoryboard,
+        size: "regular",
       },
       {
         title: "Statistiques vidéo",
@@ -933,6 +962,40 @@ export const projects: Project[] = [
         title: "Synthèse offre et FAQ",
         image: mementoFaq,
         size: "wide",
+      },
+    ],
+    // Juste après la vidéo : le produit. Pièces que Paul dit avoir faites
+    // pendant l'alternance (29 oct. 2026) ; textes décrivant ce que montrent
+    // les écrans.
+    chapters: [
+      {
+        type: "walkthrough",
+        at: 0,
+        label: "L'application",
+        title: "Créer son espace photo en quelques écrans",
+        body: "L'organisateur ouvre l'espace de son événement, répond à deux questions qui règlent ce que voient ses invités, puis l'habille à ses couleurs.",
+        steps: [
+          {
+            title: "Créer son espace",
+            body: "Le nom, la date et le type de l'événement, puis l'adresse e-mail et le prénom de l'organisateur.",
+            frames: [mementoApp01, mementoApp02],
+          },
+          {
+            title: "Un parcours adapté",
+            body: "Deux questions règlent l'espace : à quelles photos les invités ont accès, seulement les leurs ou toutes, et s'ils peuvent en publier.",
+            frames: [mementoApp03, mementoApp04, mementoApp05],
+          },
+          {
+            title: "L'espace est prêt",
+            body: "Toutes les photos de l'événement, et un onglet « Vous » pour retrouver celles où l'on apparaît.",
+            frames: [mementoApp06, mementoApp07],
+          },
+          {
+            title: "Aux couleurs de l'organisateur",
+            body: "Dans les paramètres, l'organisateur gère ses invités et ses photos, et habille l'espace : logo, couleur principale.",
+            frames: [mementoApp08, mementoApp09, mementoApp10, mementoApp11],
+          },
+        ],
       },
     ],
   },
@@ -1742,6 +1805,19 @@ export const projects: Project[] = [
         size: "wide",
         youtubeId: "jqaKMLXqmb4",
         featured: true,
+      },
+      // Exercices de conception (Paul, 29 oct. 2026 : Engie, finaliste ;
+      // Unibet, sans suite). Le troisième e-mail du rendu Engie, avec des
+      // salariés nommés, semble être l'original fourni : non repris.
+      {
+        title: "Exercice de conception pour Engie : deux e-mails marketing (finaliste)",
+        image: archiveEngie,
+        size: "regular",
+      },
+      {
+        title: "Exercice de conception pour Unibet : prototype mobile de missions qui font gagner des paris gratuits",
+        image: archiveUnibet,
+        size: "narrow",
       },
       {
         title: "Illustrations réalisées pour des stickers",

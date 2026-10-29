@@ -68,12 +68,29 @@ function WalkthroughChapter({ chapter }: { chapter: ProjectWalkthrough }) {
   const [layers, setLayers] = useState({ shown, under: "" });
   if (layers.shown !== shown) setLayers({ shown, under: layers.shown });
 
+  // Écrans de téléphone (en hauteur) : un cadre étroit aux coins arrondis, et
+  // plus de place pour les étapes.
+  const { width, height } = chapter.steps[0].frames[0];
+  const phone = height > width;
+
   return (
     <section aria-label={chapter.title}>
       <ChapterHeader label={chapter.label} title={chapter.title} body={chapter.body} />
       <ScrollReveal delay={0.05}>
-        <div ref={ref} className="grid gap-8 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center md:gap-12">
-          <div className="relative aspect-[1387/944] overflow-hidden rounded-[0.35rem] border border-ink/10 bg-white">
+        <div
+          ref={ref}
+          className={cn(
+            "grid gap-8 md:items-center md:gap-12",
+            phone ? "md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : "md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]",
+          )}
+        >
+          <div
+            className={cn(
+              "relative overflow-hidden border border-ink/10",
+              phone ? "mx-auto w-full max-w-[18rem] rounded-[1.75rem] bg-black" : "rounded-[0.35rem] bg-white",
+            )}
+            style={{ aspectRatio: `${width} / ${height}` }}
+          >
             {chapter.steps.map((step, s) =>
               step.frames.map((frame, f) => {
                 const key = `${s}-${f}`;
@@ -84,7 +101,7 @@ function WalkthroughChapter({ chapter }: { chapter: ProjectWalkthrough }) {
                     alt={key === shown ? step.title : ""}
                     aria-hidden={key !== shown}
                     fill
-                    sizes="(max-width: 768px) 92vw, 600px"
+                    sizes={phone ? "288px" : "(max-width: 768px) 92vw, 600px"}
                     quality={90}
                     className={cn(
                       "object-cover",
