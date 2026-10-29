@@ -508,6 +508,42 @@ export const enProjectTranslations: ProjectTranslations = {
           caption: "The components put together: the file's interactive demo, where you hover, tick, sort the table and open the modal",
         },
       },
+      mascot: {
+        label: "The mascot",
+        title: "Upikat, from 2D to 3D",
+        body: "Upikat is UpikaJob's assistant: it welcomes users and guides them through the setup. I drew it in 2D, in six states, and I am now taking it to 3D in Blender: model, skeleton and animations. The goal: animate it in the app, use it in communication and give the brand more depth. A work in progress.",
+        compare: {
+          title: "Six states, from drawing to volume",
+          hint: "Drag the handle to go from the drawing to 3D.",
+          flat: "2D",
+          volume: "3D",
+          states: [{ name: "Idle" }, { name: "Thinking" }, { name: "Happy" }, { name: "Sleepy" }, { name: "Waiting" }, { name: "Angry" }],
+        },
+        viewer: {
+          title: "In motion",
+          body: "The lightweight version made for the marketing site: turn it around, play an animation, show its skeleton.",
+          hint: "Drag to turn it",
+          skeleton: "Skeleton",
+          states: [
+            { name: "Idle", desc: "Breathes, blinks, whiskers twitching." },
+            { name: "Hello", desc: "A wave of the paw, then back to idle." },
+            { name: "Thinking", desc: "A “…” cloud, raised eyebrow, paw on the chin." },
+            { name: "Walk", desc: "Walk cycle on the spot." },
+            { name: "Run", desc: "Run cycle on the spot." },
+          ],
+        },
+        clips: {
+          title: "The avatar's other states",
+          body: "For the app, where it will be the chatbot's avatar, each state has its own animation, from the eyes to the whiskers.",
+          items: [
+            { name: "Talking", desc: "Hand gestures, a mouth that articulates." },
+            { name: "Tired", desc: "Heavy eyelids, a yawn." },
+            { name: "Sleep", desc: "Dozes off, jolts, sleeps standing up; “Z”s rise." },
+            { name: "Angry", desc: "Frowning brows, grey smoke, kicks." },
+            { name: "Idle time", desc: "A fly buzzes around; Upikat swats it away." },
+          ],
+        },
+      },
       bridge: "The product did not always look like this.",
       trackLabels: { product: "The product", role: "My role" },
       beats: [

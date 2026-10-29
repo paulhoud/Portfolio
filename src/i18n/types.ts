@@ -262,6 +262,15 @@ export type ProjectCopy = {
       };
       assembled: { caption: string };
     };
+    /** Même ordre que le catalogue pour les états, les animations et les vidéos. */
+    mascot?: {
+      label: string;
+      title: string;
+      body: string;
+      compare: { title: string; hint: string; flat: string; volume: string; states: { name: string }[] };
+      viewer: { title: string; body: string; hint: string; skeleton: string; states: { name: string; desc: string }[] };
+      clips: { title: string; body: string; items: { name: string; desc: string }[] };
+    };
     bridge?: string;
     trackLabels: { product: string; role: string };
     /** Même ordre que le catalogue : chaque entrée traduit le temps fort correspondant. */

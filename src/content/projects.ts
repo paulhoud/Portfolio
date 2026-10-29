@@ -39,6 +39,19 @@ import upikaDsKpi from "../../assets/upika-ds-kpi.png";
 import upikaDsTable from "../../assets/upika-ds-table.png";
 import upikaDsFields from "../../assets/upika-ds-fields.png";
 import upikaDsSandbox from "../../assets/upika-ds-sandbox.png";
+import upikat2dAngry from "../../assets/upikat/upikat-2d-angry.webp";
+import upikat2dBase from "../../assets/upikat/upikat-2d-base.webp";
+import upikat2dHappy from "../../assets/upikat/upikat-2d-happy.webp";
+import upikat2dSleepy from "../../assets/upikat/upikat-2d-sleepy.webp";
+import upikat2dThink from "../../assets/upikat/upikat-2d-think.webp";
+import upikat2dWaiting from "../../assets/upikat/upikat-2d-waiting.webp";
+import upikat3dAngry from "../../assets/upikat/upikat-3d-angry.webp";
+import upikat3dBase from "../../assets/upikat/upikat-3d-base.webp";
+import upikat3dHappy from "../../assets/upikat/upikat-3d-happy.webp";
+import upikat3dMascotte from "../../assets/upikat/upikat-3d-mascotte.webp";
+import upikat3dSleepy from "../../assets/upikat/upikat-3d-sleepy.webp";
+import upikat3dThink from "../../assets/upikat/upikat-3d-think.webp";
+import upikat3dWaiting from "../../assets/upikat/upikat-3d-waiting.webp";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -237,6 +250,46 @@ export type ProjectStorySystem = {
   assembled: ProjectStoryShot;
 };
 
+/**
+ * Chapitre de la mascotte, après le design system : Upikat, de la 2D à la 3D
+ * (UpikaJob, demande de Paul du 29 oct. 2026). Sources : Paul (il a dessiné
+ * la 2D et fait la 3D ; pour l'animer dans l'application, la communication et
+ * donner du volume à la marque ; travail en cours) et son dossier Blender
+ * (rendus, vidéos, modèle allégé du site vitrine, descriptions des états
+ * reprises de sa visionneuse).
+ */
+export type ProjectStoryMascot = {
+  label: string;
+  title: string;
+  body: string;
+  /** Les états dessinés puis modelés, même cadrage : une poignée passe de l'un à l'autre. */
+  compare: {
+    title: string;
+    hint: string;
+    flat: string;
+    volume: string;
+    states: { name: string; flat: StaticImageData; volume: StaticImageData }[];
+  };
+  /** Le modèle manipulable, ses animations et son squelette. */
+  viewer: {
+    title: string;
+    body: string;
+    /** Modèle allégé (public/models), compressé meshopt. */
+    model: string;
+    /** Rendu affiché avant le chargement, ou sans 3D. */
+    poster: StaticImageData;
+    hint: string;
+    skeleton: string;
+    states: { id: "idle" | "hello" | "think" | "walk" | "run"; name: string; desc: string }[];
+  };
+  /** Les autres états de l'avatar, en vidéos courtes (public/upikat). */
+  clips: {
+    title: string;
+    body: string;
+    items: { name: string; desc: string; video: string; poster: string }[];
+  };
+};
+
 /** Temps fort du récit : une étape, ou une bascule entre deux étapes. */
 export type ProjectStoryBeat =
   | ({ type: "stage" } & ProjectStoryStage)
@@ -260,6 +313,7 @@ export type ProjectStory = {
     shots: ProjectStoryShot[];
   };
   system?: ProjectStorySystem;
+  mascot?: ProjectStoryMascot;
   /** Phrase de bascule entre la mise en avant et le récit. */
   bridge?: string;
   /** Intitulés des deux trajectoires suivies en parallèle. */
@@ -494,6 +548,55 @@ export const projects: Project[] = [
           caption: "Les composants assemblés : la démo interactive du fichier, où l'on survole, coche, trie le tableau et ouvre la modale",
           image: upikaDsSandbox,
           optimize: true,
+        },
+      },
+      // Sources : Paul (29 oct. 2026 : 2D et 3D faites par lui, pour l'animer
+      // dans l'application, la communication et donner du volume à la marque,
+      // travail en cours) et son dossier Blender (renders/, renders/vitrine/,
+      // upikat_vitrine.glb ; descriptions des états reprises de sa visionneuse).
+      mascot: {
+        label: "La mascotte",
+        title: "Upikat, de la 2D à la 3D",
+        body: "Upikat est l'assistant d'UpikaJob : il accueille et guide la prise en main. Je l'ai dessiné en 2D, dans six états, puis je le fais passer en 3D dans Blender : modèle, squelette et animations. Pour l'animer dans l'application, s'en servir dans la communication et donner du volume à la marque. Un travail en cours.",
+        compare: {
+          title: "Six états, du dessin au volume",
+          hint: "Faites glisser la poignée pour passer du dessin à la 3D.",
+          flat: "2D",
+          volume: "3D",
+          states: [
+            { name: "Repos", flat: upikat2dBase, volume: upikat3dBase },
+            { name: "Réflexion", flat: upikat2dThink, volume: upikat3dThink },
+            { name: "Content", flat: upikat2dHappy, volume: upikat3dHappy },
+            { name: "Somnolent", flat: upikat2dSleepy, volume: upikat3dSleepy },
+            { name: "Attente", flat: upikat2dWaiting, volume: upikat3dWaiting },
+            { name: "Colère", flat: upikat2dAngry, volume: upikat3dAngry },
+          ],
+        },
+        viewer: {
+          title: "En mouvement",
+          body: "La version allégée prévue pour le site vitrine : faites-le tourner, lancez une animation, affichez son squelette.",
+          model: "/models/upikat-vitrine.glb",
+          poster: upikat3dMascotte,
+          hint: "Glissez pour le faire tourner",
+          skeleton: "Squelette",
+          states: [
+            { id: "idle", name: "Repos", desc: "Respire, cligne des yeux, les moustaches frémissent." },
+            { id: "hello", name: "Salut", desc: "Coucou de la patte, puis repos." },
+            { id: "think", name: "Réflexion", desc: "Nuage « … », sourcil levé, patte au menton." },
+            { id: "walk", name: "Marche", desc: "Cycle de marche sur place." },
+            { id: "run", name: "Course", desc: "Cycle de course sur place." },
+          ],
+        },
+        clips: {
+          title: "Les autres états de l'avatar",
+          body: "Pour l'application, où il sera l'avatar du chatbot, chaque état a son animation, du regard aux moustaches.",
+          items: [
+            { name: "Parole", desc: "Gestes de la main, bouche qui articule.", video: "/upikat/upikat-talk.mp4", poster: "/upikat/upikat-talk.webp" },
+            { name: "Fatigue", desc: "Paupières lourdes, un bâillement.", video: "/upikat/upikat-tired.mp4", poster: "/upikat/upikat-tired.webp" },
+            { name: "Sommeil", desc: "S'endort, sursaute, dort debout ; des « Z » montent.", video: "/upikat/upikat-sleep.mp4", poster: "/upikat/upikat-sleep.webp" },
+            { name: "Colère", desc: "Sourcils froncés, fumée grise, coups de pied.", video: "/upikat/upikat-angry.mp4", poster: "/upikat/upikat-angry.webp" },
+            { name: "Inactivité", desc: "Une mouche tourne autour de lui, il la chasse.", video: "/upikat/upikat-fly.mp4", poster: "/upikat/upikat-fly.webp" },
+          ],
         },
       },
       bridge: "Le produit n'a pas toujours eu ce visage.",

@@ -123,6 +123,36 @@ function mergeSystem(
   };
 }
 
+/** Chapitre de la mascotte : les textes traduits, les images, le modèle et les vidéos du catalogue. */
+function mergeMascot(
+  base: NonNullable<Project["story"]>["mascot"],
+  translated: NonNullable<ProjectCopy["story"]>["mascot"],
+): NonNullable<Project["story"]>["mascot"] {
+  if (!base || !translated) return base;
+  return {
+    label: translated.label,
+    title: translated.title,
+    body: translated.body,
+    compare: {
+      ...translated.compare,
+      states: base.compare.states.map((state, index) => ({ ...state, ...translated.compare.states[index] })),
+    },
+    viewer: {
+      ...base.viewer,
+      title: translated.viewer.title,
+      body: translated.viewer.body,
+      hint: translated.viewer.hint,
+      skeleton: translated.viewer.skeleton,
+      states: base.viewer.states.map((state, index) => ({ ...state, ...translated.viewer.states[index] })),
+    },
+    clips: {
+      title: translated.clips.title,
+      body: translated.clips.body,
+      items: base.clips.items.map((item, index) => ({ ...item, ...translated.clips.items[index] })),
+    },
+  };
+}
+
 /**
  * Applique les textes traduits au récit, chapitre par chapitre, en conservant
  * les captures du catalogue (elles ne dépendent pas de la langue). Un chapitre
@@ -163,6 +193,7 @@ function mergeStory(
           }
         : base.highlight,
     system: mergeSystem(base.system, translated.system),
+    mascot: mergeMascot(base.mascot, translated.mascot),
     trackLabels: translated.trackLabels ?? base.trackLabels,
     beats: base.beats.map((beat, index) => {
       const copy = translated.beats?.[index];

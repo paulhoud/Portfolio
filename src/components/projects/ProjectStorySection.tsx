@@ -198,7 +198,7 @@ export function ProjectStoryHighlight({
   );
 }
 
-const SYSTEM_LABEL = "block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55";
+export const SYSTEM_LABEL = "block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55";
 
 /**
  * Chapitre du design system, entre la mise en avant et le récit (UpikaJob,
@@ -304,7 +304,7 @@ export function ProjectDesignSystem({ system }: { system: ProjectStorySystem }) 
   );
 }
 
-function SystemHeading({ children }: { children: React.ReactNode }) {
+export function SystemHeading({ children }: { children: React.ReactNode }) {
   return (
     <ScrollReveal>
       <h3 className="mb-6 mt-16 text-balance text-lg font-medium text-ink md:mb-8 md:mt-24 md:text-xl">{children}</h3>

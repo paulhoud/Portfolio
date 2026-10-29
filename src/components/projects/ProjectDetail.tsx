@@ -19,6 +19,7 @@ import type {
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
 import { AnimatedLogo } from "./AnimatedLogo";
+import { ProjectMascot } from "./ProjectMascot";
 import { ProjectDesignSystem, ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
 
 type ProjectDetailProps = {
@@ -468,6 +469,9 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
 
         {/* Le design system : comment le produit tient ensemble. */}
         {story.system ? <ProjectDesignSystem system={story.system} /> : null}
+
+        {/* La mascotte : Upikat, de la 2D à la 3D. */}
+        {story.mascot ? <ProjectMascot mascot={story.mascot} /> : null}
 
         {/* Vue d'ensemble, enjeu, solution, résultat : même grille de lecture
             que les autres études de cas. */}
