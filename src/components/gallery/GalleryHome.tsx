@@ -35,6 +35,7 @@ import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
 import { onHomeReset } from "@/lib/homeReset";
 import { track } from "@/lib/stats/track";
 import { SoundToggle } from "@/components/layout/SiteHeader";
+import { wholePixels } from "@/components/motion/ScrollReveal";
 import { HeadphonesHint } from "./HeadphonesHint";
 import { ScrollGestureHint } from "./ScrollGestureHint";
 import { clearSceneCursor, setSceneCursor } from "./SceneCursor";
@@ -1268,6 +1269,8 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                           initial={{ opacity: 0, y: instant ? 0 : 6 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0 }}
+                          // Au pixel entier : la fin de la montée ne fait plus trembler le texte.
+                          transformTemplate={wholePixels}
                           transition={{ duration: instant ? 0 : 0.22, ease: "easeOut" }}
                         >
                           <CartelContent project={project} index={shown} count={count} />

@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { wholePixels } from "@/components/motion/ScrollReveal";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath, splitLocalePath } from "@/i18n/paths";
@@ -204,6 +205,13 @@ export function SiteHeader() {
         onFocusCapture={() => setIsHidden(false)}
         initial={false}
         animate={{ y: visible ? 0 : "-120%" }}
+        // Au pixel entier : le nom ne tremble plus à la fin de son retour.
+        transformTemplate={({ y }) => {
+          const value = String(y ?? 0);
+          const height = headerRef.current?.offsetHeight ?? 0;
+          const px = Math.round(value.endsWith("%") ? (Number.parseFloat(value) / 100) * height : Number.parseFloat(value) || 0);
+          return px ? `translateY(${px}px)` : "none";
+        }}
         transition={{ duration: reduceMotion ? 0 : 0.35, ease }}
         // Seule la capsule capte les clics : autour, on atteint la scène.
         className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[var(--header-height)] text-ink"
@@ -362,6 +370,8 @@ export function SiteHeader() {
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
+              // Au pixel entier : les liens ne tremblent plus à l'ouverture.
+              transformTemplate={wholePixels}
               transition={{ duration: reduceMotion ? 0 : 0.22, ease: "easeOut" }}
               // Jamais plus haut que l'écran : le panneau défile de lui-même
               // si la place manque (la page, elle, est verrouillée).

@@ -364,16 +364,20 @@ export function createGalleryRenderer(
   host.appendChild(canvas);
 
   // Qualité de départ selon la machine. Carte graphique intégrée (ou rendu
-  // logiciel) : un budget de pixels plus serré. Écran très dense : pas de
-  // lissage des bords (invisible à cette densité, et coûteux), et un budget
-  // de pixels qui évite de dessiner un écran 4K en entier.
+  // logiciel) : un budget de pixels plus serré. Écran d'ordinateur très
+  // dense : pas de lissage des bords (invisible à cette densité, et coûteux),
+  // et un budget de pixels qui évite de dessiner un écran 4K en entier.
+  // Écran tactile : lissage toujours. La scène y est dessinée à 1,5 au plus,
+  // bien en deçà de la densité de l'écran : sans lissage, les bords des
+  // cartes sortaient en escalier et scintillaient en bougeant (signalé par
+  // Paul le 29 oct. 2026) ; les puces de téléphone le font à peu de frais.
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   const gpu = probeGpu();
   const modest = MODEST_GPU.test(gpu);
   const area = Math.max(1, window.innerWidth * window.innerHeight);
   const budget = Math.sqrt((modest ? MODEST_PIXEL_BUDGET : PIXEL_BUDGET) / area);
   const topDpr = Math.max(1, Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 1.75, budget));
-  const antialias = topDpr < 1.5;
+  const antialias = coarse || topDpr < 1.5;
 
   // D'abord sans compromis de performance ; certains Chrome refusent pourtant
   // alors que leur carte graphique est accélérée : on réessaie sans cette
