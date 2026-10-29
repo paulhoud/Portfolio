@@ -229,6 +229,11 @@ export type ProjectCopy = {
   introParagraphs?: string[];
   sections?: { title: string; body: string }[];
   media?: { title: string }[];
+  /** Chapitres de la galerie, dans l'ordre du catalogue : images, couleurs et échantillons restent ceux du catalogue. */
+  chapters?: (
+    | { type: "walkthrough"; label: string; title: string; body: string; steps: { title: string; body: string }[] }
+    | { type: "charter"; label: string; title: string; body: string; palettes: { name: string }[]; fonts: { role: string }[] }
+  )[];
   /**
    * Récit scrollé. Seuls les textes sont traduits : les captures viennent du
    * catalogue et restent communes aux deux langues.

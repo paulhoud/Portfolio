@@ -153,6 +153,34 @@ function mergeMascot(
   };
 }
 
+/** Chapitres de la galerie : les textes traduits, les images, couleurs et échantillons du catalogue. */
+function mergeChapters(base: Project["chapters"], translated: ProjectCopy["chapters"]): Project["chapters"] {
+  if (!base || !translated) return base;
+  return base.map((chapter, index) => {
+    const copy = translated[index];
+    if (chapter.type === "walkthrough" && copy?.type === "walkthrough") {
+      return {
+        ...chapter,
+        label: copy.label,
+        title: copy.title,
+        body: copy.body,
+        steps: chapter.steps.map((step, stepIndex) => ({ ...step, ...copy.steps[stepIndex] })),
+      };
+    }
+    if (chapter.type === "charter" && copy?.type === "charter") {
+      return {
+        ...chapter,
+        label: copy.label,
+        title: copy.title,
+        body: copy.body,
+        palettes: chapter.palettes.map((palette, paletteIndex) => ({ ...palette, ...copy.palettes[paletteIndex] })),
+        fonts: chapter.fonts.map((font, fontIndex) => ({ ...font, ...copy.fonts[fontIndex] })),
+      };
+    }
+    return chapter;
+  });
+}
+
 /**
  * Applique les textes traduits au récit, chapitre par chapitre, en conservant
  * les captures du catalogue (elles ne dépendent pas de la langue). Un chapitre
@@ -248,6 +276,7 @@ export function localizeProject(
     sections: mergeSections(project.sections, copy.sections),
     story: mergeStory(project.story, copy.story),
     media: mergeMedia(project.media, copy.media),
+    chapters: mergeChapters(project.chapters, copy.chapters),
     blocks: mergeBlocks(project.blocks, copy.blocks),
     gallery: copy.media?.map((item) => item.title) ?? project.gallery,
   };

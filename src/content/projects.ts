@@ -68,9 +68,23 @@ import mementoFaq from "../../assets/projects/memento-offer-faq.png";
 import yvesDelormeWorkshop from "../../assets/projects/ydl-workshop.jpg";
 import yvesDelormeNeeds from "../../assets/projects/ydl-needs.jpg";
 import yvesDelormeStrategy from "../../assets/projects/ydl-strategy.jpg";
-import yvesDelormeDesignSystem from "../../assets/img-60.png";
 import yvesDelormePrototype from "../../assets/projects/ydl-prototype.jpg";
 import yvesDelormeTablet from "../../assets/projects/ydl-tablet.jpg";
+// Storyboard du motion design (Figma de Paul), recadré sur la tablette.
+import ydlConfig01 from "../../assets/projects/ydl-config/ydl-config-01.webp";
+import ydlConfig02 from "../../assets/projects/ydl-config/ydl-config-02.webp";
+import ydlConfig03 from "../../assets/projects/ydl-config/ydl-config-03.webp";
+import ydlConfig04 from "../../assets/projects/ydl-config/ydl-config-04.webp";
+import ydlConfig05 from "../../assets/projects/ydl-config/ydl-config-05.webp";
+import ydlConfig06 from "../../assets/projects/ydl-config/ydl-config-06.webp";
+import ydlConfig07 from "../../assets/projects/ydl-config/ydl-config-07.webp";
+import ydlConfig08 from "../../assets/projects/ydl-config/ydl-config-08.webp";
+import ydlConfig09 from "../../assets/projects/ydl-config/ydl-config-09.webp";
+import ydlConfig10 from "../../assets/projects/ydl-config/ydl-config-10.webp";
+import ydlConfig11 from "../../assets/projects/ydl-config/ydl-config-11.webp";
+import ydlConfig12 from "../../assets/projects/ydl-config/ydl-config-12.webp";
+import ydlConfig13 from "../../assets/projects/ydl-config/ydl-config-13.webp";
+import ydlConfig14 from "../../assets/projects/ydl-config/ydl-config-14.webp";
 import jiveDesignSystem from "../../assets/projects/jive-design-system.png";
 import jivePrototype from "../../assets/projects/jive-prototype.png";
 import jiveMiro from "../../assets/projects/jive-miro.png";
@@ -137,9 +151,42 @@ export type ProjectMedia = {
   featured?: boolean;
   size?: "narrow" | "regular" | "wide";
   variant?: "default" | "light";
+  /** `row` : côte à côte avec les visuels `row` qui le suivent (deux par rangée sur grand écran). */
   layout?: "single" | "row";
   link?: { label: string; href: string };
 };
+
+/**
+ * Le produit pas à pas : chaque étape joue ses images à la suite, comme les
+ * plans d'un film, avec ce que fait l'étape (Yves Delorme, 29 oct. 2026 :
+ * images du storyboard du motion design, textes tirés du dossier de fin de
+ * projet, dans le fichier Figma de Paul).
+ */
+export type ProjectWalkthrough = {
+  label: string;
+  title: string;
+  body: string;
+  steps: { title: string; body: string; frames: StaticImageData[] }[];
+};
+
+/**
+ * La charte refaite en page plutôt qu'en capture : les gammes de couleurs et
+ * les polices, nettes à toutes les tailles (Yves Delorme, 29 oct. 2026 :
+ * jetons et polices lus dans le fichier Figma de Paul, nuances relevées sur sa
+ * planche).
+ */
+export type ProjectCharter = {
+  label: string;
+  title: string;
+  body: string;
+  palettes: { name: string; swatches: { token: string; hex: string }[] }[];
+  fonts: { family: "poppins" | "roboto"; name: string; role: string; sample: string }[];
+};
+
+/** Chapitre glissé dans la galerie d'une page éditoriale, après `at` visuels. */
+export type ProjectChapter =
+  | ({ type: "walkthrough"; at: number } & ProjectWalkthrough)
+  | ({ type: "charter"; at: number } & ProjectCharter);
 
 export type ProjectLink = {
   label: string;
@@ -404,6 +451,8 @@ export type Project = {
   sections: ProjectSection[];
   gallery: string[];
   media?: ProjectMedia[];
+  /** Chapitres glissés entre les visuels de la galerie (variante « editorial »). */
+  chapters?: ProjectChapter[];
 };
 
 const defaultSections: ProjectSection[] = [
@@ -931,17 +980,16 @@ export const projects: Project[] = [
         title: "Point sur les attentes et les besoins des clients",
         image: yvesDelormeNeeds,
         size: "wide",
+        layout: "row",
       },
       {
         title: "Détermination des objectifs et de la stratégie de communication",
         image: yvesDelormeStrategy,
         size: "wide",
+        layout: "row",
       },
-      {
-        title: "Création de la charte graphique et de l'identité visuelle",
-        image: yvesDelormeDesignSystem,
-        size: "wide",
-      },
+      // La planche de la charte (732 px) est remplacée par le chapitre
+      // « La charte », refait en page (29 oct. 2026).
       {
         title: "Prototypage haute fidélité des différentes pages du site",
         image: yvesDelormePrototype,
@@ -952,6 +1000,86 @@ export const projects: Project[] = [
         image: yvesDelormeTablet,
         size: "wide",
         variant: "light",
+      },
+    ],
+    // Après les trois photos de la recherche en boutique, avant le prototype.
+    // Textes tirés du dossier de fin de projet (Figma de Paul, 29 oct. 2026).
+    chapters: [
+      {
+        type: "walkthrough",
+        at: 3,
+        label: "Le configurateur",
+        title: "Composer une parure avec le client, en direct",
+        body: "Difficile, en boutique, de montrer une parure faite de pièces issues de collections différentes. Le configurateur, pensé pour les vendeuses, affiche une parure Yves Delorme et en change chaque élément pour composer celle qui convient le mieux au client. Ces images viennent du motion design de présentation, illustré et animé par l'équipe.",
+        steps: [
+          {
+            title: "La parure au centre",
+            body: "Le lit occupe le centre de l'écran pour que le client se projette, et chaque changement s'y affiche aussitôt. En bas à gauche, la barre d'action donne accès aux éléments, dans l'ordre où les clients les demandent.",
+            frames: [ydlConfig01, ydlConfig02],
+          },
+          {
+            title: "Chaque élément à part",
+            body: "Taies, housse de couette, drap plat, drap housse : chaque pièce se change indépendamment des autres. Pour les taies, une navigation secondaire passe d'un niveau d'oreiller à l'autre.",
+            frames: [ydlConfig03, ydlConfig04, ydlConfig05],
+          },
+          {
+            title: "Filtrer comme en boutique",
+            body: "Les filtres suivent l'offre d'Yves Delorme : couleur, matière, style, motif, et nombre de fils, un repère de qualité pour une clientèle exigeante. Une barre de recherche retrouve un produit par mot-clé.",
+            frames: [ydlConfig06, ydlConfig07, ydlConfig08, ydlConfig09],
+          },
+          {
+            title: "Changer de décor",
+            body: "Pour plus d'immersion, le bouton « Décor » change la couleur et la texture des murs, du sol et de la tête de lit.",
+            frames: [ydlConfig10, ydlConfig11, ydlConfig12],
+          },
+          {
+            title: "Enregistrer, partager, acheter",
+            body: "Avec une adresse e-mail, la parure s'enregistre dans « Mes enregistrements » et se partage par e-mail, avec le détail de sa composition. L'ajout au panier ouvre le site d'Yves Delorme, la composition prête à être achetée.",
+            frames: [ydlConfig13, ydlConfig14],
+          },
+        ],
+      },
+      {
+        type: "charter",
+        at: 3,
+        label: "La charte",
+        title: "Un design system pour passer le relais aux développeurs",
+        body: "Pour tester vite auprès des vendeuses, l'intégration a commencé tôt. À la demande des développeurs, le fichier Figma a été repris en entier et organisé en design atomique : un design system complet, sur lequel l'intégration s'est appuyée.",
+        palettes: [
+          {
+            name: "Primaire",
+            swatches: [
+              { token: "P900", hex: "#285256" },
+              { token: "P800", hex: "#2E5E63" },
+              { token: "P700", hex: "#33696F" },
+              { token: "P600", hex: "#39757B" },
+              { token: "P500", hex: "#3E8087" },
+              { token: "P400", hex: "#61979C" },
+              { token: "P300", hex: "#84AEB2" },
+              { token: "P200", hex: "#A7C5C8" },
+              { token: "P100", hex: "#DBE7E9" },
+            ],
+          },
+          {
+            name: "Secondaire",
+            swatches: [
+              { token: "S900", hex: "#202020" },
+              { token: "S800", hex: "#333333" },
+              { token: "S700", hex: "#454545" },
+              { token: "S600", hex: "#555555" },
+              { token: "S500", hex: "#666666" },
+              { token: "S400", hex: "#777777" },
+              { token: "S300", hex: "#A0A0A0" },
+              { token: "S200", hex: "#C8C8C8" },
+              { token: "S100", hex: "#DDDDDD" },
+            ],
+          },
+        ],
+        // Échantillons : des libellés de l'interface du configurateur.
+        fonts: [
+          { family: "poppins", name: "Poppins Bold", role: "Titres", sample: "Décoration intérieure" },
+          { family: "roboto", name: "Roboto", role: "Texte et boutons", sample: "Ajouter au panier" },
+        ],
       },
     ],
   },

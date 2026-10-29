@@ -55,9 +55,46 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "In-store working session with the sales team" },
       { title: "Review of customer expectations and needs" },
       { title: "Defining goals and communication strategy" },
-      { title: "Creating the visual identity and brand guidelines" },
       { title: "High-fidelity prototyping of the site's key pages" },
       { title: "Site in context on tablet" },
+    ],
+    chapters: [
+      {
+        type: "walkthrough",
+        label: "The configurator",
+        title: "Building a bedding set with the customer, live",
+        body: "In store, it was hard to show a bedding set made of pieces from different collections. Designed for sales associates, the configurator displays a Yves Delorme bedding set and swaps each of its pieces to build the one that best suits the customer. These images come from the presentation motion design, illustrated and animated by the team.",
+        steps: [
+          {
+            title: "The set at the center",
+            body: "The bed fills the center of the screen so the customer can picture it, and every change shows up there instantly. At the bottom left, the action bar opens each piece, in the order customers ask for them.",
+          },
+          {
+            title: "Each piece on its own",
+            body: "Pillowcases, duvet cover, flat sheet, fitted sheet: each piece changes independently of the others. For pillowcases, a secondary navigation moves from one pillow layer to the next.",
+          },
+          {
+            title: "Filtering like in store",
+            body: "The filters follow Yves Delorme's range: color, material, style, pattern, and thread count, a mark of quality for demanding customers. A search bar finds a product by keyword.",
+          },
+          {
+            title: "Changing the room",
+            body: "For more immersion, the “Décor” button changes the color and texture of the walls, the floor and the headboard.",
+          },
+          {
+            title: "Save, share, buy",
+            body: "With an email address, the set is saved in “My saved sets” and can be shared by email, with the details of its composition. Adding to cart opens the Yves Delorme website, with the composition ready to buy.",
+          },
+        ],
+      },
+      {
+        type: "charter",
+        label: "The guidelines",
+        title: "A design system to hand over to developers",
+        body: "To test quickly with sales associates, integration started early. At the developers' request, the whole Figma file was reworked and organized with atomic design: a complete design system that the integration built upon.",
+        palettes: [{ name: "Primary" }, { name: "Secondary" }],
+        fonts: [{ role: "Headings" }, { role: "Text and buttons" }],
+      },
     ],
   },
 

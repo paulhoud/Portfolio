@@ -12,6 +12,7 @@ import {
 import type {
   Project,
   ProjectBlock,
+  ProjectChapter,
   ProjectHeaderLogo,
   ProjectLink,
   ProjectMedia,
@@ -19,6 +20,7 @@ import type {
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
 import { AnimatedLogo } from "./AnimatedLogo";
+import { ProjectChapterBlock } from "./ProjectChapters";
 import { ProjectMascot } from "./ProjectMascot";
 import { ProjectDesignSystem, ProjectStoryHighlight, ProjectStorySection } from "./ProjectStorySection";
 
@@ -594,6 +596,23 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
   );
 }
 
+/**
+ * Les visuels de la galerie, en suites : un visuel seul, ou plusieurs visuels
+ * `row` qui se suivent (côte à côte, deux par rangée sur grand écran), et les
+ * chapitres glissés à leur rang.
+ */
+function galleryRuns(media: ProjectMedia[], chapters: ProjectChapter[] = []) {
+  const runs: ({ kind: "media"; items: ProjectMedia[]; first: number } | { kind: "chapter"; chapter: ProjectChapter })[] = [];
+  media.forEach((item, index) => {
+    for (const chapter of chapters) if (chapter.at === index) runs.push({ kind: "chapter", chapter });
+    const last = runs.at(-1);
+    if (item.layout === "row" && last?.kind === "media" && last.items.at(-1)?.layout === "row") last.items.push(item);
+    else runs.push({ kind: "media", items: [item], first: index });
+  });
+  for (const chapter of chapters) if (chapter.at >= media.length) runs.push({ kind: "chapter", chapter });
+  return runs;
+}
+
 function ProjectMediaGallery({
   project,
   editorial = false,
@@ -608,11 +627,23 @@ function ProjectMediaGallery({
     >
       {project.media?.length ? (
         // Un visuel mis en avant est déjà montré sous l'en-tête.
-        project.media.filter((media) => !media.featured).map((media, index) => (
-          <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
-            <ProjectMediaBlock media={media} priority={index < 2} />
-          </ScrollReveal>
-        ))
+        galleryRuns(project.media.filter((media) => !media.featured), project.chapters).map((run) =>
+          run.kind === "chapter" ? (
+            <ProjectChapterBlock key={run.chapter.title} chapter={run.chapter} />
+          ) : run.items.length > 1 ? (
+            <ScrollRevealGroup key={run.items[0].title} className="grid gap-8 md:grid-cols-2 md:gap-6">
+              {run.items.map((media) => (
+                <ScrollRevealItem key={media.title}>
+                  <ProjectMediaBlock media={media} priority={false} />
+                </ScrollRevealItem>
+              ))}
+            </ScrollRevealGroup>
+          ) : (
+            <ScrollReveal key={run.items[0].title} delay={run.first === 0 ? 0 : 0.04}>
+              <ProjectMediaBlock media={run.items[0]} priority={run.first < 2} />
+            </ScrollReveal>
+          ),
+        )
       ) : (
         <ScrollRevealGroup className="grid gap-4 md:grid-cols-3">
           {project.gallery.map((item, index) => (
