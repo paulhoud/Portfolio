@@ -915,6 +915,14 @@ export const projects: Project[] = [
     gallery: [],
     media: [
       {
+        // En tête de page (demande de Paul, 29 oct. 2026).
+        title: "Configurateur produit en vidéo",
+        image: videoYvesDelorme,
+        size: "wide",
+        youtubeId: "Y6ov9iYdWIk",
+        featured: true,
+      },
+      {
         title: "Session de travail en boutique avec l'équipe de vente",
         image: yvesDelormeWorkshop,
         size: "wide",
@@ -944,12 +952,6 @@ export const projects: Project[] = [
         image: yvesDelormeTablet,
         size: "wide",
         variant: "light",
-      },
-      {
-        title: "Configurateur produit en vidéo",
-        image: videoYvesDelorme,
-        size: "wide",
-        youtubeId: "Y6ov9iYdWIk",
       },
     ],
   },
@@ -1066,6 +1068,21 @@ export const projects: Project[] = [
     gallery: [],
     media: [
       {
+        // En tête de page (demande de Paul, 29 oct. 2026).
+        title: "Accelerating Local Impact - film de restitution",
+        image: videoSanofiImpact,
+        size: "wide",
+        youtubeId: "M0JuT4dlrGg",
+        featured: true,
+      },
+      {
+        title: "Présentation du projet en vidéo",
+        image: videoSanofiProject,
+        size: "wide",
+        youtubeId: "tsqkmX-ZNsE",
+        featured: true,
+      },
+      {
         title: "Une étape de terrain avec les acteurs pour mieux comprendre les besoins",
         image: sanofiField,
         size: "wide",
@@ -1089,18 +1106,6 @@ export const projects: Project[] = [
         title: "Storyboard du film",
         image: sanofiStoryboard,
         size: "wide",
-      },
-      {
-        title: "Accelerating Local Impact - film de restitution",
-        image: videoSanofiImpact,
-        size: "wide",
-        youtubeId: "M0JuT4dlrGg",
-      },
-      {
-        title: "Présentation du projet en vidéo",
-        image: videoSanofiProject,
-        size: "wide",
-        youtubeId: "tsqkmX-ZNsE",
       },
       {
         title: "Une analyse détaillée de l'expérience patiente et des points de douleur dans le parcours",
@@ -1603,6 +1608,14 @@ export const projects: Project[] = [
     gallery: [],
     media: [
       {
+        // En tête de page (demande de Paul, 29 oct. 2026).
+        title: "Réalisation et montage d'une vidéo de skate",
+        image: archiveSkate,
+        size: "wide",
+        youtubeId: "jqaKMLXqmb4",
+        featured: true,
+      },
+      {
         title: "Illustrations réalisées pour des stickers",
         image: archiveFruits,
         size: "wide",
@@ -1637,12 +1650,6 @@ export const projects: Project[] = [
         image: archiveGecko,
         size: "wide",
         // Lien « Voir le site » retiré : il pointait vers « # ».
-      },
-      {
-        title: "Réalisation et montage d'une vidéo de skate",
-        image: archiveSkate,
-        size: "wide",
-        youtubeId: "jqaKMLXqmb4",
       },
     ],
   },

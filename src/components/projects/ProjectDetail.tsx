@@ -43,9 +43,25 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   return <MediaViewerProvider media={viewerMedia}>{content}</MediaViewerProvider>;
 }
 
+/**
+ * Les visuels mis en avant (`featured`), en grand juste sous l'en-tête :
+ * d'abord ce qui marque le plus, souvent une vidéo (demande de Paul,
+ * 29 oct. 2026). Deux à la fois : côte à côte sur grand écran.
+ */
+function FeaturedMedia({ project }: ProjectDetailProps) {
+  const featured = project.media?.filter((media) => media.featured) ?? [];
+  if (!featured.length) return null;
+  return (
+    <ScrollReveal className={cn("pb-16 md:pb-24", featured.length > 1 && "grid gap-8 md:grid-cols-2 md:gap-6")}>
+      {featured.map((media) => (
+        <ProjectMediaBlock key={media.title} media={media} priority />
+      ))}
+    </ScrollReveal>
+  );
+}
+
 function DefaultProjectDetail({ project }: ProjectDetailProps) {
   const hasTextSections = project.sections.length > 0;
-  const featured = project.media?.find((media) => media.featured);
 
   return (
     <article className="min-h-screen page-top px-6 pb-8 md:px-20 md:pb-12">
@@ -87,11 +103,7 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
         </ScrollReveal>
 
         {/* Le visuel le plus marquant, avant les textes. */}
-        {featured ? (
-          <ScrollReveal className="pb-16 md:pb-24">
-            <ProjectMediaBlock media={featured} priority />
-          </ScrollReveal>
-        ) : null}
+        <FeaturedMedia project={project} />
 
         {hasTextSections ? (
           <ScrollRevealGroup className="mx-auto max-w-3xl space-y-8 pb-20 md:space-y-10">
@@ -142,6 +154,8 @@ function CaseStudyProjectDetail({ project }: ProjectDetailProps) {
             </ScrollRevealItem>
           ) : null}
         </ScrollRevealGroup>
+
+        <FeaturedMedia project={project} />
 
         {hasBlocks ? (
           <div className="mx-auto max-w-3xl space-y-12 pb-24 md:space-y-16">
@@ -571,6 +585,8 @@ function EditorialProjectDetail({ project }: ProjectDetailProps) {
             </ScrollRevealItem>
           ))}
         </ScrollRevealGroup>
+
+        <FeaturedMedia project={project} />
 
         <ProjectMediaGallery project={project} editorial />
       </div>

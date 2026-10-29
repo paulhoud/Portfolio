@@ -51,13 +51,13 @@ export const enProjectTranslations: ProjectTranslations = {
       "The approach combined field immersion, UX/UI formalization, and the production of concrete deliverables to shape a more cohesive, premium, service-oriented experience.",
     ],
     media: [
+      { title: "Product configurator video" },
       { title: "In-store working session with the sales team" },
       { title: "Review of customer expectations and needs" },
       { title: "Defining goals and communication strategy" },
       { title: "Creating the visual identity and brand guidelines" },
       { title: "High-fidelity prototyping of the site's key pages" },
       { title: "Site in context on tablet" },
-      { title: "Product configurator video" },
     ],
   },
 
@@ -118,13 +118,13 @@ export const enProjectTranslations: ProjectTranslations = {
       },
     ],
     media: [
+      { title: "Accelerating Local Impact - wrap-up film" },
+      { title: "Project presentation video" },
       { title: "A field step with stakeholders to better understand needs" },
       { title: "Identifying and accessing local healthcare facilities" },
       { title: "Supporting local teams to improve their services" },
       { title: "A collective, collaborative ideation process with the Sanofi Espoir Foundation teams" },
       { title: "Film storyboard" },
-      { title: "Accelerating Local Impact - wrap-up film" },
-      { title: "Project presentation video" },
       { title: "A detailed analysis of the patient experience and pain points along the journey" },
     ],
   },
@@ -392,6 +392,7 @@ export const enProjectTranslations: ProjectTranslations = {
     description:
       "A selection of graphic work, illustrations, and personal experiments.",
     media: [
+      { title: "Skate video filming and editing" },
       { title: "Illustrations created for stickers" },
       { title: "Graphic research project around a Bauhaus exhibition" },
       { title: "Graphic research for a space-themed video game project" },
@@ -399,7 +400,6 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Digital landscape painting at dusk" },
       { title: "Graphic experiment in the form of a short comic strip" },
       { title: "Brand identity proposal for an audiovisual production studio" },
-      { title: "Skate video filming and editing" },
     ],
   },
 
