@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath, splitLocalePath } from "@/i18n/paths";
+import { useFullscreen } from "@/lib/fullscreen";
 import { initSound, setSoundVolume, useSoundOn, useSoundVolume } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { useTheme } from "@/lib/theme";
@@ -60,7 +61,7 @@ const DOCK_PILL = cn(
  * sans aller-retour qui distrairait de la scène.
  *
  * - Grand écran (≥ 1024 px) : logo à gauche, liens au centre, réseaux à
- *   droite ; la langue, le son et le thème sont aux coins bas de l'écran
+ *   droite ; la langue, le son, le thème et le plein écran sont aux coins bas de l'écran
  *   (pastilles du même verre). Le rang est une grille à trois
  *   colonnes « 1fr auto 1fr » : les colonnes latérales sont égales tant qu'il
  *   y a la place (liens exactement au centre) et, quand la place manque, la
@@ -315,7 +316,8 @@ export function SiteHeader() {
 
       {/* Grand écran : les réglages quittent la capsule pour les coins bas de
           l'écran, dans deux petites pastilles du même verre - la langue à
-          gauche, le son et la pause à droite. En dessous, ils sont dans le menu. */}
+          gauche, le son, le thème et le plein écran à droite. En dessous, ils
+          sont dans le menu. */}
       <div className="pointer-events-none fixed inset-x-6 bottom-6 z-40 hidden items-end justify-between text-ink lg:flex">
         <div className={cn(DOCK_PILL, "px-3")}>
           <LanguageFlags />
@@ -323,6 +325,7 @@ export function SiteHeader() {
         <div className={DOCK_PILL}>
           <SoundToggle />
           <ThemeToggle />
+          <FullscreenToggle />
         </div>
       </div>
 
@@ -402,6 +405,7 @@ export function SiteHeader() {
                   </div>
                   <SoundToggle variant="labelled" />
                   <ThemeToggle labelled />
+                  <FullscreenToggle labelled />
                 </div>
               </div>
             </motion.div>
@@ -626,6 +630,38 @@ function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
         )}
       </svg>
       {labelled ? <span>{t.site.theme.label}</span> : null}
+    </button>
+  );
+}
+
+/**
+ * Plein écran (cf. src/lib/fullscreen.ts). Un interrupteur, enfoncé en plein
+ * écran : les coins de l'icône s'ouvrent ou se rentrent (tracés Lucide
+ * « maximize » et « minimize »). Absent là où le navigateur ne le permet pas.
+ */
+function FullscreenToggle({ labelled = false }: { labelled?: boolean }) {
+  const { t } = useTranslation();
+  const [supported, active, toggle] = useFullscreen();
+  if (!supported) return null;
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      onClick={toggle}
+      aria-checked={active}
+      aria-label={labelled ? undefined : t.site.fullscreen.label}
+      title={labelled ? undefined : active ? t.site.fullscreen.exit : t.site.fullscreen.enter}
+      className={cn(toggleClasses(labelled, active), labelled && "w-full")}
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {active ? (
+          <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" />
+        ) : (
+          <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
+        )}
+      </svg>
+      {labelled ? <span>{t.site.fullscreen.label}</span> : null}
     </button>
   );
 }

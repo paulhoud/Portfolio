@@ -34,6 +34,11 @@ export const frSite: SiteCopy = {
     toLight: "Passer en thème clair",
     toDark: "Passer en thème sombre",
   },
+  fullscreen: {
+    label: "Plein écran",
+    enter: "Passer en plein écran",
+    exit: "Quitter le plein écran",
+  },
   sound: {
     mute: "Couper le son",
     unmute: "Activer le son",

@@ -74,6 +74,13 @@ export type SiteCopy = {
     toLight: string;
     toDark: string;
   };
+  /** Plein écran du site. */
+  fullscreen: {
+    /** Nom de l'interrupteur (« Plein écran »). */
+    label: string;
+    enter: string;
+    exit: string;
+  };
   /** Musique d'ambiance et effets sonores. */
   sound: {
     mute: string;

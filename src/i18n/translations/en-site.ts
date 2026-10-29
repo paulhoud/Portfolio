@@ -34,6 +34,11 @@ export const enSite: SiteCopy = {
     toLight: "Switch to light theme",
     toDark: "Switch to dark theme",
   },
+  fullscreen: {
+    label: "Full screen",
+    enter: "Enter full screen",
+    exit: "Exit full screen",
+  },
   sound: {
     mute: "Mute sound",
     unmute: "Turn sound on",
