@@ -130,6 +130,11 @@ export type ProjectMedia = {
    * vignette).
    */
   youtubeId?: string;
+  /**
+   * Mis en avant : montré en grand juste sous l'en-tête, avant les textes, et
+   * retiré de la galerie (Memento : la vidéo de présentation, 29 oct. 2026).
+   */
+  featured?: boolean;
   size?: "narrow" | "regular" | "wide";
   variant?: "default" | "light";
   layout?: "single" | "row";
@@ -838,6 +843,14 @@ export const projects: Project[] = [
     gallery: ["Prototype produit", "Design system", "Supports social media"],
     media: [
       {
+        // En tête de page : le plus marquant du projet (demande de Paul, 29 oct. 2026).
+        title: "Vidéo de présentation B2B",
+        image: videoMemento,
+        size: "wide",
+        youtubeId: "DkHwGQkWkfs",
+        featured: true,
+      },
+      {
         title: "Reportage photo événementiel",
         image: mementoEvent,
         size: "wide",
@@ -871,12 +884,6 @@ export const projects: Project[] = [
         title: "Synthèse offre et FAQ",
         image: mementoFaq,
         size: "wide",
-      },
-      {
-        title: "Vidéo de présentation B2B",
-        image: videoMemento,
-        size: "wide",
-        youtubeId: "DkHwGQkWkfs",
       },
     ],
   },

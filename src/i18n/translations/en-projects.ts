@@ -28,6 +28,7 @@ export const enProjectTranslations: ProjectTranslations = {
       },
     ],
     media: [
+      { title: "B2B presentation video" },
       { title: "Event photography coverage" },
       { title: "Memento landing page" },
       { title: "Presentation storyboards" },
@@ -35,7 +36,6 @@ export const enProjectTranslations: ProjectTranslations = {
       { title: "Commercial poster" },
       { title: "QR code event support" },
       { title: "Offer summary and FAQ" },
-      { title: "B2B presentation video" },
     ],
   },
 

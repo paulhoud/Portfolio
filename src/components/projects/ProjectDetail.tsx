@@ -45,6 +45,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
 function DefaultProjectDetail({ project }: ProjectDetailProps) {
   const hasTextSections = project.sections.length > 0;
+  const featured = project.media?.find((media) => media.featured);
 
   return (
     <article className="min-h-screen page-top px-6 pb-8 md:px-20 md:pb-12">
@@ -84,6 +85,13 @@ function DefaultProjectDetail({ project }: ProjectDetailProps) {
             </div>
           </header>
         </ScrollReveal>
+
+        {/* Le visuel le plus marquant, avant les textes. */}
+        {featured ? (
+          <ScrollReveal className="pb-16 md:pb-24">
+            <ProjectMediaBlock media={featured} priority />
+          </ScrollReveal>
+        ) : null}
 
         {hasTextSections ? (
           <ScrollRevealGroup className="mx-auto max-w-3xl space-y-8 pb-20 md:space-y-10">
@@ -583,7 +591,8 @@ function ProjectMediaGallery({
       className={editorial ? "space-y-16 pb-24 md:space-y-24" : "space-y-8 pb-20"}
     >
       {project.media?.length ? (
-        project.media.map((media, index) => (
+        // Un visuel mis en avant est déjà montré sous l'en-tête.
+        project.media.filter((media) => !media.featured).map((media, index) => (
           <ScrollReveal key={media.title} delay={index === 0 ? 0 : 0.04}>
             <ProjectMediaBlock media={media} priority={index < 2} />
           </ScrollReveal>
