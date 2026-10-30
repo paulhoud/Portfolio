@@ -75,8 +75,8 @@ export const enProjectTranslations: ProjectTranslations = {
     context: "HETIC professional project · Client: Maison Yves Delorme · 2019–2020",
     introParagraphs: [
       "L'Odyssée is a project to fully redesign the digital ecosystem of Maison Yves Delorme. It aims to harmonize the customer experience across the boutique, advisory services, and digital tools.",
-      "With the marketing and sales teams, I worked on the customer journey, the interface architecture and the priority scenarios to prototype.",
-      "The approach combined field immersion, UX/UI formalization, and the production of concrete deliverables to shape a more cohesive, premium, service-oriented experience.",
+      "The project ran for five months, from January to May 2020, with a team of three designers and three developers. I took part in all four of its strands: in-store research, mockups, the design system and the motion design presentation.",
+      "Our persona, Catherine, has been a sales associate for twenty years: the configurator was designed for her. During lockdown, testing was done over video calls.",
     ],
     media: [
       { title: "Product configurator video" },

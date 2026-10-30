@@ -1019,9 +1019,10 @@ export const projects: Project[] = [
     detailVariant: "editorial",
     introParagraphs: [
       "L'Odyssée est un projet de refonte globale de l'écosystème digital de la Maison Yves Delorme. Il vise à harmoniser l'expérience client entre la boutique, le conseil et les outils numériques.",
-      // À PRÉCISER : ta part exacte parmi immersion, ateliers, charte et prototypes.
-      "Avec les équipes marketing et commerciales, j'ai travaillé sur le parcours client, l'architecture des interfaces et les scénarios prioritaires à prototyper.",
-      "La démarche a combiné immersion terrain, formalisation UX/UI et production de livrables concrets pour faire émerger une expérience plus cohérente, premium et orientée service.",
+      // Faits du dossier de fin de projet (Figma de Paul) ; sa part, les quatre
+      // volets : réponse de Paul, 30 oct. 2026. Texte validé par Paul le même jour.
+      "Le projet a duré cinq mois, de janvier à mai 2020, avec une équipe de trois designers et trois développeurs. J'ai pris part à ses quatre volets : la recherche en boutique, les maquettes, le design system et le motion design de présentation.",
+      "Notre persona, Catherine, est vendeuse depuis vingt ans : c'est pour elle que le configurateur a été pensé. Pendant le confinement, les tests se sont faits en visio.",
     ],
     sections: [],
     gallery: [],
