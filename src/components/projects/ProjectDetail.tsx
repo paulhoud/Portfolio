@@ -17,6 +17,7 @@ import type {
   ProjectLink,
   ProjectMedia,
   ProjectSection,
+  ProjectStoryFigures,
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
 import { AnimatedLogo } from "./AnimatedLogo";
@@ -425,6 +426,32 @@ function ProjectLinks({ links }: { links: ProjectLink[] }) {
 }
 
 /**
+ * Chiffres clés sous la phrase d'accroche : la valeur en grand, ce qu'elle
+ * compte en dessous, puis une phrase qui dit le rôle de Paul derrière eux.
+ */
+function StoryFigures({ figures }: { figures: ProjectStoryFigures }) {
+  return (
+    <ScrollReveal className="mx-auto max-w-5xl pb-16 md:pb-24">
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4 md:gap-x-8">
+        {figures.items.map((item) => (
+          <li key={item.label} className="flex flex-col gap-2 border-t border-ink/10 pt-4">
+            <span className="text-3xl font-medium tabular-nums text-ink md:text-[2.5rem] md:leading-none">
+              {item.value}
+            </span>
+            <span className="text-[0.8125rem] leading-snug text-ink/65 md:text-sm">{item.label}</span>
+          </li>
+        ))}
+      </ul>
+      {figures.note ? (
+        <p className="mx-auto mt-10 max-w-2xl text-balance text-center text-base text-ink/70 md:mt-12 md:text-lg">
+          {figures.note}
+        </p>
+      ) : null}
+    </ScrollReveal>
+  );
+}
+
+/**
  * Variante « récit » : la page se lit comme une progression, portée par le
  * défilement plutôt que par le volume de texte. Voir {@link ProjectStorySection}
  * pour la mise en scène.
@@ -478,6 +505,8 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
             {story.lead}
           </p>
         </ScrollReveal>
+
+        {story.figures ? <StoryFigures figures={story.figures} /> : null}
 
         {/* Le produit abouti vient avant son histoire : un visiteur qui ne fait
             que survoler la page doit avoir vu ce qui compte dès le premier

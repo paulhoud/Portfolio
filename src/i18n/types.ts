@@ -240,6 +240,7 @@ export type ProjectCopy = {
    */
   story?: {
     lead: string;
+    figures?: { items: { value: string; label: string }[]; note?: string };
     highlight?: {
       label: string;
       title: string;

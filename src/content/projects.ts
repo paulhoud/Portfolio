@@ -366,12 +366,23 @@ export type ProjectStoryBeat =
   | ({ type: "stage" } & ProjectStoryStage)
   | ({ type: "pivot" } & ProjectStoryPivot);
 
+/** Chiffres clés : la valeur telle qu'affichée, et ce qu'elle compte. */
+export type ProjectStoryFigures = {
+  items: { value: string; label: string }[];
+  note?: string;
+};
+
 /**
  * Récit d'un projet déroulé au fil du défilement. La liste des temps forts est
  * ouverte : ajouter une étape ou une bascule revient à ajouter une entrée.
  */
 export type ProjectStory = {
   lead: string;
+  /**
+   * Chiffres clés posés juste sous la phrase d'accroche, pour qu'ils se voient
+   * dès le premier écran ; la note dit le rôle de Paul derrière ces chiffres.
+   */
+  figures?: ProjectStoryFigures;
   /**
    * Mise en avant placée juste après l'en-tête : le produit tel qu'il est
    * aujourd'hui. Un visiteur qui ne fait que survoler la page voit ainsi
@@ -495,9 +506,11 @@ export const projects: Project[] = [
     companySite: { label: "UpikaJob", href: "https://www.upikajob.com/" },
     mediaKey: "UPIKAJOB",
     title: "UpikaJob",
-    eyebrow: "SIRH pour les équipes RH et les managers",
+    // L'IA dès le sous-titre, la description et l'accroche (accord de Paul,
+    // 4 nov. 2026) : c'est le premier argument de son profil.
+    eyebrow: "SIRH et entretiens assistés par l'IA, pour les équipes RH et les managers",
     description:
-      "Seul designer d'un SIRH depuis 2024 : vision produit, recherche utilisateur, UX/UI, design system et front-end, en binôme avec le développeur.",
+      "Seul designer d'un SIRH à l'IA depuis 2024 : entretiens assistés par l'IA, synthèses générées, vision produit, recherche utilisateur, UX/UI, design system et front-end.",
     context: "Poste actuel · depuis janvier 2024 · seul designer",
     // Export transparent sans la feuille blanche (Paul, 8 oct. 2026). L'icône
     // occupe le centre d'un cadre de 960 px : le zoom lui rend sa taille
@@ -519,7 +532,19 @@ export const projects: Project[] = [
     animation: "float",
     detailVariant: "story",
     story: {
-      lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH. J'en suis le seul designer, de la vision produit jusqu'au front-end.",
+      lead: "Une plateforme née pour accompagner les jeunes talents, devenue un SIRH où l'IA assiste les entretiens. J'en suis le seul designer, de la vision produit jusqu'au front-end.",
+      // Source : profil LinkedIn de Paul (octobre 2026), retenu par Paul le
+      // 8 oct. 2026 à la place des relevés du tableau de bord admin ; remonté
+      // sous l'accroche le 4 nov. 2026. À tenir à jour en même temps que LinkedIn.
+      figures: {
+        items: [
+          { value: "200 000", label: "entretiens assistés par l'IA" },
+          { value: "50 000", label: "collaborateurs, dans de grands groupes" },
+          { value: "> 80 %", label: "taux d'utilisation" },
+          { value: "2025", label: "Prix de l'innovation IA & RH Sopra Steria, avec SPIE" },
+        ],
+        note: "Les entretiens assistés par l'IA sont au cœur du produit : j'en ai conçu les parcours et construit les écrans.",
+      },
       highlight: {
         label: "Le produit aujourd'hui",
         title: "Un SIRH qui outille les équipes RH et les managers au quotidien",
@@ -847,13 +872,6 @@ export const projects: Project[] = [
       {
         title: "Résultat",
         body: "Une plateforme RH complète, dont je porte aujourd'hui la conception de bout en bout : vision produit, UX/UI, design system et front-end. J'ai aussi conçu puis développé seul le site vitrine, avec des outils de code assistés par l'IA, et je produis les contenus de la marque : vidéo, motion design, print, réseaux sociaux.",
-      },
-      {
-        // Source : profil LinkedIn de Paul (octobre 2026), retenu par Paul le
-        // 8 oct. 2026 à la place des relevés du tableau de bord admin. À tenir à
-        // jour en même temps que LinkedIn.
-        title: "En chiffres",
-        body: "Les entretiens assistés par l'IA, dont j'ai conçu les parcours et construit les écrans, sont au cœur du produit : 200 000 entretiens ont été réalisés à ce jour. UpikaJob est utilisé par 50 000 collaborateurs dans de grands groupes, avec un taux d'utilisation supérieur à 80 %. En 2025, le produit a reçu avec SPIE le Prix de l'innovation IA & RH de Sopra Steria.",
       },
     ],
     gallery: [],

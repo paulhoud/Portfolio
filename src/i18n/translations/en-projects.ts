@@ -472,9 +472,9 @@ export const enProjectTranslations: ProjectTranslations = {
 
   upikajob: {
     title: "UpikaJob",
-    eyebrow: "An HRIS for HR teams and managers",
+    eyebrow: "An HRIS with AI-assisted reviews, for HR teams and managers",
     description:
-      "Sole designer of an HRIS since 2024: product vision, user research, UX/UI, design system and front-end, paired with the developer.",
+      "Sole designer of an AI-powered HRIS since 2024: AI-assisted reviews, generated summaries, product vision, user research, UX/UI, design system and front-end.",
     context: "Current role · since January 2024 · sole designer",
     sections: [
       {
@@ -493,13 +493,18 @@ export const enProjectTranslations: ProjectTranslations = {
         title: "Outcome",
         body: "A complete HR platform whose design I now carry end to end: product vision, UX/UI, design system and front-end. I also designed then built the marketing site on my own, with AI-assisted coding tools, and I produce the brand's content: video, motion design, print, social media.",
       },
-      {
-        title: "By the numbers",
-        body: "AI-assisted reviews, whose flows I designed and whose screens I built, sit at the heart of the product: 200,000 reviews have been held to date. UpikaJob is used by 50,000 employees in large groups, with a usage rate above 80%. In 2025, the product won the Sopra Steria AI & HR Innovation Award, together with SPIE.",
-      },
     ],
     story: {
-      lead: "A platform born to support young talent, now an HRIS. I am its sole designer, from product vision through to the front-end.",
+      lead: "A platform born to support young talent, now an HRIS where AI assists reviews. I am its sole designer, from product vision through to the front-end.",
+      figures: {
+        items: [
+          { value: "200,000", label: "AI-assisted reviews" },
+          { value: "50,000", label: "employees, in large groups" },
+          { value: "> 80%", label: "usage rate" },
+          { value: "2025", label: "Sopra Steria AI & HR Innovation Award, with SPIE" },
+        ],
+        note: "AI-assisted reviews sit at the heart of the product: I designed their flows and built their screens.",
+      },
       highlight: {
         label: "The product today",
         title: "An HRIS that equips HR teams and managers day to day",

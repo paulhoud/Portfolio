@@ -194,6 +194,9 @@ function mergeStory(
 
   return {
     lead: translated.lead ?? base.lead,
+    // Les chiffres s'écrivent différemment selon la langue (200 000, 200,000) :
+    // le bloc traduit remplace le bloc d'origine en entier.
+    figures: translated.figures ?? base.figures,
     closing: {
       ...base.closing,
       title: translated.closing?.title ?? base.closing.title,
