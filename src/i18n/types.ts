@@ -241,6 +241,7 @@ export type ProjectCopy = {
   story?: {
     lead: string;
     figures?: { items: { value: string; label: string }[]; note?: string };
+    example?: { label: string; title: string; body: string; shots: { caption: string }[]; note: string };
     highlight?: {
       label: string;
       title: string;

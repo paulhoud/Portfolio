@@ -61,6 +61,11 @@ import upikatTryRobot from "../../assets/upikat/upikat-piste-robot.webp";
 import upikatTryBear from "../../assets/upikat/upikat-piste-ourson.webp";
 import upikatTryOtter from "../../assets/upikat/upikat-piste-loutre.webp";
 import upikatTryOrangeCat from "../../assets/upikat/upikat-piste-chat-orange.webp";
+// L'entretien préparé avec Upikat : la démonstration du site vitrine v3 de
+// Paul (téléphone de l'accueil, exemple fictif), capturée en fin de parcours
+// le 4 nov. 2026 à sa demande, sur fond transparent.
+import upikaAiConversation from "../../assets/projects/upikajob-ia-conversation.webp";
+import upikaAiSummary from "../../assets/projects/upikajob-ia-synthese.webp";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -366,7 +371,7 @@ export type ProjectStoryMascot = {
     poster: StaticImageData;
     hint: string;
     skeleton: string;
-    states: { id: "idle" | "hello" | "think" | "walk" | "run"; name: string; desc: string }[];
+    states: { id: "idle" | "hello" | "think" | "walk" | "run" | "joy" | "dance" | "eureka"; name: string; desc: string }[];
   };
   /** Les autres états de l'avatar, en vidéos courtes (public/upikat). */
   clips: {
@@ -398,6 +403,14 @@ export type ProjectStory = {
    * dès le premier écran ; la note dit le rôle de Paul derrière ces chiffres.
    */
   figures?: ProjectStoryFigures;
+  /** L'IA en un exemple : les écrans côte à côte, puis d'où vient l'exemple. */
+  example?: {
+    label: string;
+    title: string;
+    body: string;
+    shots: { caption: string; image: StaticImageData }[];
+    note: string;
+  };
   /**
    * Mise en avant placée juste après l'en-tête : le produit tel qu'il est
    * aujourd'hui. Un visiteur qui ne fait que survoler la page voit ainsi
@@ -559,6 +572,18 @@ export const projects: Project[] = [
           { value: "2025", label: "Prix de l'innovation IA & RH Sopra Steria, avec SPIE" },
         ],
         note: "Les entretiens assistés par l'IA sont au cœur du produit : j'en ai conçu les parcours et construit les écrans.",
+      },
+      // Textes repris de la démonstration du site vitrine (accroche, légendes
+      // et synthèse) ; À VALIDER par Paul avant publication.
+      example: {
+        label: "L'IA au cœur du produit",
+        title: "Un entretien préparé avec Upikat",
+        body: "Upikat pose les questions de la trame, une à la fois. Le collaborateur répond comme il préfère, d'un geste, par écrit ou à l'oral ; l'IA en tire une synthèse claire, qu'il relit avant de la partager avec son manager.",
+        shots: [
+          { caption: "La préparation, question après question", image: upikaAiConversation },
+          { caption: "La synthèse proposée par l'IA, relue par le collaborateur", image: upikaAiSummary },
+        ],
+        note: "Un exemple fictif, tiré de la démonstration que j'ai conçue pour le site vitrine.",
       },
       highlight: {
         label: "Le produit aujourd'hui",
@@ -723,6 +748,10 @@ export const projects: Project[] = [
             { id: "think", name: "Réflexion", desc: "Nuage « … », sourcil levé, patte au menton." },
             { id: "walk", name: "Marche", desc: "Cycle de marche sur place." },
             { id: "run", name: "Course", desc: "Cycle de course sur place." },
+            // Gestes du modèle v14 (3 nov. 2026), décrits d'après son LISEZMOI.
+            { id: "joy", name: "Joie", desc: "Un bond, les yeux rieurs, puis repos." },
+            { id: "dance", name: "Danse", desc: "Une danse en boucle, à 120 battements par minute." },
+            { id: "eureka", name: "Eurêka", desc: "Il a trouvé : une ampoule s'allume, puis repos." },
           ],
         },
         clips: {

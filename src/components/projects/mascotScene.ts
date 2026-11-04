@@ -1,6 +1,6 @@
 import type { AnimationAction, AnimationClip, Material, Mesh, Object3D } from "three";
 
-export type MascotState = "idle" | "hello" | "think" | "walk" | "run";
+export type MascotState = "idle" | "hello" | "think" | "walk" | "run" | "joy" | "dance" | "eureka";
 
 export type MascotScene = {
   play: (state: MascotState) => void;
@@ -8,13 +8,16 @@ export type MascotScene = {
   dispose: () => void;
 };
 
-type Step = { body: string; layers: string[]; blink?: boolean };
+type Prop = "bulb" | "laughingEyes";
+type Step = { body: string; layers: string[]; blink?: boolean; props?: Prop[] };
 
 /**
  * Les états de la visionneuse de Paul (upikat-3d/visionneuse.html), limités
  * aux clips du modèle du site vitrine. Une étape jouée une fois passe à la
  * suivante quand elle finit. Couches : yeux, moustaches et bouche, jouées par
- * familles (une seule par famille) ; la dernière disponible l'emporte.
+ * familles (une seule par famille) ; la dernière disponible l'emporte. Les
+ * yeux de la joie, de la danse et de l'eurêka sont des échelles : pas de
+ * clignement par-dessus (les deux se moyenneraient).
  */
 const SEQUENCES: Record<MascotState, Step[]> = {
   idle: [{ body: "Idle", layers: ["Whiskers"], blink: true }],
@@ -28,9 +31,48 @@ const SEQUENCES: Record<MascotState, Step[]> = {
   ],
   walk: [{ body: "Walk", layers: ["Whiskers"], blink: true }],
   run: [{ body: "Run", layers: ["Whiskers", "Whiskers_Run"], blink: true }],
+  joy: [
+    { body: "Jump", layers: ["Whiskers", "Eyes_Happy", "Mouth_Happy"], props: ["laughingEyes"] },
+    { body: "Idle", layers: ["Whiskers"], blink: true },
+  ],
+  dance: [{ body: "Dance", layers: ["Whiskers", "Eyes_Dance", "Mouth_Dance"] }],
+  eureka: [
+    { body: "Eureka", layers: ["Whiskers", "Eyes_Eureka", "Mouth_Eureka"], props: ["bulb"] },
+    { body: "Idle", layers: ["Whiskers"], blink: true },
+  ],
 };
-const ONCE = new Set(["Hello", "Think_Start", "Think_End", "Blink", "Mouth_Hello"]);
+const ONCE = new Set([
+  "Hello", "Think_Start", "Think_End", "Blink", "Mouth_Hello",
+  "Jump", "Eyes_Happy", "Mouth_Happy", "Eureka", "Eyes_Eureka", "Mouth_Eureka",
+]);
 const family = (name: string) => (name.startsWith("Eyes_") ? "eyes" : name.startsWith("Whiskers") ? "whiskers" : "mouth");
+
+/**
+ * Queue (modèle v11 et suivants) : une couche à part, qu'aucun clip du corps
+ * ne touche. Une humeur joue en continu sous le corps ; un changement passe
+ * par un fondu lent, une humeur inchangée continue sans repartir de zéro.
+ * Associations de la vitrine (session « Upikat - Rig », 3 nov. 2026).
+ */
+const TAIL_MOOD: Record<string, string> = {
+  Idle: "Tail_Calm",
+  Hello: "Tail_Happy",
+  Think_Start: "Tail_Alert",
+  Think_Loop: "Tail_Alert",
+  Think_End: "Tail_Alert",
+  Walk: "Tail_Active",
+  Run: "Tail_Active",
+  Jump: "Tail_Happy",
+  Dance: "Tail_Happy",
+  Eureka: "Tail_Happy",
+};
+const TAIL_FADE = 0.8;
+
+/**
+ * Accessoires des gestes (noms des maillages tels que three.js les lit) :
+ * l'ampoule de l'eurêka et les yeux rieurs de la joie, rangés dans la tête au
+ * repos mais dessinés à chaque image. On ne les montre que pendant le geste.
+ */
+const PROPS: Record<Prop, RegExp> = { bulb: /^Idée/, laughingEyes: /^Œil_rieur/ };
 
 /** Fond des rendus et des vidéos d'Upikat (celui de ses planches). */
 export const MASCOT_STAGE = "#f1f7fc";
@@ -131,6 +173,20 @@ export async function createMascotScene(host: HTMLElement, model: string, still:
   skeleton.setColors(new THREE.Color("#1d2f5c"), new THREE.Color("#1d2f5c"));
   skeleton.visible = false;
   scene.add(skeleton);
+  const props: Record<Prop, Object3D[]> = { bulb: [], laughingEyes: [] };
+  root.traverse((object) => {
+    for (const [prop, pattern] of Object.entries(PROPS) as [Prop, RegExp][]) {
+      if (pattern.test(object.name)) {
+        props[prop].push(object);
+        object.visible = false;
+      }
+    }
+  });
+  const showProps = (wanted: Prop[] = []) => {
+    for (const [prop, objects] of Object.entries(props) as [Prop, Object3D[]][]) {
+      for (const object of objects) object.visible = wanted.includes(prop);
+    }
+  };
   const materials = new Map<Material, { transparent: boolean; opacity: number; depthWrite: boolean }>();
   root.traverse((object) => {
     const mesh = object as Mesh;
@@ -165,6 +221,14 @@ export async function createMascotScene(host: HTMLElement, model: string, still:
       layers[key] = wanted[key] ? start(wanted[key]) : null;
     }
   };
+  const setTail = (bodyName: string) => {
+    const mood = TAIL_MOOD[bodyName];
+    if (!mood || !clips[mood]) return;
+    const current = layers.tail;
+    if (current && current.getClip().name === mood) return;
+    current?.fadeOut(TAIL_FADE);
+    layers.tail = start(mood, TAIL_FADE);
+  };
   const setBlink = (on: boolean) => {
     window.clearTimeout(blinkTimer);
     if (!on || still || !clips.Blink) return;
@@ -181,6 +245,8 @@ export async function createMascotScene(host: HTMLElement, model: string, still:
     if (body && body !== next) body.fadeOut(0.3);
     body = stepAction = next;
     setLayers(step.layers);
+    setTail(step.body);
+    showProps(step.props);
     setBlink(Boolean(step.blink));
   };
   mixer.addEventListener("finished", (event) => {
@@ -191,8 +257,11 @@ export async function createMascotScene(host: HTMLElement, model: string, still:
     if (still) {
       // Pose fixe : le milieu de la dernière étape (la boucle de l'état).
       mixer.stopAllAction();
+      layers.tail = null;
       const step = SEQUENCES[state][SEQUENCES[state].length - 1];
-      for (const name of [step.body, ...step.layers]) {
+      showProps(step.props);
+      for (const name of [step.body, ...step.layers, TAIL_MOOD[step.body]]) {
+        if (!name) continue;
         const clip = clips[name];
         if (!clip) continue;
         const action = mixer.clipAction(clip);

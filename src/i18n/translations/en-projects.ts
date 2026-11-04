@@ -505,6 +505,16 @@ export const enProjectTranslations: ProjectTranslations = {
         ],
         note: "AI-assisted reviews sit at the heart of the product: I designed their flows and built their screens.",
       },
+      example: {
+        label: "AI at the heart of the product",
+        title: "A review prepared with Upikat",
+        body: "Upikat asks the questions of the review template, one at a time. Employees answer however they like, with a tap, in writing or out loud; the AI turns it into a clear summary, which they read over before sharing it with their manager.",
+        shots: [
+          { caption: "The preparation, one question at a time" },
+          { caption: "The summary drafted by the AI, read over by the employee" },
+        ],
+        note: "A fictional example, taken from the demo I designed for the marketing site.",
+      },
       highlight: {
         label: "The product today",
         title: "An HRIS that equips HR teams and managers day to day",
@@ -620,6 +630,9 @@ export const enProjectTranslations: ProjectTranslations = {
             { name: "Thinking", desc: "A “…” cloud, raised eyebrow, paw on the chin." },
             { name: "Walk", desc: "Walk cycle on the spot." },
             { name: "Run", desc: "Run cycle on the spot." },
+            { name: "Joy", desc: "A hop with laughing eyes, then back to idle." },
+            { name: "Dance", desc: "A looping dance, at 120 beats per minute." },
+            { name: "Eureka", desc: "Got it: a light bulb switches on, then back to idle." },
           ],
         },
         clips: {

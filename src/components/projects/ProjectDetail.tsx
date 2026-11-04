@@ -17,6 +17,7 @@ import type {
   ProjectLink,
   ProjectMedia,
   ProjectSection,
+  ProjectStory,
   ProjectStoryFigures,
 } from "@/content/projects";
 import { cn } from "@/lib/utils";
@@ -452,6 +453,38 @@ function StoryFigures({ figures }: { figures: ProjectStoryFigures }) {
 }
 
 /**
+ * L'IA en un exemple : les écrans côte à côte, chacun avec sa légende, puis
+ * d'où vient l'exemple. Les images ont un fond transparent et sont servies
+ * telles quelles (le texte d'interface reste net).
+ */
+function StoryExample({ example }: { example: NonNullable<ProjectStory["example"]> }) {
+  return (
+    <section aria-label={example.title} className="pb-20 md:pb-28">
+      <ScrollReveal>
+        <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+          <span className="block text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-ink/55">{example.label}</span>
+          <h2 className="mt-4 text-balance text-xl font-medium leading-snug text-ink md:text-2xl">{example.title}</h2>
+          <p className="copy mt-4">{example.body}</p>
+        </div>
+      </ScrollReveal>
+      <ScrollRevealGroup className="flex flex-col items-center gap-10 md:flex-row md:items-end md:justify-center md:gap-14">
+        {example.shots.map((shot, index) => (
+          <ScrollRevealItem key={shot.caption}>
+            <figure className={index === 0 ? "w-[min(17rem,72vw)]" : "w-[min(20rem,88vw)]"}>
+              <Image data-grid-hole src={shot.image} alt={shot.caption} unoptimized className="h-auto w-full" />
+              <figcaption className="mt-4 text-center text-[0.8125rem] leading-snug text-ink/65">{shot.caption}</figcaption>
+            </figure>
+          </ScrollRevealItem>
+        ))}
+      </ScrollRevealGroup>
+      <ScrollReveal>
+        <p className="mx-auto mt-10 max-w-xl text-balance text-center text-[0.8125rem] text-ink/55 md:mt-12">{example.note}</p>
+      </ScrollReveal>
+    </section>
+  );
+}
+
+/**
  * Variante « récit » : la page se lit comme une progression, portée par le
  * défilement plutôt que par le volume de texte. Voir {@link ProjectStorySection}
  * pour la mise en scène.
@@ -507,6 +540,8 @@ function StoryProjectDetail({ project }: ProjectDetailProps) {
         </ScrollReveal>
 
         {story.figures ? <StoryFigures figures={story.figures} /> : null}
+
+        {story.example ? <StoryExample example={story.example} /> : null}
 
         {/* Le produit abouti vient avant son histoire : un visiteur qui ne fait
             que survoler la page doit avoir vu ce qui compte dès le premier

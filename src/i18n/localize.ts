@@ -208,6 +208,13 @@ function mergeStory(
     // Les chiffres s'écrivent différemment selon la langue (200 000, 200,000) :
     // le bloc traduit remplace le bloc d'origine en entier.
     figures: translated.figures ?? base.figures,
+    example:
+      base.example && translated.example
+        ? {
+            ...translated.example,
+            shots: base.example.shots.map((shot, index) => ({ ...shot, ...translated.example?.shots[index] })),
+          }
+        : base.example,
     closing: {
       ...base.closing,
       title: translated.closing?.title ?? base.closing.title,
