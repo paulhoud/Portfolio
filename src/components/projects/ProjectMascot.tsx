@@ -34,6 +34,8 @@ export function ProjectMascot({ mascot }: { mascot: ProjectStoryMascot }) {
         </div>
       </ScrollReveal>
 
+      {mascot.origin ? <Origin origin={mascot.origin} /> : null}
+
       <SystemHeading>{mascot.compare.title}</SystemHeading>
       <ScrollReveal>
         <Compare compare={mascot.compare} />
@@ -56,6 +58,50 @@ export function ProjectMascot({ mascot }: { mascot: ProjectStoryMascot }) {
         ))}
       </ScrollRevealGroup>
     </section>
+  );
+}
+
+/** Nombre de colonnes occupées par un groupe de la rangée, sur grand écran. */
+const LINEUP_SPAN: Record<number, string> = { 1: "md:col-span-1", 4: "md:col-span-4" };
+
+/**
+ * Pourquoi un chat : le récit du choix, puis une rangée qui va du visage
+ * d'avant au personnage retenu, en passant par les pistes. Sur grand écran,
+ * les groupes partagent la grille de la rangée (sous-grille) : toutes les
+ * vignettes ont la même largeur, quel que soit leur groupe.
+ */
+function Origin({ origin }: { origin: NonNullable<ProjectStoryMascot["origin"]> }) {
+  return (
+    <>
+      <SystemHeading>{origin.title}</SystemHeading>
+      <ScrollRevealGroup className="max-w-2xl space-y-4">
+        {origin.paragraphs.map((paragraph) => (
+          <ScrollRevealItem key={paragraph}>
+            <p className="copy">{paragraph}</p>
+          </ScrollRevealItem>
+        ))}
+      </ScrollRevealGroup>
+      <ScrollReveal>
+        {/* Six vignettes : une avant, quatre pistes, une retenue. */}
+        <div className="mt-10 grid gap-y-6 md:mt-12 md:grid-cols-6 md:gap-x-4">
+          {origin.lineup.map((group) => (
+            <div key={group.label} className={cn("md:grid md:grid-cols-subgrid md:gap-y-3", LINEUP_SPAN[group.items.length])}>
+              <span className={cn(SYSTEM_LABEL, "md:col-span-full")}>{group.label}</span>
+              <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 md:col-span-full md:mt-0 md:grid-cols-subgrid md:gap-x-4">
+                {group.items.map((item) => (
+                  <li key={item.name}>
+                    <div className="relative aspect-square overflow-hidden rounded-[0.75rem] bg-white">
+                      <Image src={item.image} alt={item.name} fill sizes="(max-width: 640px) 46vw, (max-width: 768px) 24vw, 180px" className="object-contain" />
+                    </div>
+                    <span className="mt-2 block text-[0.8125rem] text-ink/65">{item.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </ScrollReveal>
+    </>
   );
 }
 

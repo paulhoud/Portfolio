@@ -52,6 +52,15 @@ import upikat3dMascotte from "../../assets/upikat/upikat-3d-mascotte.webp";
 import upikat3dSleepy from "../../assets/upikat/upikat-3d-sleepy.webp";
 import upikat3dThink from "../../assets/upikat/upikat-3d-think.webp";
 import upikat3dWaiting from "../../assets/upikat/upikat-3d-waiting.webp";
+// Avant Upikat et les pistes écartées : Savvy Sam (avatar de l'app, image
+// générée par IA) et les essais du fichier Figma « Personnage UpikaJob » de
+// Paul (4 nov. 2026). Lisa, une personne réelle filmée, n'est pas montrée ;
+// les loutres d'inspiration, qui ne sont pas de Paul, non plus.
+import upikatBeforeSavvySam from "../../assets/upikat/upikat-avant-savvy-sam.webp";
+import upikatTryRobot from "../../assets/upikat/upikat-piste-robot.webp";
+import upikatTryBear from "../../assets/upikat/upikat-piste-ourson.webp";
+import upikatTryOtter from "../../assets/upikat/upikat-piste-loutre.webp";
+import upikatTryOrangeCat from "../../assets/upikat/upikat-piste-chat-orange.webp";
 import videoMemento from "../../assets/video-memento.jpg";
 import videoYvesDelorme from "../../assets/video-yves-delorme.jpg";
 import videoSanofiImpact from "../../assets/video-sanofi-impact.jpg";
@@ -333,6 +342,12 @@ export type ProjectStoryMascot = {
   label: string;
   title: string;
   body: string;
+  /** Pourquoi un chat : le récit du choix, puis le visage d'avant, les pistes et le personnage retenu. */
+  origin?: {
+    title: string;
+    paragraphs: string[];
+    lineup: { label: string; items: { name: string; image: StaticImageData }[] }[];
+  };
   /** Les états dessinés puis modelés, même cadrage : une poignée passe de l'un à l'autre. */
   compare: {
     title: string;
@@ -657,6 +672,30 @@ export const projects: Project[] = [
         label: "La mascotte",
         title: "Upikat, de la 2D à la 3D",
         body: "Upikat est l'assistant d'UpikaJob : il accueille et guide la prise en main. Je l'ai dessiné en 2D, dans six états, puis je le fais passer en 3D dans Blender, avec l'IA : un script décrit le modèle, le squelette et les animations, et chaque retouche passe par lui plutôt que par la main. Pour l'animer dans l'application, s'en servir dans la communication et donner du volume à la marque. Un travail en cours.",
+        // Source : récit de Paul (4 nov. 2026), texte validé par lui le même jour.
+        origin: {
+          title: "Pourquoi un chat",
+          paragraphs: [
+            "L'assistant de l'application avait d'abord un visage humain : Savvy Sam, un jeune homme dessiné, puis Lisa, une femme animée presque réaliste. Les réactions restaient plutôt neutres, mais une remarque revenait souvent : il est étrange de parler à un visage presque humain en sachant qu'on s'adresse à une IA.",
+            "Or ce sont les collaborateurs qui nourrissent la plateforme : plus ils font leurs entretiens, plus leurs managers, leurs tuteurs et les RH ont de matière. Et ils ne les faisaient pas assez. Il fallait un assistant plus abordable, qui donne envie.",
+            "J'ai porté ce projet de mascotte, pour l'image de marque, pour des entretiens plus chaleureux et pour moderniser l'application. J'ai exploré plusieurs personnages : un robot, une loutre, un ourson, plusieurs chats. L'ourson et la loutre ont eu des voix lors des votes, mais le chat nous a plu à tous : mignon, apaisant, il coupe avec le côté robot et rend l'outil plus humain, ce qui compte dans les RH.",
+            "Le flat design s'est imposé : je dessine dans un style BD depuis longtemps et j'ai animé beaucoup de personnages en flat en motion design. Un trait simple, pensé dès le départ pour être animé et décliné. J'ai proposé le nom Upikat, retenu face à Upi et UpikAI.",
+            "Upikat est pour l'instant l'assistant de l'application, et son intégration est en cours. Montré à des clients, notamment à des DRH de SPIE, il a été accueilli avec enthousiasme.",
+          ],
+          lineup: [
+            { label: "Avant", items: [{ name: "Savvy Sam", image: upikatBeforeSavvySam }] },
+            {
+              label: "Les pistes",
+              items: [
+                { name: "Robot", image: upikatTryRobot },
+                { name: "Ourson", image: upikatTryBear },
+                { name: "Loutre", image: upikatTryOtter },
+                { name: "Chat orange", image: upikatTryOrangeCat },
+              ],
+            },
+            { label: "Retenu", items: [{ name: "Upikat", image: upikat2dBase }] },
+          ],
+        },
         compare: {
           title: "Six états, du dessin au volume",
           hint: "Faites glisser la poignée pour passer du dessin à la 3D.",

@@ -273,6 +273,7 @@ export type ProjectCopy = {
       label: string;
       title: string;
       body: string;
+      origin?: { title: string; paragraphs: string[]; lineup: { label: string; items: { name: string }[] }[] };
       compare: { title: string; hint: string; flat: string; volume: string; states: { name: string }[] };
       viewer: { title: string; body: string; hint: string; skeleton: string; states: { name: string; desc: string }[] };
       clips: { title: string; body: string; items: { name: string; desc: string }[] };

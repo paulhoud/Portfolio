@@ -133,6 +133,17 @@ function mergeMascot(
     label: translated.label,
     title: translated.title,
     body: translated.body,
+    origin:
+      base.origin && translated.origin
+        ? {
+            title: translated.origin.title,
+            paragraphs: translated.origin.paragraphs,
+            lineup: base.origin.lineup.map((group, index) => ({
+              label: translated.origin?.lineup[index]?.label ?? group.label,
+              items: group.items.map((item, itemIndex) => ({ ...item, ...translated.origin?.lineup[index]?.items[itemIndex] })),
+            })),
+          }
+        : base.origin,
     compare: {
       ...translated.compare,
       states: base.compare.states.map((state, index) => ({ ...state, ...translated.compare.states[index] })),

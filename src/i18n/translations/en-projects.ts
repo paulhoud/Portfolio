@@ -584,6 +584,24 @@ export const enProjectTranslations: ProjectTranslations = {
         label: "The mascot",
         title: "Upikat, from 2D to 3D",
         body: "Upikat is UpikaJob's assistant: it welcomes users and guides them through the setup. I drew it in 2D, in six states, and I am now taking it to 3D in Blender, with AI: a script describes the model, the skeleton and the animations, and every tweak goes through it rather than by hand. The goal: animate it in the app, use it in communication and give the brand more depth. A work in progress.",
+        origin: {
+          title: "Why a cat",
+          paragraphs: [
+            "The app's assistant first had a human face: Savvy Sam, a drawn young man, then Lisa, an animated, almost lifelike woman. Reactions stayed fairly neutral, but one remark kept coming back: it feels strange to talk to an almost human face when you know you are addressing an AI.",
+            "Yet it is employees who feed the platform: the more reviews they complete, the more material their managers, tutors and HR have. And they were not completing enough of them. The assistant had to be more approachable, something people want to engage with.",
+            "I championed this mascot project, for the brand image, for warmer reviews and to modernize the app. I explored several characters: a robot, an otter, a bear cub, several cats. The bear cub and the otter got votes, but the cat won everyone over: cute, soothing, it breaks with the robotic feel and makes the tool more human, which matters in HR.",
+            "Flat design came naturally: I have drawn in a comic-book style for a long time and animated many flat characters in motion design. A simple line, designed from the start to be animated and turned into variations. I came up with the name Upikat, chosen over Upi and UpikAI.",
+            "For now, Upikat is the app's assistant, and its integration is under way. Shown to clients, including HR directors at SPIE, it was met with enthusiasm.",
+          ],
+          lineup: [
+            { label: "Before", items: [{ name: "Savvy Sam" }] },
+            {
+              label: "Explorations",
+              items: [{ name: "Robot" }, { name: "Bear cub" }, { name: "Otter" }, { name: "Orange cat" }],
+            },
+            { label: "Chosen", items: [{ name: "Upikat" }] },
+          ],
+        },
         compare: {
           title: "Six states, from drawing to volume",
           hint: "Drag the handle to go from the drawing to 3D.",
