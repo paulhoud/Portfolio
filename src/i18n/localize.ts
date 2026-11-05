@@ -297,6 +297,7 @@ export function localizeProject(
     ...project,
     title: copy.title ?? project.title,
     eyebrow: copy.eyebrow ?? project.eyebrow,
+    seoTitle: copy.seoTitle ?? project.seoTitle,
     description: copy.description ?? project.description,
     detailSubtitle: copy.detailSubtitle ?? project.detailSubtitle,
     context: copy.context ?? project.context,

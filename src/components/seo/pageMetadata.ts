@@ -20,8 +20,8 @@ export function methodMetadata(locale: Locale): Metadata {
   return {
     title: en ? "My method" : "Ma méthode",
     description: en
-      ? `The method of ${profile.name}, ${profile.jobTitle}: understand, explore, design, experiment and validate, with AI as a design partner and tools chosen for the experience in mind.`
-      : `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre, explorer, concevoir, expérimenter et valider, avec l'IA comme partenaire de conception et des outils choisis pour l'expérience visée.`,
+      ? `The method of ${profile.name}, ${profile.jobTitle}: understand, explore, design, experiment and validate, with AI as a design partner.`
+      : `La méthode de ${profile.name}, ${profile.jobTitle} : comprendre, explorer, concevoir, expérimenter et valider, avec l'IA comme partenaire de conception.`,
     alternates: alternates("/method", locale),
     ...shareMetadata({
       locale,
@@ -97,7 +97,7 @@ export function projectMetadata(slug: string, locale: Locale): Metadata {
   const url = localePath(path, locale);
   return {
     // Le nom est ajouté par le template défini dans le layout racine.
-    title: `${project.title} - ${project.eyebrow}`,
+    title: project.seoTitle ?? `${project.title} - ${project.eyebrow}`,
     description: project.description,
     alternates: alternates(path, locale),
     ...shareMetadata({

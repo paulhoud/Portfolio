@@ -4,6 +4,7 @@ import type { ProjectTranslations } from "../types";
 
 export const enProjectTranslations: ProjectTranslations = {
   memento: {
+    seoTitle: "Memento - First designer at a startup",
     title: "Memento",
     eyebrow: "First designer at a startup: product, design system and content",
     description:
@@ -68,6 +69,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   "yves-delorme": {
+    seoTitle: "Yves Delorme - L'Odyssée, digital redesign",
     title: "Yves Delorme",
     eyebrow: "L'Odyssée - redesigning the digital ecosystem",
     description:
@@ -127,6 +129,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   jive: {
+    seoTitle: "Jive - Design thinking add-on for Orange",
     title: "Jive",
     eyebrow: "Improving an intranet platform with a design thinking add-on",
     description:
@@ -159,6 +162,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   "sanofi-espoir": {
+    seoTitle: "Sanofi Espoir - Maternal health in Senegal",
     title: "Sanofi Espoir",
     eyebrow: "Maternal and neonatal health in Senegal: strengthening local impact",
     description:
@@ -195,11 +199,12 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   fidesio: {
+    seoTitle: "Fidesio - UX/UI internship at a web agency",
     title: "Fidesio",
     eyebrow: "UX/UI internship at an agency: a website, an internal tool and newsletters",
     detailSubtitle: "UX/UI and branding work at a web agency",
     description:
-      "A UX/UI internship at the Fidesio web agency: mockups for the Montaigne Capital website, an internal project-tracking tool and newsletter banners for a museum shop.",
+      "A UX/UI internship at the Fidesio web agency: mockups for the Montaigne Capital website, an internal project-tracking tool and newsletter banners.",
     context: "UX/UI internship at the Fidesio agency · Jul–Sep 2018",
     blocks: [
       {
@@ -266,10 +271,11 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   capgemini: {
+    seoTitle: "Capgemini - Microsoft 365 animated videos",
     title: "Capgemini",
     eyebrow: "Illustrating use cases to reach a broad audience",
     description:
-      "Creating animated videos for Capgemini to illustrate Microsoft 365 use cases.",
+      "Creating animated videos for Capgemini to illustrate Microsoft 365 use cases for a broad audience.",
     context: "Internship at SÆGUS · Client: Capgemini · 2019",
     sections: [
       {
@@ -297,10 +303,11 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   baio: {
+    seoTitle: "Baio - A gamified app for healthier eating",
     title: "Baio",
     eyebrow: "Building a gamified app that encourages healthier shopping",
     description:
-      "Designing a gamified mobile app to encourage healthier eating habits.",
+      "Designing a gamified mobile app to help consumers make better product choices and track their eating habits.",
     context: "Mobile app concept",
     blocks: [
       {
@@ -351,6 +358,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   saegus: {
+    seoTitle: "SÆGUS - 2021 digital greeting card",
     title: "SÆGUS",
     eyebrow: "2021 greeting card: landing page, emailing and social media",
     description:
@@ -409,6 +417,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   "le-grand-menage": {
+    seoTitle: "Le Grand Ménage - Short film made as a team",
     title: "Le Grand Ménage",
     eyebrow: "Making a short film in two weeks, from writing to editing",
     context: "Short film · multidisciplinary team · 2 weeks",
@@ -455,7 +464,7 @@ export const enProjectTranslations: ProjectTranslations = {
     title: "Archive",
     eyebrow: "Personal drawings and creations",
     description:
-      "A selection of graphic work, illustrations, and personal experiments.",
+      "A selection of graphic work, illustrations and personal experiments, including stickers and graphic research around a Bauhaus exhibition.",
     media: [
       { title: "Skate video filming and editing" },
       { title: "Design exercise for Engie: two marketing emails (finalist)" },
@@ -471,6 +480,7 @@ export const enProjectTranslations: ProjectTranslations = {
   },
 
   upikajob: {
+    seoTitle: "UpikaJob - AI-powered HRIS for HR teams",
     title: "UpikaJob",
     eyebrow: "An HRIS with AI-assisted reviews, for HR teams and managers",
     description:

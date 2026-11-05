@@ -457,6 +457,8 @@ export type Project = {
   slug: string;
   title: string;
   eyebrow: string;
+  /** Titre court pour les résultats de recherche, sans le nom ajouté par le gabarit. Par défaut : titre et accroche. */
+  seoTitle?: string;
   description: string;
   logo: string;
   /**
@@ -539,6 +541,7 @@ const defaultSections: ProjectSection[] = [
 export const projects: Project[] = [
   {
     slug: "upikajob",
+    seoTitle: "UpikaJob - SIRH à l'IA pour les équipes RH",
     companySite: { label: "UpikaJob", href: "https://www.upikajob.com/" },
     mediaKey: "UPIKAJOB",
     title: "UpikaJob",
@@ -546,7 +549,7 @@ export const projects: Project[] = [
     // 4 nov. 2026) : c'est le premier argument de son profil.
     eyebrow: "SIRH et entretiens assistés par l'IA, pour les équipes RH et les managers",
     description:
-      "Seul designer d'un SIRH à l'IA depuis 2024 : entretiens assistés par l'IA, synthèses générées, vision produit, recherche utilisateur, UX/UI, design system et front-end.",
+      "Seul designer d'un SIRH à l'IA depuis 2024 : entretiens assistés par l'IA, synthèses générées, recherche utilisateur, UX/UI, design system et front-end.",
     context: "Poste actuel · depuis janvier 2024 · seul designer",
     // Export transparent sans la feuille blanche (Paul, 8 oct. 2026). L'icône
     // occupe le centre d'un cadre de 960 px : le zoom lui rend sa taille
@@ -988,6 +991,7 @@ export const projects: Project[] = [
   },
   {
     slug: "memento",
+    seoTitle: "Memento - Premier designer d'une start-up",
     companySite: { label: "Memento", href: "https://event.memento.photo/" },
     mediaKey: "MEMENTO",
     title: "Memento",
@@ -1115,6 +1119,7 @@ export const projects: Project[] = [
   },
   {
     slug: "yves-delorme",
+    seoTitle: "Yves Delorme - L'Odyssée, refonte digitale",
     companySite: { label: "Yves Delorme", href: "https://france.yvesdelorme.com/" },
     mediaKey: "YDL",
     title: "Yves Delorme",
@@ -1263,6 +1268,7 @@ export const projects: Project[] = [
   },
   {
     slug: "jive",
+    seoTitle: "Jive - Add-on design thinking pour Orange",
     companySite: { label: "Orange", href: "https://www.orange.com/" },
     mediaKey: "JIVE",
     title: "Jive",
@@ -1327,6 +1333,7 @@ export const projects: Project[] = [
   {
     // Ancien slug : « odyssey » (redirigé dans next.config.ts).
     slug: "sanofi-espoir",
+    seoTitle: "Sanofi Espoir - Santé maternelle au Sénégal",
     companySite: { label: "Sanofi", href: "https://www.sanofi.com/" },
     mediaKey: "SANOFI",
     title: "Sanofi Espoir",
@@ -1423,13 +1430,14 @@ export const projects: Project[] = [
   {
     // Ancien slug : « unicorn » (redirigé dans next.config.ts).
     slug: "fidesio",
+    seoTitle: "Fidesio - Stage UX/UI en agence web",
     companySite: { label: "Fidesio", href: "https://www.fidesio.com/" },
     mediaKey: "FIDESIO",
     title: "Fidesio",
     eyebrow: "Stage UX/UI en agence : site web, outil interne et newsletters",
     detailSubtitle: "Missions UX/UI et branding en agence web",
     description:
-      "Stage UX/UI à l'agence web Fidesio : maquettes du site de Montaigne Capital, outil interne de suivi des projets et bannières de newsletters pour une boutique de musée.",
+      "Stage UX/UI à l'agence web Fidesio : maquettes du site de Montaigne Capital, outil interne de suivi des projets et bannières de newsletters.",
     // Sources : profil LinkedIn (« Fidesio - Stagiaire UX/UI, juillet - septembre
     // 2018 ») et précisions de Paul du 8 oct. 2026 : missions UX/UI et branding
     // pour Montaigne Capital, une boutique de musée et l'agence elle-même.
@@ -1545,12 +1553,13 @@ export const projects: Project[] = [
   },
   {
     slug: "capgemini",
+    seoTitle: "Capgemini - Vidéos animées Microsoft 365",
     companySite: { label: "Capgemini", href: "https://www.capgemini.com/" },
     mediaKey: "CAPGEMINI",
     title: "Capgemini",
     eyebrow: "Illustrer des cas d'usages afin de toucher une large cible",
     description:
-      "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365.",
+      "Création de vidéos animées pour Capgemini afin d'illustrer des cas d'usage Microsoft 365 auprès d'une large cible.",
     // Source : LinkedIn (stage SÆGUS, pôle Acceleration Tactics, juil.-déc. 2019 :
     // Capgemini parmi les clients). Premier des deux stages ; Jive est le second.
     context: "Stage chez SÆGUS · Client : Capgemini · 2019",
@@ -1612,11 +1621,12 @@ export const projects: Project[] = [
   {
     // Ancien slug : « lemon » (redirigé dans next.config.ts).
     slug: "baio",
+    seoTitle: "Baio - Appli gamifiée pour manger plus sain",
     mediaKey: "BAIO",
     title: "Baio",
     eyebrow: "Créer une application gamifiée qui encourage la consommation de produits sains",
     description:
-      "Conception d'une application mobile gamifiée pour encourager une alimentation plus saine.",
+      "Conception d'une application mobile gamifiée pour aider à mieux choisir ses produits et à suivre ses habitudes alimentaires.",
     // À COMPLÉTER : cadre (école, client, perso ?), année, seul ou en équipe.
     context: "Concept d'application mobile",
     logo: "/assets/Logo-7-1.svg",
@@ -1710,6 +1720,7 @@ export const projects: Project[] = [
   {
     // Ancien slug : « alpha » (redirigé dans next.config.ts).
     slug: "saegus",
+    seoTitle: "SÆGUS - Carte de vœux digitale 2021",
     companySite: { label: "SÆGUS", href: "https://www.saegus.com/" },
     mediaKey: "SAEGUS",
     title: "SÆGUS",
@@ -1811,6 +1822,7 @@ export const projects: Project[] = [
   {
     // Ancien slug : « studio » (redirigé dans next.config.ts).
     slug: "le-grand-menage",
+    seoTitle: "Le Grand Ménage - Court métrage en équipe",
     mediaKey: "LGM",
     title: "Le Grand Ménage",
     eyebrow: "Réaliser un court métrage en deux semaines, de l'écriture au montage",
@@ -1900,7 +1912,7 @@ export const projects: Project[] = [
     title: "Archive",
     eyebrow: "Dessins personnels et créations",
     description:
-      "Sélection de créations graphiques, illustrations et expérimentations personnelles.",
+      "Sélection de créations graphiques, illustrations et expérimentations personnelles, dont des stickers et une recherche graphique autour du Bauhaus.",
     logo: "/assets/Logo-archive.png",
     logoAlt: "Logo Archive",
     background: "#ece8df",

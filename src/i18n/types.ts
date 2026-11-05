@@ -222,6 +222,7 @@ export type SiteCopy = {
 export type ProjectCopy = {
   title: string;
   eyebrow: string;
+  seoTitle?: string;
   description: string;
   detailSubtitle?: string;
   /** Cadre du projet (contrat, employeur, client, période). */
