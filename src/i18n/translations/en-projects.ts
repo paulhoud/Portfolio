@@ -612,7 +612,6 @@ export const enProjectTranslations: ProjectTranslations = {
             { label: "templates nothing called anymore, deleted" },
             { label: "lines of code removed with them" },
             { label: "pages on the Tailwind template, which no longer loads Bootstrap" },
-            { label: "pages still on the older templates" },
           ],
           note: "Work in progress, figures as of November 5, 2026.",
         },

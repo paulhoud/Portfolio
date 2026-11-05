@@ -320,7 +320,7 @@ function SystemMigration({ migration }: { migration: NonNullable<ProjectStorySys
             </p>
           ))}
         </div>
-        <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-4">
+        <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3">
           {migration.figures.map((item) => (
             <li key={item.label} className="flex flex-col gap-2 border-t border-ink/10 pt-3">
               <span className="text-2xl font-medium tabular-nums text-ink md:text-[1.75rem]">

@@ -714,7 +714,6 @@ export const projects: Project[] = [
             { figure: 119, label: "gabarits que plus rien n'appelait, supprimés" },
             { figure: 13842, label: "lignes de code retirées avec eux" },
             { figure: 160, approx: true, label: "pages sur le modèle Tailwind, qui ne charge plus Bootstrap" },
-            { figure: 410, approx: true, label: "pages encore sur les anciens modèles" },
           ],
           note: "Un chantier en cours, chiffres au 5 novembre 2026.",
         },
