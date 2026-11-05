@@ -41,7 +41,7 @@ const TRIGGERS: Record<string, string> = { keyboard: "« destroy » au clavier",
 const DEVICES: Record<string, string> = { desktop: "Ordinateur", mobile: "Téléphone", tablet: "Tablette" };
 const THEMES: Record<string, string> = { dark: "Sombre", light: "Clair" };
 const LOCALES: Record<string, string> = { fr: "Français", en: "Anglais" };
-const CONTACTS: Record<string, string> = { write: "Écrire (messagerie ouverte)", copy: "Adresse copiée" };
+const CONTACTS: Record<string, string> = { "paul-houdebine-cv.zip": "CV FR téléchargé", "paul-houdebine-resume.zip": "CV EN téléchargé", write: "Écrire (messagerie ouverte)", copy: "Adresse copiée" };
 const SETTINGS: Record<string, string> = {
   "theme:light": "Passe en thème clair", "theme:dark": "Passe en thème sombre", "lang:en": "Passe en anglais", "lang:fr": "Passe en français",
   "sound:on": "Active le son", "sound:off": "Coupe le son", "pager:next": "Projet suivant (bas de page)", "pager:previous": "Projet précédent (bas de page)",

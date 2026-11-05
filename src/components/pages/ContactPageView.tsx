@@ -66,9 +66,9 @@ export function ContactPageView() {
         <ScrollReveal delay={0.06} className="flex flex-col gap-4">
           <EmailCard />
 
-          {profile.cv ? (
+          {profile.cv[locale] ? (
             <a
-              href={profile.cv}
+              href={profile.cv[locale]}
               // `download` force l'enregistrement plutôt que l'ouverture dans
               // le navigateur ; le nom du fichier servi est déjà explicite.
               download
