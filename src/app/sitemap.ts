@@ -10,8 +10,6 @@ import { localePath } from "@/i18n/paths";
  * signalant l'autre (hreflang).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
-
   const pages: { path: string; changeFrequency: "monthly" | "yearly"; priority: number }[] = [
     { path: "/", changeFrequency: "monthly", priority: 1 },
     { path: "/about", changeFrequency: "yearly", priority: 0.8 },
@@ -25,7 +23,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const languages = { fr: absoluteUrl(localePath(path, "fr")), en: absoluteUrl(localePath(path, "en")) };
     return (["fr", "en"] as const).map((locale) => ({
       url: languages[locale],
-      lastModified,
       changeFrequency,
       // L'anglais, version secondaire, un cran sous le français.
       priority: locale === "fr" ? priority : Math.round(priority * 0.8 * 10) / 10,

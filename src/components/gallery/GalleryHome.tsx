@@ -870,8 +870,18 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
 
   return (
     <>
+      {/* Sans JavaScript, ni ouverture ni scène 3D : le texte et les liens vers les projets restent lisibles. */}
+      <noscript>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              ".opening,[data-slot]{display:none}[data-home-track]{height:auto!important}[data-home-stage]{opacity:1!important;pointer-events:auto!important}",
+          }}
+        />
+      </noscript>
       <section
         ref={trackRef}
+        data-home-track
         className="relative [--slot:100svh]"
         style={{ height: `calc(100lvh + ${count - 1} * var(--slot) + 1px)` }}
       >
@@ -1017,6 +1027,7 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
                       ? { opacity: 0, pointerEvents: "none", transition: "opacity 0.8s ease-out" }
                       : { pointerEvents: "none" }
               }
+              data-home-stage
               className={cn(
                 "relative mx-auto flex h-[100svh] max-w-7xl flex-col px-5 pb-4 pt-[calc(var(--header-height)+0.75rem)] transition-opacity duration-300",
                 // Avec la 3D, les clics traversent jusqu'aux plaques, sauf sur le texte et les boutons.
