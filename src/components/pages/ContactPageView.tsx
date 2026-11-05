@@ -85,7 +85,7 @@ export function ContactPageView() {
                 </svg>
               </span>
               <span className="font-medium">{contact.cvLabel}</span>
-              <span className="ml-auto text-xs uppercase tracking-[0.14em] text-ink/45">PDF</span>
+              <span className="ml-auto text-xs uppercase tracking-[0.14em] text-ink/45">ZIP</span>
             </a>
           ) : null}
 

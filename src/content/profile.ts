@@ -105,8 +105,12 @@ export const profile = {
    */
   brandImage: "/assets/brand-square.png",
 
-  /** CV téléchargeable depuis la page contact. Vide = le bloc n'est pas rendu. */
-  cv: "/paul-houdebine-cv.pdf",
+  /**
+   * CV téléchargeable depuis la page contact : un zip avec la version écran et
+   * la version impression. Vide = le bloc n'est pas rendu. Le PDF écran reste
+   * servi à son ancienne adresse pour les liens déjà partagés.
+   */
+  cv: "/paul-houdebine-cv.zip",
 } as const;
 
 /** URL absolue à partir d'un chemin relatif. */
