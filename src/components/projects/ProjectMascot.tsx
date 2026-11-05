@@ -138,7 +138,7 @@ function Compare({ compare }: { compare: ProjectStoryMascot["compare"] }) {
   }, [inView, reduceMotion]);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] md:items-center md:gap-10">
+    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_14rem] md:items-center md:gap-8 lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:gap-10">
       <div
         ref={stage}
         data-grid-hole
@@ -244,7 +244,7 @@ function Viewer({ viewer }: { viewer: ProjectStoryMascot["viewer"] }) {
   const current = viewer.states.find((item) => item.id === state);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] md:items-center md:gap-10">
+    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_14rem] md:items-center md:gap-8 lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:gap-10">
       <div
         ref={host}
         data-grid-hole
