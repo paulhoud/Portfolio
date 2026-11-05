@@ -120,6 +120,13 @@ function mergeSystem(
       shot: { ...base.decision.shot, caption: translated.decision.shot.caption },
     },
     assembled: { ...base.assembled, caption: translated.assembled.caption },
+    migration:
+      base.migration && translated.migration
+        ? {
+            ...translated.migration,
+            figures: base.migration.figures.map((figure, index) => ({ ...figure, ...translated.migration?.figures[index] })),
+          }
+        : base.migration,
   };
 }
 

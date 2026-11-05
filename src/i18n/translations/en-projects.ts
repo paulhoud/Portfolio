@@ -589,6 +589,23 @@ export const enProjectTranslations: ProjectTranslations = {
         assembled: {
           caption: "The components put together: the file's interactive demo, where you hover, tick, sort the table and open the modal",
         },
+        migration: {
+          label: "In the code",
+          title: "Moving off Bootstrap",
+          paragraphs: [
+            "Bootstrap first gave the application a default art direction. Once I had designed the whole interface, it no longer served any purpose and was becoming a burden: three versions side by side, less consistent screens, code loaded for nothing, slower development.",
+            "Above all, it clashed with Tailwind. Both use the same class names for different values: on a page that loaded Bootstrap, p-4 meant 1.5rem instead of 1rem, and its !important rules overrode everything else. Its .tooltip class even made help icons invisible.",
+            "I decided to remove it in favor of Tailwind, and I'm running this project with AI agents: I set the scope and check the rendering. They have the Bootstrap reflex themselves: I've been asking them to avoid it for a long time, and the project's rules now ban it from all new code.",
+            "I started by cross-checking the code against the screens people actually open, to handle what matters first. Removal happens one page template at a time, comparing styles element by element, before and after, to keep the rendering intact. An automated check measures what is left of Bootstrap and blocks any increase.",
+          ],
+          figures: [
+            { label: "templates nothing called anymore, deleted" },
+            { label: "lines of code removed with them" },
+            { label: "pages on the Tailwind template, which no longer loads Bootstrap" },
+            { label: "pages still on the older templates" },
+          ],
+          note: "Work in progress, figures as of November 5, 2026.",
+        },
       },
       mascot: {
         label: "The mascot",

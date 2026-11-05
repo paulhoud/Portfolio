@@ -300,7 +300,40 @@ export function ProjectDesignSystem({ system }: { system: ProjectStorySystem }) 
           <StoryShotFrame shot={system.assembled} sizes="(max-width: 768px) 92vw, 768px" />
         </div>
       </ScrollReveal>
+
+      {system.migration ? <SystemMigration migration={system.migration} /> : null}
     </section>
+  );
+}
+
+/** Le chantier dans le code : le récit, puis où il en est. */
+function SystemMigration({ migration }: { migration: NonNullable<ProjectStorySystem["migration"]> }) {
+  return (
+    <ScrollReveal>
+      <div className="mt-16 rounded-[0.75rem] border border-ink/10 bg-ink/[0.03] p-5 md:mt-24 md:p-10">
+        <span className={SYSTEM_LABEL}>{migration.label}</span>
+        <h3 className="mt-3 text-lg font-bold text-ink md:text-xl">{migration.title}</h3>
+        <div className="mt-3 flex max-w-2xl flex-col gap-4">
+          {migration.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="copy">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+        <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-4">
+          {migration.figures.map((item) => (
+            <li key={item.label} className="flex flex-col gap-2 border-t border-ink/10 pt-3">
+              <span className="text-2xl font-medium tabular-nums text-ink md:text-[1.75rem]">
+                {item.approx ? "≈ " : null}
+                <CountUp to={item.figure} />
+              </span>
+              <span className="text-[0.8125rem] leading-snug text-ink/65">{item.label}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 text-[0.8125rem] leading-snug text-ink/65">{migration.note}</p>
+      </div>
+    </ScrollReveal>
   );
 }
 

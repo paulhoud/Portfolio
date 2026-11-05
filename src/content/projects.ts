@@ -333,6 +333,14 @@ export type ProjectStorySystem = {
   };
   /** Les composants assemblés. */
   assembled: ProjectStoryShot;
+  /** Le chantier dans le code : le récit, puis où il en est. */
+  migration?: {
+    label: string;
+    title: string;
+    paragraphs: string[];
+    figures: { figure: number; approx?: boolean; label: string }[];
+    note: string;
+  };
 };
 
 /**
@@ -686,6 +694,26 @@ export const projects: Project[] = [
           caption: "Les composants assemblés : la démo interactive du fichier, où l'on survole, coche, trie le tableau et ouvre la modale",
           image: upikaDsSandbox,
           optimize: true,
+        },
+        // Sources : Paul (5 nov. 2026 : décision, raisons, agents IA, accord pour
+        // les chiffres) et l'app (docs/development/bootstrap-migration.md, commit
+        // ddc7c9adab, modèles de page comptés sur main le 5 nov.). Texte validé par Paul le même jour.
+        migration: {
+          label: "Dans le code",
+          title: "Sortir de Bootstrap",
+          paragraphs: [
+            "Bootstrap a d'abord donné à l'application une direction artistique par défaut. Une fois toute l'interface dessinée, il ne servait plus à rien, et il devenait un poids : trois versions en parallèle, des écrans moins cohérents, du code chargé pour rien, un développement plus lent.",
+            "Surtout, il entrait en conflit avec Tailwind. Les deux emploient les mêmes noms de classes pour des valeurs différentes : sur une page qui chargeait Bootstrap, p-4 valait 1,5\u00a0rem au lieu de 1\u00a0rem, et ses règles !important écrasaient le reste. Sa classe .tooltip rendait même des icônes d'aide invisibles.",
+            "J'ai décidé de le retirer au profit de Tailwind, et je mène ce chantier avec des agents IA : je le cadre et je contrôle le rendu. Ils ont eux-mêmes le réflexe Bootstrap : je leur demande depuis longtemps de l'éviter, et les règles du projet l'interdisent désormais dans tout nouveau code.",
+            "J'ai commencé par croiser le code avec les écrans réellement ouverts, pour traiter d'abord ce qui sert. Le retrait se fait modèle de page par modèle de page, en comparant les styles élément par élément, avant et après, pour garder le rendu. Un garde-fou automatique mesure ce qu'il reste de Bootstrap et interdit que ça remonte.",
+          ],
+          figures: [
+            { figure: 119, label: "gabarits que plus rien n'appelait, supprimés" },
+            { figure: 13842, label: "lignes de code retirées avec eux" },
+            { figure: 160, approx: true, label: "pages sur le modèle Tailwind, qui ne charge plus Bootstrap" },
+            { figure: 410, approx: true, label: "pages encore sur les anciens modèles" },
+          ],
+          note: "Un chantier en cours, chiffres au 5 novembre 2026.",
         },
       },
       // Sources : Paul (29 oct. 2026 : 2D et 3D faites par lui, avec l'IA pour

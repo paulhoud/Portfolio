@@ -268,6 +268,7 @@ export type ProjectCopy = {
         shot: { caption: string };
       };
       assembled: { caption: string };
+      migration?: { label: string; title: string; paragraphs: string[]; figures: { label: string }[]; note: string };
     };
     /** Même ordre que le catalogue pour les états, les animations et les vidéos. */
     mascot?: {
