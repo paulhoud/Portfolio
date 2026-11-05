@@ -266,4 +266,11 @@ export const enSite: SiteCopy = {
     copied: "Address copied",
     localTime: "local time",
   },
+  documents: {
+    download: "Download the PDF",
+    view: "View",
+    viewVersion: "View",
+    downloadVersion: "Download",
+    page: "page",
+  },
 };

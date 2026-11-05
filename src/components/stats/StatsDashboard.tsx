@@ -41,7 +41,7 @@ const TRIGGERS: Record<string, string> = { keyboard: "« destroy » au clavier",
 const DEVICES: Record<string, string> = { desktop: "Ordinateur", mobile: "Téléphone", tablet: "Tablette" };
 const THEMES: Record<string, string> = { dark: "Sombre", light: "Clair" };
 const LOCALES: Record<string, string> = { fr: "Français", en: "Anglais" };
-const CONTACTS: Record<string, string> = { "paul-houdebine-cv.zip": "CV FR téléchargé", "paul-houdebine-resume.zip": "CV EN téléchargé", write: "Écrire (messagerie ouverte)", copy: "Adresse copiée" };
+const CONTACTS: Record<string, string> = { "paul-houdebine-cv.zip": "CV FR téléchargé (zip)", "paul-houdebine-resume.zip": "CV EN téléchargé (zip)", "paul-houdebine-cv.pdf": "CV FR téléchargé", "paul-houdebine-cv-impression.pdf": "CV FR téléchargé (impression)", "paul-houdebine-resume.pdf": "CV EN téléchargé", "paul-houdebine-resume-print.pdf": "CV EN téléchargé (impression)", "paul-houdebine-book.pdf": "Book FR téléchargé", "paul-houdebine-book-en.pdf": "Book EN téléchargé", write: "Écrire (messagerie ouverte)", copy: "Adresse copiée" };
 const SETTINGS: Record<string, string> = {
   "theme:light": "Passe en thème clair", "theme:dark": "Passe en thème sombre", "lang:en": "Passe en anglais", "lang:fr": "Passe en français",
   "sound:on": "Active le son", "sound:off": "Coupe le son", "pager:next": "Projet suivant (bas de page)", "pager:previous": "Projet précédent (bas de page)",
@@ -108,6 +108,11 @@ export function StatsDashboard({
     if (path === "/about") return "À propos";
     if (path === "/contact") return "Contact";
     if (path === "/legal") return "Mentions légales";
+    if (path === "/cv") return "CV FR";
+    if (path === "/cv/impression") return "CV FR (impression)";
+    if (path === "/resume") return "CV EN";
+    if (path === "/resume/print") return "CV EN (impression)";
+    if (path === "/book") return "Book";
     const slug = path.split("/")[2];
     return titles.get(slug) ?? path;
   };

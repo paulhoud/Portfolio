@@ -267,4 +267,11 @@ export const frSite: SiteCopy = {
     copied: "Adresse copiée",
     localTime: "heure locale",
   },
+  documents: {
+    download: "Télécharger le PDF",
+    view: "Consulter",
+    viewVersion: "Voir",
+    downloadVersion: "Télécharger",
+    page: "page",
+  },
 };

@@ -41,7 +41,7 @@ type ShareMetadataInput = {
    * Image propre à la page, au même format que `shareImage` (cf.
    * `src/app/share-image/[locale]/[slug]`). À défaut, celle du site.
    */
-  image?: { url: string; alt: string };
+  image?: { url: string; alt: string; width?: number; height?: number };
 };
 
 /**

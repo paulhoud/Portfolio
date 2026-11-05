@@ -217,6 +217,18 @@ export type SiteCopy = {
     /** Suit l'heure de Bordeaux et Paris (« 14:32, heure locale »). */
     localTime: string;
   };
+  /** Pages des documents à partager (CV, Book). */
+  documents: {
+    /** Bouton qui télécharge le PDF. */
+    download: string;
+    /** Bouton qui ouvre la visionneuse. */
+    view: string;
+    /** Liens vers l'autre version du document. */
+    viewVersion: string;
+    downloadVersion: string;
+    /** Précède le numéro de page, dans la visionneuse. */
+    page: string;
+  };
 };
 
 export type ProjectCopy = {

@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
+      {
+        // Le CV et le Book se lisent depuis leurs pages : leur texte, qui nomme
+        // les projets et les clients, n'a pas à ressortir dans les moteurs.
+        source: "/:file(paul-houdebine-.*\\.pdf)",
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
     ];
   },
 
@@ -62,6 +68,12 @@ const nextConfig: NextConfig = {
       // gardent leur aperçu.
       { source: "/opengraph-image", destination: "/share-image", permanent: true },
       { source: "/projects/:slug/opengraph-image", destination: "/share-image/fr/:slug", permanent: true },
+      // Le CV ne porte pas le même nom dans les deux langues, et changer de
+      // langue garde le chemin : « /cv » mène à « /en/cv ».
+      { source: "/en/cv", destination: "/en/resume", permanent: true },
+      { source: "/en/cv/impression", destination: "/en/resume/print", permanent: true },
+      { source: "/resume", destination: "/cv", permanent: true },
+      { source: "/resume/print", destination: "/cv/impression", permanent: true },
       // Anciennes adresses de projets, héritées du prototype et sans rapport
       // avec leur contenu (« /odyssey » pour Sanofi, etc.). Les liens déjà
       // partagés et les pages indexées sont renvoyés vers la nouvelle adresse.

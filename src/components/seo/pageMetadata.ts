@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { shareMetadata } from "@/components/seo/shareMetadata";
+import { documents, type DocumentId } from "@/content/documents";
 import { profile } from "@/content/profile";
 import { getLocalizedProject } from "@/i18n/catalog";
 import { languageAlternates, localePath } from "@/i18n/paths";
@@ -86,6 +87,28 @@ export function legalMetadata(locale: Locale): Metadata {
       title: en ? `Legal notice - ${profile.name}` : `Mentions légales - ${profile.name}`,
       description: en ? "Publisher, hosting and privacy of this portfolio." : "Éditeur, hébergement et confidentialité de ce portfolio.",
       url: localePath("/legal", locale),
+    }),
+  };
+}
+
+export function documentMetadata(id: DocumentId, locale: Locale): Metadata {
+  const { href, share } = documents[locale][id];
+  const french = documents.fr[id].href;
+  return {
+    title: share.title,
+    description: share.description,
+    alternates: {
+      canonical: href,
+      // Le CV ne porte pas le même nom dans les deux langues : pas de `languageAlternates`.
+      languages: { fr: french, en: documents.en[id].href, "x-default": french },
+    },
+    ...shareMetadata({
+      locale,
+      title: share.title,
+      description: share.description,
+      url: href,
+      // Miniatures fournies par Paul, en 1200 × 627.
+      image: { url: share.image, alt: share.title, width: 1200, height: 627 },
     }),
   };
 }

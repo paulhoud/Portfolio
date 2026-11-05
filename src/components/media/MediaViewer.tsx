@@ -19,6 +19,7 @@ function clamp(value: number, min: number, max: number) {
 type MediaViewerProps = {
   media: ProjectMedia[];
   index: number;
+  download?: { href: string; label: string };
   onNavigate: (index: number) => void;
   onClose: () => void;
 };
@@ -30,7 +31,7 @@ type MediaViewerProps = {
  * - Commun : navigation ◀▶ (+ flèches clavier), fermeture (Échap / clic hors
  *   média / bouton ✕), légende et compteur toujours visibles en bas à gauche.
  */
-export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerProps) {
+export function MediaViewer({ media, index, download, onNavigate, onClose }: MediaViewerProps) {
   const { locale } = useTranslation();
   const en = locale === "en";
 
@@ -218,6 +219,22 @@ export function MediaViewer({ media, index, onNavigate, onClose }: MediaViewerPr
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
       </button>
+
+      {/* Télécharger le document */}
+      {download ? (
+        <a
+          href={download.href}
+          download
+          aria-label={download.label}
+          title={download.label}
+          onClick={(event) => event.stopPropagation()}
+          className="absolute right-[4.25rem] top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" />
+          </svg>
+        </a>
+      ) : null}
 
       {/* Navigation */}
       {count > 1 ? (

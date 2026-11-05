@@ -46,9 +46,12 @@ export function useMediaViewer() {
  */
 export function MediaViewerProvider({
   media,
+  download,
   children,
 }: {
   media: ProjectMedia[];
+  /** Fichier à télécharger depuis la visionneuse (pages des documents). */
+  download?: { href: string; label: string };
   children: ReactNode;
 }) {
   const [index, setIndex] = useState<number | null>(null);
@@ -96,6 +99,7 @@ export function MediaViewerProvider({
         <MediaViewer
           media={media}
           index={index}
+          download={download}
           onNavigate={setIndex}
           onClose={() => setIndex(null)}
         />
