@@ -261,6 +261,7 @@ export const enSite: SiteCopy = {
     socialLabel: "Find me elsewhere",
     locationLabel: "Based between",
     cvLabel: "Download my resume",
+    documentsLabel: "Resume and Book",
     write: "Write",
     copy: "Copy address",
     copied: "Address copied",

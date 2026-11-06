@@ -2,13 +2,16 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
 import { brandIconPaths, type BrandIconId } from "@/components/layout/icons/brandIconPaths";
 import { TextPage } from "@/components/layout/TextPage";
 import { pointerGlow } from "@/components/motion/pointerGlow";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { documents } from "@/content/documents";
 import { activeSocialLinks, profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
+import type { Locale } from "@/i18n/types";
 import { track } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 
@@ -17,8 +20,13 @@ import { cn } from "@/lib/utils";
  *
  * Deux colonnes sur grand écran : à gauche, qui écrit (portrait, nom,
  * invitation en grand, villes et heure locale) ; à droite, les moyens de le
- * joindre, de l'e-mail (écrire ou copier l'adresse) au CV et aux profils
- * externes, listés comme un index. Sur téléphone, les deux s'empilent.
+ * joindre, de l'e-mail (écrire ou copier l'adresse) au CV, au Book et aux
+ * profils externes, listés comme un index. Sur téléphone, les deux s'empilent.
+ *
+ * Chaque document mène à sa page, dans la langue de la page, et à côté, à sa
+ * version dans l'autre langue. Liens en `nofollow` : ces pages sont faites pour
+ * être partagées, pas pour remonter dans les moteurs de recherche ; un `noindex`
+ * risquerait de priver LinkedIn de leur miniature.
  *
  * L'adresse reste affichée en clair : c'est l'appel à l'action principal. Les
  * profils et les villes viennent de `profile.ts`, source unique déjà utilisée
@@ -31,6 +39,7 @@ import { cn } from "@/lib/utils";
 export function ContactPageView() {
   const { t, locale } = useTranslation();
   const contact = t.site.contact;
+  const otherLocale: Locale = locale === "fr" ? "en" : "fr";
 
   return (
     <TextPage title={contact.title} wide revealChildren={false}>
@@ -89,10 +98,47 @@ export function ContactPageView() {
             </a>
           ) : null}
 
+          <nav aria-label={contact.documentsLabel} className="mt-6">
+            <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-ink/55">{contact.documentsLabel}</h2>
+            <LinkIndex>
+              {Object.values(documents[locale]).map((doc) => {
+                const other = documents[otherLocale][doc.id];
+                return (
+                  <li key={doc.id} className="flex items-stretch">
+                    <Link
+                      href={doc.href}
+                      rel="nofollow"
+                      className="group flex min-w-0 flex-1 items-center gap-4 py-3.5 text-ink/75 transition-colors duration-300 hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50"
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 3h8l4 4v14H6zM14 3v4h4M9.5 12.5h5M9.5 16.5h5" />
+                      </svg>
+                      <span className="truncate text-sm font-medium">{doc.shortName}</span>
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="ml-auto h-3.5 w-3.5 shrink-0 text-ink/40 transition duration-300 group-hover:translate-x-0.5 group-hover:text-ink" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </Link>
+                    {/* Lien simple : les deux langues n'ont pas la même mise en page racine. */}
+                    <a
+                      href={other.href}
+                      rel="nofollow"
+                      lang={otherLocale}
+                      hrefLang={otherLocale}
+                      aria-label={`${other.shortName}, ${LANGUAGE_NAMES[otherLocale]}`}
+                      className="ml-4 flex shrink-0 items-center pl-1 text-sm text-ink/55 underline decoration-ink/25 underline-offset-4 transition-colors duration-300 hover:text-ink hover:decoration-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50"
+                    >
+                      {LANGUAGE_NAMES[otherLocale]}
+                    </a>
+                  </li>
+                );
+              })}
+            </LinkIndex>
+          </nav>
+
           {activeSocialLinks.length > 0 ? (
             <nav aria-label={contact.socialLabel} className="mt-6">
               <h2 className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-ink/55">{contact.socialLabel}</h2>
-              <SocialIndex>
+              <LinkIndex>
                 {activeSocialLinks.map((link) => (
                   <li key={link.id}>
                     <a
@@ -121,7 +167,7 @@ export function ContactPageView() {
                     </a>
                   </li>
                 ))}
-              </SocialIndex>
+              </LinkIndex>
             </nav>
           ) : null}
         </ScrollReveal>
@@ -129,6 +175,9 @@ export function ContactPageView() {
     </TextPage>
   );
 }
+
+/** Chaque langue écrite dans cette langue, quelle que soit celle de la page. */
+const LANGUAGE_NAMES: Record<Locale, string> = { fr: "Français", en: "English" };
 
 /** Identifiant du profil, tiré de son adresse (« in/paul-houdebine » → « paul-houdebine »). */
 function handleOf(url: string) {
@@ -139,11 +188,11 @@ function handleOf(url: string) {
 type Mark = { top: number; height: number; on: boolean; slide: boolean };
 
 /**
- * Index des profils : un trait, à gauche, glisse jusqu'au profil survolé ou
- * atteint au clavier (d'après Pill Nav de React Bits). Il se déplace par sa
+ * Index de liens (documents, profils) : un trait, à gauche, glisse jusqu'à la
+ * ligne survolée ou atteinte au clavier (d'après Pill Nav de React Bits). Il se déplace par sa
  * position, sans calque à part : le texte garde son lissage.
  */
-function SocialIndex({ children }: { children: ReactNode }) {
+function LinkIndex({ children }: { children: ReactNode }) {
   const [mark, setMark] = useState<Mark | null>(null);
   const reach = (row: HTMLElement) =>
     setMark((previous) => ({ top: row.offsetTop, height: row.offsetHeight, on: true, slide: previous?.on ?? false }));

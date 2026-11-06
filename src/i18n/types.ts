@@ -209,6 +209,8 @@ export type SiteCopy = {
     locationLabel: string;
     /** Libellé du lien de téléchargement du CV. */
     cvLabel: string;
+    /** Intitulé de la liste des documents (CV, Book). */
+    documentsLabel: string;
     /** Bouton qui ouvre la messagerie. */
     write: string;
     /** Bouton qui copie l'adresse, et sa confirmation. */

@@ -262,6 +262,7 @@ export const frSite: SiteCopy = {
     socialLabel: "Me retrouver ailleurs",
     locationLabel: "Basé entre",
     cvLabel: "Télécharger mon CV",
+    documentsLabel: "CV et Book",
     write: "Écrire",
     copy: "Copier l'adresse",
     copied: "Adresse copiée",
