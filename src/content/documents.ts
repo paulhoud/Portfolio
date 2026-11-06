@@ -13,8 +13,7 @@ import type { Locale } from "@/i18n/types";
  *
  * Les PDF (`public/`) ne se retouchent pas. Les pages en image
  * (`public/documents/<dossier>/01.webp`…) en sont tirées pour la visionneuse, à
- * refaire à chaque nouvelle version d'un PDF, avec le moteur de Chrome : celui
- * d'Apple laisse un trait en travers de l'en-tête du CV écran.
+ * refaire à chaque nouvelle version d'un PDF, avec le moteur de Chrome.
  */
 
 export type DocumentId = "cv" | "cv-print" | "book";
