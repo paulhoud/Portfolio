@@ -14,7 +14,7 @@ import type { Locale } from "@/i18n/types";
  * Les PDF (`public/`) ne se retouchent pas. Les pages en image
  * (`public/documents/<dossier>/01.webp`…) en sont tirées pour la visionneuse, à
  * refaire à chaque nouvelle version d'un PDF, avec le moteur de Chrome : celui
- * d'Apple dessine des rectangles gris autour des ombres de ces fichiers.
+ * d'Apple laisse un trait en travers de l'en-tête du CV écran.
  */
 
 export type DocumentId = "cv" | "cv-print" | "book";
@@ -58,7 +58,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageSize: A4,
       title: "CV",
       name: "CV de Paul Houdebine",
-      details: "PDF, une page A4, 1,1 Mo",
+      details: "PDF, une page A4, 1 Mo",
       versionLabel: "Version écran",
       sibling: "cv-print",
       share: {
@@ -77,7 +77,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "CV",
       eyebrow: "Version impression",
       name: "CV de Paul Houdebine, version impression",
-      details: "PDF, une page A4, 430 Ko",
+      details: "PDF, une page A4, 420 Ko",
       versionLabel: "Version impression, fond blanc",
       sibling: "cv",
       share: {
@@ -95,7 +95,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageSize: SLIDE,
       title: "Book",
       name: "Book de Paul Houdebine",
-      details: "PDF, 30 pages, 11 Mo",
+      details: "PDF, 30 pages, 7,9 Mo",
       share: {
         title: "Book - Sélection de projets",
         description: "Une sélection de mes projets, à télécharger en PDF.",
@@ -113,7 +113,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageSize: A4,
       title: "Resume",
       name: "Resume of Paul Houdebine",
-      details: "One-page A4 PDF, 1.1 MB",
+      details: "One-page A4 PDF, 1 MB",
       versionLabel: "Screen version",
       sibling: "cv-print",
       share: {
@@ -132,7 +132,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "Resume",
       eyebrow: "Print version",
       name: "Resume of Paul Houdebine, print version",
-      details: "One-page A4 PDF, 430 KB",
+      details: "One-page A4 PDF, 420 KB",
       versionLabel: "Print version, white background",
       sibling: "cv",
       share: {
@@ -150,7 +150,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageSize: SLIDE,
       title: "Book",
       name: "Book of Paul Houdebine",
-      details: "PDF, 30 pages, 11 MB",
+      details: "PDF, 30 pages, 7.9 MB",
       share: {
         title: "Book - Selected projects",
         description: "A selection of my projects, available as a PDF.",
