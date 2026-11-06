@@ -196,11 +196,16 @@ export function GalleryHome({ projects }: { projects: Project[] }) {
   const [scrolled, setScrolled] = useState(() => typeof window !== "undefined" && readSession(SCROLLED_KEY));
   const count = projects.length;
 
-  /** Hauteur d'une tranche, lue sur les ancres pour rester fidèle au CSS. */
+  /**
+   * Hauteur d'une tranche, lue sur les ancres pour rester fidèle au CSS. Jamais
+   * nulle : dans une fenêtre sans hauteur (volet caché, cadre replié), la
+   * position en numéro de projet vaudrait 0/0, et la page plantait faute de
+   * projet à afficher. La hauteur revenue, `resize` relit la position.
+   */
   const slotHeight = useCallback(() => {
     const anchors = trackRef.current?.querySelectorAll<HTMLElement>("[data-slot]");
-    if (!anchors || anchors.length < 2) return window.innerHeight * 0.35;
-    return anchors[1].offsetTop - anchors[0].offsetTop;
+    const height = !anchors || anchors.length < 2 ? window.innerHeight * 0.35 : anchors[1].offsetTop - anchors[0].offsetTop;
+    return height || 1;
   }, []);
 
   const trackTop = () => (trackRef.current ? trackRef.current.getBoundingClientRect().top + window.scrollY : 0);
