@@ -1,10 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { isHomePath, splitLocalePath } from "@/i18n/paths";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { transitionFor, type TransitionKind } from "@/lib/immersion";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { FrozenRouter } from "./FrozenRouter";
 
 /**
@@ -97,7 +98,7 @@ const PINNED_STYLES = ["position", "top", "left", "width"] as const;
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const isBase = isHomePath(pathname);
   const variants = isBase ? baseVariants : overlayVariants;
   // Le mouvement dépend de la page quittée : établi une fois, au changement de page.

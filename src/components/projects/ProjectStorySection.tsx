@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+import { animate, motion, useInView, useMotionValue, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { MediaButton } from "@/components/media/MediaButton";
@@ -13,6 +13,7 @@ import type {
   ProjectStorySystem,
 } from "@/content/projects";
 import { useTranslation } from "@/i18n/context";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { cn } from "@/lib/utils";
 
 /** Deux colonnes sur grand écran : chaque cadre occupe la moitié de la colonne. */
@@ -403,7 +404,7 @@ function CountUp({ to }: { to: number }) {
   const { locale } = useTranslation();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.8 });
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const value = useMotionValue(to);
   const format = (n: number) => new Intl.NumberFormat(locale).format(Math.round(n));
   const text = useTransform(value, format);

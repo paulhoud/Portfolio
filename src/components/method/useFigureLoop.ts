@@ -1,7 +1,7 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import { useEffect, useState, type RefObject } from "react";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 
 /**
  * Déroulé en boucle d'un schéma de la page Méthodologie : une suite de temps,
@@ -20,7 +20,7 @@ import { useEffect, useState, type RefObject } from "react";
  * défaut ; la carte de la méthode ne repasse pas par son point de départ).
  */
 export function useFigureLoop(ref: RefObject<HTMLElement | null>, durations: readonly number[], paused = false, restart = 0) {
-  const reduceMotion = useReducedMotion() ?? false;
+  const reduceMotion = usePrefersReducedMotion();
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState(0);
   const [cycle, setCycle] = useState(0);

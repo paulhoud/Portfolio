@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useReducedMotion, type TargetAndTransition } from "framer-motion";
+import { motion, type TargetAndTransition } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { Project } from "@/content/projects";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { cn } from "@/lib/utils";
 const sizes: Record<Project["logoSize"], string> = {
   sm: "w-16 md:w-20",
@@ -83,8 +84,7 @@ export function AnimatedLogo({
   priority = false,
 }: AnimatedLogoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
-  const reduceMotion = prefersReducedMotion;
+  const reduceMotion = usePrefersReducedMotion();
   const isVideo =
     logoKind === "video" || logo.endsWith(".webm") || logo.endsWith(".mp4");
   // Au rendu serveur, l'image de secours (lue par tous les navigateurs) ; côté

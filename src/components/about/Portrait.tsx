@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Image from "next/image";
 import type { PointerEvent } from "react";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 /** Inclinaison au plus fort du survol, en degrés. */
@@ -20,7 +21,7 @@ const SPRING = { stiffness: 140, damping: 18, mass: 0.6 };
  * - au doigt, ou avec les animations réduites, il reste immobile.
  */
 export function Portrait({ src, alt }: { src: string; alt: string }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   // Position du pointeur sur le portrait, de -0,5 à 0,5 ; survol de 0 à 1.
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -59,7 +60,9 @@ export function Portrait({ src, alt }: { src: string; alt: string }) {
           // Le cercle s'ouvre jusqu'à découvrir aussi l'ombre, puis s'efface.
           initial={reduceMotion ? false : { clipPath: "circle(0% at 50% 50%)" }}
           animate={{ clipPath: "circle(100% at 50% 50%)", transitionEnd: { clipPath: "none" } }}
-          transition={{ duration: 1.6, ease, delay: 0.15 }}
+          // Sans durée nulle, le cercle s'ouvrirait quand même en arrivant d'une
+          // autre page : framer-motion part de `none`, lu comme un cercle de 0 %.
+          transition={reduceMotion ? { duration: 0 } : { duration: 1.6, ease, delay: 0.15 }}
         >
           <motion.div
             className="h-full w-full"

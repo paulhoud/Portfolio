@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
@@ -9,6 +9,7 @@ import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath, splitLocalePath } from "@/i18n/paths";
 import { useFullscreen } from "@/lib/fullscreen";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { initSound, setSoundVolume, useSoundOn, useSoundVolume } from "@/lib/sound/sound";
 import { lockPageScroll } from "@/lib/scrollLock";
 import { useTheme } from "@/lib/theme";
@@ -78,7 +79,7 @@ const DOCK_PILL = cn(
 export function SiteHeader() {
   const pathname = usePathname();
   const { t, href } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollRef = useRef(0);

@@ -1,10 +1,11 @@
 "use client";
 
-import { AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath } from "@/i18n/paths";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { applyTheme, useTheme } from "@/lib/theme";
 import { SceneCursor } from "@/components/gallery/SceneCursor";
 import { Analytics } from "@/components/stats/Analytics";
@@ -26,7 +27,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isHome = isHomePath(pathname);
   const { t } = useTranslation();
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
 
   const [theme] = useTheme();
 
@@ -66,7 +67,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <Veil />
 
       {/* Le même curseur sur toutes les pages ; l'accueil lui dit ce que survole la scène. */}
-      <SceneCursor calm={Boolean(reducedMotion)} />
+      <SceneCursor calm={reducedMotion} />
 
       {/* Rideau d'ouverture, hors de la zone animée pour couvrir aussi l'en-tête. */}
       <Opening />

@@ -1,10 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/i18n/context";
 import { isHomePath } from "@/i18n/paths";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 
 const SCROLL_THRESHOLD_PX = 240;
 
@@ -15,7 +16,7 @@ const SCROLL_THRESHOLD_PX = 240;
  */
 export function ScrollToTop() {
   const { locale } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

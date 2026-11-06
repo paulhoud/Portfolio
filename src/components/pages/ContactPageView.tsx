@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
@@ -12,6 +12,7 @@ import { documents } from "@/content/documents";
 import { activeSocialLinks, profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import type { Locale } from "@/i18n/types";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { track } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 
@@ -263,7 +264,7 @@ function CopySparks() {
 function EmailCard() {
   const { t } = useTranslation();
   const contact = t.site.contact;
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [copied, setCopied] = useState(false);
   const [sparks, setSparks] = useState(0);
 

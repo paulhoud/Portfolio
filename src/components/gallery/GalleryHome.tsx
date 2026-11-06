@@ -8,7 +8,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type CSSProperties,
   type FocusEvent,
   type MouseEvent,
@@ -29,6 +28,7 @@ import {
   setNextTransition,
   showVeil,
 } from "@/lib/immersion";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { useTheme } from "@/lib/theme";
 import { endOpening, isOpening, useOpening } from "@/lib/opening";
 import { playSfx, playThemes, stopThemes, type Theme } from "@/lib/sound/sound";
@@ -96,24 +96,6 @@ function writeSession(key: string) {
   } catch {
     /* ignore */
   }
-}
-
-/**
- * Réglage système « réduire les animations », suivi en direct : s'il change
- * pendant la visite, la scène 3D passe aussitôt en mode calme (ou en sort).
- */
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-function subscribeReducedMotion(listener: () => void) {
-  const query = window.matchMedia(REDUCED_MOTION);
-  query.addEventListener("change", listener);
-  return () => query.removeEventListener("change", listener);
-}
-function usePrefersReducedMotion() {
-  return useSyncExternalStore(
-    subscribeReducedMotion,
-    () => window.matchMedia(REDUCED_MOTION).matches,
-    () => false,
-  );
 }
 
 /** Une perte passagère de la 3D est retentée, deux fois au plus par visite de l'accueil. */

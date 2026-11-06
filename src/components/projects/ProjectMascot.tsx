@@ -1,10 +1,11 @@
 "use client";
 
-import { animate, useInView, useReducedMotion } from "framer-motion";
+import { animate, useInView } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ScrollReveal, ScrollRevealGroup, ScrollRevealItem } from "@/components/motion/ScrollReveal";
 import type { ProjectStoryMascot } from "@/content/projects";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { cn } from "@/lib/utils";
 import { createMascotScene, MASCOT_STAGE, type MascotScene, type MascotState } from "./mascotScene";
 import { SYSTEM_LABEL, SystemHeading } from "./ProjectStorySection";
@@ -119,7 +120,7 @@ function Compare({ compare }: { compare: ProjectStoryMascot["compare"] }) {
   const [split, setSplit] = useState(50);
   const stage = useRef<HTMLDivElement>(null);
   const inView = useInView(stage, { once: true, amount: 0.6 });
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const touched = useRef(false);
   const state = compare.states[index];
 
@@ -203,7 +204,7 @@ function Viewer({ viewer }: { viewer: ProjectStoryMascot["viewer"] }) {
   const [ready, setReady] = useState(false);
   const [state, setState] = useState<MascotState>("idle");
   const [skeleton, setSkeleton] = useState(false);
-  const reduceMotion = useReducedMotion() ?? false;
+  const reduceMotion = usePrefersReducedMotion();
 
   // La 3D se charge à l'approche (trois, le modèle de 475 Ko) ; l'image fixe l'attend.
   useEffect(() => {
@@ -299,7 +300,7 @@ function Viewer({ viewer }: { viewer: ProjectStoryMascot["viewer"] }) {
 /** Une vidéo courte d'un état : elle ne joue qu'à l'écran, jamais avec les animations réduites. */
 function Clip({ item }: { item: ProjectStoryMascot["clips"]["items"][number] }) {
   const video = useRef<HTMLVideoElement>(null);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const element = video.current;

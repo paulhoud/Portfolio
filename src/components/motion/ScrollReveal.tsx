@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import type { ReactNode } from "react";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { cn } from "@/lib/utils";
 
 const revealEase = [0.22, 1, 0.36, 1] as const;
@@ -29,7 +30,7 @@ export function ScrollReveal({
   delay = 0,
   ...props
 }: ScrollRevealProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <motion.div
@@ -61,15 +62,13 @@ export function ScrollRevealGroup({
   stagger = 0.1,
   ...props
 }: ScrollRevealGroupProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
-  if (reduceMotion) {
-    return <div className={cn(className)}>{children}</div>;
-  }
-
+  // Toujours le même élément : changer de type quand le réglage devient connu,
+  // juste après l'hydratation, recréerait tout le contenu du groupe.
   return (
     <motion.div
-      initial="hidden"
+      initial={reduceMotion ? false : "hidden"}
       whileInView="visible"
       viewport={{ once: true, amount: 0.15, margin: "-6% 0px" }}
       variants={{

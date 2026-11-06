@@ -1,9 +1,9 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { LucideIcon } from "@/components/icons/Lucide";
 import type { MethodStep } from "@/i18n/types";
+import { usePrefersReducedMotion } from "@/lib/reducedMotion";
 import { cn } from "@/lib/utils";
 import { StepGlyph, stepColor } from "./MethodTimeline";
 
@@ -69,7 +69,7 @@ export function MethodPhases({
   map: { label: string; from: string; to: string };
   loop: string;
 }) {
-  const still = useReducedMotion() ?? false;
+  const still = usePrefersReducedMotion();
   const box = useRef<HTMLDivElement>(null);
   const dot = useRef<SVGGElement>(null);
   const fills = useRef<(SVGPathElement | null)[]>([]);
