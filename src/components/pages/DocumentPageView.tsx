@@ -6,13 +6,12 @@ import { MediaButton } from "@/components/media/MediaButton";
 import { MediaViewerProvider, useMediaViewer } from "@/components/media/MediaViewerProvider";
 import { TextPage } from "@/components/layout/TextPage";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
-import { documentMedia, documents, type DocumentId } from "@/content/documents";
+import { documentMedia, documents, type DocumentId, type SiteDocument } from "@/content/documents";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60";
-const LINK = `underline underline-offset-4 decoration-ink/30 transition-colors hover:text-ink hover:decoration-ink ${FOCUS}`;
 
 /**
  * Page d'un document à partager (CV, Book ; cf. `content/documents.ts`) : un
@@ -29,7 +28,7 @@ export function DocumentPageView({ id }: { id: DocumentId }) {
   const portrait = document.pageSize.height > document.pageSize.width;
 
   return (
-    <TextPage title={document.title} eyebrow={document.eyebrow} wide revealChildren={false}>
+    <TextPage title={document.title} wide revealChildren={false}>
       <MediaViewerProvider media={media} download={{ href: document.file, label: copy.download }}>
         <ScrollReveal>
           <div
@@ -55,6 +54,8 @@ export function DocumentPageView({ id }: { id: DocumentId }) {
               <p className="text-base font-bold text-ink">{profile.name}</p>
               <p className="text-sm text-ink/60">{profile.jobTitle}</p>
 
+              {sibling ? <VersionSwitch label={copy.version} current={document} other={sibling} /> : null}
+
               <p className="mt-6 text-balance text-xl font-medium leading-snug text-ink md:text-2xl">{document.share.description}</p>
               <p className="mt-4 text-sm text-ink/60">{document.details}</p>
 
@@ -75,18 +76,6 @@ export function DocumentPageView({ id }: { id: DocumentId }) {
                 </a>
                 <ViewButton label={copy.view} />
               </div>
-
-              {sibling ? (
-                <p className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-ink/10 pt-5 text-sm text-ink/65">
-                  <span>{sibling.versionLabel}</span>
-                  <Link href={sibling.href} className={LINK}>
-                    {copy.viewVersion}
-                  </Link>
-                  <a href={sibling.file} download className={LINK}>
-                    {copy.downloadVersion}
-                  </a>
-                </p>
-              ) : null}
             </div>
           </div>
         </ScrollReveal>
@@ -111,6 +100,39 @@ export function DocumentPageView({ id }: { id: DocumentId }) {
         ) : null}
       </MediaViewerProvider>
     </TextPage>
+  );
+}
+
+/**
+ * Les deux versions d'un même document : deux onglets, toujours dans le même
+ * ordre (écran, puis impression). Chacune a sa page, à partager ; le bouton de
+ * téléchargement vaut pour la version affichée. Le passage de l'une à l'autre
+ * remplace l'entrée de l'historique : « retour » ramène à la page Contact.
+ */
+function VersionSwitch({ label, current, other }: { label: string; current: SiteDocument; other: SiteDocument }) {
+  const versions = current.id === "cv" ? [current, other] : [other, current];
+  return (
+    <nav aria-label={label} className="mt-6 inline-flex rounded-full border border-ink/15 p-1">
+      {versions.map((version) => {
+        const active = version.id === current.id;
+        return (
+          <Link
+            key={version.id}
+            href={version.href}
+            replace
+            scroll={false}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-300",
+              active ? "bg-ink text-page" : "text-ink/65 hover:text-ink",
+              FOCUS,
+            )}
+          >
+            {version.versionLabel}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 

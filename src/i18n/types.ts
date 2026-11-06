@@ -61,11 +61,6 @@ export type SiteCopy = {
     by: string;
     /** Lien vers les mentions légales et la confidentialité. */
     legal: string;
-    /** Mesure d'audience : information et refus (cf. lib/stats). */
-    audience: string;
-    optOut: string;
-    optedOut: string;
-    optIn: string;
   };
   /** Thème clair ou sombre des pages de lecture (l'accueil reste sombre). */
   theme: {
@@ -151,6 +146,8 @@ export type SiteCopy = {
     /** Intitulés répétés à chaque temps. */
     aiLabel: string;
     toolsLabel: string;
+    readMore: string;
+    readLess: string;
     /** Après le dernier temps : on repart souvent en arrière. */
     loopNote: string;
     /** Carte d'ensemble : du problème de départ à la solution en usage. */
@@ -225,9 +222,8 @@ export type SiteCopy = {
     download: string;
     /** Bouton qui ouvre la visionneuse. */
     view: string;
-    /** Liens vers l'autre version du document. */
-    viewVersion: string;
-    downloadVersion: string;
+    /** Choix de la version du document (écran, impression), pour les lecteurs d'écran. */
+    version: string;
     /** Précède le numéro de page, dans la visionneuse. */
     page: string;
   };

@@ -31,14 +31,13 @@ export type SiteDocument = {
   pageSize: { width: number; height: number };
   /** Titre de la page. */
   title: string;
-  eyebrow?: string;
   /** Nom du document dans la visionneuse. */
   name: string;
   /** Nom court, dans la liste de la page Contact. */
   shortName: string;
   /** Format, nombre de pages et poids. */
   details: string;
-  /** Nom de cette version, quand elle est proposée depuis son autre version. */
+  /** Nom de cette version, dans le choix entre les deux. */
   versionLabel?: string;
   /** L'autre version du même document. */
   sibling?: DocumentId;
@@ -61,7 +60,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       name: "CV de Paul Houdebine",
       shortName: "CV, version écran",
       details: "PDF, une page A4, 1 Mo",
-      versionLabel: "Version écran",
+      versionLabel: "Écran",
       sibling: "cv-print",
       share: {
         title: "CV - Product Designer",
@@ -77,11 +76,10 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageCount: 1,
       pageSize: A4,
       title: "CV",
-      eyebrow: "Version impression",
       name: "CV de Paul Houdebine, version impression",
       shortName: "CV, version impression",
       details: "PDF, une page A4, 420 Ko",
-      versionLabel: "Version impression, fond blanc",
+      versionLabel: "Impression",
       sibling: "cv",
       share: {
         title: "CV - Version impression",
@@ -119,7 +117,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       name: "Resume of Paul Houdebine",
       shortName: "Resume, screen version",
       details: "One-page A4 PDF, 1 MB",
-      versionLabel: "Screen version",
+      versionLabel: "Screen",
       sibling: "cv-print",
       share: {
         title: "Resume - Product Designer",
@@ -135,11 +133,10 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       pageCount: 1,
       pageSize: A4,
       title: "Resume",
-      eyebrow: "Print version",
       name: "Resume of Paul Houdebine, print version",
       shortName: "Resume, print version",
       details: "One-page A4 PDF, 420 KB",
-      versionLabel: "Print version, white background",
+      versionLabel: "Print",
       sibling: "cv",
       share: {
         title: "Resume - Print version",

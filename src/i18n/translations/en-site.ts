@@ -24,10 +24,6 @@ export const enSite: SiteCopy = {
     models: "3D models",
     by: "by",
     legal: "Legal notice",
-    audience: "Anonymous audience measurement, no cookies.",
-    optOut: "Opt out",
-    optedOut: "You are no longer counted on this device.",
-    optIn: "Undo",
   },
   theme: {
     label: "Light theme",
@@ -95,6 +91,8 @@ export const enSite: SiteCopy = {
     loop: "and back again",
     aiLabel: "With AI",
     toolsLabel: "Methods and tools",
+    readMore: "Read more",
+    readLess: "Show less",
     loopNote:
       "Often, we go back to an earlier moment: what testing teaches sends us back to understanding the need, and an experiment can reopen the exploration.",
     map: { label: "From problem to solution", from: "A need, a problem", to: "A solution in use" },
@@ -270,8 +268,7 @@ export const enSite: SiteCopy = {
   documents: {
     download: "Download the PDF",
     view: "View",
-    viewVersion: "View",
-    downloadVersion: "Download",
+    version: "Version",
     page: "page",
   },
 };

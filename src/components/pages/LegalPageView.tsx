@@ -146,7 +146,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** Refus d'être compté, ici aussi (comme dans le pied de page). */
+/** Refus d'être compté, retenu sur l'appareil. */
 function OptOutChoice({ en }: { en: boolean }) {
   const optedOut = useOptOut();
   if (optedOut === null) return null;

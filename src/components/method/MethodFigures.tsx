@@ -43,7 +43,7 @@ function Node({ state, children, className }: { state: State; children: ReactNod
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-full border px-3.5 py-1.5 text-center text-[0.8125rem] font-medium leading-tight transition-[color,background-color,border-color] duration-500",
+        "inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-center text-sm font-medium leading-tight transition-[color,background-color,border-color] duration-500",
         state === "lit" && "border-[color:var(--step)] bg-[color-mix(in_srgb,var(--step)_18%,transparent)] text-ink",
         state === "done" && "border-[color:color-mix(in_srgb,var(--step)_55%,transparent)] text-ink/85",
         state === "idle" && "border-ink/15 text-ink/55",
@@ -119,7 +119,7 @@ export function UnderstandFigure({ copy }: { copy: Figures["understand"] }) {
     <div
       ref={ref}
       aria-hidden="true"
-      className="flex select-none flex-col items-center gap-3 md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1.5fr)] md:gap-2"
+      className="flex select-none flex-col items-center gap-3 md:grid md:grid-cols-[minmax(0,0.8fr)_auto_minmax(0,1.25fr)_auto_minmax(0,1.1fr)_auto_minmax(0,1.5fr)] md:gap-2"
     >
       <Node state={node(0)} className="md:w-full">
         {copy.context}
@@ -207,7 +207,7 @@ export function ExploreFigure({ copy }: { copy: Figures["explore"] }) {
         <Node state={phase === 0 ? "lit" : "done"}>{copy.subject}</Node>
         <div className="flex flex-col items-center @[30rem]:flex-row">
           {/* L'éventail : les directions s'ouvrent depuis le sujet. */}
-          <svg viewBox="0 0 80 100" preserveAspectRatio="none" className="h-16 w-16 rotate-90 @[30rem]:h-28 @[30rem]:w-20 @[30rem]:rotate-0" fill="none" strokeWidth="1.5" strokeLinecap="round">
+          <svg viewBox="0 0 80 100" preserveAspectRatio="none" className="h-16 w-16 rotate-90 @[30rem]:h-40 @[30rem]:w-28 @[30rem]:rotate-0" fill="none" strokeWidth="1.5" strokeLinecap="round">
             {ENDS.map((y, index) => (
               <path
                 key={y}
@@ -221,9 +221,10 @@ export function ExploreFigure({ copy }: { copy: Figures["explore"] }) {
               />
             ))}
           </svg>
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="mb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink/60">{copy.directions}</span>
-            <span className="flex gap-2 @[30rem]:flex-col @[30rem]:gap-2.5">
+          <div className="relative flex flex-col items-center gap-1.5">
+            {/* Sur grand écran, au-dessus de l'éventail : les points restent en face de ses branches. */}
+            <span className="mb-1 whitespace-nowrap text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-ink/60 @[30rem]:absolute @[30rem]:bottom-full @[30rem]:mb-2">{copy.directions}</span>
+            <span className="flex gap-2 @[30rem]:flex-col @[30rem]:gap-[1.4rem]">
               {ENDS.map((y, index) => {
                 const isKept = decided && index === kept;
                 return (
@@ -232,7 +233,7 @@ export function ExploreFigure({ copy }: { copy: Figures["explore"] }) {
                     onPointerEnter={(event) => event.pointerType === "mouse" && pick(index, event)}
                     onPointerDown={(event) => pick(index, event)}
                     className={cn(
-                      "h-3.5 w-3.5 cursor-pointer rounded-full border transition-colors duration-500",
+                      "h-4 w-4 cursor-pointer rounded-full border transition-colors duration-500",
                       isKept && "border-[color:var(--step)] bg-[var(--step)]",
                       decided && !isKept && "border-dashed border-ink/25",
                       // Sondée : une onde s'élargit autour.
@@ -246,7 +247,7 @@ export function ExploreFigure({ copy }: { copy: Figures["explore"] }) {
             </span>
           </div>
           {/* Une seule direction continue jusqu'au choix. */}
-          <svg viewBox="0 0 80 100" preserveAspectRatio="none" className="h-16 w-16 rotate-90 @[30rem]:h-28 @[30rem]:w-20 @[30rem]:rotate-0" fill="none" strokeWidth="1.5" strokeLinecap="round">
+          <svg viewBox="0 0 80 100" preserveAspectRatio="none" className="h-16 w-16 rotate-90 @[30rem]:h-40 @[30rem]:w-28 @[30rem]:rotate-0" fill="none" strokeWidth="1.5" strokeLinecap="round">
             <path
               d={`M0 ${ENDS[kept]} C40 ${ENDS[kept]} 40 50 80 50`}
               pathLength={1}
@@ -416,7 +417,7 @@ export function ExperimentFigure({ copy }: { copy: Figures["experiment"] }) {
     <div
       ref={ref}
       aria-hidden="true"
-      className="relative mx-auto grid max-w-[26rem] select-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-center justify-items-center gap-x-2 gap-y-4 pt-2"
+      className="relative mx-auto grid max-w-[34rem] select-none grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-center justify-items-center gap-x-2 gap-y-4 pt-2"
     >
       {copy.steps.map((label, index) => (
         <span

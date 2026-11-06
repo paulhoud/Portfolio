@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useScroll } from "framer-motion";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { TechGlyph } from "@/components/about/TechStack";
 import { LucideIcon, type LucideName } from "@/components/icons/Lucide";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
@@ -127,15 +126,16 @@ function toolIcon(name: string) {
   return TOOL_ICONS.find(([pattern]) => pattern.test(name))?.[1];
 }
 
-type Labels = { ai: string; tools: string; progress: string; figures: SiteCopy["method"]["figures"] };
+type Labels = { ai: string; tools: string; progress: string; more: string; less: string; figures: SiteCopy["method"]["figures"] };
 
 /**
  * Les cinq temps de la méthode, refaits le 28 oct. 2026 (brief de Paul :
- * plus de caractère, de couleur et de variété).
+ * plus de caractère, de couleur et de variété), puis le 6 nov. 2026 (trop de
+ * texte, les schémas parlent mieux).
  *
- * - Chaque temps a sa teinte, son grand numéro et son schéma, tiré de son
- *   texte ; la mise en page change d'un temps à l'autre (schéma pleine
- *   largeur, à côté du texte, avant ou après lui).
+ * - Chaque temps a sa teinte, son numéro et son schéma, tiré de son texte. Le
+ *   schéma vient en grand, juste sous la phrase-clé ; le texte passe dessous,
+ *   plus petit : le premier paragraphe, le reste à la demande.
  * - Un repère reste visible pendant la lecture : la colonne des cinq temps
  *   sur ordinateur, une pastille en haut de l'écran sur téléphone. Le temps
  *   lu y prend sa couleur. Rien n'est imposé au défilement.
@@ -301,15 +301,7 @@ function MobileProgress({ steps, active, label }: { steps: MethodStep[]; active:
 
 function MethodStepItem({ step, index, labels }: { step: MethodStep; index: number; labels: Labels }) {
   const figures = labels.figures;
-  const body = (
-    <div className="space-y-4">
-      {step.body.map((paragraph) => (
-        <p key={paragraph} className="copy">
-          {paragraph}
-        </p>
-      ))}
-    </div>
-  );
+  const [first, ...more] = step.body;
   const figure = [
     <UnderstandFigure key="understand" copy={figures.understand} />,
     <ExploreFigure key="explore" copy={figures.explore} />,
@@ -318,104 +310,82 @@ function MethodStepItem({ step, index, labels }: { step: MethodStep; index: numb
     <ValidateFigure key="validate" copy={figures.validate} />,
   ][index];
 
-  // Une composition par temps, pour que la page ne devienne pas une suite de
-  // blocs identiques : schéma après le texte, à côté, avant, de l'autre côté,
-  // puis de nouveau après.
-  let content: ReactNode;
-  if (index === 1) {
-    content = (
-      <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
-        {body}
-        {figure}
-      </div>
-    );
-  } else if (index === 2) {
-    content = (
-      <>
-        {figure}
-        <div className="mt-10">{body}</div>
-      </>
-    );
-  } else if (index === 3) {
-    content = (
-      <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-12">
-        <div className="md:order-2">{body}</div>
-        <div className="md:order-1">{figure}</div>
-      </div>
-    );
-  } else {
-    content = (
-      <>
-        <div className={cn(index === 0 && "md:columns-2 md:gap-10 [&_p]:break-inside-avoid")}>{body}</div>
-        <div className="mt-12">{figure}</div>
-      </>
-    );
-  }
-
   return (
-    <li data-step={index} id={step.id} className="relative scroll-mt-28 pb-24 last:pb-0 md:pb-36" style={stepColor(index)}>
+    <li data-step={index} id={step.id} className="relative scroll-mt-28 pb-20 last:pb-0 md:pb-28" style={stepColor(index)}>
       <ScrollReveal>
-        <span aria-hidden="true" className="block h-0.5 w-12 rounded-full bg-[var(--step)]" />
-        <div className="mt-6 flex items-end gap-5 md:gap-7">
-          <span aria-hidden="true" className="text-[4rem] font-light leading-[0.78] tabular-nums text-[var(--step)] md:text-[6rem]">
+        <div className="flex items-end gap-4 md:gap-5">
+          <span aria-hidden="true" className="text-[3rem] font-light leading-[0.78] tabular-nums text-[var(--step)] md:text-[4rem]">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <div className="min-w-0 pb-0.5">
+          <div className="min-w-0">
             <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--step)]">{step.phase}</p>
-            <h2 className="mt-1.5 text-balance text-2xl font-medium leading-tight text-ink md:text-3xl">{step.title}</h2>
+            <h2 className="mt-1 text-balance text-xl font-medium leading-tight text-ink md:text-2xl">{step.title}</h2>
           </div>
         </div>
-        <p className="mt-7 max-w-2xl text-balance text-lg leading-snug text-ink md:text-xl">{step.lead}</p>
+        <p className="mt-4 max-w-2xl text-balance text-base leading-snug text-ink/85 md:text-lg">{step.lead}</p>
       </ScrollReveal>
 
-      <ScrollReveal className="mt-10">{content}</ScrollReveal>
-
-      <ScrollReveal className="mt-12 grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-12">
-        {/* Ce que l'IA apporte à ce temps : dans le déroulé, pas en annexe. */}
-        <div className="relative pl-5">
-          <ReadingRule />
-          <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
-            <LucideIcon name="sparkles" className="h-3.5 w-3.5 text-[var(--step)]" />
-            {labels.ai}
-          </p>
-          <p className="copy mt-2">{step.ai}</p>
+      {/* Le schéma d'abord : c'est lui qui explique le temps. */}
+      <ScrollReveal className="mt-7">
+        <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--step)_24%,transparent)] bg-[color-mix(in_srgb,var(--step)_5%,transparent)] px-4 py-8 md:px-10 md:py-12">
+          {figure}
         </div>
-        <div>
-          <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
-            <LucideIcon name="wrench" className="h-3.5 w-3.5 text-[var(--step)]" />
-            {labels.tools}
-          </p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {step.tools.map((tool) => {
-              const logo = toolLogo(tool);
-              const icon = logo ? undefined : toolIcon(tool);
-              return (
-                <li key={tool} className="inline-flex items-center gap-2 rounded-full border border-ink/12 px-3 py-1.5 text-[0.8125rem] leading-none text-ink/80">
-                  {logo ? (
-                    <TechGlyph icon={logo} size="chip" />
-                  ) : icon ? (
-                    <LucideIcon name={icon} className="h-4 w-4 text-[var(--step)]" />
-                  ) : (
-                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--step)]" />
-                  )}
-                  {tool}
-                </li>
-              );
-            })}
-          </ul>
+      </ScrollReveal>
+
+      {/* Le texte ensuite, plus petit : le premier paragraphe, le reste à la demande. */}
+      <ScrollReveal className="mt-8 grid gap-8 md:grid-cols-2 md:gap-12">
+        <div className="text-sm leading-relaxed text-ink/70">
+          <p>{first}</p>
+          {more.length > 0 ? (
+            <details className="group mt-2">
+              <summary className="cursor-pointer list-none font-medium text-[var(--step)] underline decoration-1 underline-offset-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50 [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">{labels.more}</span>
+                <span className="hidden group-open:inline">{labels.less}</span>
+              </summary>
+              <div className="mt-3 space-y-3">
+                {more.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </div>
+
+        <div className="space-y-6">
+          {/* Ce que l'IA apporte à ce temps : dans le déroulé, pas en annexe. */}
+          <div>
+            <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
+              <LucideIcon name="sparkles" className="h-3.5 w-3.5 text-[var(--step)]" />
+              {labels.ai}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-ink/70">{step.ai}</p>
+          </div>
+          <div>
+            <p className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-ink/65">
+              <LucideIcon name="wrench" className="h-3.5 w-3.5 text-[var(--step)]" />
+              {labels.tools}
+            </p>
+            <ul className="mt-3 flex flex-wrap gap-1.5">
+              {step.tools.map((tool) => {
+                const logo = toolLogo(tool);
+                const icon = logo ? undefined : toolIcon(tool);
+                return (
+                  <li key={tool} className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 px-2.5 py-1 text-[0.75rem] leading-none text-ink/75">
+                    {logo ? (
+                      <TechGlyph icon={logo} size="chip" />
+                    ) : icon ? (
+                      <LucideIcon name={icon} className="h-3.5 w-3.5 text-[var(--step)]" />
+                    ) : (
+                      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--step)]" />
+                    )}
+                    {tool}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </ScrollReveal>
     </li>
-  );
-}
-
-/** Filet de l'apport de l'IA, à la teinte du temps : il se remplit pendant qu'on le lit. */
-function ReadingRule() {
-  const ref = useRef<HTMLSpanElement>(null);
-  const { scrollYProgress: read } = useScroll({ target: ref, offset: ["start 85%", "end 55%"] });
-  return (
-    <span ref={ref} aria-hidden="true" className="absolute bottom-0 left-0 top-0 w-px bg-ink/15">
-      <motion.span className="absolute inset-0 origin-top bg-[var(--step)]" style={{ scaleY: read }} />
-    </span>
   );
 }

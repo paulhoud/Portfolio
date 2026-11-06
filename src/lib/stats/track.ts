@@ -6,8 +6,8 @@ import type { EventName, SentBatch, SentEvent } from "./events";
  * navigateur : ils sont regroupés et partent toutes les quelques secondes, et
  * au plus tard quand on quitte la page (sendBeacon, qui survit à la fermeture).
  *
- * Rien n'est envoyé quand le visiteur a demandé à ne pas être compté (lien du
- * pied de page, ou page des statistiques pour Paul), quand son navigateur
+ * Rien n'est envoyé quand le visiteur a demandé à ne pas être compté (mentions
+ * légales, ou page des statistiques pour Paul), quand son navigateur
  * signale qu'il refuse le suivi (Global Privacy Control, Do Not Track), ni
  * depuis un navigateur piloté par un programme (tests, robots).
  */

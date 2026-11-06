@@ -61,7 +61,7 @@ export function personSchema() {
     knowsAbout: [...profile.expertise],
     // `sameAs` relie ce site aux profils externes : signal déterminant pour
     // que Google consolide l'identité (nom → site → profils).
-    sameAs: activeSocialLinks.map((link) => link.url),
+    sameAs: activeSocialLinks.map((link) => link.profile ?? link.url),
     address: profile.localities[0]
       ? {
           "@type": "PostalAddress",

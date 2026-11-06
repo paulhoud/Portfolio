@@ -24,10 +24,6 @@ export const frSite: SiteCopy = {
     models: "Modèles 3D",
     by: "par",
     legal: "Mentions légales",
-    audience: "Mesure d'audience anonyme, sans cookie.",
-    optOut: "Ne pas être compté",
-    optedOut: "Vous n'êtes plus compté sur cet appareil.",
-    optIn: "Annuler",
   },
   theme: {
     label: "Thème clair",
@@ -96,6 +92,8 @@ export const frSite: SiteCopy = {
     loop: "et on y revient",
     aiLabel: "Avec l'IA",
     toolsLabel: "Méthodes et outils",
+    readMore: "Lire la suite",
+    readLess: "Réduire",
     loopNote:
       "Souvent, on repart d'un temps précédent : ce qu'on apprend en testant renvoie à la compréhension du besoin, et une expérimentation peut rouvrir l'exploration.",
     map: { label: "Du problème à la solution", from: "Un besoin, un problème", to: "Une solution qui vit" },
@@ -271,8 +269,7 @@ export const frSite: SiteCopy = {
   documents: {
     download: "Télécharger le PDF",
     view: "Consulter",
-    viewVersion: "Voir",
-    downloadVersion: "Télécharger",
+    version: "Version",
     page: "page",
   },
 };

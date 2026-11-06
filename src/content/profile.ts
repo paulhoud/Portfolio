@@ -23,6 +23,8 @@ export type SocialLink = {
   label: string;
   /** URL complète du profil. Laisser "" pour masquer le lien partout. */
   url: string;
+  /** Profil à déclarer dans `sameAs`, quand le lien affiché n'en est pas un (une playlist). */
+  profile?: string;
 };
 
 /**
@@ -34,7 +36,13 @@ export const socialLinks: SocialLink[] = [
   { id: "behance", label: "Behance", url: "https://www.behance.net/paulhoud" },
   { id: "figma", label: "Figma", url: "https://www.figma.com/@paulhoudebine" },
   { id: "github", label: "GitHub", url: "https://github.com/paulhoud" },
-  { id: "youtube", label: "YouTube", url: "https://www.youtube.com/@paulhdbn" },
+  // Le lien mène à une playlist (demande de Paul, 6 nov. 2026) ; pour Google, le profil reste la chaîne.
+  {
+    id: "youtube",
+    label: "YouTube",
+    url: "https://www.youtube.com/playlist?list=PLna-izXxq4R0qFQ7LrdMJZOZaBS2-rZd5",
+    profile: "https://www.youtube.com/@paulhdbn",
+  },
 ];
 
 /** Profils réellement renseignés (les autres sont ignorés partout). */

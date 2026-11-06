@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useRef } from "react";
 import { MODEL_CREDITS } from "@/content/modelCredits";
 import { profile } from "@/content/profile";
 import { useTranslation } from "@/i18n/context";
 import { splitLocalePath } from "@/i18n/paths";
-import { setOptOut, useOptOut } from "@/lib/stats/track";
 import { cn } from "@/lib/utils";
 import { SocialLinks } from "./SocialLinks";
 
@@ -21,28 +21,34 @@ import { SocialLinks } from "./SocialLinks";
  * pied de page n'en font qu'un). Sa marge basse laisse la place aux pastilles
  * fixes des coins de l'écran (langue, son, thème), qui ne la recouvrent jamais.
  * Les crédits des modèles 3D n'apparaissent que si une licence les demande.
+ * La mesure d'audience est décrite dans les mentions légales, avec le refus
+ * d'être compté (retiré d'ici le 6 nov. 2026, à la demande de Paul).
  */
+/** Clics rapprochés sur les droits qui mènent aux statistiques. */
+const STATS_CLICKS = 5;
+const STATS_WINDOW = 2500;
+
 /**
- * Information sur la mesure d'audience, et refus d'être compté (retenu sur
- * l'appareil) : conditions de l'exemption de consentement de la CNIL.
+ * Les droits, et l'accès caché aux statistiques (demande de Paul, 6 nov. 2026) :
+ * cinq clics de suite dessus ouvrent la page, qui garde son mot de passe. Rien
+ * ne le signale : ni curseur, ni lien. La sélection est coupée, sinon les clics
+ * surlignent la ligne.
  */
-function AudienceNotice() {
-  const { t } = useTranslation();
-  const optedOut = useOptOut();
-  const copy = t.site.footer;
+function Copyright({ children }: { children: string }) {
+  const router = useRouter();
+  const clicks = useRef<number[]>([]);
+  const onClick = (event: React.MouseEvent) => {
+    const recent = [...clicks.current, event.timeStamp].filter((at) => event.timeStamp - at < STATS_WINDOW);
+    clicks.current = recent;
+    if (recent.length >= STATS_CLICKS) {
+      clicks.current = [];
+      router.push("/stats");
+    }
+  };
   return (
-    <p className="mt-2 text-xs text-ink/55">
-      {optedOut ? copy.optedOut : copy.audience}{" "}
-      {optedOut === null ? null : (
-        <button
-          type="button"
-          onClick={() => setOptOut(!optedOut)}
-          className="cursor-pointer underline underline-offset-2 transition-colors hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink/50"
-        >
-          {optedOut ? copy.optIn : copy.optOut}
-        </button>
-      )}
-    </p>
+    <span onClick={onClick} className="touch-manipulation select-none">
+      {children}
+    </span>
   );
 }
 
@@ -98,12 +104,11 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-10 text-xs text-ink/55">
-          {t.site.footer.copyright} {t.site.footer.rights}{" "}
+          <Copyright>{t.site.footer.copyright}</Copyright> {t.site.footer.rights}{" "}
           <Link href={href("/legal")} className="underline-offset-2 transition-colors hover:text-ink hover:underline">
             {t.site.footer.legal}
           </Link>
         </p>
-        <AudienceNotice />
         {MODEL_CREDITS.length > 0 ? (
           <p className="mt-2 text-xs text-ink/55">
             {t.site.footer.models} :{" "}

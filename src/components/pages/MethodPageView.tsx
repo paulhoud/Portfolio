@@ -17,10 +17,9 @@ const LABEL = "text-[0.625rem] font-semibold uppercase tracking-[0.28em] text-in
  * même jour (brief de Paul : plus visuelle, plus éditoriale, plus colorée) :
  *
  * - une ouverture en deux temps, l'idée en grand, la nuance à côté ;
- * - la carte d'ensemble, du besoin à la solution, les cinq temps qui se
- *   chevauchent ;
- * - les cinq temps, chacun avec sa teinte, son schéma et ses outils, et un
- *   repère qui suit la lecture ;
+ * - la carte d'ensemble, du besoin à la solution : une roue, c'est un cycle ;
+ * - les cinq temps, chacun avec sa teinte, son schéma en grand et ses outils,
+ *   et un repère qui suit la lecture ;
  * - l'IA comme partenaire, avec les logos de GPT et de Claude ;
  * - les outils, chacun avec son logo, sans niveau de maîtrise affiché.
  */
@@ -46,7 +45,7 @@ export function MethodPageView() {
 
       <MethodTimeline
         steps={steps}
-        labels={{ ai: method.aiLabel, tools: method.toolsLabel, progress: method.progressLabel, figures: method.figures }}
+        labels={{ ai: method.aiLabel, tools: method.toolsLabel, progress: method.progressLabel, more: method.readMore, less: method.readLess, figures: method.figures }}
       />
 
       {/* Après le dernier temps : la boucle. */}
