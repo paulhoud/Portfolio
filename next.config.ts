@@ -45,11 +45,24 @@ const nextConfig: NextConfig = {
         // pas de type de fichier deviné par le navigateur, et le site ne peut
         // pas être affiché dans le cadre d'un autre site (page des
         // statistiques comprise).
+        //
+        // La politique de contenu reste volontairement limitée : pas
+        // d'adresse de base ni de plugin injectés, formulaires envoyés au site
+        // seul. Elle ne filtre ni les scripts ni les styles, que le thème et
+        // la 3D écrivent en ligne. Les permissions ferment caméra, micro,
+        // position, paiement et USB, dont le site n'a pas besoin ; le
+        // mouvement du téléphone (accéléromètre, gyroscope) reste permis,
+        // l'accueil et les vidéos YouTube s'en servent.
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'",
+          },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         ],
       },
       {
