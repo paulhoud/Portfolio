@@ -59,7 +59,7 @@ export const profile = {
    * que les recherches portant sur ces métiers puissent aussi remonter le site.
    */
   alternateJobTitles: ["UX/UI Designer", "UI Designer"],
-  email: "contact@paulhoudebine.com",
+  email: "paulhoud@gmail.com",
 
   /**
    * Villes d'exercice. La première sert d'adresse principale, l'ensemble
