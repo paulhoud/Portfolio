@@ -59,7 +59,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "CV",
       name: "CV de Paul Houdebine",
       shortName: "CV, version écran",
-      details: "PDF, une page A4, 1 Mo",
+      details: "PDF, une page A4, 1,1 Mo",
       versionLabel: "Écran",
       sibling: "cv-print",
       share: {
@@ -78,7 +78,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "CV",
       name: "CV de Paul Houdebine, version impression",
       shortName: "CV, version impression",
-      details: "PDF, une page A4, 420 Ko",
+      details: "PDF, une page A4, 430 Ko",
       versionLabel: "Impression",
       sibling: "cv",
       share: {
@@ -116,7 +116,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "Resume",
       name: "Resume of Paul Houdebine",
       shortName: "Resume, screen version",
-      details: "One-page A4 PDF, 1 MB",
+      details: "One-page A4 PDF, 1.1 MB",
       versionLabel: "Screen",
       sibling: "cv-print",
       share: {
@@ -135,7 +135,7 @@ export const documents: Record<Locale, Record<DocumentId, SiteDocument>> = {
       title: "Resume",
       name: "Resume of Paul Houdebine, print version",
       shortName: "Resume, print version",
-      details: "One-page A4 PDF, 420 KB",
+      details: "One-page A4 PDF, 430 KB",
       versionLabel: "Print",
       sibling: "cv",
       share: {
